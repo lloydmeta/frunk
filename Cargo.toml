@@ -1,0 +1,9 @@
+[package]
+name = "frust"
+version = "0.0.1"
+authors = ["Lloyd <lloydmeta@gmail.com>"]
+description = "Functional Programming in Rust"
+license = "MIT"
+homepage = "https://github.com/lloydmeta/frust"
+
+[dependencies]
