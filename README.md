@@ -1,6 +1,6 @@
 # Frust [![Crates.io](https://img.shields.io/crates/v/frust.svg)]() [![Build Status](https://travis-ci.org/lloydmeta/frust.svg?branch=master)](https://travis-ci.org/lloydmeta/frust)
 
-Functional programming in Rust. Mostly WIP for the purpose of learning stuff.
+Functional programming in Rust. Still largely a WIP.
 
 ## General idea
 
@@ -36,8 +36,20 @@ are possible given that Rust has no support for Higher Kinded Types.
 2. `Apply`
 3. `Applicative`
 
-`Show`, `Monoid`, and `Semigroup` are at least partially implemented.
+`Show`, `Monoid`, and `Semigroup` are at least partially (mostly?) implemented.
+
+Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch.
 
 ## Inspirations
 
 Scalaz, Cats, Haskell, the usual suspects ;)
+
+## Contributing
+
+Yes please ! 
+
+The following are considered important, in keeping with the spirit of Rust and functional programming:
+
+- Safety (type and memory)
+- Efficiency
+- Correctness
