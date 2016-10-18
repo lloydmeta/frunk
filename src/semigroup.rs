@@ -1,21 +1,29 @@
 use std::cell::*;
 use std::hash::Hash;
-use std::ops::Deref;
+use std::ops::{ Deref, BitAnd, BitOr };
 use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
 
 /// Wrapper type for types that are ordered and can have a Max combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Max<T: Ord>(pub T);
 
 /// Wrapper type for types that are ordered and can have a Min combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Min<T: Ord>(pub T);
 
 /// Wrapper type for types that can have a Product combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
 pub struct Product<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise && combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct All<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise || combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Any<T>(pub T);
 
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
@@ -209,6 +217,39 @@ impl<T> Semigroup for Min<T> where T: Ord + Clone {
     }
 }
 
+// Deriving for all BitAnds sucks because we are then bound on ::Output, which may not be the same type
+macro_rules! simple_all_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semigroup for All<$tr> {
+                fn combine(&self, other: &Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    All(x.bitand(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_all_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+macro_rules! simple_any_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semigroup for Any<$tr> {
+                fn combine(&self, other: &Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    Any(x.bitor(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_any_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
 macro_rules! tuple_impls {
     () => {}; // no more
 
@@ -360,6 +401,19 @@ mod tests {
 
         let v = vec![Min(1), Min(2), Min(3)];
         assert_eq!(combine_all_option(&v), Some(Min(1)));
+    }
+
+    #[test]
+    fn test_all() {
+        assert_eq!(All(3).combine(&All(5)), All(1));
+        assert_eq!(All(true).combine(&All(false)), All(false));
+
+    }
+
+    #[test]
+    fn test_any() {
+        assert_eq!(Any(3).combine(&Any(5)), Any(7));
+        assert_eq!(Any(true).combine(&Any(false)), Any(true));
     }
 
     #[test]

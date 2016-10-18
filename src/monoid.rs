@@ -1,4 +1,4 @@
-use super::semigroup::{Semigroup, Product};
+use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
@@ -76,6 +76,39 @@ impl<K, V> Monoid for HashMap<K, V>
         HashMap::new()
     }
 }
+
+impl Monoid for All<bool> {
+    fn empty() -> Self { All(true) }
+}
+
+
+impl Monoid for Any<bool> {
+    fn empty() -> Self { Any(false) }
+}
+
+macro_rules! numeric_all_impls {
+    ($($tr:ty)*) => {
+      $(
+        impl Monoid for All<$tr> {
+            fn empty() -> Self { All(!0) }
+        }
+      )*
+    }
+}
+
+numeric_all_impls! { usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+macro_rules! numeric_any_impls {
+    ($($tr:ty)*) => {
+      $(
+        impl Monoid for Any<$tr> {
+            fn empty() -> Self { Any(0) }
+        }
+      )*
+    }
+}
+
+numeric_any_impls! { usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
 
 macro_rules! numeric_monoid_imps {
   ($($zero: expr; $tr:ty),*) => {
@@ -183,7 +216,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::semigroup::{Product};
+    use super::super::semigroup::{Product, All, Any};
     use std::collections::*;
 
     #[test]
@@ -249,6 +282,28 @@ mod tests {
         h_expected.insert(2, String::from("Goodbye"));
         h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
         assert_eq!(combine_all(&vec_of_hashes), h_expected);
+    }
+
+    #[test]
+    fn test_combine_all_all(){
+        let v1: Vec<All<i32>> = Vec::new();
+        assert_eq!(combine_all(&v1), All(!0));
+        assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
+
+        assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
+        assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
+    }
+
+    #[test]
+    fn test_combine_all_any(){
+        let v1: Vec<Any<i32>> = Vec::new();
+        assert_eq!(combine_all(&v1), Any(0));
+        assert_eq!(combine_all(&vec![Any(3), Any(8)]), Any(11));
+
+        let v2 : Vec<Any<bool>> = Vec::new();
+        assert_eq!(combine_all(&v2), Any(false));
+        assert_eq!(combine_all(&vec![Any(false), Any(false)]), Any(false));
+        assert_eq!(combine_all(&vec![Any(true), Any(false)]), Any(true));
     }
 
     #[test]
