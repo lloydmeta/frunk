@@ -208,7 +208,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::semigroup::{ Sum, Product };
+    use super::super::semigroup::{Sum, Product};
     use std::collections::*;
 
     #[test]
