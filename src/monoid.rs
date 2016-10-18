@@ -54,7 +54,9 @@ impl Monoid for String {
     }
 }
 
-impl<T> Monoid for Vec<T> where T: Clone {
+impl<T> Monoid for Vec<T>
+    where T: Clone
+{
     fn empty() -> Self {
         Vec::new()
     }
@@ -78,12 +80,16 @@ impl<K, V> Monoid for HashMap<K, V>
 }
 
 impl Monoid for All<bool> {
-    fn empty() -> Self { All(true) }
+    fn empty() -> Self {
+        All(true)
+    }
 }
 
 
 impl Monoid for Any<bool> {
-    fn empty() -> Self { Any(false) }
+    fn empty() -> Self {
+        Any(false)
+    }
 }
 
 macro_rules! numeric_all_impls {
@@ -285,24 +291,24 @@ mod tests {
     }
 
     #[test]
-    fn test_combine_all_all(){
+    fn test_combine_all_all() {
         let v1: Vec<All<i32>> = Vec::new();
         assert_eq!(combine_all(&v1), All(!0));
         assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
 
-        let v2 : Vec<All<bool>> = Vec::new();
+        let v2: Vec<All<bool>> = Vec::new();
         assert_eq!(combine_all(&v2), All(true));
         assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
         assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
     }
 
     #[test]
-    fn test_combine_all_any(){
+    fn test_combine_all_any() {
         let v1: Vec<Any<i32>> = Vec::new();
         assert_eq!(combine_all(&v1), Any(0));
         assert_eq!(combine_all(&vec![Any(3), Any(8)]), Any(11));
 
-        let v2 : Vec<Any<bool>> = Vec::new();
+        let v2: Vec<Any<bool>> = Vec::new();
         assert_eq!(combine_all(&v2), Any(false));
         assert_eq!(combine_all(&vec![Any(false), Any(false)]), Any(false));
         assert_eq!(combine_all(&vec![Any(true), Any(false)]), Any(true));

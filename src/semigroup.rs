@@ -1,6 +1,6 @@
 use std::cell::*;
 use std::hash::Hash;
-use std::ops::{ Deref, BitAnd, BitOr };
+use std::ops::{Deref, BitAnd, BitOr};
 use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
@@ -195,24 +195,28 @@ impl<K, V> Semigroup for HashMap<K, V>
     }
 }
 
-impl<T> Semigroup for Max<T> where T: Ord + Clone {
+impl<T> Semigroup for Max<T>
+    where T: Ord + Clone
+{
     fn combine(&self, other: &Self) -> Self {
         let x = self.0.clone();
         let y = other.0.clone();
         match x.cmp(&y) {
             Ordering::Less => Max(y),
-            _ => Max(x)
+            _ => Max(x),
         }
     }
 }
 
-impl<T> Semigroup for Min<T> where T: Ord + Clone {
+impl<T> Semigroup for Min<T>
+    where T: Ord + Clone
+{
     fn combine(&self, other: &Self) -> Self {
         let x = self.0.clone();
         let y = other.0.clone();
         match x.cmp(&y) {
             Ordering::Less => Min(x),
-            _ => Min(y)
+            _ => Min(y),
         }
     }
 }
