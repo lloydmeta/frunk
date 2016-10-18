@@ -4,6 +4,14 @@ use std::ops::Deref;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
 
+/// Wrapper type for types that can have a Sum combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Sum<T>(pub T);
+
+/// Wrapper type for types that can have a Product combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Product<T>(pub T);
+
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
     fn combine(&self, other: &Self) -> Self;
@@ -62,6 +70,38 @@ macro_rules! numeric_semigroup_imps {
 }
 
 numeric_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
+
+macro_rules! numeric_sum_semigroup_imps {
+  ($($tr:ty),*) => {
+    $(
+      impl Semigroup for Sum<$tr> {
+        fn combine(&self, other: &Self) -> Self {
+            let Sum(x) = *self;
+            let Sum(y) = *other;
+            Sum(x + y)
+        }
+      }
+    )*
+  }
+}
+
+numeric_sum_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
+
+macro_rules! numeric_product_semigroup_imps {
+  ($($tr:ty),*) => {
+    $(
+      impl Semigroup for Product<$tr> {
+        fn combine(&self, other: &Self) -> Self {
+            let Product(x) = *self;
+            let Product(y) = *other;
+            Product(x * y)
+         }
+      }
+    )*
+  }
+}
+
+numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
 impl<T> Semigroup for Option<T>
     where T: Semigroup + Clone
@@ -232,6 +272,8 @@ mod tests {
 
     semigroup_tests! {
         test_i8, 1.combine(&2) => 3, i8
+        test_sum_i8, Sum(1).combine(&Sum(2)) => Sum(3), Sum<i8>
+        test_product_i8, Product(1).combine(&Product(2)) => Product(2), Product<i8>
         test_i16, 1.combine(&2) => 3, i16
         test_i32, 1.combine(&2) => 3, i32
         test_u8, 1.combine(&2) => 3, u8
@@ -242,6 +284,7 @@ mod tests {
         test_f32, 1f32.combine(&2f32) => 3f32, f32
         test_f64, 1f64.combine(&2f64) => 3f64, f64
         test_option_i16, Some(1).combine(&Some(2)) => Some(3), Option<i16>
+        test_option_sum_i16, Some(Sum(1)).combine(&Some(Sum(2))) => Some(Sum(3)), Option<Sum<i16>>
         test_option_i16_none1, None.combine(&Some(2)) => Some(2), Option<i16>
         test_option_i16_none2, Some(2).combine(&None) => Some(2), Option<i16>
     }

@@ -1,4 +1,4 @@
-use super::semigroup::Semigroup;
+use super::semigroup::{Semigroup, Sum, Product};
 use std::collections::*;
 use std::hash::Hash;
 
@@ -102,6 +102,56 @@ numeric_monoid_imps! {
     0f64; f64
 }
 
+macro_rules! numeric_sum_monoid_imps {
+  ($($zero: expr; $tr:ty),*) => {
+    $(
+      impl Monoid for Sum<$tr> {
+        fn empty() -> Self { Sum($zero) }
+      }
+    )*
+  }
+}
+
+numeric_sum_monoid_imps! {
+    0; i8,
+    0; i16,
+    0; i32,
+    0; i64,
+    0; u8,
+    0; u16,
+    0; u32,
+    0; u64,
+    0; isize,
+    0; usize,
+    0f32; f32,
+    0f64; f64
+}
+
+macro_rules! numeric_product_monoid_imps {
+  ($($one: expr; $tr:ty),*) => {
+    $(
+      impl Monoid for Product<$tr> {
+        fn empty() -> Self { Product($one) }
+      }
+    )*
+  }
+}
+
+numeric_product_monoid_imps! {
+    1; i8,
+    1; i16,
+    1; i32,
+    1; i64,
+    1; u8,
+    1; u16,
+    1; u32,
+    1; u64,
+    1; isize,
+    1; usize,
+    1f32; f32,
+    1f64; f64
+}
+
 
 macro_rules! tuple_impls {
     () => {}; // no more
@@ -158,6 +208,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::semigroup::{ Sum, Product };
     use std::collections::*;
 
     #[test]
@@ -234,6 +285,18 @@ mod tests {
 
         let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
         assert_eq!(combine_all(&tuples), expected)
+    }
+
+    #[test]
+    fn test_combine_all_sum() {
+        let v = vec![Sum(2), Sum(3), Sum(4)];
+        assert_eq!(combine_all(&v), Sum(9))
+    }
+
+    #[test]
+    fn test_combine_all_product() {
+        let v = vec![Product(2), Product(3), Product(4)];
+        assert_eq!(combine_all(&v), Product(24))
     }
 
 }
