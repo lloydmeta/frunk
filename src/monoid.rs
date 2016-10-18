@@ -169,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn test_combine_all() {
+    fn test_combine_all_basic() {
         assert_eq!(combine_all(&vec![1, 2, 3]), 6);
 
         let empty_vec_int: Vec<i32> = Vec::new();
@@ -181,7 +181,10 @@ mod tests {
         let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
         assert_eq!(combine_all(&vec_of_some_strings),
                    Some("Hello World".to_owned()));
+    }
 
+    #[test]
+    fn test_combine_all_hashset() {
         let vec_of_no_hashes: Vec<HashSet<i32>> = Vec::new();
         assert_eq!(combine_all(&vec_of_no_hashes),
                    <HashSet<i32> as Monoid>::empty());
@@ -201,7 +204,29 @@ mod tests {
     }
 
     #[test]
-    fn test_tuple() {
+    fn test_combine_all_hashmap() {
+        let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
+        assert_eq!(combine_all(&vec_of_no_hashmaps),
+                   <HashMap<i32, String> as Monoid>::empty());
+
+        let mut h1: HashMap<i32, String> = HashMap::new();
+        h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
+        let mut h2: HashMap<i32, String> = HashMap::new();
+        h2.insert(1, String::from(" World"));
+        h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+        let mut h3: HashMap<i32, String> = HashMap::new();
+        h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
+        let vec_of_hashes = vec![h1, h2, h3];
+
+        let mut h_expected: HashMap<i32, String> = HashMap::new();
+        h_expected.insert(1, String::from("Hello World"));
+        h_expected.insert(2, String::from("Goodbye"));
+        h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+        assert_eq!(combine_all(&vec_of_hashes), h_expected);
+    }
+
+    #[test]
+    fn test_combine_all_tuple() {
         let t1 = (1, 2.5f32, String::from("hi"), Some(3));
         let t2 = (1, 2.5f32, String::from(" world"), None);
         let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
