@@ -84,6 +84,61 @@ numeric_monoid_imps! {
     0f64; f64
 }
 
+
+macro_rules! tuple_impls {
+    () => {}; // no more
+
+    (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+        /*
+         * Invoke recursive reversal of list that ends in the macro expansion implementation
+         * of the reversed list
+        */
+        tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
+        tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
+    };
+
+    /*
+     * ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+     + is empty (see next pattern)
+    */
+    ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+      tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
+    };
+
+    // Finally expand into our implementation
+    ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
+        impl<$typ: Monoid, $( $ntyp: Monoid),*> Monoid for ($typ, $( $ntyp ),*) {
+            fn empty() -> Self {
+              (<$typ as Monoid>::empty(), $(<$ntyp as Monoid>::empty(), )*)
+            }
+        }
+    }
+}
+
+tuple_impls! {
+    (20 => U),
+    (19 => T),
+    (18 => S),
+    (17 => R),
+    (16 => Q),
+    (15 => P),
+    (14 => O),
+    (13 => N),
+    (12 => M),
+    (11 => L),
+    (10 => K),
+    (9 => J),
+    (8 => I),
+    (7 => H),
+    (6 => G),
+    (5 => F),
+    (4 => E),
+    (3 => D),
+    (2 => C),
+    (1 => B),
+    (0 => A),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,6 +180,17 @@ mod tests {
         h_expected.insert(2);
         h_expected.insert(3);
         assert_eq!(combine_all(&vec_of_hashes), h_expected);
+    }
+
+    #[test]
+    fn test_tuple() {
+        let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+        let t2 = (1, 2.5f32, String::from(" world"), None);
+        let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
+        let tuples = vec![t1, t2, t3];
+
+        let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(133));
+        assert_eq!(combine_all(&tuples), expected)
     }
 
 }

@@ -156,6 +156,60 @@ impl<K, V> Semigroup for HashMap<K, V>
 }
 
 
+macro_rules! tuple_impls {
+    () => {}; // no more
+
+    (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+        /*
+         * Invoke recursive reversal of list that ends in the macro expansion implementation
+         * of the reversed list
+        */
+        tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
+        tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
+    };
+
+    /*
+     * ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+     + is empty (see next pattern)
+    */
+    ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+      tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
+    };
+
+    // Finally expand into our implementation
+    ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
+        impl<$typ: Semigroup, $( $ntyp: Semigroup),*> Semigroup for ($typ, $( $ntyp ),*) {
+            fn combine(&self, other: &Self) -> Self {
+                (self.$idx.combine(&other.$idx), $(self.$nidx.combine(&other.$nidx), )*)
+            }
+        }
+    }
+}
+
+tuple_impls! {
+    (20 => U),
+    (19 => T),
+    (18 => S),
+    (17 => R),
+    (16 => Q),
+    (15 => P),
+    (14 => O),
+    (13 => N),
+    (12 => M),
+    (11 => L),
+    (10 => K),
+    (9 => J),
+    (8 => I),
+    (7 => H),
+    (6 => G),
+    (5 => F),
+    (4 => E),
+    (3 => D),
+    (2 => C),
+    (1 => B),
+    (0 => A),
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -228,6 +282,16 @@ mod tests {
         expected.insert(3);
         expected.insert(4);
         assert_eq!(v1.combine(&v2), expected)
+    }
+
+    #[test]
+    fn test_tuple() {
+        let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+        let t2 = (1, 2.5f32, String::from(" world"), None);
+
+        let expected = (2, 5.0f32, String::from("hi world"), Some(3));
+
+        assert_eq!(t1.combine(&t2), expected)
     }
 
     #[test]

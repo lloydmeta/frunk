@@ -127,8 +127,6 @@ impl <T: Show> Show for Box<T> {
     }
 }
 
-
-// Recursive macro lifted largely from this genius here: http://stackoverflow.com/a/29195954/1814775
 macro_rules! tuple_impls {
     () => {}; // no more
 

@@ -12,18 +12,14 @@ use frust::monoid::*;
 let v = vec![Some(1), Some(3)];
 assert_eq!(combine_all(&v), Some(4));
 
+// Slightly more magical
+let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+let t2 = (1, 2.5f32, String::from(" world"), None);
+let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
+let tuples = vec![t1, t2, t3];
 
-// the following will not compile because Display is not implemented
-// print!("{}", Some(Box::new(1)));
-
-use frust::show::*;
-print!("{}", Some(Box::new(1)).show());
-assert_eq!(Some(Box::new(1)).show(), "Some(Box(1))");
-
-// Show is implemented for Tuples too
- 
-// print!("{}", (1,2, 3f32)); <-- won't compile
-print!("{}", (1,2, 3f32).show()); // <-- will compile
+let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(133));
+assert_eq!(combine_all(&tuples), expected);
 ```
 
 ## Todo
