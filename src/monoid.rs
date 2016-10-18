@@ -290,6 +290,8 @@ mod tests {
         assert_eq!(combine_all(&v1), All(!0));
         assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
 
+        let v2 : Vec<All<bool>> = Vec::new();
+        assert_eq!(combine_all(&v2), All(true));
         assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
         assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
     }
