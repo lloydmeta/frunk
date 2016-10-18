@@ -1,4 +1,4 @@
-use super::semigroup::Semigroup;
+use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
@@ -54,7 +54,9 @@ impl Monoid for String {
     }
 }
 
-impl<T> Monoid for Vec<T> where T: Clone {
+impl<T> Monoid for Vec<T>
+    where T: Clone
+{
     fn empty() -> Self {
         Vec::new()
     }
@@ -76,6 +78,43 @@ impl<K, V> Monoid for HashMap<K, V>
         HashMap::new()
     }
 }
+
+impl Monoid for All<bool> {
+    fn empty() -> Self {
+        All(true)
+    }
+}
+
+
+impl Monoid for Any<bool> {
+    fn empty() -> Self {
+        Any(false)
+    }
+}
+
+macro_rules! numeric_all_impls {
+    ($($tr:ty)*) => {
+      $(
+        impl Monoid for All<$tr> {
+            fn empty() -> Self { All(!0) }
+        }
+      )*
+    }
+}
+
+numeric_all_impls! { usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+macro_rules! numeric_any_impls {
+    ($($tr:ty)*) => {
+      $(
+        impl Monoid for Any<$tr> {
+            fn empty() -> Self { Any(0) }
+        }
+      )*
+    }
+}
+
+numeric_any_impls! { usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
 
 macro_rules! numeric_monoid_imps {
   ($($zero: expr; $tr:ty),*) => {
@@ -100,6 +139,31 @@ numeric_monoid_imps! {
     0; usize,
     0f32; f32,
     0f64; f64
+}
+
+macro_rules! numeric_product_monoid_imps {
+  ($($one: expr; $tr:ty),*) => {
+    $(
+      impl Monoid for Product<$tr> {
+        fn empty() -> Self { Product($one) }
+      }
+    )*
+  }
+}
+
+numeric_product_monoid_imps! {
+    1; i8,
+    1; i16,
+    1; i32,
+    1; i64,
+    1; u8,
+    1; u16,
+    1; u32,
+    1; u64,
+    1; isize,
+    1; usize,
+    1f32; f32,
+    1f64; f64
 }
 
 
@@ -158,6 +222,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::semigroup::{Product, All, Any};
     use std::collections::*;
 
     #[test]
@@ -226,6 +291,30 @@ mod tests {
     }
 
     #[test]
+    fn test_combine_all_all() {
+        let v1: Vec<All<i32>> = Vec::new();
+        assert_eq!(combine_all(&v1), All(!0));
+        assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
+
+        let v2: Vec<All<bool>> = Vec::new();
+        assert_eq!(combine_all(&v2), All(true));
+        assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
+        assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
+    }
+
+    #[test]
+    fn test_combine_all_any() {
+        let v1: Vec<Any<i32>> = Vec::new();
+        assert_eq!(combine_all(&v1), Any(0));
+        assert_eq!(combine_all(&vec![Any(3), Any(8)]), Any(11));
+
+        let v2: Vec<Any<bool>> = Vec::new();
+        assert_eq!(combine_all(&v2), Any(false));
+        assert_eq!(combine_all(&vec![Any(false), Any(false)]), Any(false));
+        assert_eq!(combine_all(&vec![Any(true), Any(false)]), Any(true));
+    }
+
+    #[test]
     fn test_combine_all_tuple() {
         let t1 = (1, 2.5f32, String::from("hi"), Some(3));
         let t2 = (1, 2.5f32, String::from(" world"), None);
@@ -234,6 +323,12 @@ mod tests {
 
         let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
         assert_eq!(combine_all(&tuples), expected)
+    }
+
+    #[test]
+    fn test_combine_all_product() {
+        let v = vec![Product(2), Product(3), Product(4)];
+        assert_eq!(combine_all(&v), Product(24))
     }
 
 }

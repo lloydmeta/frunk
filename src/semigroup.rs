@@ -1,8 +1,29 @@
 use std::cell::*;
 use std::hash::Hash;
-use std::ops::Deref;
+use std::ops::{Deref, BitAnd, BitOr};
+use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
+
+/// Wrapper type for types that are ordered and can have a Max combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+pub struct Max<T: Ord>(pub T);
+
+/// Wrapper type for types that are ordered and can have a Min combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+pub struct Min<T: Ord>(pub T);
+
+/// Wrapper type for types that can have a Product combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Product<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise && combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct All<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise || combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Any<T>(pub T);
 
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
@@ -62,6 +83,22 @@ macro_rules! numeric_semigroup_imps {
 }
 
 numeric_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
+
+macro_rules! numeric_product_semigroup_imps {
+  ($($tr:ty),*) => {
+    $(
+      impl Semigroup for Product<$tr> {
+        fn combine(&self, other: &Self) -> Self {
+            let Product(x) = *self;
+            let Product(y) = *other;
+            Product(x * y)
+         }
+      }
+    )*
+  }
+}
+
+numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
 impl<T> Semigroup for Option<T>
     where T: Semigroup + Clone
@@ -158,6 +195,64 @@ impl<K, V> Semigroup for HashMap<K, V>
     }
 }
 
+impl<T> Semigroup for Max<T>
+    where T: Ord + Clone
+{
+    fn combine(&self, other: &Self) -> Self {
+        let x = self.0.clone();
+        let y = other.0.clone();
+        match x.cmp(&y) {
+            Ordering::Less => Max(y),
+            _ => Max(x),
+        }
+    }
+}
+
+impl<T> Semigroup for Min<T>
+    where T: Ord + Clone
+{
+    fn combine(&self, other: &Self) -> Self {
+        let x = self.0.clone();
+        let y = other.0.clone();
+        match x.cmp(&y) {
+            Ordering::Less => Min(x),
+            _ => Min(y),
+        }
+    }
+}
+
+// Deriving for all BitAnds sucks because we are then bound on ::Output, which may not be the same type
+macro_rules! simple_all_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semigroup for All<$tr> {
+                fn combine(&self, other: &Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    All(x.bitand(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_all_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+macro_rules! simple_any_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semigroup for Any<$tr> {
+                fn combine(&self, other: &Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    Any(x.bitor(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_any_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
 
 macro_rules! tuple_impls {
     () => {}; // no more
@@ -232,6 +327,7 @@ mod tests {
 
     semigroup_tests! {
         test_i8, 1.combine(&2) => 3, i8
+        test_product_i8, Product(1).combine(&Product(2)) => Product(2), Product<i8>
         test_i16, 1.combine(&2) => 3, i16
         test_i32, 1.combine(&2) => 3, i32
         test_u8, 1.combine(&2) => 3, u8
@@ -293,6 +389,35 @@ mod tests {
         let expected = (2, 5.0f32, String::from("hi world"), Some(3));
 
         assert_eq!(t1.combine(&t2), expected)
+    }
+
+    #[test]
+    fn test_max() {
+        assert_eq!(Max(1).combine(&Max(2)), Max(2));
+
+        let v = vec![Max(1), Max(2), Max(3)];
+        assert_eq!(combine_all_option(&v), Some(Max(3)));
+    }
+
+    #[test]
+    fn test_min() {
+        assert_eq!(Min(1).combine(&Min(2)), Min(1));
+
+        let v = vec![Min(1), Min(2), Min(3)];
+        assert_eq!(combine_all_option(&v), Some(Min(1)));
+    }
+
+    #[test]
+    fn test_all() {
+        assert_eq!(All(3).combine(&All(5)), All(1));
+        assert_eq!(All(true).combine(&All(false)), All(false));
+
+    }
+
+    #[test]
+    fn test_any() {
+        assert_eq!(Any(3).combine(&Any(5)), Any(7));
+        assert_eq!(Any(true).combine(&Any(false)), Any(true));
     }
 
     #[test]
