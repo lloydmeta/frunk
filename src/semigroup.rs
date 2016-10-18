@@ -1,12 +1,17 @@
 use std::cell::*;
 use std::hash::Hash;
 use std::ops::Deref;
+use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
 
-/// Wrapper type for types that can have a Sum combination
+/// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
-pub struct Sum<T>(pub T);
+pub struct Max<T: Ord>(pub T);
+
+/// Wrapper type for types that are ordered and can have a Min combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+pub struct Min<T: Ord>(pub T);
 
 /// Wrapper type for types that can have a Product combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
@@ -70,22 +75,6 @@ macro_rules! numeric_semigroup_imps {
 }
 
 numeric_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
-
-macro_rules! numeric_sum_semigroup_imps {
-  ($($tr:ty),*) => {
-    $(
-      impl Semigroup for Sum<$tr> {
-        fn combine(&self, other: &Self) -> Self {
-            let Sum(x) = *self;
-            let Sum(y) = *other;
-            Sum(x + y)
-        }
-      }
-    )*
-  }
-}
-
-numeric_sum_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
 macro_rules! numeric_product_semigroup_imps {
   ($($tr:ty),*) => {
@@ -198,6 +187,27 @@ impl<K, V> Semigroup for HashMap<K, V>
     }
 }
 
+impl<T> Semigroup for Max<T> where T: Ord + Clone {
+    fn combine(&self, other: &Self) -> Self {
+        let x = self.0.clone();
+        let y = other.0.clone();
+        match x.cmp(&y) {
+            Ordering::Less => Max(y),
+            _ => Max(x)
+        }
+    }
+}
+
+impl<T> Semigroup for Min<T> where T: Ord + Clone {
+    fn combine(&self, other: &Self) -> Self {
+        let x = self.0.clone();
+        let y = other.0.clone();
+        match x.cmp(&y) {
+            Ordering::Less => Min(x),
+            _ => Min(y)
+        }
+    }
+}
 
 macro_rules! tuple_impls {
     () => {}; // no more
@@ -272,7 +282,6 @@ mod tests {
 
     semigroup_tests! {
         test_i8, 1.combine(&2) => 3, i8
-        test_sum_i8, Sum(1).combine(&Sum(2)) => Sum(3), Sum<i8>
         test_product_i8, Product(1).combine(&Product(2)) => Product(2), Product<i8>
         test_i16, 1.combine(&2) => 3, i16
         test_i32, 1.combine(&2) => 3, i32
@@ -284,7 +293,6 @@ mod tests {
         test_f32, 1f32.combine(&2f32) => 3f32, f32
         test_f64, 1f64.combine(&2f64) => 3f64, f64
         test_option_i16, Some(1).combine(&Some(2)) => Some(3), Option<i16>
-        test_option_sum_i16, Some(Sum(1)).combine(&Some(Sum(2))) => Some(Sum(3)), Option<Sum<i16>>
         test_option_i16_none1, None.combine(&Some(2)) => Some(2), Option<i16>
         test_option_i16_none2, Some(2).combine(&None) => Some(2), Option<i16>
     }
@@ -336,6 +344,22 @@ mod tests {
         let expected = (2, 5.0f32, String::from("hi world"), Some(3));
 
         assert_eq!(t1.combine(&t2), expected)
+    }
+
+    #[test]
+    fn test_max() {
+        assert_eq!(Max(1).combine(&Max(2)), Max(2));
+
+        let v = vec![Max(1), Max(2), Max(3)];
+        assert_eq!(combine_all_option(&v), Some(Max(3)));
+    }
+
+    #[test]
+    fn test_min() {
+        assert_eq!(Min(1).combine(&Min(2)), Min(1));
+
+        let v = vec![Min(1), Min(2), Min(3)];
+        assert_eq!(combine_all_option(&v), Some(Min(1)));
     }
 
     #[test]
