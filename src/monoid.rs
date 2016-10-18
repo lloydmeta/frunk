@@ -2,7 +2,7 @@ use super::semigroup::Semigroup;
 use std::collections::*;
 use std::hash::Hash;
 
-pub trait Monoid {
+pub trait Monoid: Semigroup {
     fn empty() -> Self;
 }
 
@@ -54,14 +54,14 @@ impl Monoid for String {
     }
 }
 
-impl<T> Monoid for Vec<T> {
+impl<T> Monoid for Vec<T> where T: Clone {
     fn empty() -> Self {
         Vec::new()
     }
 }
 
 impl<T> Monoid for HashSet<T>
-    where T: Hash + Eq
+    where T: Hash + Eq + Clone
 {
     fn empty() -> Self {
         HashSet::new()
