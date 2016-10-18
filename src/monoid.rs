@@ -7,7 +7,9 @@ pub trait Monoid {
 }
 
 /// Return this combined with itself `n` times.
-pub fn combine_n<T>(o: &T, times: u32) -> T where T: Monoid + Semigroup + Clone {
+pub fn combine_n<T>(o: &T, times: u32) -> T
+    where T: Monoid + Semigroup + Clone
+{
     if times == 0 {
         <T as Monoid>::empty()
     } else {
@@ -28,7 +30,9 @@ pub fn combine_n<T>(o: &T, times: u32) -> T where T: Monoid + Semigroup + Clone 
 /// let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
 /// assert_eq!(combine_all(&vec_of_some_strings), Some("Hello World".to_owned()));
 /// ```
-pub fn combine_all<T>(xs: &Vec<T>) -> T where T: Monoid + Semigroup + Clone {
+pub fn combine_all<T>(xs: &Vec<T>) -> T
+    where T: Monoid + Semigroup + Clone
+{
     let mut r = <T as Monoid>::empty();
     for i in xs {
         r = r.combine(i);
@@ -37,26 +41,40 @@ pub fn combine_all<T>(xs: &Vec<T>) -> T where T: Monoid + Semigroup + Clone {
 }
 
 impl<T> Monoid for Option<T>
-    where T: Semigroup + Clone {
-    fn empty() -> Self { None }
+    where T: Semigroup + Clone
+{
+    fn empty() -> Self {
+        None
+    }
 }
 
 impl Monoid for String {
-    fn empty() -> Self { String::new() }
+    fn empty() -> Self {
+        String::new()
+    }
 }
 
-impl <T> Monoid for Vec<T> {
-    fn empty() -> Self { Vec::new() }
+impl<T> Monoid for Vec<T> {
+    fn empty() -> Self {
+        Vec::new()
+    }
 }
 
-impl <T> Monoid for HashSet<T> where T: Hash + Eq {
-    fn empty() -> Self { HashSet::new()}
+impl<T> Monoid for HashSet<T>
+    where T: Hash + Eq
+{
+    fn empty() -> Self {
+        HashSet::new()
+    }
 }
 
 impl<K, V> Monoid for HashMap<K, V>
-where K: Eq + Hash + Clone,
-      V: Semigroup + Clone {
-    fn empty() -> Self { HashMap::new()}
+    where K: Eq + Hash + Clone,
+          V: Semigroup + Clone
+{
+    fn empty() -> Self {
+        HashMap::new()
+    }
 }
 
 macro_rules! numeric_monoid_imps {
@@ -89,23 +107,21 @@ macro_rules! tuple_impls {
     () => {}; // no more
 
     (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
-        /*
-         * Invoke recursive reversal of list that ends in the macro expansion implementation
-         * of the reversed list
-        */
+// Invoke recursive reversal of list that ends in the macro expansion implementation
+// of the reversed list
+//
         tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
         tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
     };
 
-    /*
-     * ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
-     + is empty (see next pattern)
-    */
+// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// + is empty (see next pattern)
+//
     ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
       tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
     };
 
-    // Finally expand into our implementation
+// Finally expand into our implementation
     ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
         impl<$typ: Monoid, $( $ntyp: Monoid),*> Monoid for ($typ, $( $ntyp ),*) {
             fn empty() -> Self {
@@ -154,19 +170,21 @@ mod tests {
 
     #[test]
     fn test_combine_all() {
-        assert_eq!(combine_all(&vec![1,2,3]), 6);
+        assert_eq!(combine_all(&vec![1, 2, 3]), 6);
 
-        let empty_vec_int:  Vec<i32> = Vec::new();
+        let empty_vec_int: Vec<i32> = Vec::new();
         assert_eq!(combine_all(&empty_vec_int), 0);
 
-        let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
+        let empty_vec_opt_int: Vec<Option<i32>> = Vec::new();
         assert_eq!(combine_all(&empty_vec_opt_int), None);
 
         let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
-        assert_eq!(combine_all(&vec_of_some_strings), Some("Hello World".to_owned()));
+        assert_eq!(combine_all(&vec_of_some_strings),
+                   Some("Hello World".to_owned()));
 
         let vec_of_no_hashes: Vec<HashSet<i32>> = Vec::new();
-        assert_eq!(combine_all(&vec_of_no_hashes), <HashSet<i32> as Monoid>::empty());
+        assert_eq!(combine_all(&vec_of_no_hashes),
+                   <HashSet<i32> as Monoid>::empty());
 
         let mut h1 = HashSet::new();
         h1.insert(1);

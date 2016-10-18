@@ -7,14 +7,15 @@ use std::collections::hash_map::Entry;
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
     fn combine(&self, other: &Self) -> Self;
-
 }
 
 /// Return this combined with itself `n` times.
-pub fn combine_n<T>(o: &T, times: u32) -> T where T: Semigroup + Clone {
+pub fn combine_n<T>(o: &T, times: u32) -> T
+    where T: Semigroup + Clone
+{
     let mut x = o.clone();
     // note: range is non-inclusive in the upper bound
-    for _ in 1 .. times {
+    for _ in 1..times {
         x = o.combine(&x);
     }
     x
@@ -33,18 +34,20 @@ pub fn combine_n<T>(o: &T, times: u32) -> T where T: Semigroup + Clone {
 /// let v2: Vec<i16> = Vec::new(); // empty!
 /// assert_eq!(combine_all_option(&v2), None);
 /// ```
-pub fn combine_all_option<T>(xs: &Vec<T>) -> Option<T> where T: Semigroup + Clone {
+pub fn combine_all_option<T>(xs: &Vec<T>) -> Option<T>
+    where T: Semigroup + Clone
+{
     match xs.first() {
         Some(ref head) => {
-            let tail = xs[1 .. ].to_vec();
+            let tail = xs[1..].to_vec();
             // TODO figure out how to write this as a fold
             let mut x = (*head).clone();
             for i in tail {
                 x = x.combine(&i)
             }
             Some(x)
-        },
-        _ => None
+        }
+        _ => None,
     }
 }
 
@@ -160,23 +163,21 @@ macro_rules! tuple_impls {
     () => {}; // no more
 
     (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
-        /*
-         * Invoke recursive reversal of list that ends in the macro expansion implementation
-         * of the reversed list
-        */
+// Invoke recursive reversal of list that ends in the macro expansion implementation
+// of the reversed list
+//
         tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
         tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
     };
 
-    /*
-     * ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
-     + is empty (see next pattern)
-    */
+// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// + is empty (see next pattern)
+//
     ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
       tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
     };
 
-    // Finally expand into our implementation
+// Finally expand into our implementation
     ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
         impl<$typ: Semigroup, $( $ntyp: Semigroup),*> Semigroup for ($typ, $( $ntyp ),*) {
             fn combine(&self, other: &Self) -> Self {

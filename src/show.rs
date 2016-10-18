@@ -121,7 +121,7 @@ impl<K, V> Show for HashMap<K, V>
     }
 }
 
-impl <T: Show> Show for Box<T> {
+impl<T: Show> Show for Box<T> {
     fn show(&self) -> String {
         format!("Box({})", self.deref().show())
     }
@@ -131,23 +131,21 @@ macro_rules! tuple_impls {
     () => {}; // no more
 
     (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
-        /*
-         * Invoke recursive reversal of list that ends in the macro expansion implementation
-         * of the reversed list
-        */
+// Invoke recursive reversal of list that ends in the macro expansion implementation
+// of the reversed list
+//
         tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
         tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
     };
 
-    /*
-     * ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
-     + is empty (see next pattern)
-    */
+// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// + is empty (see next pattern)
+//
     ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
       tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
     };
 
-    // Finally expand into our implementation
+// Finally expand into our implementation
     ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
         impl<$typ: Show, $( $ntyp: Show),*> Show for ($typ, $( $ntyp ),*) {
             fn show(&self) -> String {
