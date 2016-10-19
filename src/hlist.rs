@@ -1,6 +1,17 @@
+/// Represents the right-most end of a heterogeneous list
+///
+/// Used to begin one:
+///
+/// ```
+/// # use frust::hlist::*;
+///
+/// let hlist1 = h_cons(1, HNil);
+/// let (h, _) = hlist1.pop();
+/// assert_eq!(h, 1);
+/// ```
 pub struct HNil;
 
-/// Represents a heterogenous list.
+/// Represents a heterogeneous list.
 ///
 /// To construct one, use the h_cons method
 ///
