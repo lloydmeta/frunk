@@ -1,3 +1,11 @@
+pub trait HList {
+    fn length(&self) -> u32;
+}
+
+pub trait HListPush: HList {
+    fn push<H>(self, h: H) -> HCons<H, Self> where Self: Sized;
+}
+
 /// Represents the right-most end of a heterogeneous list
 ///
 /// Used to begin one:
@@ -10,6 +18,10 @@
 /// assert_eq!(h, 1);
 /// ```
 pub struct HNil;
+
+impl HList for HNil {
+    fn length(&self) -> u32 { 0 }
+}
 
 /// Represents a heterogeneous list.
 ///
@@ -27,10 +39,11 @@ pub struct HNil;
 pub struct HCons<H, T: HListPush> {
     head: H,
     tail: T,
+    length: u32
 }
 
-pub trait HListPush {
-    fn push<H>(self, h: H) -> HCons<H, Self> where Self: Sized;
+impl<H, T: HListPush> HList for HCons<H, T> {
+    fn length(&self) -> u32 { self.length }
 }
 
 impl<H, T: HListPush> HCons<H, T> {
@@ -57,18 +70,20 @@ impl HListPush for HNil {
         HCons {
             head: h,
             tail: self,
+            length: 1
         }
     }
 }
-
 
 impl<H, T: HListPush> HListPush for HCons<H, T> {
     fn push<NewH>(self, h: NewH) -> HCons<NewH, Self>
         where Self: Sized
     {
+        let l =  self.length() + 1;
         HCons {
             head: h,
             tail: self,
+            length: l
         }
     }
 }
@@ -108,4 +123,16 @@ mod tests {
         assert_eq!(h2, "hello");
         assert_eq!(h1, 1);
     }
+
+    struct HasHList<T: HList>(T);
+
+    #[test]
+    fn test_contained_list() {
+        let c = HasHList(h_cons(1, HNil));
+        let retrieved = c.0;
+        assert_eq!(retrieved.length(), 1);
+        let new_list = h_cons(2, retrieved);
+        assert_eq!(new_list.length(), 2);
+    }
+
 }
