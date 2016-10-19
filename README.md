@@ -1,4 +1,4 @@
-# Frust [![Crates.io](https://img.shields.io/crates/v/frust.svg)]() [![Build Status](https://travis-ci.org/lloydmeta/frust.svg?branch=master)](https://travis-ci.org/lloydmeta/frust)
+# Frust [![Crates.io](https://img.shields.io/crates/v/frust.svg)](https://crates.io/crates/frust) [![Build Status](https://travis-ci.org/lloydmeta/frust.svg?branch=master)](https://travis-ci.org/lloydmeta/frust)
 
 Functional programming in Rust. Still largely a WIP.
 
@@ -35,9 +35,6 @@ assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
 assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise && 
 assert_eq!(All(true).combine(&All(false)), All(false));
-
-let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
-assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
 ```
 
 ### Monoid
@@ -68,10 +65,10 @@ remains typed.
 #[macro_use] extern crate frust;
 use frust::hlist::*;
 
-let h = hlist![1, 2, 3];
+let h = hlist![true, "hello", Some(41)];
 let (h1, tail1) = h.pop();
-assert_eq!(h1, 1);
-assert_eq!(tail1, hlist![2, 3]);
+assert_eq!(h1, true);
+assert_eq!(tail1, hlist!["hello", Some(41)]);
 ```
 
 ## Todo

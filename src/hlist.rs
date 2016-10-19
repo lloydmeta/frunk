@@ -21,22 +21,25 @@ pub trait HListPush: HList {
 pub struct HNil;
 
 impl HList for HNil {
-    fn length(&self) -> u32 { 0 }
+    fn length(&self) -> u32 {
+        0
+    }
 }
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T: HListPush> {
     head: H,
     tail: T,
-    length: u32
+    length: u32,
 }
 
 impl<H, T: HListPush> HList for HCons<H, T> {
-    fn length(&self) -> u32 { self.length }
+    fn length(&self) -> u32 {
+        self.length
+    }
 }
 
 impl<H, T: HListPush> HCons<H, T> {
-
     /// Returns the head of the list and the tail of the list as a tuple2.
     /// The original list is consumed
     ///
@@ -60,7 +63,7 @@ impl HListPush for HNil {
         HCons {
             head: h,
             tail: self,
-            length: 1
+            length: 1,
         }
     }
 }
@@ -69,11 +72,11 @@ impl<H, T: HListPush> HListPush for HCons<H, T> {
     fn push<NewH>(self, h: NewH) -> HCons<NewH, Self>
         where Self: Sized
     {
-        let l =  self.length() + 1;
+        let l = self.length() + 1;
         HCons {
             head: h,
             tail: self,
-            length: l
+            length: l,
         }
     }
 }
@@ -101,13 +104,13 @@ pub fn h_cons<H, T: HListPush>(h: H, tail: T) -> HCons<H, T> {
 /// ```
 /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
 ///
-/// let h = hlist![1, 2, 3];
+/// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, tail1) = h.pop();
 /// let (h2, tail2) = tail1.pop();
 /// let (h3, tail3) = tail2.pop();
-/// assert_eq!(h1, 1);
-/// assert_eq!(h2, 2);
-/// assert_eq!(h3, 3);
+/// assert_eq!(h1, 13.5f32);
+/// assert_eq!(h2, "hello");
+/// assert_eq!(h3, Some(41));
 /// assert_eq!(tail3, HNil);
 /// # }
 /// ```
@@ -122,13 +125,11 @@ macro_rules! hlist {
     ($last: expr, $( $repeated: expr ), +) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
-//
         hlist!([($last),] => $( $repeated, )+);
     };
 
-// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// ([accumulatedList], listToReverse); recursively calls hlist until the list to reverse
 // + is empty (see next pattern)
-//
     ([$(($acc: expr),)*] =>$next: expr, $( $repeated:expr, )*) => {
         hlist!([($next), $( ($acc) ,)*] => $( $repeated, ) *);
     };
@@ -171,12 +172,12 @@ mod tests {
 
     #[test]
     fn test_macro() {
-        let h = hlist![1, 2, 3];
+        let h = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
-        assert_eq!(tail1, hlist![2, 3]);
+        assert_eq!(tail1, hlist!["2", 3]);
         let (h2, tail2) = tail1.pop();
-        assert_eq!(h2, 2);
+        assert_eq!(h2, "2");
         assert_eq!(tail2, hlist![3]);
         let (h3, tail3) = tail2.pop();
         assert_eq!(h3, 3);
