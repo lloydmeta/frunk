@@ -24,7 +24,13 @@ assert_eq!(combine_all(&tuples), expected);
 
 ## Todo
 
-Lots, but for starters, these are not implemented at all, nor do I know for sure if they
+It makes sense to start by implementing things that are useful even for idiomatic
+Rust usage (efficient, and safe). The following might be nice to have:
+  
+1. HList
+2. Validation (See cats)
+
+These are not implemented at all, nor do I know for sure if they
 are possible given that Rust has no support for Higher Kinded Types.
 
 0. `Functor`
