@@ -27,18 +27,20 @@ assert_eq!(combine_all(&tuples), expected);
 It makes sense to start by implementing things that are useful even for idiomatic
 Rust usage (efficient, and safe). The following might be nice to have:
   
-1. HList
-2. Validation (See cats)
+1. Validation (See cats)
 
 These are not implemented at all, nor do I know for sure if they
-are possible given that Rust has no support for Higher Kinded Types.
+are possible given that Rust has no support for Higher Kinded Types. In addition,
+Rustaceans are used to calling `iter()` on collections to get a lazy view, 
+manipulating their lists, and then doing a `collect()` at the end to keep things efficient.
+The use of these following structures maybe limited in that context.
 
 0. `Functor`
 1. `Monad`
 2. `Apply`
 3. `Applicative`
 
-`Show`, `Monoid`, and `Semigroup` are at least partially (mostly?) implemented.
+`Show`, `Monoid`, `HList`, and `Semigroup` are at least partially (mostly?) implemented.
 
 Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch.
 
