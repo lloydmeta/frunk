@@ -34,6 +34,17 @@ pub trait HListPush {
 }
 
 impl<H, T: HListPush> HCons<H, T> {
+
+    /// Returns the head of the list and the tail of the list as a tuple2.
+    /// The original list is consumed
+    ///
+    /// ```
+    /// # use frust::hlist::*;
+    ///
+    /// let hlist1 = h_cons("hi", HNil);
+    /// let (h, _) = hlist1.pop();
+    /// assert_eq!(h, "hi");
+    /// ```
     pub fn pop(self) -> (H, T) {
         (self.head, self.tail)
     }
@@ -62,6 +73,20 @@ impl<H, T: HListPush> HListPush for HCons<H, T> {
     }
 }
 
+
+/// Takes an element and an Hlist and returns another one with
+/// the element prepended to the original list. The original list
+/// is consumed
+///
+/// ```
+/// # use frust::hlist::*;
+///
+/// let h_list = h_cons("what", h_cons(1.23f32, HNil));
+/// let (h1, tail) = h_list.pop();
+/// let (h2, _) = tail.pop();
+/// assert_eq!(h1, "what");
+/// assert_eq!(h2, 1.23f32);
+/// ```
 pub fn h_cons<H, T: HListPush>(h: H, tail: T) -> HCons<H, T> {
     tail.push(h)
 }
