@@ -17,6 +17,7 @@ pub trait HListPush: HList {
 /// let (h, _) = hlist1.pop();
 /// assert_eq!(h, 1);
 /// ```
+#[derive(PartialEq, Eq, Debug)]
 pub struct HNil;
 
 impl HList for HNil {
@@ -36,6 +37,7 @@ impl HList for HNil {
 /// assert_eq!(h1, "hello");
 /// assert_eq!(h2, 1);
 /// ```
+#[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T: HListPush> {
     head: H,
     tail: T,
