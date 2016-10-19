@@ -24,19 +24,6 @@ impl HList for HNil {
     fn length(&self) -> u32 { 0 }
 }
 
-/// Represents a heterogeneous list.
-///
-/// To construct one, use the h_cons method
-///
-/// ```
-/// # use frust::hlist::*;
-///
-/// let h_list = h_cons("hello", h_cons(1, HNil));
-/// let (h1, tail) = h_list.pop();
-/// let (h2, _) = tail.pop();
-/// assert_eq!(h1, "hello");
-/// assert_eq!(h2, 1);
-/// ```
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T: HListPush> {
     head: H,
@@ -54,11 +41,12 @@ impl<H, T: HListPush> HCons<H, T> {
     /// The original list is consumed
     ///
     /// ```
-    /// # use frust::hlist::*;
+    /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
     ///
-    /// let hlist1 = h_cons("hi", HNil);
+    /// let hlist1 = hlist!("hi");
     /// let (h, _) = hlist1.pop();
     /// assert_eq!(h, "hi");
+    /// # }
     /// ```
     pub fn pop(self) -> (H, T) {
         (self.head, self.tail)
@@ -108,6 +96,50 @@ pub fn h_cons<H, T: HListPush>(h: H, tail: T) -> HCons<H, T> {
     tail.push(h)
 }
 
+/// Create an HList
+///
+/// ```
+/// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+///
+/// let h = hlist![1, 2, 3];
+/// let (h1, tail1) = h.pop();
+/// let (h2, tail2) = tail1.pop();
+/// let (h3, tail3) = tail2.pop();
+/// assert_eq!(h1, 1);
+/// assert_eq!(h2, 2);
+/// assert_eq!(h3, 3);
+/// assert_eq!(tail3, HNil);
+/// # }
+/// ```
+#[macro_export]
+macro_rules! hlist {
+
+    // Just a single item
+    ($single: expr) => {
+        HNil.push($single)
+    };
+
+    ($last: expr, $( $repeated: expr ), +) => {
+// Invoke recursive reversal of list that ends in the macro expansion implementation
+// of the reversed list
+//
+        hlist!([($last),] => $( $repeated, )+);
+    };
+
+// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// + is empty (see next pattern)
+//
+    ([$(($acc: expr),)*] =>$next: expr, $( $repeated:expr, )*) => {
+        hlist!([($next), $( ($acc) ,)*] => $( $repeated, ) *);
+    };
+
+// Finally expand into our implementation
+    ([($h:expr), $( ($repeated: expr), )*] => ) => {
+        HNil.push($h)
+         $(.push($repeated))*
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -135,6 +167,20 @@ mod tests {
         assert_eq!(retrieved.length(), 1);
         let new_list = h_cons(2, retrieved);
         assert_eq!(new_list.length(), 2);
+    }
+
+    #[test]
+    fn test_macro() {
+        let h = hlist![1, 2, 3];
+        let (h1, tail1) = h.pop();
+        assert_eq!(h1, 1);
+        assert_eq!(tail1, hlist![2, 3]);
+        let (h2, tail2) = tail1.pop();
+        assert_eq!(h2, 2);
+        assert_eq!(tail2, hlist![3]);
+        let (h3, tail3) = tail2.pop();
+        assert_eq!(h3, 3);
+        assert_eq!(tail3, HNil);
     }
 
 }

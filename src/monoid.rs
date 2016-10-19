@@ -27,8 +27,8 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 /// let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
 /// assert_eq!(combine_all(&empty_vec_opt_int), None);
 ///
-/// let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
-/// assert_eq!(combine_all(&vec_of_some_strings), Some("Hello World".to_owned()));
+/// let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
+/// assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
 /// ```
 pub fn combine_all<T>(xs: &Vec<T>) -> T
     where T: Monoid + Semigroup + Clone

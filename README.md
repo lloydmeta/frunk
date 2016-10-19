@@ -22,6 +22,58 @@ let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
 assert_eq!(combine_all(&tuples), expected);
 ```
 
+## Examples
+
+### Semigroup
+
+Things that can be combined.
+
+```rust
+use frust::semigroup::*;
+
+assert_eq!(Some(1).combine(&Some(2)), Some(3));
+
+assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise && 
+assert_eq!(All(true).combine(&All(false)), All(false));
+
+let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
+assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
+```
+
+### Monoid
+
+Things that can be combined *and* have an empty/id value.
+
+```rust
+use frust::monoid::*;
+
+let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+let t2 = (1, 2.5f32, String::from(" world"), None);
+let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
+let tuples = vec![t1, t2, t3];
+
+let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
+assert_eq!(combine_all(&tuples), expected)
+
+let product_nums = vec![Product(2), Product(3), Product(4)];
+assert_eq!(combine_all(&product_nums), Product(24))
+```
+
+### HList
+
+Statically typed heterogeneous lists. Pop as much as you want from one of these; everything
+remains typed.
+
+```rust
+#[macro_use] extern crate frust;
+use frust::hlist::*;
+
+let h = hlist![1, 2, 3];
+let (h1, tail1) = h.pop();
+assert_eq!(h1, 1);
+assert_eq!(tail1, hlist![2, 3]);
+```
+
 ## Todo
 
 It makes sense to start by implementing things that are useful even for idiomatic
