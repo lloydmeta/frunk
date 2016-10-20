@@ -132,13 +132,7 @@ fn get_age_faulty() -> Result<i32, String> {
 
 let validation2 = get_name_faulty().into_validated() + get_age_faulty();
 let try_person2 = validation2.into_result()
-                             .map(|hlist| {
-                                 let (name, (age, _)) = hlist.into_tuple2();
-                                 Person {
-                                     name: name,
-                                     age: age,
-                                 }
-                             });
+                             .map(|_| unimplemented!());
 
 // Notice that we have an accumulated list of errors!
 assert_eq!(try_person2,

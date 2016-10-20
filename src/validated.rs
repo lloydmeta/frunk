@@ -252,13 +252,7 @@ mod tests {
 
         let v = get_name_faulty().into_validated() + get_age_faulty();
         let person = v.into_result()
-                      .map(|hlist| {
-                          let (name, (age, _)) = hlist.into_tuple2();
-                          Person {
-                              name: name,
-                              age: age,
-                          }
-                      });
+                      .map(|_| unimplemented!());
 
         assert_eq!(person,
                    Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
