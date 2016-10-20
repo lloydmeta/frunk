@@ -4,11 +4,9 @@ pub trait HList: Sized {
     fn length(&self) -> u32;
 
     fn push<H>(self, h: H) -> HCons<H, Self> {
-        let l = self.length() + 1;
         HCons {
             head: h,
-            tail: self,
-            length: l,
+            tail: self
         }
     }
 }
@@ -36,13 +34,12 @@ impl HList for HNil {
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
     pub head: H,
-    pub tail: T,
-    pub length: u32,
+    pub tail: T
 }
 
-impl<H, T> HList for HCons<H, T> {
+impl<H, T: HList> HList for HCons<H, T> {
     fn length(&self) -> u32 {
-        self.length
+        1 + self.tail.length()
     }
 }
 
@@ -99,28 +96,20 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 #[macro_export]
 macro_rules! hlist {
 
+    // Nothing
+    (()) => { HNil };
+
     // Just a single item
     ($single: expr) => {
-        HNil.push($single)
+        HCons { head: $single, tail: HNil }
     };
 
-    ($last: expr, $( $repeated: expr ), +) => {
+    ($first: expr, $( $repeated: expr ), +) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
-        hlist!([($last),] => $( $repeated, )+);
+        HCons { head: $first, tail: hlist!($($repeated), *)}
     };
 
-// ([accumulatedList], listToReverse); recursively calls hlist until the list to reverse
-// + is empty (see next pattern)
-    ([$(($acc: expr),)*] =>$next: expr, $( $repeated:expr, )*) => {
-        hlist!([($next), $( ($acc) ,)*] => $( $repeated, ) *);
-    };
-
-// Finally expand into our implementation
-    ([($h:expr), $( ($repeated: expr), )*] => ) => {
-        HNil.push($h)
-         $(.push($repeated))*
-    }
 }
 
 impl<RHS> Add<RHS> for HNil
@@ -140,11 +129,9 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
     type Output = HCons<H, <T as Add<RHS>>::Output>;
 
     fn add(self, rhs: RHS) -> Self::Output {
-        let length = self.length() + rhs.length();
         HCons {
             head: self.head,
-            tail: self.tail + rhs,
-            length: length,
+            tail: self.tail + rhs
         }
     }
 }
