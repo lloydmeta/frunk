@@ -97,7 +97,7 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 macro_rules! hlist {
 
     // Nothing
-    (()) => { HNil };
+    () => { HNil };
 
     // Just a single item
     ($single: expr) => {
@@ -167,6 +167,7 @@ mod tests {
 
     #[test]
     fn test_macro() {
+        assert_eq!(hlist![], HNil);
         let h = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
