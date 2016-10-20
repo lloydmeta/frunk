@@ -71,6 +71,70 @@ assert_eq!(h1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
 ```
 
+### Validated
+
+A `Validated` is a way of running a bunch of operations that can go wrong(for example,
+returning `Result<T, E>`s) and, in the case of one or more things going wrong, having all the errors
+returned to you all at once. In the case that everything went swimmingly, you get
+an `HList` of all your results. Mapping `Result`s is different because it will stop
+at the first error, which can be annoying in the very common case [outlined best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
+
+Here is an example of how it can be used.
+
+```rust
+#[derive(PartialEq, Eq, Debug)]
+struct Person {
+    age: i32,
+    name: String,
+}
+
+fn get_name() -> Result<String, Error> { /* elided */ }
+
+fn get_age() -> Result<i32, Error> { /* elided */ }
+
+// Build up a `Validated` by adding `Result<T, E>` to it
+let validation = get_name().into_validated() + get_age();
+// When needed, turn the `Validated` back into a Result and map! 
+let try_person = validation.into_result()
+                           .map(|hlist| {
+                               let (name, (age, _)) = hlist.into_tuple2();
+                               Person {
+                                   name: name,
+                                   age: age,
+                               }
+                           });
+
+assert_eq!(person,
+           Result::Ok(Person {
+               name: "James".to_owned(),
+               age: 32,
+           }));
+
+/// This next pair of functions always return Recover::Err 
+fn get_name_faulty() -> Result<String, String> {
+    Result::Err("crap name".to_owned())
+}
+
+fn get_age_faulty() -> Result<i32, String> {
+    Result::Err("crap age".to_owned())
+}
+
+let validation2 = get_name_faulty().into_validated() + get_age_faulty();
+let try_person2 = validation2.into_result()
+                             .map(|hlist| {
+                                 let (name, (age, _)) = hlist.into_tuple2();
+                                 Person {
+                                     name: name,
+                                     age: age,
+                                 }
+                             });
+
+// Notice that we have an accumulated list of errors!
+assert_eq!(try_person2,
+           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
+    
+```
+
 ## Todo
 
 It makes sense to start by implementing things that are useful even for idiomatic
