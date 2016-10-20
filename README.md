@@ -142,25 +142,27 @@ assert_eq!(try_person2,
 
 ## Todo
 
-It makes sense to start by implementing things that are useful even for idiomatic
-Rust usage (efficient, and safe). The following might be nice to have:
-  
-1. Validation (See cats)
+### Stabilise interface, general cleanup
 
-These are not implemented at all, nor do I know for sure if they
-are possible given that Rust has no support for Higher Kinded Types. In addition,
-Rustaceans are used to calling `iter()` on collections to get a lazy view, 
-manipulating their lists, and then doing a `collect()` at the end to keep things efficient.
-The use of these following structures maybe limited in that context.
+Before a 1.0 release, would be best to revisit the design of the interfaces
+and do some general code (and test cleanup).
+
+### Benchmmarks
+
+Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch ?
+
+### Not yet implemented 
+
+Given that Rust has no support for Higher Kinded Types, I'm not sure if these
+are even possible to implement. In addition, Rustaceans are used to calling `iter()` 
+on collections to get a lazy view, manipulating their elements with `map`
+or `and_then`, and then doing a `collect()` at the end to keep things
+efficient. The usefulness of these following structures maybe limited in that context.
 
 0. `Functor`
 1. `Monad`
 2. `Apply`
 3. `Applicative`
-
-`Show`, `Monoid`, `HList`, and `Semigroup` are at least partially (mostly?) implemented.
-
-Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch.
 
 ## Contributing
 
