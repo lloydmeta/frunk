@@ -80,6 +80,8 @@ impl<T, E> Validated<T, E>
     /// assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
     /// # }
     /// ```
+    ///
+    ///
     pub fn combine<T2>(self,
                        other: Result<T2, E>)
                        -> Validated<<T as Add<HCons<T2, HNil>>>::Output, E>
@@ -97,6 +99,45 @@ impl<T, E> Validated<T, E>
         }
     }
 
+    /// Turns this Validated into a Result.
+    ///
+    /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
+    /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+    ///
+    /// #[derive(PartialEq, Eq, Debug)]
+    /// struct Person {
+    ///     age: i32,
+    ///     name: String,
+    /// }
+    ///
+    /// fn get_name() -> Result<String, String> {
+    ///     Result::Ok("James".to_owned())
+    /// }
+    ///
+    /// fn get_age() -> Result<i32, String> {
+    ///     Result::Ok(32)
+    /// }
+    ///
+    /// let v = get_name()
+    ///         .into_validated()
+    ///         .combine(get_age());
+    /// let person = v.into_result()
+    ///                .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+    ///                     Person {
+    ///                         name: name,
+    ///                         age: age,
+    ///                     }
+    ///                 });
+    ///
+    ///  assert_eq!(person,
+    ///             Result::Ok(Person {
+    ///                         name: "James".to_owned(),
+    ///                        age: 32,
+    ///             }));
+    /// # }
     pub fn into_result(self) -> Result<T, Vec<E>> {
         match self {
             Validated::Ok(h) => Result::Ok(h),
