@@ -47,7 +47,6 @@ pub trait ToValidated<T, E> {
 }
 
 impl<T, E> ToValidated<T, E> for Result<T, E> {
-
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
     /// ```
@@ -85,11 +84,10 @@ impl<T, E> Validated<T, E>
         }
     }
 
-    /// Transforms a Validated into a Result
     pub fn into_result(self) -> Result<T, Vec<E>> {
         match self {
             Validated::Ok(h) => Result::Ok(h),
-            Validated::Err(errors) => Result::Err(errors)
+            Validated::Err(errors) => Result::Err(errors),
         }
     }
 }
@@ -127,4 +125,60 @@ mod tests {
         let v1 = r1.into_validated().combine(r2);
         assert!(v1.is_err())
     }
+
+    #[derive(PartialEq, Eq, Debug)]
+    struct Person {
+        age: i32,
+        name: String,
+    }
+
+    fn get_name() -> Result<String, String> {
+        Result::Ok("James".to_owned())
+    }
+
+    fn get_age() -> Result<i32, String> {
+        Result::Ok(32)
+    }
+
+    fn get_name_faulty() -> Result<String, String> { Result::Err("crap name".to_owned())}
+
+    fn get_age_faulty() -> Result<i32, String> { Result::Err("crap age".to_owned())}
+
+    #[test]
+    fn test_to_result_ok() {
+
+        let v = get_name().into_validated()
+                    .combine(get_age());
+        let person = v.into_result()
+                      .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+                          Person {
+                              name: name,
+                              age: age,
+                          }
+                      });
+
+        assert_eq!(person,
+                   Result::Ok(Person {
+                       name: "James".to_owned(),
+                       age: 32,
+                   }));
+    }
+
+    #[test]
+    fn test_to_result_faulty() {
+
+        let v = get_name_faulty().into_validated()
+                    .combine(get_age_faulty());
+        let person = v.into_result()
+                      .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+                          Person {
+                              name: name,
+                              age: age,
+                          }
+                      });
+
+        assert_eq!(person,
+                   Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
+    }
+
 }

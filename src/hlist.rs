@@ -35,9 +35,9 @@ impl HList for HNil {
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
-    head: H,
-    tail: T,
-    length: u32,
+    pub head: H,
+    pub tail: T,
+    pub length: u32,
 }
 
 impl<H, T> HList for HCons<H, T> {
