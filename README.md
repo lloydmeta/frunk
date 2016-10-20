@@ -151,7 +151,7 @@ assert_eq!(try_person2,
 Before a 1.0 release, would be best to revisit the design of the interfaces
 and do some general code (and test cleanup).
 
-### Benchmmarks
+### Benchmarks
 
 Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch ?
 

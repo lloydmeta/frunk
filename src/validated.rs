@@ -40,6 +40,51 @@ impl<T, E> Validated<T, E>
     pub fn is_err(&self) -> bool {
         !self.is_ok()
     }
+
+    /// Turns this Validated into a Result.
+    ///
+    /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
+    /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
+    ///
+    /// #[derive(PartialEq, Eq, Debug)]
+    /// struct Person {
+    ///     age: i32,
+    ///     name: String,
+    /// }
+    ///
+    /// fn get_name() -> Result<String, String> {
+    ///     Result::Ok("James".to_owned())
+    /// }
+    ///
+    /// fn get_age() -> Result<i32, String> {
+    ///     Result::Ok(32)
+    /// }
+    ///
+    /// let v = get_name().into_validated() + get_age();
+    /// let person = v.into_result()
+    ///                .map(|hlist| {
+    ///                     let (name,(age,_)) = hlist.into_tuple2();
+    ///                     Person {
+    ///                         name: name,
+    ///                         age: age,
+    ///                     }
+    ///                 });
+    ///
+    ///  assert_eq!(person,
+    ///             Result::Ok(Person {
+    ///                         name: "James".to_owned(),
+    ///                        age: 32,
+    ///             }));
+    /// # }
+    pub fn into_result(self) -> Result<T, Vec<E>> {
+        match self {
+            Validated::Ok(h) => Result::Ok(h),
+            Validated::Err(errors) => Result::Err(errors),
+        }
+    }
 }
 
 /// Trait for "lifting" a given type into a Validated
@@ -60,7 +105,12 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E> {
         match self {
             Result::Err(e) => Validated::Err(vec![e]),
-            Result::Ok(v) => Validated::Ok(hlist![v]),
+            Result::Ok(v) => {
+                Validated::Ok(HCons {
+                    head: v,
+                    tail: HNil,
+                })
+            }
         }
     }
 }
@@ -117,55 +167,6 @@ impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
             (Validated::Err(errs), _) => Validated::Err(errs),
             (_, Validated::Err(errs)) => Validated::Err(errs),
             (Validated::Ok(h1), Validated::Ok(h2)) => Validated::Ok(h1 + h2),
-        }
-    }
-}
-
-impl<T, E> Validated<T, E>
-    where T: HList
-{
-    /// Turns this Validated into a Result.
-    ///
-    /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
-    /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
-    ///
-    /// #[derive(PartialEq, Eq, Debug)]
-    /// struct Person {
-    ///     age: i32,
-    ///     name: String,
-    /// }
-    ///
-    /// fn get_name() -> Result<String, String> {
-    ///     Result::Ok("James".to_owned())
-    /// }
-    ///
-    /// fn get_age() -> Result<i32, String> {
-    ///     Result::Ok(32)
-    /// }
-    ///
-    /// let v = get_name().into_validated() + get_age();
-    /// let person = v.into_result()
-    ///                .map(|hlist| {
-    ///                     let (name,(age,_)) = hlist.into_tuple2();
-    ///                     Person {
-    ///                         name: name,
-    ///                         age: age,
-    ///                     }
-    ///                 });
-    ///
-    ///  assert_eq!(person,
-    ///             Result::Ok(Person {
-    ///                         name: "James".to_owned(),
-    ///                        age: 32,
-    ///             }));
-    /// # }
-    pub fn into_result(self) -> Result<T, Vec<E>> {
-        match self {
-            Validated::Ok(h) => Result::Ok(h),
-            Validated::Err(errors) => Result::Err(errors),
         }
     }
 }
