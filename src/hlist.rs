@@ -25,12 +25,6 @@ pub trait HList: Sized {
 #[derive(PartialEq, Eq, Debug)]
 pub struct HNil;
 
-impl HList for HNil {
-    fn length(&self) -> u32 {
-        0
-    }
-}
-
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
     pub head: H,
