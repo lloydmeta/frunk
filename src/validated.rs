@@ -47,6 +47,7 @@ pub trait ToValidated<T, E> {
 }
 
 impl<T, E> ToValidated<T, E> for Result<T, E> {
+
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
     /// ```
@@ -67,6 +68,18 @@ impl<T, E> ToValidated<T, E> for Result<T, E> {
 impl<T, E> Validated<T, E>
     where T: HList
 {
+    /// Combines the current Validated with a Result, returning a new Validated
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+    ///
+    /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
+    /// let r2: Result<i32, String> = Result::Ok(1);
+    /// let v = r1.into_validated()
+    ///            .combine(r2);
+    /// assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
+    /// # }
+    /// ```
     pub fn combine<T2>(self,
                        other: Result<T2, E>)
                        -> Validated<<T as Add<HCons<T2, HNil>>>::Output, E>
