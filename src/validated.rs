@@ -140,14 +140,19 @@ mod tests {
         Result::Ok(32)
     }
 
-    fn get_name_faulty() -> Result<String, String> { Result::Err("crap name".to_owned())}
+    fn get_name_faulty() -> Result<String, String> {
+        Result::Err("crap name".to_owned())
+    }
 
-    fn get_age_faulty() -> Result<i32, String> { Result::Err("crap age".to_owned())}
+    fn get_age_faulty() -> Result<i32, String> {
+        Result::Err("crap age".to_owned())
+    }
 
     #[test]
     fn test_to_result_ok() {
 
-        let v = get_name().into_validated()
+        let v = get_name()
+                    .into_validated()
                     .combine(get_age());
         let person = v.into_result()
                       .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
@@ -167,7 +172,8 @@ mod tests {
     #[test]
     fn test_to_result_faulty() {
 
-        let v = get_name_faulty().into_validated()
+        let v = get_name_faulty()
+                    .into_validated()
                     .combine(get_age_faulty());
         let person = v.into_result()
                       .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
