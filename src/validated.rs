@@ -42,11 +42,11 @@ impl<T, E> Validated<T, E>
     }
 }
 
-pub trait ToValidated<T, E> {
+pub trait IntoValidated<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E>;
 }
 
-impl<T, E> ToValidated<T, E> for Result<T, E> {
+impl<T, E> IntoValidated<T, E> for Result<T, E> {
 
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
@@ -125,7 +125,8 @@ impl<T, E> Validated<T, E>
     ///         .into_validated()
     ///         .combine(get_age());
     /// let person = v.into_result()
-    ///                .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+    ///                .map(|hlist| {
+    ///                     let (name,(age,_)) = hlist.into_tuple2();
     ///                     Person {
     ///                         name: name,
     ///                         age: age,
@@ -209,7 +210,8 @@ mod tests {
                     .into_validated()
                     .combine(get_age());
         let person = v.into_result()
-                      .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+                      .map(|hlist| {
+                          let (name, (age, _)) = hlist.into_tuple2();
                           Person {
                               name: name,
                               age: age,
@@ -230,7 +232,8 @@ mod tests {
                     .into_validated()
                     .combine(get_age_faulty());
         let person = v.into_result()
-                      .map(|HCons { head: name, tail: HCons { head: age, .. }, .. }| {
+                      .map(|hlist| {
+                          let (name, (age, _)) = hlist.into_tuple2();
                           Person {
                               name: name,
                               age: age,

@@ -31,6 +31,10 @@ impl HList for HNil {
     }
 }
 
+/// An HList is a heterogeneous list, one that is statically typed
+/// at compile time.
+///
+/// In simple terms, it is just a really deeply nested Tuple2.
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
     pub head: H,
@@ -134,6 +138,47 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
             tail: self.tail + rhs
         }
     }
+}
+
+pub trait IntoTuple2 {
+    type HeadType;
+    type TailOutput;
+
+    /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
+    /// and have a nicer type signature.
+    ///
+    /// ///
+    /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+    /// let h = hlist![1, "hello", true, 42f32];
+    /// let (first(second(third(fourth, _)))) = h.into_tuple2;
+    /// assert_eq!(first ,       1);
+    /// assert_eq!(second, "hello");
+    /// assert_eq!(third ,     true);
+    /// assert_eq!(fourth,    42f32);
+    /// # }
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput );
+}
+
+impl <T> IntoTuple2 for HCons<T, HNil> {
+
+    type HeadType = T;
+    type TailOutput = HNil;
+
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput ) {
+        (self.head, HNil)
+    }
+}
+
+impl <T, Tail> IntoTuple2 for HCons<T, Tail>
+    where Tail: IntoTuple2 {
+
+    type HeadType = T;
+    type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
+
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput ) {
+        (self.head, self.tail.into_tuple2())
+    }
+
 }
 
 #[cfg(test)]
