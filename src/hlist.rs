@@ -147,15 +147,19 @@ pub trait IntoTuple2 {
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
     /// and have a nicer type signature.
     ///
-    /// ///
+    /// ```
     /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
-    /// let (first(second(third(fourth, _)))) = h.into_tuple2;
+    ///
+    /// // We now have a much nicer pattern matching experience
+    /// let (first,(second,(third, (fourth, _)))) = h.into_tuple2();
+    ///
     /// assert_eq!(first ,       1);
     /// assert_eq!(second, "hello");
     /// assert_eq!(third ,     true);
     /// assert_eq!(fourth,    42f32);
     /// # }
+    /// ```
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 
