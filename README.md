@@ -1,8 +1,8 @@
 # Frust [![Crates.io](https://img.shields.io/crates/v/frust.svg)](https://crates.io/crates/frust) [![Build Status](https://travis-ci.org/lloydmeta/frust.svg?branch=master)](https://travis-ci.org/lloydmeta/frust)
 
-Functional programming in Rust. Still largely a WIP.
+Useful functional programming toolbelt in Rust. Still largely a WIP.
 
-General idea is to hopefully, make things easier by allowing stuff like this:
+General idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
 ```rust
 use frust::monoid::*;
