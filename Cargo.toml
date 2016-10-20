@@ -1,6 +1,6 @@
 [package]
 name = "frust"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Functional Programming in Rust"
 license = "MIT"
