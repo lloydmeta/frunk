@@ -4,11 +4,9 @@ pub trait HList: Sized {
     fn length(&self) -> u32;
 
     fn push<H>(self, h: H) -> HCons<H, Self> {
-        let l = self.length() + 1;
         HCons {
             head: h,
             tail: self,
-            length: l,
         }
     }
 }
@@ -33,16 +31,19 @@ impl HList for HNil {
     }
 }
 
+/// An HList is a heterogeneous list, one that is statically typed
+/// at compile time.
+///
+/// In simple terms, it is just a really deeply nested Tuple2.
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
-    head: H,
-    tail: T,
-    length: u32,
+    pub head: H,
+    pub tail: T,
 }
 
-impl<H, T> HList for HCons<H, T> {
+impl<H, T: HList> HList for HCons<H, T> {
     fn length(&self) -> u32 {
-        self.length
+        1 + self.tail.length()
     }
 }
 
@@ -99,28 +100,20 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 #[macro_export]
 macro_rules! hlist {
 
+    // Nothing
+    () => { HNil };
+
     // Just a single item
     ($single: expr) => {
-        HNil.push($single)
+        HCons { head: $single, tail: HNil }
     };
 
-    ($last: expr, $( $repeated: expr ), +) => {
+    ($first: expr, $( $repeated: expr ), +) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
-        hlist!([($last),] => $( $repeated, )+);
+        HCons { head: $first, tail: hlist!($($repeated), *)}
     };
 
-// ([accumulatedList], listToReverse); recursively calls hlist until the list to reverse
-// + is empty (see next pattern)
-    ([$(($acc: expr),)*] =>$next: expr, $( $repeated:expr, )*) => {
-        hlist!([($next), $( ($acc) ,)*] => $( $repeated, ) *);
-    };
-
-// Finally expand into our implementation
-    ([($h:expr), $( ($repeated: expr), )*] => ) => {
-        HNil.push($h)
-         $(.push($repeated))*
-    }
 }
 
 impl<RHS> Add<RHS> for HNil
@@ -140,12 +133,53 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
     type Output = HCons<H, <T as Add<RHS>>::Output>;
 
     fn add(self, rhs: RHS) -> Self::Output {
-        let length = self.length() + rhs.length();
         HCons {
             head: self.head,
             tail: self.tail + rhs,
-            length: length,
         }
+    }
+}
+
+pub trait IntoTuple2 {
+    type HeadType;
+    type TailOutput;
+
+    /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
+    /// and have a nicer type signature.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+    /// let h = hlist![1, "hello", true, 42f32];
+    ///
+    /// // We now have a much nicer pattern matching experience
+    /// let (first,(second,(third, (fourth, _)))) = h.into_tuple2();
+    ///
+    /// assert_eq!(first ,       1);
+    /// assert_eq!(second, "hello");
+    /// assert_eq!(third ,     true);
+    /// assert_eq!(fourth,    42f32);
+    /// # }
+    /// ```
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
+}
+
+impl<T> IntoTuple2 for HCons<T, HNil> {
+    type HeadType = T;
+    type TailOutput = HNil;
+
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
+        (self.head, HNil)
+    }
+}
+
+impl<T, Tail> IntoTuple2 for HCons<T, Tail>
+    where Tail: IntoTuple2
+{
+    type HeadType = T;
+    type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
+
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
+        (self.head, self.tail.into_tuple2())
     }
 }
 
@@ -180,6 +214,7 @@ mod tests {
 
     #[test]
     fn test_macro() {
+        assert_eq!(hlist![], HNil);
         let h = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
