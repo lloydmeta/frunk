@@ -42,6 +42,7 @@ impl<T, E> Validated<T, E>
     }
 }
 
+/// Trait for "lifting" a given type into a Validated
 pub trait IntoValidated<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E>;
 }
@@ -64,40 +65,65 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
     }
 }
 
-impl<T, E> Validated<T, E>
-    where T: HList
+/// Implements Add for the current Validated with a Result, returning a new Validated.
+///
+/// ```
+/// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+///
+/// let r1: Result<String, String> = Result::Ok(String::from("hello"));
+/// let r2: Result<i32, String> = Result::Ok(1);
+/// let v = r1.into_validated() + r2;
+/// assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
+/// # }
+/// ```
+///
+impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
+    where T: HList + Add<HCons<T2, HNil>>,
+          <T as Add<HCons<T2, HNil>>>::Output: HList
 {
-    /// Combines the current Validated with a Result, returning a new Validated
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
-    ///
-    /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
-    /// let r2: Result<i32, String> = Result::Ok(1);
-    /// let v = r1.into_validated()
-    ///            .combine(r2);
-    /// assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
-    /// # }
-    /// ```
-    ///
-    ///
-    pub fn combine<T2>(self,
-                       other: Result<T2, E>)
-                       -> Validated<<T as Add<HCons<T2, HNil>>>::Output, E>
-        where T: Add<HCons<T2, HNil>>,
-              <T as Add<HCons<T2, HNil>>>::Output: HList
-    {
+    type Output = Validated<<T as Add<HCons<T2, HNil>>>::Output, E>;
+
+    fn add(self, other: Result<T2, E>) -> Self::Output {
+        let other_as_validated = other.into_validated();
+        self + other_as_validated
+    }
+}
+
+/// Implements Add for the current Validated with another Validated, returning a new Validated.
+///
+/// ```
+/// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+/// let r1: Result<String, String> = Result::Ok(String::from("hello"));
+/// let r2: Result<i32, String> = Result::Ok(1);
+/// let v1 = r1.into_validated();
+/// let v2 = r2.into_validated();
+/// let v3 = v1 + v2;
+/// assert_eq!(v3, Validated::Ok(hlist!(String::from("hello"), 1)))
+/// # }
+/// ```
+impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
+    where T: HList + Add<T2>,
+          T2: HList,
+          <T as Add<T2>>::Output: HList
+{
+    type Output = Validated<<T as Add<T2>>::Output, E>;
+
+    fn add(self, other: Validated<T2, E>) -> Self::Output {
         match (self, other) {
-            (Validated::Err(mut errs), Result::Err(e)) => {
-                errs.push(e);
+            (Validated::Err(mut errs), Validated::Err(errs2)) => {
+                errs.extend(errs2);
                 Validated::Err(errs)
             }
             (Validated::Err(errs), _) => Validated::Err(errs),
-            (_, Result::Err(e)) => Validated::Err(vec![e]),
-            (Validated::Ok(h1), Result::Ok(v2)) => Validated::Ok(h1 + hlist!(v2)),
+            (_, Validated::Err(errs)) => Validated::Err(errs),
+            (Validated::Ok(h1), Validated::Ok(h2)) => Validated::Ok(h1 + h2),
         }
     }
+}
 
+impl<T, E> Validated<T, E>
+    where T: HList
+{
     /// Turns this Validated into a Result.
     ///
     /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
@@ -120,9 +146,7 @@ impl<T, E> Validated<T, E>
     ///     Result::Ok(32)
     /// }
     ///
-    /// let v = get_name()
-    ///         .into_validated()
-    ///         .combine(get_age());
+    /// let v = get_name().into_validated() + get_age();
     /// let person = v.into_result()
     ///                .map(|hlist| {
     ///                     let (name,(age,_)) = hlist.into_tuple2();
@@ -153,31 +177,32 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_combining_ok_results() {
+    fn test_adding_ok_results() {
         let r1: Result<String, String> = Result::Ok(String::from("hello"));
         let r2: Result<i32, String> = Result::Ok(1);
-        let v = r1.into_validated()
-                  .combine(r2);
+        let v = r1.into_validated() + r2;
         assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
     }
 
     #[test]
-    fn test_combining_validated_oks() {
+    fn test_adding_validated_oks() {
         let r1: Result<String, String> = Result::Ok(String::from("hello"));
         let r2: Result<i32, String> = Result::Ok(1);
         let r3: Result<i32, String> = Result::Ok(3);
-        let comb = r1.into_validated()
-                     .combine(r2)
-                     .combine(r3);
+        let v1 = r1.into_validated();
+        let v2 = r2.into_validated();
+        let v3 = r3.into_validated();
+        let comb = v1 + v2 + v3;
         assert_eq!(comb, Validated::Ok(hlist!(String::from("hello"), 1, 3)))
     }
 
     #[test]
-    fn test_chaining_invalid() {
+    fn test_adding_err_results() {
         let r1: Result<i16, String> = Result::Ok(1);
         let r2: Result<i16, String> = Result::Err(String::from("NO!"));
-        let v1 = r1.into_validated().combine(r2);
-        assert!(v1.is_err())
+        let v1 = r1.into_validated() + r2;
+        assert!(v1.is_err());
+        assert_eq!(v1, Validated::Err(vec!["NO!".to_owned()]))
     }
 
     #[derive(PartialEq, Eq, Debug)]
@@ -205,9 +230,7 @@ mod tests {
     #[test]
     fn test_to_result_ok() {
 
-        let v = get_name()
-                    .into_validated()
-                    .combine(get_age());
+        let v = get_name().into_validated() + get_age();
         let person = v.into_result()
                       .map(|hlist| {
                           let (name, (age, _)) = hlist.into_tuple2();
@@ -227,9 +250,7 @@ mod tests {
     #[test]
     fn test_to_result_faulty() {
 
-        let v = get_name_faulty()
-                    .into_validated()
-                    .combine(get_age_faulty());
+        let v = get_name_faulty().into_validated() + get_age_faulty();
         let person = v.into_result()
                       .map(|hlist| {
                           let (name, (age, _)) = hlist.into_tuple2();
