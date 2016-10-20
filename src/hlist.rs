@@ -1,9 +1,16 @@
-pub trait HList {
-    fn length(&self) -> u32;
-}
+use std::ops::Add;
 
-pub trait HListPush: HList {
-    fn push<H>(self, h: H) -> HCons<H, Self> where Self: Sized;
+pub trait HList: Sized {
+    fn length(&self) -> u32;
+
+    fn push<H>(self, h: H) -> HCons<H, Self> {
+        let l = self.length() + 1;
+        HCons {
+            head: h,
+            tail: self,
+            length: l,
+        }
+    }
 }
 
 /// Represents the right-most end of a heterogeneous list
@@ -27,19 +34,19 @@ impl HList for HNil {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct HCons<H, T: HListPush> {
+pub struct HCons<H, T> {
     head: H,
     tail: T,
     length: u32,
 }
 
-impl<H, T: HListPush> HList for HCons<H, T> {
+impl<H, T> HList for HCons<H, T> {
     fn length(&self) -> u32 {
         self.length
     }
 }
 
-impl<H, T: HListPush> HCons<H, T> {
+impl<H, T> HCons<H, T> {
     /// Returns the head of the list and the tail of the list as a tuple2.
     /// The original list is consumed
     ///
@@ -53,31 +60,6 @@ impl<H, T: HListPush> HCons<H, T> {
     /// ```
     pub fn pop(self) -> (H, T) {
         (self.head, self.tail)
-    }
-}
-
-impl HListPush for HNil {
-    fn push<NewH>(self, h: NewH) -> HCons<NewH, HNil>
-        where Self: Sized
-    {
-        HCons {
-            head: h,
-            tail: self,
-            length: 1,
-        }
-    }
-}
-
-impl<H, T: HListPush> HListPush for HCons<H, T> {
-    fn push<NewH>(self, h: NewH) -> HCons<NewH, Self>
-        where Self: Sized
-    {
-        let l = self.length() + 1;
-        HCons {
-            head: h,
-            tail: self,
-            length: l,
-        }
     }
 }
 
@@ -95,7 +77,7 @@ impl<H, T: HListPush> HListPush for HCons<H, T> {
 /// assert_eq!(h1, "what");
 /// assert_eq!(h2, 1.23f32);
 /// ```
-pub fn h_cons<H, T: HListPush>(h: H, tail: T) -> HCons<H, T> {
+pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
     tail.push(h)
 }
 
@@ -141,6 +123,32 @@ macro_rules! hlist {
     }
 }
 
+impl<RHS> Add<RHS> for HNil
+    where RHS: HList
+{
+    type Output = RHS;
+
+    fn add(self, rhs: RHS) -> RHS {
+        rhs
+    }
+}
+
+impl<H, T, RHS> Add<RHS> for HCons<H, T>
+    where T: Add<RHS>,
+          RHS: HList
+{
+    type Output = HCons<H, <T as Add<RHS>>::Output>;
+
+    fn add(self, rhs: RHS) -> Self::Output {
+        let length = self.length() + rhs.length();
+        HCons {
+            head: self.head,
+            tail: self.tail + rhs,
+            length: length,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -182,6 +190,14 @@ mod tests {
         let (h3, tail3) = tail2.pop();
         assert_eq!(h3, 3);
         assert_eq!(tail3, HNil);
+    }
+
+    #[test]
+    fn test_add() {
+        let h1 = hlist![true, "hi"];
+        let h2 = hlist![1, 32f32];
+        let combined = h1 + h2;
+        assert_eq!(combined, hlist![true, "hi", 1, 32f32])
     }
 
 }
