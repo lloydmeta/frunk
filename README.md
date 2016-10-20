@@ -81,11 +81,14 @@ assert_eq!(tail1, hlist!["hello", Some(41)]);
 
 ### Validated
 
-A `Validated` is a way of running a bunch of operations that can go wrong(for example,
-returning `Result<T, E>`s) and, in the case of one or more things going wrong, having all the errors
-returned to you all at once. In the case that everything went swimmingly, you get
-an `HList` of all your results. Mapping `Result`s is different because it will stop
-at the first error, which can be annoying in the very common case (outlined best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
+`Validated` is a way of running a bunch of operations that can go wrong (for example,
+functions returning `Result<T, E>`) and, in the case of one or more things going wrong, 
+having all the errors returned to you all at once. In the case that everything went well, you get
+an `HList` of all your results. 
+
+Mapping (and otherwise working with plain) `Result`s is different because it will 
+stop at the first error, which can be annoying in the very common case (outlined 
+best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
 
 Here is an example of how it can be used.
 
@@ -100,9 +103,9 @@ fn get_name() -> Result<String, Error> { /* elided */ }
 
 fn get_age() -> Result<i32, Error> { /* elided */ }
 
-// Build up a `Validated` by adding `Result<T, E>` to it
+// Build up a `Validated`
 let validation = get_name().into_validated() + get_age();
-// When needed, turn the `Validated` back into a Result and map! 
+// When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            .map(|hlist| {
                                let (name, (age, _)) = hlist.into_tuple2();
