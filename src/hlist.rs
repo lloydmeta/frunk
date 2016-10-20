@@ -31,7 +31,6 @@ impl HList for HNil {
     fn length(&self) -> u32 {
         0
     }
-
 }
 
 #[derive(PartialEq, Eq, Debug)]
@@ -124,7 +123,9 @@ macro_rules! hlist {
     }
 }
 
-impl<RHS> Add<RHS> for HNil {
+impl<RHS> Add<RHS> for HNil
+    where RHS: HList
+{
     type Output = RHS;
 
     fn add(self, rhs: RHS) -> RHS {
@@ -133,12 +134,18 @@ impl<RHS> Add<RHS> for HNil {
 }
 
 impl<H, T, RHS> Add<RHS> for HCons<H, T>
-where T: Add<RHS>, RHS: HList {
+    where T: Add<RHS>,
+          RHS: HList
+{
     type Output = HCons<H, <T as Add<RHS>>::Output>;
 
     fn add(self, rhs: RHS) -> Self::Output {
         let length = self.length() + rhs.length();
-        HCons { head:self.head, tail: self.tail + rhs, length: length }
+        HCons {
+            head: self.head,
+            tail: self.tail + rhs,
+            length: length,
+        }
     }
 }
 
@@ -186,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add(){
+    fn test_add() {
         let h1 = hlist![true, "hi"];
         let h2 = hlist![1, 32f32];
         let combined = h1 + h2;
