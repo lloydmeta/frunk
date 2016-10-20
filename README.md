@@ -97,21 +97,23 @@ Here is an example of how it can be used.
 struct Person {
     age: i32,
     name: String,
+    street: String,
 }
 
 fn get_name() -> Result<String, Error> { /* elided */ }
-
 fn get_age() -> Result<i32, Error> { /* elided */ }
+fn get_street() -> Result<String, Error> { /* elided */ }
 
 // Build up a `Validated`
-let validation = get_name().into_validated() + get_age();
+let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            .map(|hlist| {
-                               let (name, (age, _)) = hlist.into_tuple2();
+                               let (name, (age, (street, _))) = hlist.into_tuple2();
                                Person {
                                    name: name,
                                    age: age,
+                                   street: street,
                                }
                            });
 
@@ -119,7 +121,9 @@ assert_eq!(person,
            Result::Ok(Person {
                name: "James".to_owned(),
                age: 32,
+               street: "Main".to_owned(),
            }));
+}
 
 /// This next pair of functions always return Recover::Err 
 fn get_name_faulty() -> Result<String, String> {
