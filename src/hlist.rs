@@ -6,7 +6,7 @@ pub trait HList: Sized {
     fn push<H>(self, h: H) -> HCons<H, Self> {
         HCons {
             head: h,
-            tail: self
+            tail: self,
         }
     }
 }
@@ -38,7 +38,7 @@ impl HList for HNil {
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
     pub head: H,
-    pub tail: T
+    pub tail: T,
 }
 
 impl<H, T: HList> HList for HCons<H, T> {
@@ -135,7 +135,7 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
     fn add(self, rhs: RHS) -> Self::Output {
         HCons {
             head: self.head,
-            tail: self.tail + rhs
+            tail: self.tail + rhs,
         }
     }
 }
@@ -156,29 +156,27 @@ pub trait IntoTuple2 {
     /// assert_eq!(third ,     true);
     /// assert_eq!(fourth,    42f32);
     /// # }
-    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput );
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 
-impl <T> IntoTuple2 for HCons<T, HNil> {
-
+impl<T> IntoTuple2 for HCons<T, HNil> {
     type HeadType = T;
     type TailOutput = HNil;
 
-    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput ) {
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, HNil)
     }
 }
 
-impl <T, Tail> IntoTuple2 for HCons<T, Tail>
-    where Tail: IntoTuple2 {
-
+impl<T, Tail> IntoTuple2 for HCons<T, Tail>
+    where Tail: IntoTuple2
+{
     type HeadType = T;
     type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
 
-    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput ) {
+    fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
     }
-
 }
 
 #[cfg(test)]

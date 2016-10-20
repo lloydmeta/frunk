@@ -47,7 +47,6 @@ pub trait IntoValidated<T, E> {
 }
 
 impl<T, E> IntoValidated<T, E> for Result<T, E> {
-
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
     /// ```
