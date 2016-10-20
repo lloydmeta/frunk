@@ -20,7 +20,7 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 /// Given a sequence of `xs`, combine them and return the total
 ///
 /// ```
-/// # use frust::monoid::*;
+/// # use frunk::monoid::*;
 ///
 /// assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
 ///

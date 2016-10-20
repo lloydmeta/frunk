@@ -16,7 +16,7 @@ pub trait HList: Sized {
 /// Used to begin one:
 ///
 /// ```
-/// # use frust::hlist::*;
+/// # use frunk::hlist::*;
 ///
 /// let hlist1 = h_cons(1, HNil);
 /// let (h, _) = hlist1.pop();
@@ -52,7 +52,7 @@ impl<H, T> HCons<H, T> {
     /// The original list is consumed
     ///
     /// ```
-    /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
     ///
     /// let hlist1 = hlist!("hi");
     /// let (h, _) = hlist1.pop();
@@ -70,7 +70,7 @@ impl<H, T> HCons<H, T> {
 /// is consumed
 ///
 /// ```
-/// # use frust::hlist::*;
+/// # use frunk::hlist::*;
 ///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, tail) = h_list.pop();
@@ -85,7 +85,7 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 /// Create an HList
 ///
 /// ```
-/// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
 ///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, tail1) = h.pop();
@@ -148,7 +148,7 @@ pub trait IntoTuple2 {
     /// and have a nicer type signature.
     ///
     /// ```
-    /// # #[macro_use] extern crate frust; use frust::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience

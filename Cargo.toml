@@ -1,9 +1,9 @@
 [package]
-name = "frust"
-version = "0.0.7"
+name = "frunk"
+version = "0.1.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
-description = "Functional Programming in Rust"
+description = "Frunk provides developers with a number of functional programming tools like HList, Validate, Monoid, and Semigroup."
 license = "MIT"
-homepage = "https://github.com/lloydmeta/frust"
+homepage = "https://github.com/lloydmeta/frunk"
 
 [dependencies]

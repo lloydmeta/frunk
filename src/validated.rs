@@ -15,7 +15,7 @@ impl<T, E> Validated<T, E>
     /// Returns true if this validation is Ok, false otherwise
     ///
     /// ```
-    /// # use frust::validated::*;
+    /// # use frunk::validated::*;
     ///
     /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
     /// let v = r1.into_validated();
@@ -31,7 +31,7 @@ impl<T, E> Validated<T, E>
     /// Returns true if this validation is Err, false otherwise
     ///
     /// ```
-    /// # use frust::validated::*;
+    /// # use frunk::validated::*;
     ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
@@ -51,7 +51,7 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
     /// ```
-    /// # use frust::validated::*;
+    /// # use frunk::validated::*;
     ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
@@ -68,7 +68,7 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 /// Implements Add for the current Validated with a Result, returning a new Validated.
 ///
 /// ```
-/// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
 ///
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
@@ -92,7 +92,7 @@ impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
 /// Implements Add for the current Validated with another Validated, returning a new Validated.
 ///
 /// ```
-/// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
 /// let v1 = r1.into_validated();
@@ -130,7 +130,7 @@ impl<T, E> Validated<T, E>
     /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
     ///
     /// ```
-    /// # #[macro_use] extern crate frust; use frust::hlist::*; use frust::validated::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
     ///
     /// #[derive(PartialEq, Eq, Debug)]
     /// struct Person {

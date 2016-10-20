@@ -1,11 +1,11 @@
-# Frust [![Crates.io](https://img.shields.io/crates/v/frust.svg)](https://crates.io/crates/frust) [![Build Status](https://travis-ci.org/lloydmeta/frust.svg?branch=master)](https://travis-ci.org/lloydmeta/frust)
+# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk)
 
 Useful functional programming toolbelt in Rust. Still largely a WIP.
 
 General idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
 ```rust
-use frust::monoid::*;
+use frunk::monoid::*;
 
 let v = vec![Some(1), Some(3)];
 assert_eq!(combine_all(&v), Some(4));
@@ -37,7 +37,7 @@ assert_eq!(combine_all(&tuples), expected);
 Things that can be combined.
 
 ```rust
-use frust::semigroup::*;
+use frunk::semigroup::*;
 
 assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
@@ -50,7 +50,7 @@ assert_eq!(All(true).combine(&All(false)), All(false));
 Things that can be combined *and* have an empty/id value.
 
 ```rust
-use frust::monoid::*;
+use frunk::monoid::*;
 
 let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 let t2 = (1, 2.5f32, String::from(" world"), None);
@@ -70,8 +70,8 @@ Statically typed heterogeneous lists. Pop as much as you want from one of these;
 remains typed.
 
 ```rust
-#[macro_use] extern crate frust;
-use frust::hlist::*;
+#[macro_use] extern crate frunk;
+use frunk::hlist::*;
 
 let h = hlist![true, "hello", Some(41)];
 let (h1, tail1) = h.pop();

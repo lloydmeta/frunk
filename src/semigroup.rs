@@ -47,7 +47,7 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 /// If the sequence is empty, returns None. Otherwise, returns Some(total).
 ///
 /// ```
-/// # use frust::semigroup::*;
+/// # use frunk::semigroup::*;
 ///
 /// let v1 = &vec![1, 2, 3];
 /// assert_eq!(combine_all_option(v1), Some(6));
