@@ -2,9 +2,7 @@
 
 Functional programming in Rust. Still largely a WIP.
 
-## General idea
-
-Hopefully, make things easier by allowing stuff like this:
+General idea is to hopefully, make things easier by allowing stuff like this:
 
 ```rust
 use frust::monoid::*;
@@ -21,6 +19,16 @@ let tuples = vec![t1, t2, t3];
 let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
 assert_eq!(combine_all(&tuples), expected);
 ```
+
+## Table of Contents
+
+1. [Semigroup](#semigroup)
+2. [Monoid](#monoid)
+3. [HList](#hlist)
+4. [Validated](#validated)
+5. [Todo](#todo)
+5. [Contributing](#contributing)
+6. [Inspirations](#inspirations)
 
 ## Examples
 
@@ -77,7 +85,7 @@ A `Validated` is a way of running a bunch of operations that can go wrong(for ex
 returning `Result<T, E>`s) and, in the case of one or more things going wrong, having all the errors
 returned to you all at once. In the case that everything went swimmingly, you get
 an `HList` of all your results. Mapping `Result`s is different because it will stop
-at the first error, which can be annoying in the very common case [outlined best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
+at the first error, which can be annoying in the very common case (outlined best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
 
 Here is an example of how it can be used.
 
@@ -157,10 +165,6 @@ The use of these following structures maybe limited in that context.
 
 Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch.
 
-## Inspirations
-
-Scalaz, Cats, Haskell, the usual suspects ;)
-
 ## Contributing
 
 Yes please ! 
@@ -170,3 +174,7 @@ The following are considered important, in keeping with the spirit of Rust and f
 - Safety (type and memory)
 - Efficiency
 - Correctness
+
+## Inspirations
+
+Scalaz, Cats, Haskell, the usual suspects ;)
