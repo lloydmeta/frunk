@@ -1,3 +1,6 @@
 language: rust
+
 rust:
   - stable
+
+cache: cargo
