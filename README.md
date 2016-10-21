@@ -1,6 +1,6 @@
 # Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk)
 
-Useful functional programming toolbelt in Rust. Still largely a WIP.
+Useful functional programming toolbelt in Rust.
 
 General idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
@@ -77,6 +77,11 @@ let h = hlist![true, "hello", Some(41)];
 let (h1, tail1) = h.pop();
 assert_eq!(h1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
+
+// HLists also have a .into_tuple2() method that convert HLists with 2 or more 
+// items into nested Tuple2s for a nicer type-signature and pattern-matching experience
+let hl = hlist!["Joe", "Blow", 30, true];
+let (f_name, (l_name, (age, is_admin))) = hl.into_tuple2();
 ```
 
 ### Validated
@@ -109,7 +114,7 @@ let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            .map(|hlist| {
-                               let (name, (age, (street, _))) = hlist.into_tuple2();
+                               let (name, (age, street)) = hlist.into_tuple2();
                                Person {
                                    name: name,
                                    age: age,

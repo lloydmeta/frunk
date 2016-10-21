@@ -109,8 +109,6 @@ macro_rules! hlist {
     };
 
     ($first: expr, $( $repeated: expr ), +) => {
-// Invoke recursive reversal of list that ends in the macro expansion implementation
-// of the reversed list
         HCons { head: $first, tail: hlist!($($repeated), *)}
     };
 

@@ -1,8 +1,8 @@
 [package]
 name = "frunk"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
-description = "Frunk provides developers with a number of functional programming tools like HList, Validate, Monoid, and Semigroup."
+description = "Frunk provides developers with a number of functional programming tools like HList, Validated, Monoid, Semigroup and friends."
 license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
 
