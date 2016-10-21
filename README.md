@@ -69,8 +69,7 @@ assert_eq!(combine_all(&product_nums), Product(24))
 
 ### HList
 
-Statically typed heterogeneous lists. Pop as much as you want from one of these; everything
-remains typed.
+Statically typed heterogeneous lists.
 
 First, let's enable `hlist`:
 ```rust
@@ -80,13 +79,16 @@ use frunk::hlist::*;
 
 Some basics:
 ```rust
+let h = hlist![1]; 
+// h has a static type of: HCons<{integer}, HNil>
+
 // HLists have a head and tail
 assert_eq!(hlist![1].head, 1);
 assert_eq!(hlist![1].tail, HNil);
 ```
 
-HLists have a .into_tuple2() method that convert HLists with 2 or more items 
-into nested Tuple2s for a nicer type-signature and pattern-matching experience
+HLists with 2 or more items have a `.into_tuple2()` method that them
+into nested Tuple2s for a nice type-signature and pattern-matching experience
 ```rust
 let h = hlist!["Joe", "Blow", 30, true];
 // h has a static type of: HCons<&str, HCons<&str, HCons<{integer}, HCons<bool, HNil>>>>
@@ -98,7 +100,7 @@ assert_eq!(age, 30);
 assert_eq!(is_admin, true);
 ```
 
-You can also traverse HLists using .pop()
+You can also traverse HLists using `.pop()`
 ```rust
 let h = hlist![true, "hello", Some(41)];
 // h has a static type of: HCons<bool, HCons<&str, HCons<Option<{integer}>, HNil>>>
@@ -120,7 +122,7 @@ best by [the Cats project](http://typelevel.org/cats/tut/validated.html)).
 
 To use `Validated`, first:
 ```rust
-#[macro_use] extern crate frunk;
+#[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
 use frunk::hlist::*;
 use frunk::validated::*;
 ```
