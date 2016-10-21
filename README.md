@@ -23,6 +23,10 @@ let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
 assert_eq!(combine_all(&tuples), expected);
 ```
 
+For a deep dive, RustDocs for are available for:
+* Code on [Master](https://beachape.com/frunk)
+* Latest [published release](https://docs.rs/frunk)
+
 ## Table of Contents
 
 1. [Semigroup](#semigroup)

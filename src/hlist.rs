@@ -119,9 +119,9 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
     tail.prepend(h)
 }
 
-/// Returns an HList based on the values passed in.
+/// Returns an `HList` based on the values passed in.
 ///
-/// Hel
+/// Helps to avoid having to write nested `HCons`.
 ///
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
