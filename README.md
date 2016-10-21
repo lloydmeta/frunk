@@ -69,22 +69,44 @@ assert_eq!(combine_all(&product_nums), Product(24))
 
 ### HList
 
-Statically typed heterogeneous lists. Pop as much as you want from one of these; everything
-remains typed.
+Statically typed heterogeneous lists.
 
+First, let's enable `hlist`:
 ```rust
-#[macro_use] extern crate frunk;
+#[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
 use frunk::hlist::*;
+```
 
+Some basics:
+```rust
+let h = hlist![1]; 
+// h has a static type of: HCons<{integer}, HNil>
+
+// HLists have a head and tail
+assert_eq!(hlist![1].head, 1);
+assert_eq!(hlist![1].tail, HNil);
+```
+
+HLists with 2 or more items have a `.into_tuple2()` method that them
+into nested Tuple2s for a nice type-signature and pattern-matching experience
+```rust
+let h = hlist!["Joe", "Blow", 30, true];
+// h has a static type of: HCons<&str, HCons<&str, HCons<{integer}, HCons<bool, HNil>>>>
+
+let (f_name, (l_name, (age, is_admin))) = h.into_tuple2();
+assert_eq!(f_name, "Joe");
+assert_eq!(l_name, "Blow");
+assert_eq!(age, 30);
+assert_eq!(is_admin, true);
+```
+
+You can also traverse HLists using `.pop()`
+```rust
 let h = hlist![true, "hello", Some(41)];
+// h has a static type of: HCons<bool, HCons<&str, HCons<Option<{integer}>, HNil>>>
 let (h1, tail1) = h.pop();
 assert_eq!(h1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
-
-// HLists also have a .into_tuple2() method that convert HLists with 2 or more 
-// items into nested Tuple2s for a nicer type-signature and pattern-matching experience
-let hl = hlist!["Joe", "Blow", 30, true];
-let (f_name, (l_name, (age, is_admin))) = hl.into_tuple2();
 ```
 
 ### Validated
@@ -98,8 +120,14 @@ Mapping (and otherwise working with plain) `Result`s is different because it wil
 stop at the first error, which can be annoying in the very common case (outlined 
 best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
 
-Here is an example of how it can be used.
+To use `Validated`, first:
+```rust
+#[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
+use frunk::hlist::*;
+use frunk::validated::*;
+```
 
+Assuming we have a `Person` struct defined
 ```rust
 #[derive(PartialEq, Eq, Debug)]
 struct Person {
@@ -107,16 +135,21 @@ struct Person {
     name: String,
     street: String,
 }
+```
 
+Here is an example of how it can be used in the case that everything goes smoothly.
+
+```rust
 fn get_name() -> Result<String, Error> { /* elided */ }
 fn get_age() -> Result<i32, Error> { /* elided */ }
 fn get_street() -> Result<String, Error> { /* elided */ }
 
-// Build up a `Validated`
+// Build up a `Validated` by adding in any number of `Result`s
 let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            .map(|hlist| {
+                               // Destructure our hlist
                                let (name, (age, street)) = hlist.into_tuple2();
                                Person {
                                    name: name,
@@ -132,7 +165,10 @@ assert_eq!(try_person,
                street: "Main".to_owned(),
            }));
 }
+```
 
+If, on the other hand, our `Result`s are faulty:
+```rust
 /// This next pair of functions always return Recover::Err 
 fn get_name_faulty() -> Result<String, String> {
     Result::Err("crap name".to_owned())
@@ -148,8 +184,7 @@ let try_person2 = validation2.into_result()
 
 // Notice that we have an accumulated list of errors!
 assert_eq!(try_person2,
-           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
-    
+           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()])); 
 ```
 
 ## Todo
