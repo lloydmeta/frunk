@@ -117,7 +117,7 @@ let try_person = validation.into_result()
                                }
                            });
 
-assert_eq!(person,
+assert_eq!(try_person,
            Result::Ok(Person {
                name: "James".to_owned(),
                age: 32,
