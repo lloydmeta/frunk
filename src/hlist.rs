@@ -152,7 +152,7 @@ pub trait IntoTuple2 {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience
-    /// let (first,(second,(third, (fourth, _)))) = h.into_tuple2();
+    /// let (first,(second,(third, fourth))) = h.into_tuple2();
     ///
     /// assert_eq!(first ,       1);
     /// assert_eq!(second, "hello");
@@ -163,12 +163,12 @@ pub trait IntoTuple2 {
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 
-impl<T> IntoTuple2 for HCons<T, HNil> {
-    type HeadType = T;
-    type TailOutput = HNil;
+impl<T1, T2> IntoTuple2 for HCons<T1, HCons<T2, HNil>> {
+    type HeadType = T1;
+    type TailOutput = T2;
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
-        (self.head, HNil)
+        (self.head, self.tail.head)
     }
 }
 

@@ -66,7 +66,7 @@ impl<T, E> Validated<T, E>
     /// let v = get_name().into_validated() + get_age();
     /// let person = v.into_result()
     ///                .map(|hlist| {
-    ///                     let (name,(age,_)) = hlist.into_tuple2();
+    ///                     let (name, age) = hlist.into_tuple2();
     ///                     Person {
     ///                         name: name,
     ///                         age: age,
@@ -234,7 +234,7 @@ mod tests {
         let v = get_name().into_validated() + get_age();
         let person = v.into_result()
                       .map(|hlist| {
-                          let (name, (age, _)) = hlist.into_tuple2();
+                          let (name, age) = hlist.into_tuple2();
                           Person {
                               name: name,
                               age: age,
