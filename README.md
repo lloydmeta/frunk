@@ -144,11 +144,12 @@ fn get_name() -> Result<String, Error> { /* elided */ }
 fn get_age() -> Result<i32, Error> { /* elided */ }
 fn get_street() -> Result<String, Error> { /* elided */ }
 
-// Build up a `Validated`
+// Build up a `Validated` by adding in any number of `Result`s
 let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            .map(|hlist| {
+                               // Destructure our hlist
                                let (name, (age, street)) = hlist.into_tuple2();
                                Person {
                                    name: name,
