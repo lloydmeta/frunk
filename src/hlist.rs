@@ -101,15 +101,15 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 macro_rules! hlist {
 
     // Nothing
-    () => { HNil };
+    () => { $crate::hlist::HNil };
 
     // Just a single item
     ($single: expr) => {
-        HCons { head: $single, tail: HNil }
+        $crate::hlist::HCons { head: $single, tail: HNil }
     };
 
     ($first: expr, $( $repeated: expr ), +) => {
-        HCons { head: $first, tail: hlist!($($repeated), *)}
+        $crate::hlist::HCons { head: $first, tail: hlist!($($repeated), *)}
     };
 
 }
