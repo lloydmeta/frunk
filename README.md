@@ -158,8 +158,8 @@ let try_person = validation.into_result()
                                }
                            });
 
-assert_eq!(try_person,
-           Result::Ok(Person {
+assert_eq!(try_person.unwrap(),
+           Person {
                name: "James".to_owned(),
                age: 32,
                street: "Main".to_owned(),
@@ -183,8 +183,8 @@ let try_person2 = validation2.into_result()
                              .map(|_| unimplemented!());
 
 // Notice that we have an accumulated list of errors!
-assert_eq!(try_person2,
-           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()])); 
+assert_eq!(try_person2.unwrap_err(),
+           vec!["crap name".to_owned(), "crap age".to_owned()]); 
 ```
 
 ## Todo

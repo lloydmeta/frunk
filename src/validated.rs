@@ -73,11 +73,11 @@ impl<T, E> Validated<T, E>
     ///                     }
     ///                 });
     ///
-    ///  assert_eq!(person,
-    ///             Result::Ok(Person {
-    ///                         name: "James".to_owned(),
-    ///                        age: 32,
-    ///             }));
+    ///  assert_eq!(person.unwrap(),
+    ///             Person {
+    ///                 name: "James".to_owned(),
+    ///                 age: 32,
+    ///             });
     /// # }
     pub fn into_result(self) -> Result<T, Vec<E>> {
         match self {
@@ -241,11 +241,11 @@ mod tests {
                           }
                       });
 
-        assert_eq!(person,
-                   Result::Ok(Person {
+        assert_eq!(person.unwrap(),
+                   Person {
                        name: "James".to_owned(),
                        age: 32,
-                   }));
+                   });
     }
 
     #[test]
@@ -255,8 +255,8 @@ mod tests {
         let person = v.into_result()
                       .map(|_| unimplemented!());
 
-        assert_eq!(person,
-                   Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
+        assert_eq!(person.unwrap_err(),
+                   vec!["crap name".to_owned(), "crap age".to_owned()]);
     }
 
 }
