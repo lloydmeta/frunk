@@ -1,6 +1,50 @@
+//! Module for holding Validated logic
+//!
+//! `Validated` is a way of running a bunch of operations that can go wrong (for example,
+//! functions returning `Result<T, E>`) and, in the case of one or more things going wrong,
+//! having all the errors returned to you all at once. In the case that everything went well, you get
+//! an `HList` of all your results.
+//!
+//! ```
+//! # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
+//!
+//! #[derive(PartialEq, Eq, Debug)]
+//! struct Person {
+//!     age: i32,
+//!     name: String,
+//! }
+//!
+//! fn get_name() -> Result<String, String> {
+//!     Result::Ok("James".to_owned())
+//! }
+//!
+//! fn get_age() -> Result<i32, String> {
+//!     Result::Ok(32)
+//! }
+//!
+//! let v = get_name().into_validated() + get_age();
+//! let person = v.into_result()
+//!                .map(|hlist| {
+//!                     let (name, age) = hlist.into_tuple2();
+//!                     Person {
+//!                         name: name,
+//!                         age: age,
+//!                     }
+//!                 });
+//!
+//!  assert_eq!(person.unwrap(),
+//!             Person {
+//!                 name: "James".to_owned(),
+//!                 age: 32,
+//!             });
+//! # }
+//! ```
+
 use super::hlist::*;
 use std::ops::Add;
 
+/// A Validated is either an Ok holding an HList or an Err, holding vector
+/// of collected errors.
 #[derive(PartialEq, Eq, Debug)]
 pub enum Validated<T, E>
     where T: HList
@@ -89,10 +133,6 @@ impl<T, E> Validated<T, E>
 
 /// Trait for "lifting" a given type into a Validated
 pub trait IntoValidated<T, E> {
-    fn into_validated(self) -> Validated<HCons<T, HNil>, E>;
-}
-
-impl<T, E> IntoValidated<T, E> for Result<T, E> {
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
     /// ```
@@ -102,6 +142,10 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
     /// ```
+    fn into_validated(self) -> Validated<HCons<T, HNil>, E>;
+}
+
+impl<T, E> IntoValidated<T, E> for Result<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E> {
         match self {
             Result::Err(e) => Validated::Err(vec![e]),
