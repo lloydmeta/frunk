@@ -1,12 +1,56 @@
+//! Module for holding Monoid typeclass definitions and default implementations
+//!
+//! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to
+//! define a `combine_all` method to work on a list of said things:
+//!
+//! Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
+//! their values are summed in the new map?
+//!
+//! ```
+//! # use frunk::monoid::*;
+//! # use std::collections::*;
+//! let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
+//! assert_eq!(combine_all(&vec_of_no_hashmaps),
+//!                    <HashMap<i32, String> as Monoid>::empty());
+//!
+//! let mut h1: HashMap<i32, String> = HashMap::new();
+//! h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
+//! let mut h2: HashMap<i32, String> = HashMap::new();
+//! h2.insert(1, String::from(" World"));
+//! h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+//! let mut h3: HashMap<i32, String> = HashMap::new();
+//! h3.insert(3, String::from("Cruel World"));
+//! let vec_of_hashes = vec![h1, h2, h3];
+//!
+//! let mut h_expected: HashMap<i32, String> = HashMap::new();
+//! h_expected.insert(1, String::from("Hello World"));
+//! h_expected.insert(2, String::from("Goodbye"));
+//! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+//! assert_eq!(combine_all(&vec_of_hashes), h_expected);
+//! ```
 use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
+/// A Monoid is a Sempigroup that has an empty/ zero value
 pub trait Monoid: Semigroup {
+    /// For a given Monoid, returns its empty/zero value
+    ///
+    /// ```
+    /// # use frunk::monoid::*;
+    ///
+    /// assert_eq!(<i16 as Monoid>::empty(), 0);
+    /// ```
     fn empty() -> Self;
 }
 
 /// Return this combined with itself `n` times.
+///
+/// ```
+/// # use frunk::monoid::*;
+///
+/// assert_eq!(combine_n(&Some(2), 4), Some(8));
+/// ```
 pub fn combine_n<T>(o: &T, times: u32) -> T
     where T: Monoid + Semigroup + Clone
 {

@@ -1,3 +1,17 @@
+//! Module for holding the Semigroup typeclass definition and typeclass instances
+//!
+//! You can, for example, combine tuples.
+//!
+//! ```
+//! use frunk::semigroup::*;
+//! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+//! let t2 = (1, 2.5f32, String::from(" world"), None);
+//!
+//! let expected = (2, 5.0f32, String::from("hi world"), Some(3));
+//!
+//! assert_eq!(t1.combine(&t2), expected)
+//! ```
+
 use std::cell::*;
 use std::hash::Hash;
 use std::ops::{Deref, BitAnd, BitOr};
@@ -25,8 +39,15 @@ pub struct All<T>(pub T);
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
 pub struct Any<T>(pub T);
 
+/// A Semigroup is a class of thing that has a definable combine operation
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
+    ///
+    /// ```
+    /// # use frunk::semigroup::*;
+    ///
+    /// assert_eq!(Some(1).combine(&Some(2)), Some(3))
+    /// ```
     fn combine(&self, other: &Self) -> Self;
 }
 

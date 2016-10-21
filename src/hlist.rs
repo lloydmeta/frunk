@@ -1,9 +1,49 @@
+//! Module that holds HList data structures and implementations
+//!
+//! Typically, you would want to use the `hlist!` macro to make it easier
+//! for you to use HList.
+//!
+//! ```
+//! # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+//! let h = hlist![1, "hi"];
+//! assert_eq!(h.length(), 2);
+//! let (a, b) = h.into_tuple2();
+//! assert_eq!(a, 1);
+//! assert_eq!(b, "hi");
+//! # }
+//! ```
+
 use std::ops::Add;
 
+/// Typeclass for HList-y behaviour
+///
+/// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
+/// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
+    /// Returns the length of a given HList
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// let h = hlist![1, "hi"];
+    /// let (a, b) = h.into_tuple2();
+    /// assert_eq!(a, 1);
+    /// assert_eq!(b, "hi");
+    /// # }
+    /// ```
     fn length(&self) -> u32;
 
-    fn push<H>(self, h: H) -> HCons<H, Self> {
+    /// Prepends an item to the current HList
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// let h1 = hlist![1, "hi"];
+    /// let h2 = h1.prepend(true);
+    /// let (a, (b, c)) = h2.into_tuple2();
+    /// assert_eq!(a, true);
+    /// assert_eq!(b, 1);
+    /// assert_eq!(c, "hi");
+    /// # }
+    fn prepend<H>(self, h: H) -> HCons<H, Self> {
         HCons {
             head: h,
             tail: self,
@@ -18,8 +58,8 @@ pub trait HList: Sized {
 /// ```
 /// # use frunk::hlist::*;
 ///
-/// let hlist1 = h_cons(1, HNil);
-/// let (h, _) = hlist1.pop();
+/// let h = h_cons(1, HNil);
+/// let h = h.head;
 /// assert_eq!(h, 1);
 /// ```
 #[derive(PartialEq, Eq, Debug)]
@@ -31,10 +71,8 @@ impl HList for HNil {
     }
 }
 
-/// An HList is a heterogeneous list, one that is statically typed
-/// at compile time.
-///
-/// In simple terms, it is just a really deeply nested Tuple2.
+/// Represents the most basic non-empty HList. Its value is held in `head`
+/// while its tail is another HList.
 #[derive(PartialEq, Eq, Debug)]
 pub struct HCons<H, T> {
     pub head: H,
@@ -54,8 +92,8 @@ impl<H, T> HCons<H, T> {
     /// ```
     /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
     ///
-    /// let hlist1 = hlist!("hi");
-    /// let (h, _) = hlist1.pop();
+    /// let h = hlist!("hi");
+    /// let h = h.head;
     /// assert_eq!(h, "hi");
     /// # }
     /// ```
@@ -73,28 +111,26 @@ impl<H, T> HCons<H, T> {
 /// # use frunk::hlist::*;
 ///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
-/// let (h1, tail) = h_list.pop();
-/// let (h2, _) = tail.pop();
+/// let (h1, h2) = h_list.into_tuple2();
 /// assert_eq!(h1, "what");
 /// assert_eq!(h2, 1.23f32);
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    tail.push(h)
+    tail.prepend(h)
 }
 
-/// Create an HList
+/// Returns an HList based on the values passed in.
+///
+/// Hel
 ///
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
 ///
 /// let h = hlist![13.5f32, "hello", Some(41)];
-/// let (h1, tail1) = h.pop();
-/// let (h2, tail2) = tail1.pop();
-/// let (h3, tail3) = tail2.pop();
+/// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
 /// assert_eq!(h2, "hello");
-/// assert_eq!(h3, Some(41));
-/// assert_eq!(tail3, HNil);
+/// assert_eq!(h3, Some(41))
 /// # }
 /// ```
 #[macro_export]
@@ -138,8 +174,12 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
     }
 }
 
+/// Trait for things that can be turned into a Tuple 2 (pair)
 pub trait IntoTuple2 {
+    /// The 0 element in the output tuple
     type HeadType;
+
+    /// The 1 element in the output tuple
     type TailOutput;
 
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
