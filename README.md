@@ -1,8 +1,11 @@
 # Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk)
 
-Useful functional programming toolbelt in Rust.
+> **frunk** *frəNGk*
+>  * Functional programming toolbelt in Rust.
+>  * Might seem funky at first, but you'll like it.
+>  * Comes from: funktional (German) + Rust → Frunk
 
-General idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
+The general idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
 ```rust
 use frunk::monoid::*;
