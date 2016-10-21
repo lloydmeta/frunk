@@ -184,8 +184,7 @@ let try_person2 = validation2.into_result()
 
 // Notice that we have an accumulated list of errors!
 assert_eq!(try_person2,
-           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()]));
-    
+           Result::Err(vec!["crap name".to_owned(), "crap age".to_owned()])); 
 ```
 
 ## Todo
