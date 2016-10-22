@@ -62,7 +62,7 @@ pub trait HList: Sized {
 /// let h = h.head;
 /// assert_eq!(h, 1);
 /// ```
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct HNil;
 
 impl HList for HNil {
@@ -73,7 +73,7 @@ impl HList for HNil {
 
 /// Represents the most basic non-empty HList. Its value is held in `head`
 /// while its tail is another HList.
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct HCons<H, T> {
     pub head: H,
     pub tail: T,

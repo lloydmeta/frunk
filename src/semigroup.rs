@@ -28,15 +28,15 @@ pub struct Max<T: Ord>(pub T);
 pub struct Min<T: Ord>(pub T);
 
 /// Wrapper type for types that can have a Product combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Product<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise && combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct All<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise || combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Any<T>(pub T);
 
 /// A Semigroup is a class of thing that has a definable combine operation
