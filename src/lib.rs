@@ -1,4 +1,4 @@
-//! Frunk: generic functional programming toolbet for Rust
+//! Frunk: generic functional programming toolbelt for Rust
 //!
 //! Aims to be a collection of functional programming abstractions implemented in Rust
 //! in effective, useful, and idiomatic ways.

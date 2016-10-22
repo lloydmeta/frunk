@@ -194,8 +194,8 @@ pub trait IntoTuple2 {
     ///
     /// assert_eq!(first ,       1);
     /// assert_eq!(second, "hello");
-    /// assert_eq!(third ,     true);
-    /// assert_eq!(fourth,    42f32);
+    /// assert_eq!(third ,    true);
+    /// assert_eq!(fourth,   42f32);
     /// # }
     /// ```
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);

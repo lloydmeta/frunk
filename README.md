@@ -227,4 +227,4 @@ The following are considered important, in keeping with the spirit of Rust and f
 
 ## Inspirations
 
-Scalaz, Cats, Haskell, the usual suspects ;)
+Scalaz, Shapeless, Cats, Haskell, the usual suspects ;)
