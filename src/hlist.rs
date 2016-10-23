@@ -25,9 +25,7 @@ pub trait HList: Sized {
     /// ```
     /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
     /// let h = hlist![1, "hi"];
-    /// let (a, b) = h.into_tuple2();
-    /// assert_eq!(a, 1);
-    /// assert_eq!(b, "hi");
+    /// assert_eq!(h.length(), 2);
     /// # }
     /// ```
     fn length(&self) -> u32;

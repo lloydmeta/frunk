@@ -43,7 +43,7 @@
 use super::hlist::*;
 use std::ops::Add;
 
-/// A Validated is either an Ok holding an HList or an Err, holding vector
+/// A Validated is either an Ok holding an HList or an Err, holding a vector
 /// of collected errors.
 #[derive(PartialEq, Debug, Eq, Clone, PartialOrd, Ord)]
 pub enum Validated<T, E>

@@ -23,6 +23,10 @@
 //! assert_eq!(b, "hi");
 //! # }
 //! ```
+//!
+//! Links:
+//! 1. [Source on Github](https://github.com/lloydmeta/frunk)
+//! 2. [Crates.io page](https://crates.io/crates/frunk)
 
 pub mod semigroup;
 pub mod monoid;
