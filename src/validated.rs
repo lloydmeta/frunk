@@ -254,34 +254,55 @@ mod tests {
     struct Person {
         age: i32,
         name: String,
+        email: String,
     }
 
-    fn get_name() -> Result<String, String> {
-        Result::Ok("James".to_owned())
+    #[derive(PartialEq, Eq, Debug)]
+    pub enum YahNah {
+        Yah,
+        Nah,
     }
 
-    fn get_age() -> Result<i32, String> {
-        Result::Ok(32)
+    /// Our Errors
+    #[derive(PartialEq, Eq, Debug)]
+    pub enum Nope {
+        NameNope,
+        AgeNope,
+        EmailNope,
     }
 
-    fn get_name_faulty() -> Result<String, String> {
-        Result::Err("crap name".to_owned())
+    fn get_name(yah_nah: YahNah) -> Result<String, Nope> {
+        match yah_nah {
+            YahNah::Yah => Result::Ok("James".to_owned()),
+            _ => Result::Err(Nope::NameNope),
+        }
     }
 
-    fn get_age_faulty() -> Result<i32, String> {
-        Result::Err("crap age".to_owned())
+    fn get_age(yah_nah: YahNah) -> Result<i32, Nope> {
+        match yah_nah {
+            YahNah::Yah => Result::Ok(32),
+            _ => Result::Err(Nope::AgeNope),
+        }
+    }
+
+    fn get_email(yah_nah: YahNah) -> Result<String, Nope> {
+        match yah_nah {
+            YahNah::Yah => Result::Ok("hello@world.com".to_owned()),
+            _ => Result::Err(Nope::EmailNope),
+        }
     }
 
     #[test]
     fn test_to_result_ok() {
-
-        let v = get_name().into_validated() + get_age();
+        let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
+                get_email(YahNah::Yah);
         let person = v.into_result()
                       .map(|hlist| {
-                          let (name, age) = hlist.into_tuple2();
+                          let (name, (age, email)) = hlist.into_tuple2();
                           Person {
                               name: name,
                               age: age,
+                              email: email,
                           }
                       });
 
@@ -289,18 +310,19 @@ mod tests {
                    Person {
                        name: "James".to_owned(),
                        age: 32,
+                       email: "hello@world.com".to_owned(),
                    });
     }
 
     #[test]
     fn test_to_result_faulty() {
-
-        let v = get_name_faulty().into_validated() + get_age_faulty();
+        let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
+                get_email(YahNah::Nah);
         let person = v.into_result()
                       .map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(),
-                   vec!["crap name".to_owned(), "crap age".to_owned()]);
+                   vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
     }
 
 }
