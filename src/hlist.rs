@@ -91,8 +91,9 @@ impl<H, T> HCons<H, T> {
     /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
     ///
     /// let h = hlist!("hi");
-    /// let h = h.head;
+    /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
+    /// assert_eq!(tail, HNil);
     /// # }
     /// ```
     pub fn pop(self) -> (H, T) {
