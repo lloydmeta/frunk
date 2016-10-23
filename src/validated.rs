@@ -315,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn test_to_result_faulty() {
+    fn test_to_result_all_faulty() {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
                 get_email(YahNah::Nah);
         let person = v.into_result()
@@ -323,6 +323,17 @@ mod tests {
 
         assert_eq!(person.unwrap_err(),
                    vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
+    }
+
+    #[test]
+    fn test_to_result_one_faulty() {
+        let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) +
+                get_email(YahNah::Nah);
+        let person = v.into_result()
+                      .map(|_| unimplemented!());
+
+        assert_eq!(person.unwrap_err(),
+                   vec![Nope::NameNope, Nope::EmailNope]);
     }
 
 }
