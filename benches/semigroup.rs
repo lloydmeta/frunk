@@ -29,13 +29,14 @@ fn combine_option_string(b: &mut Bencher) {
 
 #[bench]
 fn std_add_option_string(b: &mut Bencher) {
+    let x: Option<String> = Some("hello".to_owned());
+    let y: Option<String> = Some(" world".to_owned());
     b.iter(|| {
-        // Run into "cannot move out of captured outer variable in an `FnMut` closure" error
-        // if these are not declared inside the closure. Not entirely sure why
-        let x: Option<String> = Some("hello".to_owned());
-        let y: Option<String> = Some(" world".to_owned());
-        x.and_then(|first| {
-            y.map(|second| first + &second )
+        // cloning is required otherwise we get `cannot move out of captured outer variable in an `FnMut` closure` errors
+        let a = x.clone();
+        let b = y.clone();
+        a.and_then(|first| {
+            b.map(|second| first + &second )
         })
     })
 }
