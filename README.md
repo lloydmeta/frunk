@@ -200,7 +200,12 @@ and do some general code (and test cleanup).
 
 ### Benchmarks
 
-Benchmarks would be nice but they're an unstable feature, so perhaps in a different branch ?
+Benchmarks are available in `./benches` and can be run with:
+
+`$ rustup run nightly cargo bench`
+
+It would be nice to use something like [bench-cmp](https://github.com/BurntSushi/cargo-benchcmp) to compare
+before and after, but for some reason, there is no output. Should investigate why.
 
 ### Not yet implemented 
 
