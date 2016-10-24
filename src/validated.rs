@@ -332,8 +332,7 @@ mod tests {
         let person = v.into_result()
                       .map(|_| unimplemented!());
 
-        assert_eq!(person.unwrap_err(),
-                   vec![Nope::NameNope, Nope::EmailNope]);
+        assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);
     }
 
 }
