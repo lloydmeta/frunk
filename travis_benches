@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [ "${TRAVIS_PULL_REQUEST_BRANCH:-TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+    travis-cargo --only nightly bench > benches-variable;
+    git fetch;
+    git checkout master;
+    travis-cargo --only nightly bench > benches-control;
+    cargo benchcmp benches-control benches-variable;
+    exit 0;
+fi
