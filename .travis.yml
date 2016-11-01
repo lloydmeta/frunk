@@ -20,12 +20,12 @@ script:
 
 after_success:
   - travis-cargo doc-upload
-  - if [ "$TRAVIS_BRANCH" != "master" ]; then
-      travis-cargo --only nightly -- --features unstable bench > benches-variable;
+  - if [ "$TRAVIS_BRANCH" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+      rustup run nightly cargo bench > benches-variable;
       git fetch;
       git checkout master;
-      travis-cargo --only nightly -- --features unstable bench > benches-control;
-      travis-cargo --only nightly -- --features unstable benchcmp benches-control benches-variable;
+      rustup run nightly cargo bench > benches-control;
+      rustup run nightly cargo bench benchcmp benches-control benches-variable;
     fi
 
 env:
