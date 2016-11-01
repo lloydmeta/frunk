@@ -21,11 +21,11 @@ script:
 after_success:
   - travis-cargo doc-upload
   - if [ "$TRAVIS_BRANCH" != "master" ]; then
-      travis-cargo --only nightly bench > benches-variable;
+      travis-cargo --only nightly -- --features unstable bench > benches-variable;
       git fetch;
       git checkout master;
-      travis-cargo --only nightly bench > benches-control;
-      travis-cargo --only nightly benchcmp benches-control benches-variable;
+      travis-cargo --only nightly -- --features unstable bench > benches-control;
+      travis-cargo --only nightly -- --features unstable benchcmp benches-control benches-variable;
     fi
 
 env:
