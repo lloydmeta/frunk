@@ -19,8 +19,8 @@ script:
     travis-cargo doc
 
 after_success:
-  - ./travis_benches
   - travis-cargo doc-upload
+  - ./travis_benches
 
 env:
   global:
