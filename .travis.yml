@@ -20,15 +20,7 @@ script:
 
 after_success:
   - travis-cargo doc-upload
-  - echo "$TRAVIS_BRANCH"
-  - if [ "$TRAVIS_BRANCH" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
-      echo "WTF"
-      rustup run nightly cargo bench > benches-variable;
-      git fetch;
-      git checkout master;
-      rustup run nightly cargo bench > benches-control;
-      rustup run nightly cargo benchcmp benches-control benches-variable;
-    fi
+  - ./travis_benches
 
 env:
   global:
