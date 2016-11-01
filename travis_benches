@@ -7,4 +7,5 @@ if ! [ "$TRAVIS_BRANCH" == "master" ]; then
     git checkout master;
     travis-cargo --only nightly bench > benches-control;
     travis-cargo --only nightly benchcmp benches-control benches-variable;
+    exit 0;
 fi
