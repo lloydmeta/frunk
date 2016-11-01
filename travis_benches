@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-echo "travis_benches";
-
-if [ "$TRAVIS_BRANCH" != "master" ]; then
-    echo "Running benchmarks";
+if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "master" ]; then
     travis-cargo --only nightly bench > benches-variable;
     git fetch;
     git checkout master;
