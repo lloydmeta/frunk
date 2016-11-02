@@ -20,7 +20,15 @@ script:
 
 after_success:
   - travis-cargo doc-upload
-  - ./travis_benches
+  - if [ "${TRAVIS_PULL_REQUEST_BRANCH:-TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+        cargo install cargo-benchcmp --force;
+        cargo bench > benches-variable;
+        git fetch;
+        git checkout master;
+        cargo --only nightly bench > benches-control;
+        cargo benchcmp benches-control benches-variable;
+        exit 0;
+    fi
 
 env:
   global:
