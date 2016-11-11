@@ -158,7 +158,7 @@ let validation = get_name().into_validated() + get_age() + get_street();
 let try_person = validation.into_result()
                            .map(|hlist| {
                                // Destructure our hlist
-                               let (name, (age, street)) = hlist.into_tuple2();
+                               let hlist_pat!(name, age, street) = hlist;
                                Person {
                                    name: name,
                                    age: age,
