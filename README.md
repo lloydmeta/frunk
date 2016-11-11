@@ -83,8 +83,10 @@ use frunk::hlist::*;
 
 Some basics:
 ```rust
-let h = hlist![1]; 
-// h has a static type of: HCons<{integer}, HNil>
+let h: Hlist!(i32) = hlist![1]; 
+// We use the Hlist! type macro to make it easier to write 
+// a type signature for HLists, which is a series of nested HCons
+// h has a static type of: HCons<i32, HNil>
 
 // HLists have a head and tail
 assert_eq!(hlist![1].head, 1);
@@ -95,6 +97,7 @@ HLists with 2 or more items have a `.into_tuple2()` method that them
 into nested Tuple2s for a nice type-signature and pattern-matching experience
 ```rust
 let h = hlist!["Joe", "Blow", 30, true];
+// Type annotations for HList are optional. Here we let the compiler infer it for us
 // h has a static type of: HCons<&str, HCons<&str, HCons<{integer}, HCons<bool, HNil>>>>
 
 let (f_name, (l_name, (age, is_admin))) = h.into_tuple2();

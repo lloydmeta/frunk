@@ -19,7 +19,7 @@ use std::ops::Add;
 ///
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
-pub trait HList: Sized {
+pub trait HList: Sized{
     /// Returns the length of a given HList
     ///
     /// ```
@@ -149,6 +149,32 @@ macro_rules! hlist {
 
 }
 
+/// Returns a type signature for an HList of the provided types
+///
+/// This is a type macro (introduced in Rust 1.13) that makes it easier
+/// to write nested type signatures.
+///
+/// ```
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+///
+/// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
+/// # }
+/// ```
+#[macro_export]
+macro_rules! Hlist {
+    // Nothing
+    () => { $crate::hlist::HNil };
+
+    // Just a single item
+    ($single: ty) => {
+        $crate::hlist::HCons<$single, HNil>
+    };
+
+    ($first: ty, $( $repeated: ty ), +) => {
+        $crate::hlist::HCons<$first, Hlist!($($repeated), *)>
+    };
+}
+
 impl<RHS> Add<RHS> for HNil
     where RHS: HList
 {
@@ -252,7 +278,7 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h = hlist![1, "2", 3];
+        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
