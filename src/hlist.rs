@@ -19,7 +19,7 @@ use std::ops::Add;
 ///
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
-pub trait HList: Sized{
+pub trait HList: Sized {
     /// Returns the length of a given HList
     ///
     /// ```
