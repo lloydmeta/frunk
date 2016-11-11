@@ -6,7 +6,10 @@
 //! an `HList` of all your results.
 //!
 //! ```
-//! # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
+//! # #[macro_use] extern crate frunk;
+//! # use frunk::hlist::*;
+//! # use frunk::validated::*;
+//! # fn main() {
 //!
 //! #[derive(PartialEq, Eq, Debug)]
 //! struct Person {
@@ -22,7 +25,7 @@
 //!     Result::Ok(32)
 //! }
 //!
-//! let v = get_name().into_validated() + get_age();
+//! let v: Validated<Hlist!(String, i32), String> = get_name().into_validated() + get_age();
 //! let person = v.into_result()
 //!                .map(|hlist| {
 //!                     let (name, age) = hlist.into_tuple2();
