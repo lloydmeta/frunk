@@ -92,7 +92,7 @@ assert_eq!(hlist![1].head, 1);
 assert_eq!(hlist![1].tail, HNil);
 ```
 
-HLists have a `hlist_pat!` macro for pattern matching,;
+HLists have a `hlist_pat!` macro for pattern matching;
 ```rust
 let h: Hlist!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
 // We use the Hlist! type macro to make it easier to write 
