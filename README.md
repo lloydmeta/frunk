@@ -92,19 +92,20 @@ assert_eq!(hlist![1].head, 1);
 assert_eq!(hlist![1].tail, HNil);
 ```
 
-HLists with 2 or more items have a `.into_tuple2()` method that them
-into nested Tuple2s for a nice type-signature and pattern-matching experience
+HLists have a `hlist_pat!` macro for pattern matching;
 ```rust
 let h: Hlist!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
 // We use the Hlist! type macro to make it easier to write 
 // a type signature for HLists, which is a series of nested HCons
 // h has an expanded static type of: HCons<&str, HCons<&str, HCons<i32, HCons<bool, HNil>>>>
 
-let (f_name, (l_name, (age, is_admin))) = h.into_tuple2();
+let hlist_pat!(f_name, l_name, age, is_admin) = h;
 assert_eq!(f_name, "Joe");
 assert_eq!(l_name, "Blow");
 assert_eq!(age, 30);
 assert_eq!(is_admin, true);
+
+// You can also use into_tuple2() to turn the hlist into a nested pair
 ```
 
 You can also traverse HLists using `.pop()`
