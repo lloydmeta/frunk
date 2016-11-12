@@ -300,8 +300,7 @@ mod tests {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
                 get_email(YahNah::Yah);
         let person = v.into_result()
-                      .map(|hlist| {
-                          let (name, (age, email)) = hlist.into_tuple2();
+                      .map(|hlist_pat!(name, age, email)| {
                           Person {
                               name: name,
                               age: age,

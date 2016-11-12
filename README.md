@@ -156,9 +156,8 @@ fn get_street() -> Result<String, Error> { /* elided */ }
 let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
-                           .map(|hlist| {
-                               // Destructure our hlist
-                               let hlist_pat!(name, age, street) = hlist;
+                           // Destructure our hlist
+                           .map(|hlist_pat!(name, age, street)| { 
                                Person {
                                    name: name,
                                    age: age,
