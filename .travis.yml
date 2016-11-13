@@ -24,7 +24,7 @@ after_success:
         git remote -v &&\
         cargo install cargo-benchcmp --force &&\
         cargo bench > benches-variable &&\
-        git fetch --all &&\
+        git fetch origin --all &&\
         git checkout -f -b master -t origin/master &&\
         cargo bench > benches-control &&\
         cargo benchcmp benches-control benches-variable;
