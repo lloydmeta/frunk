@@ -21,10 +21,14 @@ after_success:
   - travis-cargo doc-upload
   - |
     if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+        git remote -v &&\
         cargo install cargo-benchcmp --force &&\
         cargo bench > benches-variable &&\
-        git fetch origin &&\
-        git checkout master &&\
+        git fetch origin master &&\
+        git branch --all &&\
+        git status &&\
+        git show-ref &&\
+        git checkout -b master --track origin/master &&\
         cargo bench > benches-control &&\
         cargo benchcmp benches-control benches-variable;
     fi
