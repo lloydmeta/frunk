@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+    echo "TRAVIS_PULL_REQUEST_SHA $TRAVIS_PULL_REQUEST_SHA" && \
+    echo "TRAVIS_COMMIT $TRAVIS_COMMIT" && \
     cd .. && \
     git clone https://github.com/lloydmeta/frunk.git lloydmeta/frunk-bench && \
     cd lloydmeta/frunk-bench && \
