@@ -24,12 +24,8 @@ after_success:
         git remote -v &&\
         cargo install cargo-benchcmp --force &&\
         cargo bench > benches-variable &&\
-        git fetch origin master &&\
-        git branch --all &&\
-        git status &&\
-        git show-ref &&\
-        git checkout $TRAVIS_BRANCH &&\
-        git checkout -b master --track origin/master &&\
+        git fetch --all &&\
+        git checkout -f -b master -t origin/master &&\
         cargo bench > benches-control &&\
         cargo benchcmp benches-control benches-variable;
     fi
