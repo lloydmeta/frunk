@@ -3,8 +3,9 @@
 if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
     cargo install cargo-benchcmp --force && \
     cargo bench > benches-variable && \
+    git remote update && \
     git fetch --all && \
-    git checkout master && \
+    git checkout --track origin/master && \
     cargo bench > benches-control && \
     cargo benchcmp benches-control benches-variable;
 fi
