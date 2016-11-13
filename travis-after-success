@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
-    git remote get-url origin && \
+    git config --get remote.origin.url && \
     cd .. && \
     git clone https://github.com/lloydmeta/frunk.git "${TRAVIS_REPO_SLUG}-bench" && \
     cd  "${TRAVIS_REPO_SLUG}-bench" && \
