@@ -28,6 +28,7 @@ after_success:
         git branch --all &&\
         git status &&\
         git show-ref &&\
+        git checkout $TRAVIS_BRANCH &&\
         git checkout -b master --track origin/master &&\
         cargo bench > benches-control &&\
         cargo benchcmp benches-control benches-variable;
