@@ -4,14 +4,12 @@ if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS
     echo "TRAVIS_PULL_REQUEST_SHA $TRAVIS_PULL_REQUEST_SHA" && \
     echo "TRAVIS_COMMIT $TRAVIS_COMMIT" && \
     cd .. && \
-    git clone https://github.com/lloydmeta/frunk.git lloydmeta/frunk-bench && \
-    cd lloydmeta/frunk-bench && \
-    git checkout ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} && \
-    cargo install cargo-benchcmp --force && \
-    cargo bench > benches-variable && \
-    git remote update && \
-    git fetch --all && \
+    git clone https://github.com/lloydmeta/frunk.git "${TRAVIS_REPO_SLUG}-bench" && \
+    cd  "${TRAVIS_REPO_SLUG}-bench" && \
     git checkout master && \
     cargo bench > benches-control && \
+    git checkout ${TRAVIS_COMMIT} && \
+    cargo install cargo-benchcmp --force && \
+    cargo bench > benches-variable && \
     cargo benchcmp benches-control benches-variable;
 fi
