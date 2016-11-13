@@ -149,6 +149,53 @@ macro_rules! hlist {
 
 }
 
+/// Macro for pattern-matching on HLists.
+///
+/// Taken from https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md
+///
+/// ```
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+///
+/// let h = hlist![13.5f32, "hello", Some(41)];
+/// let hlist_pat![h1, h2, h3] = h;
+/// assert_eq!(h1, 13.5f32);
+/// assert_eq!(h2, "hello");
+/// assert_eq!(h3, Some(41))
+/// # }
+/// ```
+#[macro_export]
+macro_rules! hlist_pat {
+    {} => { $crate::hlist::HNil };
+    { $head:pat, $($tail:tt), +} => { $crate::hlist::HCons{ head: $head, tail: hlist_pat!($($tail),*) } };
+    { $head:pat } => { $crate::hlist::HCons { head: $head, tail: $crate::hlist::HNil } };
+}
+
+/// Returns a type signature for an HList of the provided types
+///
+/// This is a type macro (introduced in Rust 1.13) that makes it easier
+/// to write nested type signatures.
+///
+/// ```
+/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+///
+/// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
+/// # }
+/// ```
+#[macro_export]
+macro_rules! Hlist {
+    // Nothing
+    () => { $crate::hlist::HNil };
+
+    // Just a single item
+    ($single: ty) => {
+        $crate::hlist::HCons<$single, HNil>
+    };
+
+    ($first: ty, $( $repeated: ty ), +) => {
+        $crate::hlist::HCons<$first, Hlist!($($repeated), *)>
+    };
+}
+
 impl<RHS> Add<RHS> for HNil
     where RHS: HList
 {
@@ -252,7 +299,7 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h = hlist![1, "2", 3];
+        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
@@ -262,6 +309,16 @@ mod tests {
         let (h3, tail3) = tail2.pop();
         assert_eq!(h3, 3);
         assert_eq!(tail3, HNil);
+    }
+
+    #[test]
+    fn test_pattern_matching() {
+        let h = hlist![5, 3.2f32, true, "blue".to_owned()];
+        let hlist_pat!(five, float, right, s) = h;
+        assert_eq!(five, 5);
+        assert_eq!(float, 3.2f32);
+        assert_eq!(right, true);
+        assert_eq!(s, "blue".to_owned());
     }
 
     #[test]

@@ -23,7 +23,7 @@ let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
 assert_eq!(combine_all(&tuples), expected);
 ```
 
-For a deep dive, RustDocs for are available for:
+For a deep dive, RustDocs are available for:
 * Code on [Master](https://beachape.com/frunk)
 * Latest [published release](https://docs.rs/frunk)
 
@@ -83,25 +83,29 @@ use frunk::hlist::*;
 
 Some basics:
 ```rust
-let h = hlist![1]; 
-// h has a static type of: HCons<{integer}, HNil>
+let h = hlist![1];
+// Type annotations for HList are optional. Here we let the compiler infer it for us
+// h has a static type of: HCons<i32, HNil>
 
 // HLists have a head and tail
 assert_eq!(hlist![1].head, 1);
 assert_eq!(hlist![1].tail, HNil);
 ```
 
-HLists with 2 or more items have a `.into_tuple2()` method that them
-into nested Tuple2s for a nice type-signature and pattern-matching experience
+HLists have a `hlist_pat!` macro for pattern matching;
 ```rust
-let h = hlist!["Joe", "Blow", 30, true];
-// h has a static type of: HCons<&str, HCons<&str, HCons<{integer}, HCons<bool, HNil>>>>
+let h: Hlist!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
+// We use the Hlist! type macro to make it easier to write 
+// a type signature for HLists, which is a series of nested HCons
+// h has an expanded static type of: HCons<&str, HCons<&str, HCons<i32, HCons<bool, HNil>>>>
 
-let (f_name, (l_name, (age, is_admin))) = h.into_tuple2();
+let hlist_pat!(f_name, l_name, age, is_admin) = h;
 assert_eq!(f_name, "Joe");
 assert_eq!(l_name, "Blow");
 assert_eq!(age, 30);
 assert_eq!(is_admin, true);
+
+// You can also use into_tuple2() to turn the hlist into a nested pair
 ```
 
 You can also traverse HLists using `.pop()`
@@ -152,9 +156,8 @@ fn get_street() -> Result<String, Error> { /* elided */ }
 let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
-                           .map(|hlist| {
-                               // Destructure our hlist
-                               let (name, (age, street)) = hlist.into_tuple2();
+                           // Destructure our hlist
+                           .map(|hlist_pat!(name, age, street)| { 
                                Person {
                                    name: name,
                                    age: age,

@@ -4,7 +4,6 @@
 extern crate test;
 
 use frunk::validated::*;
-use frunk::hlist::*;
 use test::Bencher;
 
 fn yah_nah(yah: bool) -> Result<i32, String> {

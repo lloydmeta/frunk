@@ -23,6 +23,25 @@ fn hlist_into_tuple2(b: &mut Bencher) {
 }
 
 #[bench]
+fn hlist_into_tuple2_match(b: &mut Bencher) {
+    let h = hlist![1, 2, 3.3f32, "hi2", true];
+    b.iter(|| {
+        let (a, (b, (c, (d, e)))) = h.into_tuple2();
+        (a, b, c, d, e)
+    })
+}
+
+
+#[bench]
+fn hlist_into_hlist_pat_match(b: &mut Bencher) {
+    let h = hlist![1, 2, 3.3f32, "hi2", true];
+    b.iter(|| {
+        let hlist_pat!(a, b, c, d, e) = h;
+        (a, b, c, d, e)
+    })
+}
+
+#[bench]
 fn hlist_append(b: &mut Bencher) {
     let h1 = hlist![1, 2, 3.3f32, "hi2", true];
     let h2 = hlist![true, "blue", "varcity"];

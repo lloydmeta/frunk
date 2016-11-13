@@ -10,7 +10,6 @@ cache: cargo
 
 before_script:
   - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
-  - cargo install cargo-benchcmp --force
 
 script:
   - |
@@ -27,7 +26,6 @@ after_success:
         git checkout master;
         cargo bench > benches-control;
         cargo benchcmp benches-control benches-variable;
-        exit 0;
     fi
 
 env:
