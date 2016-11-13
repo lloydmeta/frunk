@@ -9,7 +9,7 @@ if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS
     cargo bench > benches-variable && \
     git remote update && \
     git fetch --all && \
-    git checkout --track origin/master && \
+    git checkout master && \
     cargo bench > benches-control && \
     cargo benchcmp benches-control benches-variable;
 fi
