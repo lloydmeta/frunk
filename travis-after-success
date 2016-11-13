@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+    cd .. && \
+    git clone https://github.com/lloydmeta/frunk.git lloydmeta/frunk-bench && \
+    cd lloydmeta/frunk-bench && \
+    git checkout ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} && \
     cargo install cargo-benchcmp --force && \
     cargo bench > benches-variable && \
     git remote update && \
