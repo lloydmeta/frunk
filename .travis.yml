@@ -25,7 +25,7 @@ after_success:
         cargo install cargo-benchcmp --force &&\
         cargo bench > benches-variable &&\
         git fetch --all &&\
-        git checkout -B master origin/master &&\
+        git checkout -qf master &&\
         cargo bench > benches-control &&\
         cargo benchcmp benches-control benches-variable;
     fi
