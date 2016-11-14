@@ -4,7 +4,7 @@ if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS
     REMOTE_URL="$(git config --get remote.origin.url)";
     # Clone the repository fresh..for some reason checking out master fails
     # from a normal PR build's provided directory
-    cd .. && \
+    cd ${TRAVIS_BUILD_DIR}/.. && \
     git clone ${REMOTE_URL} "${TRAVIS_REPO_SLUG}-bench" && \
     cd  "${TRAVIS_REPO_SLUG}-bench" && \
     # Bench master
