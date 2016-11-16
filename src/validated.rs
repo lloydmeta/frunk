@@ -111,8 +111,7 @@ impl<T, E> Validated<T, E>
     ///
     /// let v = get_name().into_validated() + get_age();
     /// let person = v.into_result()
-    ///                .map(|hlist| {
-    ///                     let (name, age) = hlist.into_tuple2();
+    ///                .map(|hlist_pat!(name, age)| {
     ///                     Person {
     ///                         name: name,
     ///                         age: age,

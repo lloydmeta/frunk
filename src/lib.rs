@@ -3,7 +3,12 @@
 //! Frunk: generic functional programming toolbelt for Rust
 //!
 //! Aims to be a collection of functional programming abstractions implemented in Rust
-//! in effective, useful, and idiomatic ways.
+//! in effective, useful, and idiomatic ways. Examples of things that are included in rust are:
+//!
+//!   1. HLists (heterogeneously-typed lists)
+//!   2. Validated (accumulator for Result)
+//!   3. Semigroup
+//!   4. Monoid
 //!
 //! Here is a small taste of what Frunk has to offer:
 //!
@@ -20,15 +25,15 @@
 //! // HLists
 //! let h = hlist![1, "hi"];
 //! assert_eq!(h.length(), 2);
-//! let (a, b) = h.into_tuple2();
+//! let hlist_pat!(a, b) = h;
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
 //! # }
 //! ```
 //!
 //! Links:
-//! 1. [Source on Github](https://github.com/lloydmeta/frunk)
-//! 2. [Crates.io page](https://crates.io/crates/frunk)
+//!   1. [Source on Github](https://github.com/lloydmeta/frunk)
+//!   2. [Crates.io page](https://crates.io/crates/frunk)
 
 pub mod semigroup;
 pub mod monoid;
