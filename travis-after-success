@@ -2,8 +2,6 @@
 
 if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
     git fetch origin master && git checkout -b master FETCH_HEAD && \
-    git clone ${REMOTE_URL} "${TRAVIS_REPO_SLUG}-bench" && \
-    cd  "${TRAVIS_REPO_SLUG}-bench" && \
     # Bench master
     git checkout master && \
     cargo bench > benches-control && \
