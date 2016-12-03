@@ -14,6 +14,7 @@
 //! ```
 
 use std::ops::Add;
+use std::marker::PhantomData;
 
 /// Typeclass for HList-y behaviour
 ///
@@ -217,6 +218,56 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
             head: self.head,
             tail: self.tail + rhs,
         }
+    }
+}
+
+/// Largely lifted from https://github.com/Sgeo/hlist/blob/master/src/lib.rs#L30
+
+/// Used as an index into an `HList`.
+///
+/// `Here` is 0, pointing to the head of the HList.
+///
+/// Users should normally allow type inference to create this type
+#[allow(dead_code)]
+pub struct Here;
+
+/// Used as an index into an `HList`.
+///
+/// `There<T>` is 1 + `T`.
+///
+/// Users should normally allow type inference to create this type.
+#[allow(dead_code)]
+pub struct There<T>(PhantomData<T>);
+
+/// Trait for retrieving an HList element by type
+pub trait Selector<S, I> {
+
+    /// Allows you to retrieve a unique type from an HList
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    ///
+    /// let h = hlist![1, "hello", true, 42f32];
+    ///
+    /// let f: &f32 = h.get();
+    /// let b: &bool = h.get();
+    /// assert_eq!(*f, 42f32);
+    /// assert!(b)
+    /// }
+    /// ```
+    fn get(&self) -> &S;
+}
+
+impl<T, Tail> Selector<T, Here> for HCons<T, Tail> {
+    fn get(&self) -> &T {
+        &self.head
+    }
+}
+
+impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for HCons<Head, Tail>
+where Tail: Selector<FromTail, TailIndex> {
+    fn get(&self) -> &FromTail {
+        self.tail.get()
     }
 }
 

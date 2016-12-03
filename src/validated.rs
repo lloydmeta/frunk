@@ -298,13 +298,13 @@ mod tests {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
                 get_email(YahNah::Yah);
         let person = v.into_result()
-                      .map(|hlist_pat!(name, age, email)| {
-                          Person {
-                              name: name,
-                              age: age,
-                              email: email,
-                          }
-                      });
+            .map(|hlist_pat!(name, age, email)| {
+                Person {
+                    name: name,
+                    age: age,
+                    email: email,
+                }
+            });
 
         assert_eq!(person.unwrap(),
                    Person {
@@ -319,7 +319,7 @@ mod tests {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
                 get_email(YahNah::Nah);
         let person = v.into_result()
-                      .map(|_| unimplemented!());
+            .map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(),
                    vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
@@ -330,7 +330,7 @@ mod tests {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) +
                 get_email(YahNah::Nah);
         let person = v.into_result()
-                      .map(|_| unimplemented!());
+            .map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);
     }
