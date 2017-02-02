@@ -10,24 +10,37 @@ macro_rules! with_generic {
     ($(#[$struct_meta:meta])*
     pub struct $name:ident { $($fname:ident : $ftype:ty), *}
     ) => {
-        with_generic![(pub) $(#[$struct_meta])* struct $name {$($fname: $ftype) ,*}];
+        with_generic![(pub) () $(#[$struct_meta])* struct $name {$($fname: $ftype) ,*}];
     };
 
     ($(#[$struct_meta:meta])*
     struct $name:ident { $($fname:ident : $ftype:ty), *}
     ) => {
-        with_generic![() $(#[$struct_meta])* struct $name {$($fname: $ftype), *}];
+        with_generic![() () $(#[$struct_meta])* struct $name {$($fname: $ftype), *}];
+    };
+
+    ($(#[$struct_meta:meta])*
+    pub struct $name:ident { $(pub $fname:ident : $ftype:ty), *}
+    ) => {
+        with_generic![(pub) (pub) $(#[$struct_meta])* struct $name {$($fname: $ftype) ,*}];
+    };
+
+    ($(#[$struct_meta:meta])*
+    struct $name:ident { $(pub $fname:ident : $ftype:ty), *}
+    ) => {
+        with_generic![() (pub) $(#[$struct_meta])* struct $name {$($fname: $ftype), *}];
     };
 
     (
-    ($($vis:tt)*)
+    ($($struct_vis:tt)*)
+    ($($member_vis:tt)*)
     $(#[$struct_meta:meta])*
     struct $name:ident { $($fname:ident : $ftype:ty), *}
     ) => {
 
             $(#[$struct_meta])*
-            $($vis)* struct $name {
-                $($fname: $ftype,)*
+            $($struct_vis)* struct $name {
+                $($member_vis)* $( $fname: $ftype,)*
             }
 
         impl Generic for $name {
