@@ -7,13 +7,28 @@ pub trait Generic {
 }
 
 macro_rules! with_generic {
+    ($(#[$struct_meta:meta])*
+    pub struct $name:ident { $($fname:ident : $ftype:ty), *}
+    ) => {
+        with_generic![(pub) $(#[$struct_meta])* struct $name {$($fname: $ftype) ,*}];
+    };
+
+    ($(#[$struct_meta:meta])*
+    struct $name:ident { $($fname:ident : $ftype:ty), *}
+    ) => {
+        with_generic![() $(#[$struct_meta])* struct $name {$($fname: $ftype), *}];
+    };
+
     (
+    ($($vis:tt)*)
     $(#[$struct_meta:meta])*
-    struct $name:ident { $($fname:ident : $ftype:ty), *}) => {
-        $(#[$struct_meta])*
-        struct $name {
-            $($fname: $ftype,)*
-        }
+    struct $name:ident { $($fname:ident : $ftype:ty), *}
+    ) => {
+
+            $(#[$struct_meta])*
+            $($vis)* struct $name {
+                $($fname: $ftype,)*
+            }
 
         impl Generic for $name {
             type Repr = Hlist!($($ftype),*);
@@ -31,7 +46,6 @@ macro_rules! with_generic {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::super::hlist::*;
@@ -39,16 +53,39 @@ mod tests {
 
     with_generic! {
         #[derive(PartialEq, Eq, Debug)]
-        struct Person {
+        pub struct Person {
+            first_name: String,
+            last_name:  String
+        }
+    }
+
+    with_generic! {
+        #[derive(PartialEq, Eq, Debug)]
+        struct PrivatePerson {
             first_name: String,
             last_name:  String
         }
     }
 
     #[test]
-    fn test_from_generic() {
+    fn test_pub_struct_from_generic() {
         let h = hlist!("james".to_owned(), "may".to_owned());
         let p = <Person as Generic>::from_generic(h);
-        assert_eq!(p, Person{ first_name: "james".to_owned(), last_name: "may".to_owned()});
+        assert_eq!(p,
+        Person {
+            first_name: "james".to_owned(),
+            last_name: "may".to_owned(),
+        });
+    }
+
+    #[test]
+    fn test_nonpub_struct_from_generic() {
+        let h = hlist!("james".to_owned(), "may".to_owned());
+        let p = <PrivatePerson as Generic>::from_generic(h);
+        assert_eq!(p,
+        PrivatePerson {
+            first_name: "james".to_owned(),
+            last_name: "may".to_owned(),
+        });
     }
 }

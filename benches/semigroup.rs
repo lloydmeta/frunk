@@ -10,7 +10,7 @@ use test::Bencher;
 fn combine_i32(b: &mut Bencher) {
     let x: i32 = 10;
     let y: i32 = 50;
-    b.iter(||x.combine(&y))
+    b.iter(|| x.combine(&y))
 }
 
 #[bench]
@@ -24,7 +24,7 @@ fn std_add_i32(b: &mut Bencher) {
 fn combine_option_string(b: &mut Bencher) {
     let x: Option<String> = Some("hello".to_owned());
     let y: Option<String> = Some(" world".to_owned());
-    b.iter(||x.combine(&y))
+    b.iter(|| x.combine(&y))
 }
 
 #[bench]
