@@ -1,7 +1,7 @@
 #![feature(test)]
 
 #[macro_use]
-extern crate frunk;
+extern crate frunk_core;
 extern crate test;
 
 use frunk_core::hlist::*;

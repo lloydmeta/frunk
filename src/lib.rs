@@ -1,6 +1,4 @@
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
-#![feature(proc_macro, proc_macro_lib)]
-
 //! Frunk: generic functional programming toolbelt for Rust
 //!
 //! Aims to be a collection of functional programming abstractions implemented in Rust
