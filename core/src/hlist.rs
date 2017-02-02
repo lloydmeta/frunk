@@ -4,7 +4,7 @@
 //! for you to use HList.
 //!
 //! ```
-//! # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+//! # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
 //! let h = hlist![1, "hi"];
 //! assert_eq!(h.length(), 2);
 //! let (a, b) = h.into_tuple2();
@@ -24,7 +24,7 @@ pub trait HList: Sized {
     /// Returns the length of a given HList
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
     /// let h = hlist![1, "hi"];
     /// assert_eq!(h.length(), 2);
     /// # }
@@ -34,7 +34,7 @@ pub trait HList: Sized {
     /// Prepends an item to the current HList
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
     /// let h1 = hlist![1, "hi"];
     /// let h2 = h1.prepend(true);
     /// let (a, (b, c)) = h2.into_tuple2();
@@ -55,7 +55,7 @@ pub trait HList: Sized {
 /// Used to begin one:
 ///
 /// ```
-/// # use frunk::hlist::*;
+/// # use frunk_core::hlist::*;
 ///
 /// let h = h_cons(1, HNil);
 /// let h = h.head;
@@ -89,7 +89,7 @@ impl<H, T> HCons<H, T> {
     /// The original list is consumed
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
     ///
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
@@ -108,7 +108,7 @@ impl<H, T> HCons<H, T> {
 /// is consumed
 ///
 /// ```
-/// # use frunk::hlist::*;
+/// # use frunk_core::hlist::*;
 ///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
@@ -124,7 +124,7 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 /// Helps to avoid having to write nested `HCons`.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
 ///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
@@ -155,7 +155,7 @@ macro_rules! hlist {
 /// Taken from https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
 ///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![h1, h2, h3] = h;
@@ -177,7 +177,7 @@ macro_rules! hlist_pat {
 /// to write nested type signatures.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
 ///
 /// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 /// # }
@@ -245,7 +245,7 @@ pub trait Selector<S, I> {
     /// Allows you to retrieve a unique type from an HList
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
     ///
     /// let h = hlist![1, "hello", true, 42f32];
     ///
@@ -283,7 +283,7 @@ pub trait IntoTuple2 {
     /// and have a nicer type signature.
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk; use frunk_core::hlist::*; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience

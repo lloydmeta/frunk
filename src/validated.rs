@@ -7,7 +7,8 @@
 //!
 //! ```
 //! # #[macro_use] extern crate frunk;
-//! # use frunk::hlist::*;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*;
 //! # use frunk::validated::*;
 //! # fn main() {
 //!
@@ -42,7 +43,7 @@
 //! # }
 //! ```
 
-use super::hlist::*;
+use frunk_core::hlist::*;
 use std::ops::Add;
 
 /// A Validated is either an Ok holding an HList or an Err, holding a vector
@@ -56,7 +57,7 @@ pub enum Validated<T, E>
 }
 
 impl<T, E> Validated<T, E>
-    where T: HList
+where T: HList
 {
     /// Returns true if this validation is Ok, false otherwise
     ///
@@ -93,7 +94,11 @@ impl<T, E> Validated<T, E>
     /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
+    /// # #[macro_use] extern crate frunk;
+    /// # #[macro_use] extern crate frunk_core;
+    /// # use frunk_core::hlist::*;
+    /// # use frunk::validated::*;
+    /// # fn main() {
     ///
     /// #[derive(PartialEq, Eq, Debug)]
     /// struct Person {
@@ -163,8 +168,11 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 /// Implements Add for the current Validated with a Result, returning a new Validated.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
-///
+/// # #[macro_use] extern crate frunk;
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::hlist::*;
+/// # use frunk::validated::*;
+/// # fn main() {
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
 /// let v = r1.into_validated() + r2;
@@ -173,10 +181,10 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 /// ```
 ///
 impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
-    where T: HList + Add<HCons<T2, HNil>>,
-          <T as Add<HCons<T2, HNil>>>::Output: HList
+where T: HList + Add<HCons<T2, HNil>>,
+      < T as Add<HCons<T2, HNil>> >::Output: HList
 {
-    type Output = Validated<<T as Add<HCons<T2, HNil>>>::Output, E>;
+    type Output = Validated<< T as Add<HCons<T2, HNil>> >::Output, E>;
 
     fn add(self, other: Result<T2, E>) -> Self::Output {
         let other_as_validated = other.into_validated();
@@ -187,7 +195,11 @@ impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
 /// Implements Add for the current Validated with another Validated, returning a new Validated.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::hlist::*; use frunk::validated::*; fn main() {
+/// # #[macro_use] extern crate frunk;
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::hlist::*;
+/// # use frunk::validated::*;
+/// # fn main() {
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
 /// let v1 = r1.into_validated();
@@ -197,11 +209,11 @@ impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
 /// # }
 /// ```
 impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
-    where T: HList + Add<T2>,
-          T2: HList,
-          <T as Add<T2>>::Output: HList
+where T: HList + Add<T2>,
+      T2: HList,
+      < T as Add<T2> >::Output: HList
 {
-    type Output = Validated<<T as Add<T2>>::Output, E>;
+    type Output = Validated<< T as Add<T2> >::Output, E>;
 
     fn add(self, other: Validated<T2, E>) -> Self::Output {
         match (self, other) {
@@ -218,8 +230,7 @@ impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
 
 #[cfg(test)]
 mod tests {
-
-    use super::super::hlist::*;
+    use frunk_core::hlist::*;
     use super::*;
 
     #[test]
@@ -296,7 +307,7 @@ mod tests {
     #[test]
     fn test_to_result_ok() {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
-                get_email(YahNah::Yah);
+            get_email(YahNah::Yah);
         let person = v.into_result()
             .map(|hlist_pat!(name, age, email)| {
                 Person {
@@ -307,32 +318,31 @@ mod tests {
             });
 
         assert_eq!(person.unwrap(),
-                   Person {
-                       name: "James".to_owned(),
-                       age: 32,
-                       email: "hello@world.com".to_owned(),
-                   });
+        Person {
+            name: "James".to_owned(),
+            age: 32,
+            email: "hello@world.com".to_owned(),
+        });
     }
 
     #[test]
     fn test_to_result_all_faulty() {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
-                get_email(YahNah::Nah);
+            get_email(YahNah::Nah);
         let person = v.into_result()
             .map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(),
-                   vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
+        vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
     }
 
     #[test]
     fn test_to_result_one_faulty() {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) +
-                get_email(YahNah::Nah);
+            get_email(YahNah::Nah);
         let person = v.into_result()
             .map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);
     }
-
 }

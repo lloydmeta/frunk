@@ -4,7 +4,7 @@
 extern crate frunk;
 extern crate test;
 
-use frunk::hlist::*;
+use frunk_core::hlist::*;
 use test::Bencher;
 
 #[bench]

@@ -8,3 +8,4 @@ homepage = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Validation", "Validated", "Semigroup", "Monoid"]
 
 [dependencies]
+frunk_core = { path = "core" }

@@ -1,4 +1,5 @@
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
+#![feature(proc_macro, proc_macro_lib)]
 
 //! Frunk: generic functional programming toolbelt for Rust
 //!
@@ -13,8 +14,10 @@
 //! Here is a small taste of what Frunk has to offer:
 //!
 //! ```
-//! # #[macro_use] extern crate frunk; use frunk::hlist::*; fn main() {
-//! use frunk::hlist::*;
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*; fn main() {
+//! use frunk_core::hlist::*;
 //! use frunk::monoid::*;
 //! use frunk::validated::*;
 //!
@@ -35,9 +38,9 @@
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
+#[macro_use]
+extern crate frunk_core;
+
 pub mod semigroup;
 pub mod monoid;
-#[macro_use]
-pub mod hlist;
 pub mod validated;
-pub mod generic;

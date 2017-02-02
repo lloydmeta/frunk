@@ -78,7 +78,7 @@ Statically typed heterogeneous lists.
 First, let's enable `hlist`:
 ```rust
 #[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk::hlist::*;
+use frunk_core::hlist::*;
 ```
 
 Some basics:
@@ -131,7 +131,7 @@ best by [the Cats project](http://typelevel.org/cats/tut/validated.html)).
 To use `Validated`, first:
 ```rust
 #[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk::hlist::*;
+use frunk_core::hlist::*;
 use frunk::validated::*;
 ```
 
