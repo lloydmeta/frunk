@@ -13,7 +13,6 @@ before_script:
 
 script:
   - |
-    cd core &&
     travis-cargo build &&
     travis-cargo test &&
     travis-cargo test -p frunk_core
