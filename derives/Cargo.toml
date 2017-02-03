@@ -16,3 +16,4 @@ quote = "0.3.12"
 
 [dependencies.frunk_core]
 path = "../core"
+version = "0.0.1"
