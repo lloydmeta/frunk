@@ -1,6 +1,41 @@
+/// A trait that converts from a type to a generic representation
+///
+/// For the most part, you should be using the derivation that is available through
+/// frunk_derive to generate instances of this typeclass for your types.
+///
+/// I would highly recommend you check out `derivation_tests.rs` to see how to actually use
+/// this trait in real life. Since frunk_derive depends on this trait, I can't actually
+/// pull it in as a dependency here (otherwise the dependency would be circular) and show
+/// how to use it in a proper doc test.
+///
+/// ```rust,ignore
+/// #[derive(Generic)]
+/// struct ApiPerson<'a> {
+///     FirstName: &'a str,
+///     LastName: &'a str,
+///     Age: usize,
+/// }
+///
+/// #[derive(Generic)]
+/// struct DomainPerson<'a> {
+///     first_name: &'a str,
+///     last_name: &'a str,
+///     age: usize,
+/// }
+///
+/// let a_person = ApiPersion {
+/// first_name: "Joe",
+/// last_name: "Blow",
+/// age: 30,
+/// };
+/// let d_person: DomainPersion = convert_from(a_person); // done
+/// ```
 pub trait Generic<Repr> {
+
+    /// Go from something to Repr
     fn into(self) -> Repr;
 
+    /// Go from Repr to something
     fn from(r: Repr) -> Self;
 }
 
