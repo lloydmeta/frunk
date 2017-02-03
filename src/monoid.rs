@@ -263,7 +263,6 @@ tuple_impls! {
 mod tests {
     use super::*;
     use super::super::semigroup::{Product, All, Any};
-    use std::collections::*;
 
     #[test]
     fn test_combine_n() {

@@ -76,6 +76,11 @@ fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     }
 }
 
+/*
+    For some reason, normal macros don't work inside the quote (non-items not allowed error),
+    so we re-do our macros procedurally here. Ironically easier to understand..
+*/
+
 fn build_repr(field_types: &Vec<Ty>) -> quote::Tokens {
     match field_types.len() {
         0 => quote! { ::frunk_core::hlist::HNil },

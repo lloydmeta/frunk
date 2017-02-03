@@ -331,8 +331,6 @@ tuple_impls! {
 mod tests {
 
     use super::*;
-    use std::collections::*;
-    use std::cell::*;
 
     macro_rules! semigroup_tests {
       ($($name:ident, $comb: expr => $expected: expr, $tr:ty)+) => {
