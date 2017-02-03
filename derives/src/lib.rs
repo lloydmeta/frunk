@@ -19,6 +19,8 @@ pub fn generic(input: TokenStream) -> TokenStream {
     // Build the impl
     let gen = impl_generic(&ast);
 
+//    println!("{}", gen);
+
     // Return the generated impl
     gen.parse().unwrap()
 }
@@ -30,11 +32,18 @@ fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let fields: &Vec<Field> = match ast.body {
         Body::Struct(VariantData::Struct(ref fields)) => fields,
+        Body::Struct(VariantData::Tuple(ref fields)) => fields,
         _ => panic!("Only structs are supported")
     };
     let field_types: Vec<Ty> = fields.iter()
         .map(|f| f.ty.clone()).collect();
     let repr_type = build_repr(&field_types);
+    let maybe_fnames: Vec<Option<Ident>> = fields
+        .iter()
+        .map(|f| f.ident.clone())
+        .collect();
+    let is_tuple_struct = maybe_fnames.iter().all(|m_f| m_f.is_none());
+
     let fnames: Vec<Ident> = fields
         .iter()
         .enumerate()
@@ -42,18 +51,20 @@ fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
         .collect();
     let hcons_constr = build_hcons_constr(&fnames);
     let hcons_pat = build_hcons_constr(&fnames);
-    let maybe_fnames: Vec<Option<Ident>> = fields
-        .iter()
-        .map(|f| f.ident.clone())
-        .collect();
-    let new_struct_constr = build_new_struct_constr(name, &maybe_fnames, &fnames);
+    let new_struct_constr = build_new_struct_constr(name, &fnames, is_tuple_struct);
+
+    let struct_deconstr = if is_tuple_struct {
+        quote! { #name ( #(#fnames, )* ) }
+    } else {
+        quote! { #name { #(#fnames, )* } }
+    };
 
     quote! {
         impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
             type Repr = #repr_type;
 
             fn into_generic(self) -> Self::Repr {
-                let #name { #(#fnames, )* } = self;
+                let #struct_deconstr = self;
                 #hcons_constr
             }
 
@@ -97,11 +108,10 @@ fn build_hcons_constr(field_types: &Vec<Ident>) -> quote::Tokens {
     }
 }
 
-fn build_new_struct_constr(struct_name: &Ident, maybe_fieldnames: &Vec<Option<Ident>>, bindnames: &Vec<Ident>) -> quote::Tokens {
-    let is_tuple_struct = maybe_fieldnames.iter().all(|m_f| m_f.is_none());
+fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> quote::Tokens {
     if is_tuple_struct {
         let cloned_bind = bindnames.clone();
-        quote! { #struct_name { #(#cloned_bind),* } }
+        quote! { #struct_name (#(#cloned_bind),* ) }
     } else {
         let cloned_bind1 = bindnames.clone();
         let cloned_bind2 = bindnames.clone();
