@@ -29,47 +29,16 @@ For a deep dive, RustDocs are available for:
 
 ## Table of Contents
 
-1. [Semigroup](#semigroup)
-2. [Monoid](#monoid)
-3. [HList](#hlist)
-4. [Validated](#validated)
-5. [Todo](#todo)
-5. [Contributing](#contributing)
-6. [Inspirations](#inspirations)
+1. [HList](#hlist)
+2. [Generic](#generic)
+3. [Validated](#validated)
+4. [Semigroup](#semigroup)
+5. [Monoid](#monoid)
+6. [Todo](#todo)
+7. [Contributing](#contributing)
+8. [Inspirations](#inspirations)
 
 ## Examples
-
-### Semigroup
-
-Things that can be combined.
-
-```rust
-use frunk::semigroup::*;
-
-assert_eq!(Some(1).combine(&Some(2)), Some(3));
-
-assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise && 
-assert_eq!(All(true).combine(&All(false)), All(false));
-```
-
-### Monoid
-
-Things that can be combined *and* have an empty/id value.
-
-```rust
-use frunk::monoid::*;
-
-let t1 = (1, 2.5f32, String::from("hi"), Some(3));
-let t2 = (1, 2.5f32, String::from(" world"), None);
-let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
-let tuples = vec![t1, t2, t3];
-
-let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
-assert_eq!(combine_all(&tuples), expected)
-
-let product_nums = vec![Product(2), Product(3), Product(4)];
-assert_eq!(combine_all(&product_nums), Product(24))
-```
 
 ### HList
 
@@ -116,6 +85,74 @@ let (h1, tail1) = h.pop();
 assert_eq!(h1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
 ```
+
+### Generic
+
+`Generic` is a way of representing a type in ... a generic way. This enables you to have reusable functions that can work
+with many different types, and yet allow you to get back to your original types if you so wish.
+
+Frunk comes out of the box with a nice custom `Generic` derivation so that boilerplate is kept to a minimum. 
+
+Here are some examples:
+
+#### Turning any HList into your Struct
+
+```rust
+extern crate frunk;
+#[macro_use] // for the hlist macro
+extern crate frunk_core;
+use frunk::*; // for the Generic trait and HList
+
+#[derive(Generic, Debug, PartialEq)]
+struct Person<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+let h = hlist!("Joe", "Blow", 30);
+let p: Person = from_generic(h);
+assert_eq!(p,
+           Person {
+               first_name: "Joe",
+               last_name: "Blow",
+               age: 30,
+           });
+```
+
+This also works the other way too; just use `to_generic` and pass in a struct.
+
+#### Converting between Structs 
+
+Sometimes you may have 2 different types that are structurally the same (e.g. different domains but the same data). This can
+happen when you have a model for deserialising from an external API and another one for your domain logic.
+
+Generic comes with a handy `convert_from` method that helps:
+
+```rust
+// Assume we have all the imports needed
+#[derive(Generic, Debug, PartialEq)]
+struct ApiPerson<'a> {
+    FirstName: &'a str,
+    LastName: &'a str,
+    Age: usize,
+}
+
+#[derive(Generic, Debug, PartialEq)]
+struct DomainPerson<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+let a_person = ApiPersion {
+                   first_name: "Joe",
+                   last_name: "Blow",
+                   age: 30,
+};
+let d_person: DomainPersion = convert_from(a_person); // done
+```
+
 
 ### Validated
 
@@ -192,6 +229,38 @@ let try_person2 = validation2.into_result()
 // Notice that we have an accumulated list of errors!
 assert_eq!(try_person2.unwrap_err(),
            vec!["crap name".to_owned(), "crap age".to_owned()]); 
+```
+
+### Semigroup
+
+Things that can be combined.
+
+```rust
+use frunk::semigroup::*;
+
+assert_eq!(Some(1).combine(&Some(2)), Some(3));
+
+assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise && 
+assert_eq!(All(true).combine(&All(false)), All(false));
+```
+
+### Monoid
+
+Things that can be combined *and* have an empty/id value.
+
+```rust
+use frunk::monoid::*;
+
+let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+let t2 = (1, 2.5f32, String::from(" world"), None);
+let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
+let tuples = vec![t1, t2, t3];
+
+let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
+assert_eq!(combine_all(&tuples), expected)
+
+let product_nums = vec![Product(2), Product(3), Product(4)];
+assert_eq!(combine_all(&product_nums), Product(24))
 ```
 
 ## Todo
