@@ -5,4 +5,4 @@ authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
-keywords = [ "HList", "Functional programming"]
+keywords = [ "HList", "Generic"]
