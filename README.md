@@ -131,14 +131,14 @@ Generic comes with a handy `convert_from` method that helps:
 
 ```rust
 // Assume we have all the imports needed
-#[derive(Generic, Debug, PartialEq)]
+#[derive(Generic)]
 struct ApiPerson<'a> {
     FirstName: &'a str,
     LastName: &'a str,
     Age: usize,
 }
 
-#[derive(Generic, Debug, PartialEq)]
+#[derive(Generic)]
 struct DomainPerson<'a> {
     first_name: &'a str,
     last_name: &'a str,
