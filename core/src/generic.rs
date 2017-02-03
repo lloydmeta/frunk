@@ -4,10 +4,12 @@ pub trait Generic<Repr> {
     fn from(r: Repr) -> Self;
 }
 
-pub fn from_generic<A, Gen>(gen: Gen) -> A where A: Generic<Gen> {
-    <A as Generic<Gen>>::from(gen)
+/// Given a generic representation of an A, returns A
+pub fn from_generic<A, Repr>(gen: Repr) -> A where A: Generic<Repr> {
+    <A as Generic<Repr>>::from(gen)
 }
 
-pub fn into_generic<A, Gen>(a: A) -> Gen where A: Generic<Gen> {
-    <A as Generic<Gen>>::into(a)
+/// Given an A, returns its generic representation
+pub fn into_generic<A, Repr>(a: A) -> Repr where A: Generic<Repr> {
+    <A as Generic<Repr>>::into(a)
 }

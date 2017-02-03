@@ -1,10 +1,8 @@
-#[macro_use]
-extern crate frunk_derives;
-#[macro_use]
+extern crate frunk;
+#[macro_use] // for the hlist macro
 extern crate frunk_core;
 
-use frunk_core::hlist::*;
-use frunk_core::generic::*;
+use frunk::*; // for the Generic trait and HList
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {

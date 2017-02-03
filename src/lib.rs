@@ -38,7 +38,15 @@
 
 #[macro_use]
 extern crate frunk_core;
+#[macro_use]
+extern crate frunk_derives;
 
 pub mod semigroup;
 pub mod monoid;
 pub mod validated;
+
+pub use frunk_core::hlist::*;
+// this needs to be globally imported in order for custom derives to work w/o fuss
+pub use frunk_core::generic::*;
+
+pub use frunk_derives::*;
