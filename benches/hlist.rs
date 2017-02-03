@@ -1,9 +1,10 @@
 #![feature(test)]
 
-#[macro_use] extern crate frunk;
+#[macro_use]
+extern crate frunk_core;
 extern crate test;
 
-use frunk::hlist::*;
+use frunk_core::hlist::*;
 use test::Bencher;
 
 #[bench]
@@ -45,5 +46,5 @@ fn hlist_into_hlist_pat_match(b: &mut Bencher) {
 fn hlist_append(b: &mut Bencher) {
     let h1 = hlist![1, 2, 3.3f32, "hi2", true];
     let h2 = hlist![true, "blue", "varcity"];
-    b.iter(|| h1 + h2 )
+    b.iter(|| h1 + h2)
 }

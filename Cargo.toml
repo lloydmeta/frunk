@@ -1,10 +1,16 @@
 [package]
 name = "frunk"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Validated, Monoid, Semigroup and friends."
 license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
-keywords = [ "HList", "Validation", "Validated", "Semigroup", "Monoid"]
+keywords = [ "HList", "Generic", "Validated", "Semigroup", "Monoid"]
 
-[dependencies]
+[dependencies.frunk_core]
+path = "core"
+version = "0.0.1"
+
+[dependencies.frunk_derives]
+path = "derives"
+version = "0.0.1"

@@ -1,0 +1,8 @@
+[package]
+name = "frunk_core"
+version = "0.0.1"
+authors = ["Lloyd <lloydmeta@gmail.com>"]
+description = "Frunk core provides developers with HList and Generic"
+license = "MIT"
+homepage = "https://github.com/lloydmeta/frunk"
+keywords = [ "HList", "Generic"]
