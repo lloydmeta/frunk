@@ -1,7 +1,13 @@
-pub trait Generic {
-    type Repr;
+pub trait Generic<Repr> {
+    fn into(self) -> Repr;
 
-    fn into_generic(self) -> Self::Repr;
+    fn from(r: Repr) -> Self;
+}
 
-    fn from_generic(r: Self::Repr) -> Self;
+pub fn from_generic<A, Gen>(gen: Gen) -> A where A: Generic<Gen> {
+    <A as Generic<Gen>>::from(gen)
+}
+
+pub fn into_generic<A, Gen>(a: A) -> Gen where A: Generic<Gen> {
+    <A as Generic<Gen>>::into(a)
 }

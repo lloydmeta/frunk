@@ -60,15 +60,14 @@ fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     };
 
     quote! {
-        impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
-            type Repr = #repr_type;
+        impl #impl_generics ::frunk_core::generic::Generic<#repr_type> for #name #ty_generics #where_clause {
 
-            fn into_generic(self) -> Self::Repr {
+            fn into(self) -> #repr_type {
                 let #struct_deconstr = self;
                 #hcons_constr
             }
 
-            fn from_generic(r: Self::Repr) -> Self {
+            fn from(r: #repr_type) -> Self {
                 let #hcons_pat = r;
                 #new_struct_constr
             }

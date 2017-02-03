@@ -4,7 +4,7 @@ extern crate frunk_derives;
 extern crate frunk_core;
 
 use frunk_core::hlist::*;
-use frunk_core::generic::Generic;
+use frunk_core::generic::*;
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -16,7 +16,7 @@ struct Person<'a> {
 #[test]
 fn test_pub_struct_from_generic() {
     let h = hlist!("james", "may", 13);
-    let p = <Person as Generic>::from_generic(h);
+    let p: Person = from_generic(h);
     assert_eq!(p,
                Person {
                    first_name: "james",
