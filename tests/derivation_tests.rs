@@ -45,8 +45,7 @@ fn test_pub_struct_into_generic() {
         age: 3,
     };
     let h = into_generic(p);
-    assert_eq!(h,
-    hlist!("Humpty", "Drumpty", 3));
+    assert_eq!(h, hlist!("Humpty", "Drumpty", 3));
 }
 
 #[test]
@@ -57,11 +56,12 @@ fn test_pub_struct_conversion() {
         age: 3,
     };
     let pres: President = convert_from(a);
-    assert_eq!(pres, President {
-        first_name: "Steve",
-        last_name: "Cannon",
-        age: 3,
-    })
+    assert_eq!(pres,
+               President {
+                   first_name: "Steve",
+                   last_name: "Cannon",
+                   age: 3,
+               })
 }
 
 #[test]
