@@ -13,12 +13,12 @@ struct Person<'a> {
 
 #[test]
 fn test_pub_struct_from_generic() {
-    let h = hlist!("james", "may", 13);
+    let h = hlist!("Humpty", "Drumpty", 3);
     let p: Person = from_generic(h);
     assert_eq!(p,
                Person {
-                   first_name: "james",
-                   last_name: "may",
-                   age: 13,
+                   first_name: "Humpty",
+                   last_name: "Drumpty",
+                   age: 3,
                });
 }
