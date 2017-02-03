@@ -315,10 +315,10 @@ mod tests {
                    <HashMap<i32, String> as Monoid>::empty());
 
         let mut h1: HashMap<i32, String> = HashMap::new();
-        h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
+        h1.insert(1, String::from("Hello")); // h1 is HashMap( 1 -> "Hello")
         let mut h2: HashMap<i32, String> = HashMap::new();
         h2.insert(1, String::from(" World"));
-        h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+        h2.insert(2, String::from("Goodbye")); // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
         let mut h3: HashMap<i32, String> = HashMap::new();
         h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
         let vec_of_hashes = vec![h1, h2, h3];

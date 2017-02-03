@@ -9,3 +9,6 @@ keywords = [ "HList", "Validation", "Validated", "Semigroup", "Monoid"]
 
 [dependencies.frunk_core]
 path = "core"
+
+[dependencies.frunk_derives]
+path = "derives"

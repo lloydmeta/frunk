@@ -1,0 +1,18 @@
+[package]
+name = "frunk_derives"
+version = "0.0.1"
+authors = ["Lloyd <lloydmeta@gmail.com>"]
+description = "Frunk core provides developers with HList and Generic"
+license = "MIT"
+homepage = "https://github.com/lloydmeta/frunk"
+keywords = [ "HList", "Functional programming", "derives"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "0.11.4"
+quote = "0.3.12"
+
+[dependencies.frunk_core]
+path = "../core"
