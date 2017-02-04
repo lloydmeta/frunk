@@ -24,9 +24,9 @@
 /// }
 ///
 /// let a_person = ApiPerson {
-/// first_name: "Joe",
-/// last_name: "Blow",
-/// age: 30,
+///     first_name: "Joe",
+///     last_name: "Blow",
+///     age: 30,
 /// };
 /// let d_person: DomainPerson = convert_from(a_person); // done
 /// ```
