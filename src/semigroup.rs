@@ -18,6 +18,7 @@ use std::ops::{Deref, BitAnd, BitOr};
 use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
+use frunk_core::hlist::{HCons, HList, HNil};
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
@@ -49,6 +50,21 @@ pub trait Semigroup {
     /// assert_eq!(Some(1).combine(&Some(2)), Some(3))
     /// ```
     fn combine(&self, other: &Self) -> Self;
+}
+
+/// Allow the combination of any two HLists having the same structure
+/// if all of the sub-element types are also Semiups
+impl<H: Semigroup, T: HList + Semigroup> Semigroup for HCons<H, T> {
+    fn combine(&self, other: &Self) -> Self {
+        self.tail.combine(&other.tail).prepend(self.head.combine(&other.head))
+    }
+}
+
+/// Since () + () = (), the same is true for HNil
+impl Semigroup for HNil {
+    fn combine(&self, _: &Self) -> Self {
+        *self
+    }
 }
 
 /// Return this combined with itself `n` times.
@@ -469,5 +485,14 @@ mod tests {
         assert_eq!(combine_n(&2, 1), 2);
         assert_eq!(combine_n(&Some(2), 4), Some(8));
     }
+
+    #[test]
+    fn test_combine_hlist() {
+        let h1 = hlist![1, 3.3,53i64];
+        let h2 = hlist![2, 1.2,1i64];
+        let h3 = hlist![3,4.5,54];
+        assert_eq!(h1.combine(&h2), h3)
+    }
+
 
 }
