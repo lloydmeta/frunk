@@ -120,7 +120,7 @@ assert_eq!(p,
            });
 ```
 
-This also works the other way too; just use `to_generic` and pass in a struct.
+This also works the other way too; just use `into_generic` and pass in a struct.
 
 #### Converting between Structs 
 
