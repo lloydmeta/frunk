@@ -3,13 +3,26 @@
 //! You can, for example, combine tuples.
 //!
 //! ```
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*; fn main() {
+//! use frunk_core::hlist::*;
 //! use frunk::semigroup::*;
 //! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 //! let t2 = (1, 2.5f32, String::from(" world"), None);
 //!
 //! let expected = (2, 5.0f32, String::from("hi world"), Some(3));
 //!
-//! assert_eq!(t1.combine(&t2), expected)
+//! assert_eq!(t1.combine(&t2), expected);
+//!
+//! // ultimately, the Tuple-based combines are only available for a maximum of 26 elements.
+//! // if you need more, use HList, which is has no such limit.
+//!
+//! let h1 = hlist![1, 3.3, 53i64];
+//! let h2 = hlist![2, 1.2, 1i64];
+//! let h3 = hlist![3, 4.5, 54];
+//! assert_eq!(h1.combine(&h2), h3)
+//! }
 //! ```
 
 use std::cell::*;
@@ -18,7 +31,7 @@ use std::ops::{Deref, BitAnd, BitOr};
 use std::cmp::Ordering;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
-use frunk_core::hlist::{HCons, HList, HNil};
+use frunk_core::hlist::*;
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
@@ -488,9 +501,9 @@ mod tests {
 
     #[test]
     fn test_combine_hlist() {
-        let h1 = hlist![1, 3.3,53i64];
-        let h2 = hlist![2, 1.2,1i64];
-        let h3 = hlist![3,4.5,54];
+        let h1 = hlist![1, 3.3, 53i64];
+        let h2 = hlist![2, 1.2, 1i64];
+        let h3 = hlist![3, 4.5, 54];
         assert_eq!(h1.combine(&h2), h3)
     }
 
