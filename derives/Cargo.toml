@@ -2,7 +2,7 @@
 name = "frunk_derives"
 version = "0.0.1"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
-description = "Frunk core provides developers with HList and Generic"
+description = "frunk_derives contains the custom derivations for certain traits in Frunk."
 license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic", "derives"]
