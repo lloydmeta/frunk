@@ -88,14 +88,14 @@ assert_eq!(tail1, hlist!["hello", Some(41)]);
 
 ### Generic
 
-`Generic` is a way of representing a type in ... a generic way. This enables you to have reusable functions that can work
-with many different types, and yet allow you to get back to your original types if you so wish.
+`Generic` is a way of representing a type in ... a generic way. By coding around `Generic`, you can to write functions 
+that abstract over types and arity, but still have the ability to recover your original type afterwards. This can be a fairly powerful thing.
 
 Frunk comes out of the box with a nice custom `Generic` derivation so that boilerplate is kept to a minimum. 
 
 Here are some examples:
 
-#### Turning any HList into your Struct
+#### HList ⇄ Struct
 
 ```rust
 extern crate frunk;
@@ -120,7 +120,7 @@ assert_eq!(p,
            });
 ```
 
-This also works the other way too; just use `into_generic` and pass in a struct.
+This also works the other way too; just pass a struct to `into_generic` and get its generic representation.
 
 #### Converting between Structs 
 

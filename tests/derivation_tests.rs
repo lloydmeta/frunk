@@ -3,6 +3,7 @@ extern crate frunk;
 extern crate frunk_core;
 
 use frunk::*; // for the Generic trait and HList
+use frunk::validated::*;
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -85,4 +86,47 @@ fn test_struct_conversion_round_trip() {
     let p: President = convert_from(a);
     let a_again: Strategist = convert_from(p);
     assert_eq!(a_again, before)
+}
+
+
+// Working with Validated
+
+#[derive(PartialEq, Eq, Debug)]
+pub enum YahNah {
+    Yah,
+    Nah,
+}
+
+/// Our Errors
+#[derive(PartialEq, Eq, Debug)]
+pub enum Nope {
+    NameNope,
+    AgeNope,
+    EmailNope,
+}
+
+fn get_name(yah_nah: YahNah) -> Result<&'static str, Nope> {
+    match yah_nah {
+        YahNah::Yah => Result::Ok("James"),
+        _ => Result::Err(Nope::NameNope),
+    }
+}
+
+fn get_age(yah_nah: YahNah) -> Result<usize, Nope> {
+    match yah_nah {
+        YahNah::Yah => Result::Ok(32),
+        _ => Result::Err(Nope::AgeNope),
+    }
+}
+
+#[test]
+fn test_to_result_ok() {
+    let v = get_name(YahNah::Yah).into_validated() + get_name(YahNah::Yah) + get_age(YahNah::Yah);
+    let person: Result<Person, _> = v.into_result().map(|h| from_generic(h)); // much simpler
+    assert_eq!(person.unwrap(),
+               Person {
+                   first_name: "James",
+                   last_name: "James",
+                   age: 32,
+               });
 }
