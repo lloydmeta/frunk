@@ -15,14 +15,14 @@
 //!
 //! assert_eq!(t1.combine(&t2), expected);
 //!
-//! // ultimately, the Tuple-based combines are only available for a maximum of 26 elements.
-//! // if you need more, use HList, which is has no such limit.
+//! // ultimately, the Tuple-based Semigroup implementations are only available for a maximum of
+//! 26 elements. If you need more, use HList, which is has no such limit.
 //!
 //! let h1 = hlist![1, 3.3, 53i64];
 //! let h2 = hlist![2, 1.2, 1i64];
 //! let h3 = hlist![3, 4.5, 54];
 //! assert_eq!(h1.combine(&h2), h3)
-//! }
+//! # }
 //! ```
 
 use std::cell::*;
