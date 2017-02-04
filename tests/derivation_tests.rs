@@ -25,8 +25,11 @@ struct President<'a> {
     age: usize,
 }
 
+#[derive(Generic, Debug, PartialEq)]
+struct TupleStruct<'a>(&'a str, i32);
+
 #[test]
-fn test_pub_struct_from_generic() {
+fn test_struct_from_generic() {
     let h = hlist!("Humpty", "Drumpty", 3);
     let p: Person = from_generic(h);
     assert_eq!(p,
@@ -38,7 +41,14 @@ fn test_pub_struct_from_generic() {
 }
 
 #[test]
-fn test_pub_struct_into_generic() {
+fn test_tuple_struct_from_generic() {
+    let h = hlist!("Drumpty", 3);
+    let p: TupleStruct = from_generic(h);
+    assert_eq!(p, TupleStruct("Drumpty", 3));
+}
+
+#[test]
+fn test_struct_into_generic() {
     let p = Person {
         first_name: "Humpty",
         last_name: "Drumpty",
@@ -49,7 +59,7 @@ fn test_pub_struct_into_generic() {
 }
 
 #[test]
-fn test_pub_struct_conversion() {
+fn test_struct_conversion() {
     let a = Strategist {
         first_name: "Steve",
         last_name: "Cannon",
@@ -65,7 +75,7 @@ fn test_pub_struct_conversion() {
 }
 
 #[test]
-fn test_pub_struct_conversion_round_trip() {
+fn test_struct_conversion_round_trip() {
     let a = Strategist {
         first_name: "Steve",
         last_name: "Cannon",
