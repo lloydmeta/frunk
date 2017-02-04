@@ -16,7 +16,7 @@
 //! assert_eq!(t1.combine(&t2), expected);
 //!
 //! // ultimately, the Tuple-based Semigroup implementations are only available for a maximum of
-//! 26 elements. If you need more, use HList, which is has no such limit.
+//! // 26 elements. If you need more, use HList, which is has no such limit.
 //!
 //! let h1 = hlist![1, 3.3, 53i64];
 //! let h2 = hlist![2, 1.2, 1i64];
