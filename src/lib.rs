@@ -17,6 +17,7 @@
 //! # use frunk_core::hlist::*; fn main() {
 //! use frunk_core::hlist::*;
 //! use frunk::monoid::*;
+//! use frunk::semigroup::*;
 //! use frunk::validated::*;
 //!
 //! // Combining Monoids
@@ -29,6 +30,11 @@
 //! let hlist_pat!(a, b) = h;
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
+//!
+//! let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
+//! let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
+//! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_owned()];
+//! assert_eq!(h1.combine(&h2), h3)
 //! # }
 //! ```
 //!

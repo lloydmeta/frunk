@@ -358,7 +358,6 @@ tuple_impls! {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     macro_rules! semigroup_tests {
@@ -459,7 +458,6 @@ mod tests {
     fn test_all() {
         assert_eq!(All(3).combine(&All(5)), All(1));
         assert_eq!(All(true).combine(&All(false)), All(false));
-
     }
 
     #[test]
@@ -501,10 +499,9 @@ mod tests {
 
     #[test]
     fn test_combine_hlist() {
-        let h1 = hlist![1, 3.3, 53i64];
-        let h2 = hlist![2, 1.2, 1i64];
-        let h3 = hlist![3, 4.5, 54];
+        let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
+        let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
+        let h3 = hlist![Some(3), 4.5, 54, "hello world".to_owned()];
         assert_eq!(h1.combine(&h2), h3)
     }
-
 }
