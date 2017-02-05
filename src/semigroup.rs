@@ -507,38 +507,4 @@ mod tests {
         assert_eq!(h1.combine(&h2), h3)
     }
 
-    struct ApiPerson<'a> {
-        LastName: &'a str,
-        FirstName: &'a str,
-        Age: usize,
-    }
-
-    struct DomainPerson<'a> {
-        first_name: &'a str,
-        last_name: &'a str,
-        age: usize,
-    }
-
-    impl<'a> From<ApiPerson<'a>> for DomainPerson<'a> {
-        fn from(a_p: ApiPerson<'a>) -> Self {
-            let ApiPerson { LastName: n1, FirstName: n2, Age: a } = a_p;
-            DomainPerson {
-                first_name: n1,
-                last_name: n2,
-                age: a,
-            }
-        }
-    }
-
-    #[test]
-    fn test() {
-        let a_p = ApiPerson {
-            FirstName: "Hello",
-            LastName: "World",
-            Age: 30,
-        };
-        let d_p = DomainPerson::from(a_p);
-        assert_eq!(d_p.first_name, "Hello")
-    }
-
 }
