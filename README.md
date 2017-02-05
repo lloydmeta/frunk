@@ -124,10 +124,12 @@ This also works the other way too; just pass a struct to `into_generic` and get 
 
 #### Converting between Structs 
 
-Sometimes you may have 2 different types that are structurally the same (e.g. different domains but the same data). This can
-happen when you have a model for deserialising from an external API and another one for your domain logic.
+Sometimes you may have 2 different types that are structurally the same (e.g. different domains but the same data). Use cases include: 
 
-Generic comes with a handy `convert_from` method that helps:
+ * You have a models for deserialising from an external API and equivalents for your app logic
+ * You want to represent different stages of the same data using types (see [this question on StackOverflow](http://stackoverflow.com/questions/31949455/transform-one-case-class-into-another-when-the-argument-list-is-the-same))
+
+Generic comes with a handy `convert_from` method that helps make this painless:
 
 ```rust
 // Assume we have all the imports needed
