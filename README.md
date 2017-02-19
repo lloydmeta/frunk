@@ -165,7 +165,7 @@ an `HList` of all your results.
 
 Mapping (and otherwise working with plain) `Result`s is different because it will 
 stop at the first error, which can be annoying in the very common case (outlined 
-best by [the Cats project](http://typelevel.org/cats/tut/validated.html)). 
+best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)). 
 
 To use `Validated`, first:
 ```rust
