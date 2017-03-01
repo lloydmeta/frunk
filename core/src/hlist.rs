@@ -336,12 +336,12 @@ pub trait HZipMappable<Mapper> {
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// // Sadly we need to help the compiler understand the types in our mapper
+    /// // Sadly we need to help the compiler understand the bool type in our mapper
     ///
     /// let mapped = h.zip_map(hlist![
-    ///     |n: isize| n + 1,
+    ///     |n| n + 1,
     ///     |b: bool| !b,
-    ///     |f: f32| f + 1f32]);
+    ///     |f| f + 1f32]);
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
     /// # }
     /// ```
@@ -387,9 +387,9 @@ pub trait HZipFoldrable<Folder, Init> {
     ///
     /// let folded = h.zip_foldr(
     ///     hlist![
-    ///         |i: i32, acc: i32| i + acc,
-    ///         |b: bool, acc: f32| if !b && acc > 42f32 { 9000 } else { 0 },
-    ///         |f: f32, acc: f32| f + acc
+    ///         |i, acc| i + acc,
+    ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
+    ///         |f, acc| f + acc
     ///     ],
     ///     1f32
     /// );
@@ -546,9 +546,9 @@ mod tests {
         let h = hlist![1, false, 42f32];
         let folded = h.zip_foldr(
             hlist![
-                |i: i32, acc: i32| i + acc,
-                |b: bool, acc: f32| if !b && acc > 42f32 { 9000 } else { 0 },
-                |f: f32, acc: f32| f + acc
+                |i, acc| i + acc,
+                |_, acc| if acc > 42f32 { 9000 } else { 0 },
+                |f, acc| f + acc
             ],
             1f32
         );
@@ -559,12 +559,12 @@ mod tests {
     #[test]
     fn test_zip_map() {
 
-        let h = hlist![9000, false, 41f32];
+        let h = hlist![9000, "joe", 41f32];
         let mapped = h.zip_map(hlist![
-            |n: i32| n + 1,
-            |b: bool| !b,
-            |f: f32| f + 1f32]);
-        assert_eq!(mapped, hlist![9001, true, 42f32]);
+            |n| n + 1,
+            |s| s,
+            |f| f + 1f32]);
+        assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 
     }
 }
