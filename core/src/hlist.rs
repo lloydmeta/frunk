@@ -596,10 +596,13 @@ mod tests {
     fn test_foldr() {
 
         let h = hlist![1, false, 42f32];
-        let folded = h.foldr(hlist![|i, acc| i + acc,
-                                        |_, acc| if acc > 42f32 { 9000 } else { 0 },
-                                        |f, acc| f + acc],
-                                 1f32);
+        let folded = h.foldr(
+            hlist![
+              |i, acc| i + acc,
+              |_, acc| if acc > 42f32 { 9000 } else { 0 },
+              |f, acc| f + acc
+            ],
+            1f32);
         assert_eq!(folded, 9001)
 
     }
@@ -610,9 +613,9 @@ mod tests {
         let h = hlist![1, false, 42f32];
         let folded = h.foldl(
             hlist![
-                |acc, i| i + acc,
-                |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-                |acc, f| f + acc
+              |acc, i| i + acc,
+              |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+              |acc, f| f + acc
             ],
             1
         );
@@ -624,7 +627,12 @@ mod tests {
     fn test_map() {
 
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
+        let mapped = h.map(
+            hlist![
+                |n| n + 1,
+                |s| s,
+                |f| f + 1f32]
+        );
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 
     }
