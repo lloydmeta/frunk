@@ -198,7 +198,7 @@ macro_rules! Hlist {
 }
 
 impl<RHS> Add<RHS> for HNil
-    where RHS: HList
+where RHS: HList
 {
     type Output = RHS;
 
@@ -208,10 +208,10 @@ impl<RHS> Add<RHS> for HNil
 }
 
 impl<H, T, RHS> Add<RHS> for HCons<H, T>
-    where T: Add<RHS>,
-          RHS: HList
+where T: Add<RHS>,
+      RHS: HList
 {
-    type Output = HCons<H, <T as Add<RHS>>::Output>;
+    type Output = HCons<H, < T as Add<RHS> >::Output>;
 
     fn add(self, rhs: RHS) -> Self::Output {
         HCons {
@@ -241,7 +241,6 @@ pub struct There<T>(PhantomData<T>);
 
 /// Trait for retrieving an HList element by type
 pub trait Selector<S, I> {
-
     /// Allows you to retrieve a unique type from an HList
     ///
     /// ```
@@ -253,7 +252,7 @@ pub trait Selector<S, I> {
     /// let b: &bool = h.get();
     /// assert_eq!(*f, 42f32);
     /// assert!(b)
-    /// }
+    /// # }
     /// ```
     fn get(&self) -> &S;
 }
@@ -268,6 +267,44 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 where Tail: Selector<FromTail, TailIndex> {
     fn get(&self) -> &FromTail {
         self.tail.get()
+    }
+}
+
+/// Trait that allows for reversing a given data structure.
+///
+/// Implemented for HCons and HNil.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+///
+/// let nil = HNil;
+///
+/// assert_eq!(nil.into_reverse(), nil);
+///
+/// let h = hlist![1, "hello", true, 42f32];
+/// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
+///
+/// # }
+/// ```
+pub trait IntoReverse {
+    type Output;
+
+    fn into_reverse(self) -> Self::Output;
+}
+
+impl IntoReverse for HNil {
+    type Output = HNil;
+    fn into_reverse(self) -> Self::Output { self }
+}
+
+impl<H, Tail> IntoReverse for HCons<H, Tail>
+where
+    Tail: IntoReverse,
+    < Tail as IntoReverse >::Output: Add<HCons<H, HNil>> {
+    type Output = < < Tail as IntoReverse >::Output as Add<HCons<H, HNil>> >::Output;
+
+    fn into_reverse(self) -> Self::Output {
+        self.tail.into_reverse() + HCons { head: self.head, tail: HNil }
     }
 }
 
@@ -308,10 +345,10 @@ impl<T1, T2> IntoTuple2 for HCons<T1, HCons<T2, HNil>> {
 }
 
 impl<T, Tail> IntoTuple2 for HCons<T, Tail>
-    where Tail: IntoTuple2
+where Tail: IntoTuple2
 {
     type HeadType = T;
-    type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
+    type TailOutput = (< Tail as IntoTuple2 >::HeadType, < Tail as IntoTuple2 >::TailOutput);
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
@@ -320,7 +357,6 @@ impl<T, Tail> IntoTuple2 for HCons<T, Tail>
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
@@ -350,7 +386,8 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h: Hlist
+        !(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
@@ -379,5 +416,4 @@ mod tests {
         let combined = h1 + h2;
         assert_eq!(combined, hlist![true, "hi", 1, 32f32])
     }
-
 }
