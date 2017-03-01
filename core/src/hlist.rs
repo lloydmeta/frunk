@@ -318,6 +318,9 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 
 /// Trail that allow for mapping over a data structure using mapping functions stored in another
 /// data structure
+///
+/// It might be a good idea to try to re-write these using the foldr variants, but it's a
+/// wee-bit more complicated.
 pub trait HZipMappable<Mapper> {
     type Output;
 
@@ -333,8 +336,12 @@ pub trait HZipMappable<Mapper> {
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// // Sadly we need to help the comiler understand the types in our mapper
-    /// let mapped = h.zip_map(hlist![|n: isize| n + 1, |b: bool| !b, |f: f32| f + 1f32]);
+    /// // Sadly we need to help the compiler understand the types in our mapper
+    ///
+    /// let mapped = h.zip_map(hlist![
+    ///     |n: isize| n + 1,
+    ///     |b: bool| !b,
+    ///     |f: f32| f + 1f32]);
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
     /// # }
     /// ```
@@ -521,5 +528,43 @@ mod tests {
         let h2 = hlist![1, 32f32];
         let combined = h1 + h2;
         assert_eq!(combined, hlist![true, "hi", 1, 32f32])
+    }
+
+    #[test]
+    fn test_into_reverse() {
+
+        let h1 = hlist![true, "hi"];
+        let h2 = hlist![1, 32f32];
+        assert_eq!(h1.into_reverse(), hlist!["hi", true]);
+        assert_eq!(h2.into_reverse(), hlist![32f32, 1]);
+
+    }
+
+    #[test]
+    fn test_zip_foldr() {
+
+        let h = hlist![1, false, 42f32];
+        let folded = h.zip_foldr(
+            hlist![
+                |i: i32, acc: i32| i + acc,
+                |b: bool, acc: f32| if !b && acc > 42f32 { 9000 } else { 0 },
+                |f: f32, acc: f32| f + acc
+            ],
+            1f32
+        );
+        assert_eq!(folded, 9001)
+
+    }
+
+    #[test]
+    fn test_zip_map() {
+
+        let h = hlist![9000, false, 41f32];
+        let mapped = h.zip_map(hlist![
+            |n: isize| n + 1,
+            |b: bool| !b,
+            |f: f32| f + 1f32]);
+        assert_eq!(mapped, hlist![9001, true, 42f32]);
+
     }
 }
