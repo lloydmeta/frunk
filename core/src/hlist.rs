@@ -241,7 +241,6 @@ pub struct There<T>(PhantomData<T>);
 
 /// Trait for retrieving an HList element by type
 pub trait Selector<S, I> {
-
     /// Allows you to retrieve a unique type from an HList
     ///
     /// ```
@@ -253,7 +252,7 @@ pub trait Selector<S, I> {
     /// let b: &bool = h.get();
     /// assert_eq!(*f, 42f32);
     /// assert!(b)
-    /// }
+    /// # }
     /// ```
     fn get(&self) -> &S;
 }
@@ -265,9 +264,160 @@ impl<T, Tail> Selector<T, Here> for HCons<T, Tail> {
 }
 
 impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for HCons<Head, Tail>
-where Tail: Selector<FromTail, TailIndex> {
+    where Tail: Selector<FromTail, TailIndex>
+{
     fn get(&self) -> &FromTail {
         self.tail.get()
+    }
+}
+
+/// Trait that allows for reversing a given data structure.
+///
+/// Implemented for HCons and HNil.
+pub trait IntoReverse {
+    type Output;
+
+    /// Reverses a given data structure.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.into_reverse(), nil);
+    ///
+    /// let h = hlist![1, "hello", true, 42f32];
+    /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
+    ///
+    /// # }
+    /// ```
+    fn into_reverse(self) -> Self::Output;
+}
+
+impl IntoReverse for HNil {
+    type Output = HNil;
+    fn into_reverse(self) -> Self::Output {
+        self
+    }
+}
+
+impl<H, Tail> IntoReverse for HCons<H, Tail>
+    where Tail: IntoReverse,
+          <Tail as IntoReverse>::Output: Add<HCons<H, HNil>>
+{
+    type Output = < < Tail as IntoReverse >::Output as Add<HCons<H, HNil>> >::Output;
+
+    fn into_reverse(self) -> Self::Output {
+        self.tail.into_reverse() +
+        HCons {
+            head: self.head,
+            tail: HNil,
+        }
+    }
+}
+
+/// Trail that allow for mapping over a data structure using mapping functions stored in another
+/// data structure
+///
+/// It might be a good idea to try to re-write these using the foldr variants, but it's a
+/// wee-bit more complicated.
+pub trait HZipMappable<Mapper> {
+    type Output;
+
+    /// Maps over the current data structure using functions stored in another
+    /// data structure.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.zip_map(HNil), HNil);
+    ///
+    /// let h = hlist![1, false, 42f32];
+    ///
+    /// // Sadly we need to help the compiler understand the bool type in our mapper
+    ///
+    /// let mapped = h.zip_map(hlist![
+    ///     |n| n + 1,
+    ///     |b: bool| !b,
+    ///     |f| f + 1f32]);
+    /// assert_eq!(mapped, hlist![2, true, 43f32]);
+    /// # }
+    /// ```
+    fn zip_map(self, folder: Mapper) -> Self::Output;
+}
+
+impl<F> HZipMappable<F> for HNil {
+    type Output = HNil;
+
+    fn zip_map(self, _: F) -> Self::Output {
+        self
+    }
+}
+
+impl<F, MapperHeadR, MapperTail, H, Tail> HZipMappable<HCons<F, MapperTail>> for HCons<H, Tail>
+    where F: Fn(H) -> MapperHeadR,
+          Tail: HZipMappable<MapperTail>
+{
+    type Output = HCons<MapperHeadR, < Tail as HZipMappable<MapperTail> >::Output>;
+    fn zip_map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
+        let f = mapper.head;
+        HCons {
+            head: f(self.head),
+            tail: self.tail.zip_map(mapper.tail),
+        }
+    }
+}
+
+/// Foldr for HLists
+pub trait HZipFoldrable<Folder, Init> {
+    type Output;
+
+    /// foldr over a data structure
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.zip_foldr(HNil, 0), 0);
+    ///
+    /// let h = hlist![1, false, 42f32];
+    ///
+    /// let folded = h.zip_foldr(
+    ///     hlist![
+    ///         |i, acc| i + acc,
+    ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
+    ///         |f, acc| f + acc
+    ///     ],
+    ///     1f32
+    /// );
+    ///
+    /// assert_eq!(9001, folded)
+    ///
+    /// # }
+    /// ```
+    fn zip_foldr(self, folder: Folder, i: Init) -> Self::Output;
+}
+
+impl<F, Init> HZipFoldrable<F, Init> for HNil {
+    type Output = Init;
+
+    fn zip_foldr(self, _: F, i: Init) -> Self::Output {
+        i
+    }
+}
+
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HZipFoldrable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
+where
+    Tail: HZipFoldrable<FolderTail, Init>,
+    F: Fn(H, < Tail as HZipFoldrable<FolderTail, Init> >::Output) -> FolderHeadR {
+    type Output = FolderHeadR;
+
+    fn zip_foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+        let folded_tail = self.tail.zip_foldr(folder.tail, init);
+        (folder.head)(self.head, folded_tail)
     }
 }
 
@@ -320,7 +470,6 @@ impl<T, Tail> IntoTuple2 for HCons<T, Tail>
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
@@ -350,7 +499,8 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h: Hlist
+        !(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
@@ -380,4 +530,41 @@ mod tests {
         assert_eq!(combined, hlist![true, "hi", 1, 32f32])
     }
 
+    #[test]
+    fn test_into_reverse() {
+
+        let h1 = hlist![true, "hi"];
+        let h2 = hlist![1, 32f32];
+        assert_eq!(h1.into_reverse(), hlist!["hi", true]);
+        assert_eq!(h2.into_reverse(), hlist![32f32, 1]);
+
+    }
+
+    #[test]
+    fn test_zip_foldr() {
+
+        let h = hlist![1, false, 42f32];
+        let folded = h.zip_foldr(
+            hlist![
+                |i, acc| i + acc,
+                |_, acc| if acc > 42f32 { 9000 } else { 0 },
+                |f, acc| f + acc
+            ],
+            1f32
+        );
+        assert_eq!(folded, 9001)
+
+    }
+
+    #[test]
+    fn test_zip_map() {
+
+        let h = hlist![9000, "joe", 41f32];
+        let mapped = h.zip_map(hlist![
+            |n| n + 1,
+            |s| s,
+            |f| f + 1f32]);
+        assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+
+    }
 }
