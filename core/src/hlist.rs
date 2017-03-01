@@ -273,22 +273,23 @@ where Tail: Selector<FromTail, TailIndex> {
 /// Trait that allows for reversing a given data structure.
 ///
 /// Implemented for HCons and HNil.
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
-/// let nil = HNil;
-///
-/// assert_eq!(nil.into_reverse(), nil);
-///
-/// let h = hlist![1, "hello", true, 42f32];
-/// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
-///
-/// # }
-/// ```
 pub trait IntoReverse {
     type Output;
 
+    /// Reverses a given data structure.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.into_reverse(), nil);
+    ///
+    /// let h = hlist![1, "hello", true, 42f32];
+    /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
+    ///
+    /// # }
+    /// ```
     fn into_reverse(self) -> Self::Output;
 }
 
@@ -386,8 +387,7 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist
-        !(i32, &str, i32) = hlist![1, "2", 3];
+        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
