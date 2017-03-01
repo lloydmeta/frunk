@@ -311,7 +311,7 @@ where
 
 /// Trail that allow for mapping over a data structure using mapping functions stored in another
 /// data structure
-pub trait HZipMappable<Folder> {
+pub trait HZipMappable<Mapper> {
     type Output;
 
     /// Maps over the current data structure using functions stored in another
@@ -331,7 +331,7 @@ pub trait HZipMappable<Folder> {
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
     /// # }
     /// ```
-    fn zip_map(self, folder: Folder) -> Self::Output;
+    fn zip_map(self, folder: Mapper) -> Self::Output;
 }
 
 impl<F> HZipMappable<F> for HNil {
@@ -352,6 +352,55 @@ where
             head: f(self.head),
             tail: self.tail.zip_map(mapper.tail)
         }
+    }
+}
+
+/// Foldr for HLists
+pub trait HFoldRightable<Folder, Init> {
+    type Output;
+
+    /// foldr over a data structure
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.zip_foldr(HNil, 0), 0);
+    ///
+    /// let h = hlist![1, false, 42f32];
+    ///
+    /// let folded = h.zip_foldr(
+    ///     hlist![
+    ///         |i: i32, acc: bool| if acc { i + 1 } else { i },
+    ///         |b: bool, acc: f32| !b && acc > 40f32,
+    ///         |f: f32, acc: f32| f + acc
+    ///     ],
+    ///     1f32
+    /// );
+    ///
+    /// assert_eq!(2, folded)
+    ///
+    /// # }
+    /// ```
+    fn zip_foldr(self, folder: Folder, i: Init) -> Self::Output;
+}
+
+impl<F, Init> HFoldRightable<F, Init> for HNil {
+    type Output = Init;
+
+    fn zip_foldr(self, _: F, i: Init) -> Self::Output { i }
+}
+
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
+where
+    Tail: HFoldRightable<FolderTail, Init>,
+    F: Fn(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
+    type Output = FolderHeadR;
+
+    fn zip_foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+        let folded_tail = self.tail.zip_foldr(folder.tail, init);
+        (folder.head)(self.head, folded_tail)
     }
 }
 
