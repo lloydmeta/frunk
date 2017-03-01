@@ -86,6 +86,35 @@ assert_eq!(h1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
 ```
 
+You can reverse, map, and fold over them too:
+
+```rust
+// Reverse
+let h1 = hlist![true, "hi"];
+assert_eq!(h1.into_reverse(), hlist!["hi", true]);
+
+// Fold
+let h2 = hlist![1, false, 42f32];
+let folded = h2.zip_foldr(
+    hlist![
+        |i, acc| i + acc,
+        |_, acc| if acc > 42f32 { 9000 } else { 0 },
+        |f, acc| f + acc
+    ],
+    1f32
+);
+assert_eq!(folded, 9001)
+
+// Map
+let h3 = hlist![9000, "joe", 41f32];
+let mapped = h3.zip_map(hlist![
+    |n| n + 1,
+    |s| s,
+    |f| f + 1f32]);
+assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+
+```
+
 ### Generic
 
 `Generic` is a way of representing a type in ... a generic way. By coding around `Generic`, you can to write functions 
