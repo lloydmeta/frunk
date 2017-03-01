@@ -423,7 +423,7 @@ where
 }
 
 /// Left fold for a given data structure
-pub trait HZipFoldLeftable<Folder, Init> {
+pub trait HFoldLeftable<Folder, Init> {
     type Output;
 
     /// foldl over a data structure
@@ -453,7 +453,7 @@ pub trait HZipFoldLeftable<Folder, Init> {
     fn foldl(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Acc> HZipFoldLeftable<F, Acc> for HNil {
+impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
     type Output = Acc;
 
     fn foldl(self, _: F, acc: Acc) -> Self::Output {
@@ -461,12 +461,12 @@ impl<F, Acc> HZipFoldLeftable<F, Acc> for HNil {
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HZipFoldLeftable<HCons<F, FolderTail>, Acc>
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
     for HCons<H, Tail>
-    where Tail: HZipFoldLeftable<FolderTail, FolderHeadR>,
+    where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
           F: Fn(Acc, H) -> FolderHeadR
 {
-    type Output = <Tail as HZipFoldLeftable<FolderTail, FolderHeadR>>::Output;
+    type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR>>::Output;
 
     fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
         self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
