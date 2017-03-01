@@ -198,7 +198,7 @@ macro_rules! Hlist {
 }
 
 impl<RHS> Add<RHS> for HNil
-where RHS: HList
+    where RHS: HList
 {
     type Output = RHS;
 
@@ -208,10 +208,10 @@ where RHS: HList
 }
 
 impl<H, T, RHS> Add<RHS> for HCons<H, T>
-where T: Add<RHS>,
-      RHS: HList
+    where T: Add<RHS>,
+          RHS: HList
 {
-    type Output = HCons<H, < T as Add<RHS> >::Output>;
+    type Output = HCons<H, <T as Add<RHS>>::Output>;
 
     fn add(self, rhs: RHS) -> Self::Output {
         HCons {
@@ -264,7 +264,8 @@ impl<T, Tail> Selector<T, Here> for HCons<T, Tail> {
 }
 
 impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for HCons<Head, Tail>
-where Tail: Selector<FromTail, TailIndex> {
+    where Tail: Selector<FromTail, TailIndex>
+{
     fn get(&self) -> &FromTail {
         self.tail.get()
     }
@@ -295,17 +296,23 @@ pub trait IntoReverse {
 
 impl IntoReverse for HNil {
     type Output = HNil;
-    fn into_reverse(self) -> Self::Output { self }
+    fn into_reverse(self) -> Self::Output {
+        self
+    }
 }
 
 impl<H, Tail> IntoReverse for HCons<H, Tail>
-where
-    Tail: IntoReverse,
-    < Tail as IntoReverse >::Output: Add<HCons<H, HNil>> {
+    where Tail: IntoReverse,
+          <Tail as IntoReverse>::Output: Add<HCons<H, HNil>>
+{
     type Output = < < Tail as IntoReverse >::Output as Add<HCons<H, HNil>> >::Output;
 
     fn into_reverse(self) -> Self::Output {
-        self.tail.into_reverse() + HCons { head: self.head, tail: HNil }
+        self.tail.into_reverse() +
+        HCons {
+            head: self.head,
+            tail: HNil,
+        }
     }
 }
 
@@ -337,20 +344,21 @@ pub trait HZipMappable<Mapper> {
 impl<F> HZipMappable<F> for HNil {
     type Output = HNil;
 
-    fn zip_map(self, _: F) -> Self::Output { self }
+    fn zip_map(self, _: F) -> Self::Output {
+        self
+    }
 }
 
 impl<F, MapperHeadR, MapperTail, H, Tail> HZipMappable<HCons<F, MapperTail>> for HCons<H, Tail>
-where
-    F: Fn(H) -> MapperHeadR,
-    Tail: HZipMappable<MapperTail>
+    where F: Fn(H) -> MapperHeadR,
+          Tail: HZipMappable<MapperTail>
 {
     type Output = HCons<MapperHeadR, < Tail as HZipMappable<MapperTail> >::Output>;
     fn zip_map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let f = mapper.head;
         HCons {
             head: f(self.head),
-            tail: self.tail.zip_map(mapper.tail)
+            tail: self.tail.zip_map(mapper.tail),
         }
     }
 }
@@ -389,7 +397,9 @@ pub trait HZipFoldrable<Folder, Init> {
 impl<F, Init> HZipFoldrable<F, Init> for HNil {
     type Output = Init;
 
-    fn zip_foldr(self, _: F, i: Init) -> Self::Output { i }
+    fn zip_foldr(self, _: F, i: Init) -> Self::Output {
+        i
+    }
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Init> HZipFoldrable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
@@ -441,10 +451,10 @@ impl<T1, T2> IntoTuple2 for HCons<T1, HCons<T2, HNil>> {
 }
 
 impl<T, Tail> IntoTuple2 for HCons<T, Tail>
-where Tail: IntoTuple2
+    where Tail: IntoTuple2
 {
     type HeadType = T;
-    type TailOutput = (< Tail as IntoTuple2 >::HeadType, < Tail as IntoTuple2 >::TailOutput);
+    type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
