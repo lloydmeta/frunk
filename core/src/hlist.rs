@@ -421,6 +421,57 @@ where
     }
 }
 
+/// Left fold for a given data structure
+pub trait HZipFoldlable<Folder, Init> {
+    type Output;
+
+    /// foldl over a data structure
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.zip_foldl(HNil, 0), 0);
+    ///
+    /// let h = hlist![1, false, 42f32];
+    ///
+    /// let folded = h.zip_foldl(
+    ///     hlist![
+    ///         |acc, i| i + acc,
+    ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+    ///         |acc, f| f + acc
+    ///     ],
+    ///     1
+    /// );
+    ///
+    /// assert_eq!(42f32, folded)
+    ///
+    /// # }
+    /// ```
+    fn zip_foldl(self, folder: Folder, i: Init) -> Self::Output;
+}
+
+impl<F, Acc> HZipFoldlable<F, Acc> for HNil {
+    type Output = Acc;
+
+    fn zip_foldl(self, _: F, acc: Acc) -> Self::Output {
+        acc
+    }
+}
+
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HZipFoldlable<HCons<F, FolderTail>, Acc>
+    for HCons<H, Tail>
+    where Tail: HZipFoldlable<FolderTail, FolderHeadR>,
+          F: Fn(Acc, H) -> FolderHeadR
+{
+    type Output = <Tail as HZipFoldlable<FolderTail, FolderHeadR>>::Output;
+
+    fn zip_foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
+        self.tail.zip_foldl(folder.tail, (folder.head)(acc, self.head))
+    }
+}
+
 /// Trait for things that can be turned into a Tuple 2 (pair)
 pub trait IntoTuple2 {
     /// The 0 element in the output tuple
@@ -544,15 +595,33 @@ mod tests {
     fn test_zip_foldr() {
 
         let h = hlist![1, false, 42f32];
-        let folded = h.zip_foldr(
-            hlist![
-                |i, acc| i + acc,
-                |_, acc| if acc > 42f32 { 9000 } else { 0 },
-                |f, acc| f + acc
-            ],
-            1f32
-        );
+        let folded = h.zip_foldr(hlist![|i, acc| i + acc,
+                                        |_, acc| if acc > 42f32 { 9000 } else { 0 },
+                                        |f, acc| f + acc],
+                                 1f32);
         assert_eq!(folded, 9001)
+
+    }
+
+    #[test]
+    fn test_zip_foldl() {
+
+        let nil = HNil;
+
+        assert_eq!(nil.zip_foldl(HNil, 0), 0);
+
+        let h = hlist![1, false, 42f32];
+
+        let folded = h.zip_foldl(
+            hlist![
+                |acc, i| i + acc,
+                |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                |acc, f| f + acc
+            ],
+            1
+        );
+
+        assert_eq!(42f32, folded)
 
     }
 
@@ -560,10 +629,7 @@ mod tests {
     fn test_zip_map() {
 
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.zip_map(hlist![
-            |n| n + 1,
-            |s| s,
-            |f| f + 1f32]);
+        let mapped = h.zip_map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 
     }
