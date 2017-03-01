@@ -373,7 +373,7 @@ pub trait HFoldRightable<Folder, Init> {
     /// let folded = h.zip_foldr(
     ///     hlist![
     ///         |i: i32, acc: bool| if acc { i + 1 } else { i },
-    ///         |b: bool, acc: f32| !b && acc > 40f32,
+    ///         |b: bool, acc: f32| !b && acc > 42f32,
     ///         |f: f32, acc: f32| f + acc
     ///     ],
     ///     1f32
