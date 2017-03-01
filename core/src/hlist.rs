@@ -321,8 +321,9 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 ///
 /// It might be a good idea to try to re-write these using the foldr variants, but it's a
 /// wee-bit more complicated.
-pub trait HZipMappable<Mapper> {
+pub trait HMappable<Mapper> {
     type Output;
+
 
     /// Maps over the current data structure using functions stored in another
     /// data structure.
@@ -332,46 +333,46 @@ pub trait HZipMappable<Mapper> {
     ///
     /// let nil = HNil;
     ///
-    /// assert_eq!(nil.zip_map(HNil), HNil);
+    /// assert_eq!(nil.map(HNil), HNil);
     ///
     /// let h = hlist![1, false, 42f32];
     ///
     /// // Sadly we need to help the compiler understand the bool type in our mapper
     ///
-    /// let mapped = h.zip_map(hlist![
+    /// let mapped = h.map(hlist![
     ///     |n| n + 1,
     ///     |b: bool| !b,
     ///     |f| f + 1f32]);
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
     /// # }
     /// ```
-    fn zip_map(self, folder: Mapper) -> Self::Output;
+    fn map(self, folder: Mapper) -> Self :: Output;
 }
 
-impl<F> HZipMappable<F> for HNil {
+impl<F> HMappable<F> for HNil {
     type Output = HNil;
 
-    fn zip_map(self, _: F) -> Self::Output {
+    fn map(self, _: F) -> Self::Output {
         self
     }
 }
 
-impl<F, MapperHeadR, MapperTail, H, Tail> HZipMappable<HCons<F, MapperTail>> for HCons<H, Tail>
+impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
     where F: Fn(H) -> MapperHeadR,
-          Tail: HZipMappable<MapperTail>
+          Tail: HMappable<MapperTail>
 {
-    type Output = HCons<MapperHeadR, < Tail as HZipMappable<MapperTail> >::Output>;
-    fn zip_map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
+    type Output = HCons<MapperHeadR, < Tail as HMappable<MapperTail> >::Output>;
+    fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let f = mapper.head;
         HCons {
             head: f(self.head),
-            tail: self.tail.zip_map(mapper.tail),
+            tail: self.tail.map(mapper.tail),
         }
     }
 }
 
 /// Foldr for HLists
-pub trait HZipFoldrable<Folder, Init> {
+pub trait HFoldRightable<Folder, Init> {
     type Output;
 
     /// foldr over a data structure
@@ -381,11 +382,11 @@ pub trait HZipFoldrable<Folder, Init> {
     ///
     /// let nil = HNil;
     ///
-    /// assert_eq!(nil.zip_foldr(HNil, 0), 0);
+    /// assert_eq!(nil.foldr(HNil, 0), 0);
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// let folded = h.zip_foldr(
+    /// let folded = h.foldr(
     ///     hlist![
     ///         |i, acc| i + acc,
     ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
@@ -398,31 +399,31 @@ pub trait HZipFoldrable<Folder, Init> {
     ///
     /// # }
     /// ```
-    fn zip_foldr(self, folder: Folder, i: Init) -> Self::Output;
+    fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Init> HZipFoldrable<F, Init> for HNil {
+impl<F, Init> HFoldRightable<F, Init> for HNil {
     type Output = Init;
 
-    fn zip_foldr(self, _: F, i: Init) -> Self::Output {
+    fn foldr(self, _: F, i: Init) -> Self::Output {
         i
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init> HZipFoldrable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
 where
-    Tail: HZipFoldrable<FolderTail, Init>,
-    F: Fn(H, < Tail as HZipFoldrable<FolderTail, Init> >::Output) -> FolderHeadR {
+    Tail: HFoldRightable<FolderTail, Init>,
+    F: Fn(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
     type Output = FolderHeadR;
 
-    fn zip_foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
-        let folded_tail = self.tail.zip_foldr(folder.tail, init);
+    fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+        let folded_tail = self.tail.foldr(folder.tail, init);
         (folder.head)(self.head, folded_tail)
     }
 }
 
 /// Left fold for a given data structure
-pub trait HZipFoldlable<Folder, Init> {
+pub trait HZipFoldLeftable<Folder, Init> {
     type Output;
 
     /// foldl over a data structure
@@ -432,11 +433,11 @@ pub trait HZipFoldlable<Folder, Init> {
     ///
     /// let nil = HNil;
     ///
-    /// assert_eq!(nil.zip_foldl(HNil, 0), 0);
+    /// assert_eq!(nil.foldl(HNil, 0), 0);
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// let folded = h.zip_foldl(
+    /// let folded = h.foldl(
     ///     hlist![
     ///         |acc, i| i + acc,
     ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
@@ -449,26 +450,26 @@ pub trait HZipFoldlable<Folder, Init> {
     ///
     /// # }
     /// ```
-    fn zip_foldl(self, folder: Folder, i: Init) -> Self::Output;
+    fn foldl(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Acc> HZipFoldlable<F, Acc> for HNil {
+impl<F, Acc> HZipFoldLeftable<F, Acc> for HNil {
     type Output = Acc;
 
-    fn zip_foldl(self, _: F, acc: Acc) -> Self::Output {
+    fn foldl(self, _: F, acc: Acc) -> Self::Output {
         acc
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HZipFoldlable<HCons<F, FolderTail>, Acc>
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HZipFoldLeftable<HCons<F, FolderTail>, Acc>
     for HCons<H, Tail>
-    where Tail: HZipFoldlable<FolderTail, FolderHeadR>,
+    where Tail: HZipFoldLeftable<FolderTail, FolderHeadR>,
           F: Fn(Acc, H) -> FolderHeadR
 {
-    type Output = <Tail as HZipFoldlable<FolderTail, FolderHeadR>>::Output;
+    type Output = <Tail as HZipFoldLeftable<FolderTail, FolderHeadR>>::Output;
 
-    fn zip_foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
-        self.tail.zip_foldl(folder.tail, (folder.head)(acc, self.head))
+    fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
+        self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
     }
 }
 
@@ -592,10 +593,10 @@ mod tests {
     }
 
     #[test]
-    fn test_zip_foldr() {
+    fn test_foldr() {
 
         let h = hlist![1, false, 42f32];
-        let folded = h.zip_foldr(hlist![|i, acc| i + acc,
+        let folded = h.foldr(hlist![|i, acc| i + acc,
                                         |_, acc| if acc > 42f32 { 9000 } else { 0 },
                                         |f, acc| f + acc],
                                  1f32);
@@ -604,15 +605,10 @@ mod tests {
     }
 
     #[test]
-    fn test_zip_foldl() {
-
-        let nil = HNil;
-
-        assert_eq!(nil.zip_foldl(HNil, 0), 0);
+    fn test_foldl() {
 
         let h = hlist![1, false, 42f32];
-
-        let folded = h.zip_foldl(
+        let folded = h.foldl(
             hlist![
                 |acc, i| i + acc,
                 |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
@@ -620,16 +616,15 @@ mod tests {
             ],
             1
         );
-
         assert_eq!(42f32, folded)
 
     }
 
     #[test]
-    fn test_zip_map() {
+    fn test_map() {
 
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.zip_map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
+        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 
     }
