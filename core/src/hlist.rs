@@ -309,6 +309,52 @@ where
     }
 }
 
+/// Trail that allow for mapping over a data structure using mapping functions stored in another
+/// data structure
+pub trait HZipMappable<Folder> {
+    type Output;
+
+    /// Maps over the current data structure using functions stored in another
+    /// data structure.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let nil = HNil;
+    ///
+    /// assert_eq!(nil.zip_map(HNil), HNil);
+    ///
+    /// let h = hlist![1, false, 42f32];
+    ///
+    /// // Sadly we need to help the comiler understand the types in our mapper
+    /// let mapped = h.zip_map(hlist![|n: isize| n + 1, |b: bool| !b, |f: f32| f + 1f32]);
+    /// assert_eq!(mapped, hlist![2, true, 43f32]);
+    /// # }
+    /// ```
+    fn zip_map(self, folder: Folder) -> Self::Output;
+}
+
+impl<F> HZipMappable<F> for HNil {
+    type Output = HNil;
+
+    fn zip_map(self, _: F) -> Self::Output { self }
+}
+
+impl<F, MapperHeadR, MapperTail, H, Tail> HZipMappable<HCons<F, MapperTail>> for HCons<H, Tail>
+where
+    F: FnOnce(H) -> MapperHeadR,
+    Tail: HZipMappable<MapperTail>
+{
+    type Output = HCons<MapperHeadR, < Tail as HZipMappable<MapperTail> >::Output>;
+    fn zip_map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
+        let f = mapper.head;
+        HCons {
+            head: f(self.head),
+            tail: self.tail.zip_map(mapper.tail)
+        }
+    }
+}
+
 /// Trait for things that can be turned into a Tuple 2 (pair)
 pub trait IntoTuple2 {
     /// The 0 element in the output tuple
@@ -387,7 +433,8 @@ mod tests {
     #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h: Hlist
+        !(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
