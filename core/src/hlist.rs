@@ -561,7 +561,7 @@ mod tests {
 
         let h = hlist![9000, false, 41f32];
         let mapped = h.zip_map(hlist![
-            |n: isize| n + 1,
+            |n: i32| n + 1,
             |b: bool| !b,
             |f: f32| f + 1f32]);
         assert_eq!(mapped, hlist![9001, true, 42f32]);
