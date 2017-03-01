@@ -93,7 +93,7 @@ You can reverse, map, and fold over them too:
 let h1 = hlist![true, "hi"];
 assert_eq!(h1.into_reverse(), hlist!["hi", true]);
 
-// Fold
+// Fold (foldl and foldr exist)
 let h2 = hlist![1, false, 42f32];
 let folded = h2.foldr(
     hlist![
