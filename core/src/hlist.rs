@@ -342,7 +342,7 @@ impl<F> HZipMappable<F> for HNil {
 
 impl<F, MapperHeadR, MapperTail, H, Tail> HZipMappable<HCons<F, MapperTail>> for HCons<H, Tail>
 where
-    F: FnOnce(H) -> MapperHeadR,
+    F: Fn(H) -> MapperHeadR,
     Tail: HZipMappable<MapperTail>
 {
     type Output = HCons<MapperHeadR, < Tail as HZipMappable<MapperTail> >::Output>;
