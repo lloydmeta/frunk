@@ -372,14 +372,14 @@ pub trait HFoldRightable<Folder, Init> {
     ///
     /// let folded = h.zip_foldr(
     ///     hlist![
-    ///         |i: i32, acc: bool| if acc { i + 1 } else { i },
-    ///         |b: bool, acc: f32| !b && acc > 42f32,
+    ///         |i: i32, acc: i32| i + acc,
+    ///         |b: bool, acc: f32| if !b && acc > 42f32 { 9000 } else { 0 },
     ///         |f: f32, acc: f32| f + acc
     ///     ],
     ///     1f32
     /// );
     ///
-    /// assert_eq!(2, folded)
+    /// assert_eq!(9001, folded)
     ///
     /// # }
     /// ```
