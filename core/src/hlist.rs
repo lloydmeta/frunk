@@ -356,7 +356,7 @@ where
 }
 
 /// Foldr for HLists
-pub trait HFoldRightable<Folder, Init> {
+pub trait HZipFoldrable<Folder, Init> {
     type Output;
 
     /// foldr over a data structure
@@ -386,16 +386,16 @@ pub trait HFoldRightable<Folder, Init> {
     fn zip_foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Init> HFoldRightable<F, Init> for HNil {
+impl<F, Init> HZipFoldrable<F, Init> for HNil {
     type Output = Init;
 
     fn zip_foldr(self, _: F, i: Init) -> Self::Output { i }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HZipFoldrable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
 where
-    Tail: HFoldRightable<FolderTail, Init>,
-    F: Fn(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
+    Tail: HZipFoldrable<FolderTail, Init>,
+    F: Fn(H, < Tail as HZipFoldrable<FolderTail, Init> >::Output) -> FolderHeadR {
     type Output = FolderHeadR;
 
     fn zip_foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
