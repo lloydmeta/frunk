@@ -3,6 +3,9 @@ use syn;
 use syn::{Ident, MacroInput};
 use proc_macro::TokenStream;
 
+/// Parses a TokenStream (usually received as input into a
+/// custom derive function), into a syn MacroInput AST,
+/// which is nice.
 pub fn to_ast(input: &TokenStream) -> MacroInput {
     // Construct a string representation of the type definition
     let s = input.to_string();
@@ -11,7 +14,9 @@ pub fn to_ast(input: &TokenStream) -> MacroInput {
 }
 
 /// Given a identifiers, creates an AST for building an HList (HCons)
-/// using those identifiers as accessors
+/// using those identifiers as accessors.
+///
+/// Subsequently, this same function can be used for pattern matching too!
 pub fn build_hcons_constr(accessors: &Vec<Ident>) -> quote::Tokens {
     match accessors.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
