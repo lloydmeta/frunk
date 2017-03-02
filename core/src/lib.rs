@@ -3,4 +3,4 @@
 #[macro_use]
 pub mod hlist;
 pub mod generic;
-pub mod field;
+pub mod named_field;
