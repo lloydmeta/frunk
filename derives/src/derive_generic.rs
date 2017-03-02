@@ -1,8 +1,10 @@
 use quote::Tokens;
-use common::build_hcons_constr;
-use syn::{Ident, Body, VariantData, Field, Ty, MacroInput};
+use common::{build_hcons_constr, to_ast};
+use syn::{Ident, Body, VariantData, Field, Ty};
+use proc_macro::TokenStream;
 
-pub fn impl_generic(ast: &MacroInput) -> Tokens {
+pub fn impl_generic(input: TokenStream) -> Tokens {
+    let ast = to_ast(&input);
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
