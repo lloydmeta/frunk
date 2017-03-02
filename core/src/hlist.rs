@@ -229,7 +229,7 @@ impl<H, T, RHS> Add<RHS> for HCons<H, T>
 ///
 /// Users should normally allow type inference to create this type
 #[allow(dead_code)]
-pub struct Here;
+pub enum Here {}
 
 /// Used as an index into an `HList`.
 ///

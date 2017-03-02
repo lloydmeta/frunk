@@ -1,10 +1,98 @@
+//! This module holds the machinery behind LabelledGeneric.
+//!
+//! A LabelledGeneric instance is pretty much exactly the same as a Generic instance, except
+//! that the generic representation should contain information about field names.
+//!
+//! Having a separate trait for LabelledGenerics gives us the freedom to derive both
+//! lablled and non-labelled generic type class instances for our types.
+//!
+//! Asides from the main LabelledGeneric trait, this module holds helper methods that allow
+//! users to use LabelledGeneric without using universal function call syntax.
+//!
+//! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
+
 use std::marker::PhantomData;
+
+/// A trait that converts from a type to a generic representation
+///
+/// For the most part, you should be using the derivation that is available through
+/// frunk_derive to generate instances of this typeclass for your types.
+///
+/// I would highly recommend you check out `derivation_tests.rs` to see how to actually use
+/// this trait in real life. Since frunk_derive depends on this trait, I can't actually
+/// pull it in as a dependency here (otherwise the dependency would be circular) and show
+/// how to use it in a proper doc test.
+///
+/// ```rust,ignore
+/// #[derive(LabelledGeneric)]
+/// struct ApiPerson<'a> {
+///     FirstName: &'a str,
+///     LastName: &'a str,
+///     Age: usize,
+/// }
+///
+/// #[derive(Generic)]
+/// struct DomainPerson<'a> {
+///     first_name: &'a str,
+///     last_name: &'a str,
+///     age: usize,
+/// }
+///
+/// let a_person = ApiPerson {
+///     first_name: "Joe",
+///     last_name: "Blow",
+///     age: 30,
+/// };
+/// let d_person = <DomainPerson as LabelledGeneric>::convert_from(a_person); // done
+/// ```
+pub trait LabelledGeneric {
+
+    /// The generic representation type
+    type Repr;
+
+    /// Go from something to Repr
+    fn into(self) -> Self::Repr;
+
+    /// Go from Repr to something
+    fn from(r: Self::Repr) -> Self;
+
+    /// From one type to another using a type with a compatible generic representation
+    fn convert_from<A>(a: A) -> Self
+        where A: LabelledGeneric<Repr=Self::Repr>,
+              Self: Sized
+    {
+        let repr = <A as LabelledGeneric>::into(a);
+        <Self as LabelledGeneric>::from(repr)
+    }
+}
+
+/// Given a labelled generic Representation of an A, returns A
+pub fn from_labelled_generic<A, Repr>(gen: Repr) -> A
+    where A: LabelledGeneric<Repr=Repr>
+{
+    <A as LabelledGeneric>::from(gen)
+}
+
+/// Given an A, returns its labelled generic Representation
+pub fn into_labelled_generic<A, Repr>(a: A) -> Repr
+    where A: LabelledGeneric<Repr=Repr>
+{
+    <A as LabelledGeneric>::into(a)
+}
+
+/// Converts one type into another assuming they have the same labelled generic Representation
+pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
+    where A: LabelledGeneric<Repr=Repr>,
+          B: LabelledGeneric<Repr=Repr>
+{
+    <B as LabelledGeneric>::convert_from(a)
+}
 
 // Create a bunch of enums that can be used to represent names on the type level
 macro_rules! create_enums_for {
     ($($i: ident)*) => {
         $(
-            #[allow(non_snake_case, dead_code, non_camel_case_types)]
+            #[allow(non_snake_case, non_camel_case_types)]
             #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
             pub enum $i {}
         )*

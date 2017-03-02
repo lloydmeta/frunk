@@ -30,7 +30,7 @@ pub fn impl_labelled_generic(input: TokenStream) -> Tokens {
     let struct_deconstr = quote! { #name { #(#fnames, )* } };
 
     quote! {
-        impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
+        impl #impl_generics ::frunk_core::labelled::LabelledGeneric for #name #ty_generics #where_clause {
 
             type Repr = #repr_type;
 

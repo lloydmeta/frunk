@@ -81,7 +81,7 @@ fn test_struct_conversion() {
         last_name: "Cannon",
         age: 3,
     };
-    let pres: President = convert_from(a);
+    let pres = <President as Generic>::convert_from(a);
     assert_eq!(pres,
                President {
                    first_name: "Steve",
@@ -98,8 +98,8 @@ fn test_struct_conversion_round_trip() {
         age: 3,
     };
     let before = a.clone();
-    let p: President = convert_from(a);
-    let a_again: Strategist = convert_from(p);
+    let p: President = <President as Generic>::convert_from(a);
+    let a_again =  <Strategist as Generic>::convert_from(p);
     assert_eq!(a_again, before)
 }
 
@@ -108,7 +108,7 @@ fn test_struct_from_labelled_generic() {
     let h = hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
                    label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
                    label::<(a, g, e), usize>(3)];
-    let u: NewUser = from_generic(h);
+    let u: NewUser = from_labelled_generic(h);
     assert_eq!(u,
                NewUser {
                    first_name: "Humpty",
@@ -124,7 +124,7 @@ fn test_struct_into_labelled_generic() {
         last_name: "Drumpty",
         age: 3,
     };
-    let h = into_generic(u);
+    let h = into_labelled_generic(u);
     assert_eq!(h,
                hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
                       label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
@@ -139,8 +139,8 @@ fn test_stuct_conversion_round_trip_labelled() {
         age: 3,
     };
     let before = u.clone();
-    let su: SavedUser = convert_from(u);
-    let u_again: NewUser = convert_from(su);
+    let su = <SavedUser as LabelledGeneric>::convert_from(u);
+    let u_again = <NewUser as LabelledGeneric>::convert_from(su);
     assert_eq!(u_again, before)
 }
 
