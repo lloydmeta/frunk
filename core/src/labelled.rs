@@ -26,13 +26,12 @@ pub struct Labelled<Name, Type> {
 ///
 /// ```
 /// # use frunk_core::labelled::*;
-/// let f1 = Label::<(a, g, e), i32>(3);
-/// let f2 = Label::<(a, g, e), i32>(3);
+/// let f1 = label::<(a, g, e), i32>(3);
+/// let f2 = label::<(a, g, e), i32>(3);
 /// assert_eq!(f1, f2)
 ///
 /// ```
-#[allow(non_snake_case)]
-pub fn Label<Label, Value>(value: Value) -> Labelled<Label, Value> {
+pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
     Labelled {
         name: PhantomData,
         value: value,
@@ -45,8 +44,8 @@ mod tests {
 
     #[test]
     fn test_field_construction() {
-        let f1 = Label::<(a, g, e), i32>(3);
-        let f2 = Label::<(a, g, e), i32>(3);
+        let f1 = label::<(a, g, e), i32>(3);
+        let f2 = label::<(a, g, e), i32>(3);
         assert_eq!(f1, f2)
     }
 }

@@ -224,7 +224,7 @@ fn build_labelled_constr_for(field: &Field) -> quote::Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();
     let field_name = field.ident.clone();
-    quote! { ::frunk_core::labelled::Label::<#name_as_type, #field_type>(#field_name) }
+    quote! { ::frunk_core::labelled::label::<#name_as_type, #field_type>(#field_name) }
 }
 
 fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> quote::Tokens {
