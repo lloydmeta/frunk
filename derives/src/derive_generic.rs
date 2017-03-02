@@ -41,14 +41,16 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     };
 
     quote! {
-        impl #impl_generics ::frunk_core::generic::Generic<#repr_type> for #name #ty_generics #where_clause {
+        impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
 
-            fn into(self) -> #repr_type {
+            type Repr = #repr_type;
+
+            fn into(self) -> Self::Repr {
                 let #struct_deconstr = self;
                 #hcons_constr
             }
 
-            fn from(r: #repr_type) -> Self {
+            fn from(r: Self::Repr) -> Self {
                 let #hcons_pat = r;
                 #new_struct_constr
             }
