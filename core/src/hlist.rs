@@ -358,7 +358,7 @@ impl<F> HMappable<F> for HNil {
 }
 
 impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
-    where F: Fn(H) -> MapperHeadR,
+    where F: FnOnce(H) -> MapperHeadR,
           Tail: HMappable<MapperTail>
 {
     type Output = HCons<MapperHeadR, < Tail as HMappable<MapperTail> >::Output>;
@@ -413,7 +413,7 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
 impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
 where
     Tail: HFoldRightable<FolderTail, Init>,
-    F: Fn(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
+    F: FnOnce(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
     type Output = FolderHeadR;
 
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
@@ -464,7 +464,7 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
 impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
     for HCons<H, Tail>
     where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
-          F: Fn(Acc, H) -> FolderHeadR
+          F: FnOnce(Acc, H) -> FolderHeadR
 {
     type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR>>::Output;
 
