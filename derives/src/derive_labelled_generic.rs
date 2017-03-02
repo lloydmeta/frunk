@@ -79,6 +79,7 @@ fn build_type_level_name_for(ident: &Ident) -> Tokens {
     }).collect();
     quote! { (#(#name_as_types),*) }
 }
+
 fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
     match fields.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
