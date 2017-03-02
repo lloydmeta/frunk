@@ -5,11 +5,11 @@ extern crate frunk_core;
 extern crate quote;
 extern crate syn;
 
-use syn::{Ident, Body, VariantData, Field, Ty, MacroInput};
+use syn::{Ident, Body, VariantData, Field, Ty};
 use proc_macro::TokenStream;
 
 mod common;
-use common::build_hcons_constr;
+use common::{build_hcons_constr, to_ast};
 
 #[proc_macro_derive(Generic)]
 pub fn generic(input: TokenStream) -> TokenStream {
@@ -33,13 +33,6 @@ pub fn labelled_generic(input: TokenStream) -> TokenStream {
     gen.parse().unwrap()
 }
 
-
-fn to_ast(input: &TokenStream) -> MacroInput {
-    // Construct a string representation of the type definition
-    let s = input.to_string();
-    // Parse the string representation
-    syn::parse_macro_input(&s).unwrap()
-}
 
 fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     let name = &ast.ident;

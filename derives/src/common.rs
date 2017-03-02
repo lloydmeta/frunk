@@ -1,5 +1,14 @@
 use quote;
-use syn::Ident;
+use syn;
+use syn::{Ident, MacroInput};
+use proc_macro::TokenStream;
+
+pub fn to_ast(input: &TokenStream) -> MacroInput {
+    // Construct a string representation of the type definition
+    let s = input.to_string();
+    // Parse the string representation
+    syn::parse_macro_input(&s).unwrap()
+}
 
 /// Given a identifiers, creates an AST for building an HList (HCons)
 /// using those identifiers as accessors
