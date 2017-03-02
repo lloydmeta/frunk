@@ -6,7 +6,7 @@ macro_rules! simple_impls_for {
         $(
             #[allow(non_snake_case, dead_code, non_camel_case_types)]
             #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
-            enum $i {}
+            pub enum $i {}
         )*
     }
 }
@@ -21,6 +21,18 @@ pub struct Labelled<Name, Type> {
 }
 
 impl<Name, Type> Labelled<Name, Type> {
+
+    /// Helper function for building a new Labelled value.
+    ///
+    /// Useful so that users don't need to deal with PhantomData directly.
+    ///
+    /// ```
+    /// # use frunk_core::labelled::*;
+    /// let f1: Labelled<(a, g, e), i32> = Labelled::new(3);
+    /// let f2: Labelled<(a, g, e), i32> = Labelled::new(3);
+    /// assert_eq!(f1, f2)
+    ///
+    /// ```
     pub fn new(value: Type) -> Labelled<Name, Type> {
         Labelled {
             name: PhantomData,
