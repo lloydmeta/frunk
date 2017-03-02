@@ -2,6 +2,7 @@ extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;
 
+use frunk_core::labelled::*;
 use frunk::*; // for the Generic trait and HList
 use frunk::validated::*;
 
@@ -24,6 +25,34 @@ struct President<'a> {
     first_name: &'a str,
     last_name: &'a str,
     age: usize,
+}
+
+#[derive(LabelledGeneric, Debug, PartialEq, Clone)]
+struct NewUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+#[derive(LabelledGeneric, Generic, Debug, PartialEq, Clone)]
+struct SavedUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+#[allow(non_snake_case)]
+#[derive(LabelledGeneric, Generic, Debug, PartialEq)]
+struct ApiUser<'a> {
+    FirstName: &'a str,
+    LastName: &'a str,
+    Age: usize,
+}
+
+#[allow(non_snake_case)]
+#[derive(LabelledGeneric, Debug, PartialEq)]
+struct SuperLongField {
+    abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789: i32
 }
 
 #[derive(Generic, Debug, PartialEq)]
@@ -66,7 +95,7 @@ fn test_struct_conversion() {
         last_name: "Cannon",
         age: 3,
     };
-    let pres: President = convert_from(a);
+    let pres = <President as Generic>::convert_from(a);
     assert_eq!(pres,
                President {
                    first_name: "Steve",
@@ -83,9 +112,69 @@ fn test_struct_conversion_round_trip() {
         age: 3,
     };
     let before = a.clone();
-    let p: President = convert_from(a);
-    let a_again: Strategist = convert_from(p);
+    let p: President = <President as Generic>::convert_from(a);
+    let a_again =  <Strategist as Generic>::convert_from(p);
     assert_eq!(a_again, before)
+}
+
+#[test]
+fn test_struct_from_labelled_generic() {
+    let h = hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
+                   label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
+                   label::<(a, g, e), usize>(3)];
+    let u: NewUser = from_labelled_generic(h);
+    assert_eq!(u,
+               NewUser {
+                   first_name: "Humpty",
+                   last_name: "Drumpty",
+                   age: 3,
+               });
+}
+
+#[test]
+fn test_struct_into_labelled_generic() {
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let h = into_labelled_generic(u);
+    assert_eq!(h,
+               hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
+                      label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
+                      label::<(a, g, e), usize>(3)]);
+}
+
+#[test]
+fn test_stuct_conversion_round_trip_labelled() {
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let before = u.clone();
+    let su = <SavedUser as LabelledGeneric>::convert_from(u);
+    let u_again = <NewUser as LabelledGeneric>::convert_from(su);
+    assert_eq!(u_again, before)
+}
+
+#[test]
+fn test_mixed_conversions_round_trip() {
+    // Both SavedUser and ApiUser derive both Generic and LabelledGeneric
+    //
+    // Because their field names are different, their LabelledGeneric representations
+    // differ, so we can't use the LabelledGeneric typeclass to convert to and fro.
+    // Instead, we'll use the Generic typeclass to get the job done.
+    let u = SavedUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let before = u.clone();
+    let au = <ApiUser as Generic>::convert_from(u);
+    // let au2 = <ApiUser as LabelledGeneric>::convert_from(u); <-- will fail at compile time
+    let u_again = <SavedUser as Generic>::convert_from(au);
+    assert_eq!(u_again, before)
 }
 
 
