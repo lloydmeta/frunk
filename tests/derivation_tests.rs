@@ -41,6 +41,12 @@ struct SavedUser<'a> {
     age: usize,
 }
 
+#[allow(non_snake_case)]
+#[derive(LabelledGeneric, Debug, PartialEq)]
+struct SuperLongField {
+    abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789: i32
+}
+
 #[derive(Generic, Debug, PartialEq)]
 struct TupleStruct<'a>(&'a str, i32);
 

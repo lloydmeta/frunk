@@ -41,6 +41,7 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     };
 
     quote! {
+        #[allow(non_snake_case, non_camel_case_types)]
         impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
 
             type Repr = #repr_type;
