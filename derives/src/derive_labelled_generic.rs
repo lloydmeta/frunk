@@ -1,10 +1,9 @@
-use syn;
-use quote;
+use quote::Tokens;
 use common::build_hcons_constr;
-use syn::{Ident, Body, VariantData, Field};
+use syn::{Ident, Body, VariantData, Field, MacroInput};
 
 
-pub fn impl_labelled_generic(ast: &syn::MacroInput) -> quote::Tokens {
+pub fn impl_labelled_generic(ast: &MacroInput) -> Tokens {
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -41,7 +40,7 @@ pub fn impl_labelled_generic(ast: &syn::MacroInput) -> quote::Tokens {
     }
 }
 
-fn build_labelled_repr(fields: &Vec<Field>) -> quote::Tokens {
+fn build_labelled_repr(fields: &Vec<Field>) -> Tokens {
     match fields.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {
@@ -59,16 +58,16 @@ fn build_labelled_repr(fields: &Vec<Field>) -> quote::Tokens {
     }
 }
 
-fn build_labelled_type_for(field: &Field) -> quote::Tokens {
+fn build_labelled_type_for(field: &Field) -> Tokens {
     let ident = field.clone().ident.unwrap(); // this method is for labelled structs only
     let name_as_type = build_type_level_name_for(&ident);
     let ref field_type = field.ty;
     quote! { ::frunk_core::labelled::Labelled<#name_as_type, #field_type> }
 }
 
-fn build_type_level_name_for(ident: &Ident) -> quote ::Tokens {
+fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
-    let name_as_types: Vec<quote::Tokens> = name.chars().map(|c| {
+    let name_as_types: Vec<Tokens> = name.chars().map(|c| {
         // Here we assume we have every single possible letter created via our label.
         if c.is_alphabetic() {
             let as_ident = Ident::new(c.to_string());
@@ -80,7 +79,7 @@ fn build_type_level_name_for(ident: &Ident) -> quote ::Tokens {
     }).collect();
     quote! { (#(#name_as_types),*) }
 }
-fn build_labelled_hcons_constr(fields: &Vec<Field>) -> quote::Tokens {
+fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
     match fields.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {
@@ -98,14 +97,14 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> quote::Tokens {
     }
 }
 
-fn build_labelled_constr_for(field: &Field) -> quote::Tokens {
+fn build_labelled_constr_for(field: &Field) -> Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();
     let field_name = field.ident.clone();
     quote! { ::frunk_core::labelled::label::<#name_as_type, #field_type>(#field_name) }
 }
 
-fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> quote::Tokens {
+fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> Tokens {
     let cloned_bind1 = bindnames.clone();
     let cloned_bind2 = bindnames.clone();
     quote! { #struct_name { #(#cloned_bind1: #cloned_bind2.value),* } }

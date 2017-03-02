@@ -1,9 +1,8 @@
-use syn;
-use quote;
+use quote::Tokens;
 use common::build_hcons_constr;
-use syn::{Ident, Body, VariantData, Field, Ty};
+use syn::{Ident, Body, VariantData, Field, Ty, MacroInput};
 
-pub fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
+pub fn impl_generic(ast: &MacroInput) -> Tokens {
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -52,7 +51,7 @@ pub fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     }
 }
 
-fn build_repr(field_types: &Vec<Ty>) -> quote::Tokens {
+fn build_repr(field_types: &Vec<Ty>) -> Tokens {
     match field_types.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {
@@ -69,7 +68,7 @@ fn build_repr(field_types: &Vec<Ty>) -> quote::Tokens {
 }
 
 
-fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> quote::Tokens {
+fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> Tokens {
     if is_tuple_struct {
         let cloned_bind = bindnames.clone();
         quote! { #struct_name (#(#cloned_bind),* ) }
