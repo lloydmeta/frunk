@@ -3,6 +3,9 @@ use common::{build_hcons_constr, to_ast};
 use syn::{Ident, Body, VariantData, Field, Ty};
 use proc_macro::TokenStream;
 
+/// Given an AST, returns an implementation of Generic using HList
+///
+/// Only works with Structs and Tuple Structs
 pub fn impl_generic(input: TokenStream) -> Tokens {
     let ast = to_ast(&input);
     let name = &ast.ident;

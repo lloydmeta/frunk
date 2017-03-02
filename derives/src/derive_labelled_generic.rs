@@ -3,7 +3,10 @@ use common::{build_hcons_constr, to_ast};
 use syn::{Ident, Body, VariantData, Field};
 use proc_macro::TokenStream;
 
-
+/// Given an AST, returns an implementation of Generic using HList with
+/// Labelled (see frunk_core::labelled) elements
+///
+/// Only works with Structs and Tuple Structs
 pub fn impl_labelled_generic(input: TokenStream) -> Tokens {
     let ast = to_ast(&input);
     let name = &ast.ident;
