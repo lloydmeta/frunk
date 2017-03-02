@@ -88,7 +88,7 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
     <B as LabelledGeneric>::convert_from(a)
 }
 
-// Create a bunch of enums that can be used to represent names on the type level
+// Create a bunch of enums that can be used to represent characters on the type level
 macro_rules! create_enums_for {
     ($($i: ident)*) => {
         $(
@@ -99,7 +99,7 @@ macro_rules! create_enums_for {
     }
 }
 
-// Add more as needed
+// Add more as needed.
 create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
