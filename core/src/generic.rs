@@ -40,6 +40,15 @@ pub trait Generic {
 
     /// Go from Repr to something
     fn from(r: Self::Repr) -> Self;
+
+    /// From one type to another using a type with a compatible generic representation
+    fn convert_from<A>(a: A) -> Self
+        where A: Generic<Repr=Self::Repr>,
+              Self: Sized
+    {
+        let repr = <A as Generic>::into(a);
+        <Self as Generic>::from(repr)
+    }
 }
 
 /// Given a generic Representation of an A, returns A
@@ -61,6 +70,5 @@ pub fn convert_from<A, B, Repr>(a: A) -> B
     where A: Generic<Repr=Repr>,
           B: Generic<Repr=Repr>
 {
-    let repr = <A as Generic>::into(a);
-    <B as Generic>::from(repr)
+    <B as Generic>::convert_from(a)
 }
