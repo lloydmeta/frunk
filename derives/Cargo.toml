@@ -1,6 +1,6 @@
 [package]
 name = "frunk_derives"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_derives contains the custom derivations for certain traits in Frunk."
 license = "MIT"
