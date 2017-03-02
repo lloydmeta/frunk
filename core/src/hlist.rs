@@ -346,7 +346,7 @@ pub trait HMappable<Mapper> {
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
     /// # }
     /// ```
-    fn map(self, folder: Mapper) -> Self :: Output;
+    fn map(self, folder: Mapper) -> Self::Output;
 }
 
 impl<F> HMappable<F> for HNil {
@@ -361,7 +361,7 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
     where F: FnOnce(H) -> MapperHeadR,
           Tail: HMappable<MapperTail>
 {
-    type Output = HCons<MapperHeadR, < Tail as HMappable<MapperTail> >::Output>;
+    type Output = HCons<MapperHeadR, <Tail as HMappable<MapperTail>>::Output>;
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let f = mapper.head;
         HCons {
@@ -596,13 +596,10 @@ mod tests {
     fn test_foldr() {
 
         let h = hlist![1, false, 42f32];
-        let folded = h.foldr(
-            hlist![
-              |i, acc| i + acc,
-              |_, acc| if acc > 42f32 { 9000 } else { 0 },
-              |f, acc| f + acc
-            ],
-            1f32);
+        let folded = h.foldr(hlist![|i, acc| i + acc,
+                                    |_, acc| if acc > 42f32 { 9000 } else { 0 },
+                                    |f, acc| f + acc],
+                             1f32);
         assert_eq!(folded, 9001)
 
     }
@@ -611,14 +608,10 @@ mod tests {
     fn test_foldl() {
 
         let h = hlist![1, false, 42f32];
-        let folded = h.foldl(
-            hlist![
-              |acc, i| i + acc,
-              |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-              |acc, f| f + acc
-            ],
-            1
-        );
+        let folded = h.foldl(hlist![|acc, i| i + acc,
+                                    |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                                    |acc, f| f + acc],
+                             1);
         assert_eq!(42f32, folded)
 
     }
@@ -627,12 +620,7 @@ mod tests {
     fn test_map() {
 
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.map(
-            hlist![
-                |n| n + 1,
-                |s| s,
-                |f| f + 1f32]
-        );
+        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 
     }
