@@ -110,11 +110,11 @@ fn test_struct_from_labelled_generic() {
                    Label::<(a, g, e), usize>(3)];
     let u: NewUser = from_generic(h);
     assert_eq!(u,
-    NewUser {
-        first_name: "Humpty",
-        last_name: "Drumpty",
-        age: 3,
-    });
+               NewUser {
+                   first_name: "Humpty",
+                   last_name: "Drumpty",
+                   age: 3,
+               });
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn test_struct_into_labelled_generic() {
     };
     let h = into_generic(u);
     assert_eq!(h,
-    hlist![Label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
+               hlist![Label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
                       Label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
                       Label::<(a, g, e), usize>(3)]);
 }
