@@ -31,6 +31,7 @@ For a deep dive, RustDocs are available for:
 
 1. [HList](#hlist)
 2. [Generic](#generic)
+    * 2.1 [LabelledGeneric](#labelledgeneric)
 3. [Validated](#validated)
 4. [Semigroup](#semigroup)
 5. [Monoid](#monoid)
@@ -184,6 +185,62 @@ let a_person = ApiPersion {
 let d_person: DomainPersion = convert_from(a_person); // done
 ```
 
+#### LabelledGeneric
+
+In addition to `Generic`, there is also `LabelledGeneric`, which, as the name implies, relies on a generic representation
+that is _labelled_. This means that if two structs derive `LabelledGeneric`, you can convert between them only if their
+field names match!
+
+Here's an example:
+  
+```rust
+// Suppose that again, we have different User types representing the same data
+// in different stages in our application logic.
+
+#[derive(LabelledGeneric)]
+struct NewUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+#[derive(LabelledGeneric)]
+struct SavedUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+let n_user = NewUser {
+    first_name: "Joe",
+    last_name: "Blow",
+    age: 30
+};
+
+// Convert from a NewUser to a Saved using LabelledGeneric
+//
+// This will fail if the fields of the types converted to and from do not
+// have the same names or do not line up properly :)
+//
+// Also note that we're using a helper method to avoid having to use universal
+// function call syntax
+let s_user: SavedUser = labelled_convert_from(n_user);
+
+assert_eq!(s_user.first_name, "Joe");
+assert_eq!(s_user.last_name, "Blow");
+assert_eq!(s_user.age, 30);
+
+// Uh-oh ! last_name and first_name have been flipped!
+#[derive(LabelledGeneric)]
+struct DeletedUser<'a> {
+    last_name: &'a str,
+    first_name: &'a str,
+    age: usize,
+}
+
+//  This would fail at compile time :)
+let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user); 
+```  
 
 ### Validated
 

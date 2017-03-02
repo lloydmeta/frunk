@@ -55,7 +55,7 @@
 //!     age: usize,
 //! }
 //!
-//! #[derive(Generic, LabelledGeneric)]
+//! #[derive(LabelledGeneric)]
 //! struct SavedUser<'a> {
 //!     first_name: &'a str,
 //!     last_name: &'a str,
