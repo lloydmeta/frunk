@@ -1,7 +1,7 @@
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk Derives
 //!
-//! This library holds logic for the nice custom derives Frunk.
+//! This library holds logic for the nice custom derives in Frunk.
 //!
 //! Links:
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
@@ -39,9 +39,9 @@ pub fn generic(input: TokenStream) -> TokenStream {
 /// a given Struct (Tuple Structs not supported because they have
 /// no labels)
 ///
-/// There *may* be problems if you certain characters in your
-/// field names. This can be solved by adding letter to the
-/// create_enums_for! macro invocation in frunk_core::labelled via a PR :)
+/// There *may* be problems if your field names contain certain characters.
+/// This can be solved by adding letters to the create_enums_for! macro invocation
+/// in frunk_core::labelled via a PR :)
 #[proc_macro_derive(LabelledGeneric)]
 pub fn labelled_generic(input: TokenStream) -> TokenStream {
     // Build the impl
