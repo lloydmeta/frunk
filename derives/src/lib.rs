@@ -5,19 +5,13 @@ extern crate frunk_core;
 extern crate quote;
 extern crate syn;
 
-use syn::{Ident, Body, VariantData, Field, Ty};
+use syn::{Ident, Body, VariantData, Field, Ty, MacroInput};
 use proc_macro::TokenStream;
 
 #[proc_macro_derive(Generic)]
 pub fn generic(input: TokenStream) -> TokenStream {
-    // Construct a string representation of the type definition
-    let s = input.to_string();
-
-    // Parse the string representation
-    let ast = syn::parse_macro_input(&s).unwrap();
-
     // Build the impl
-    let gen = impl_generic(&ast);
+    let gen = impl_generic(&to_ast(&input));
 
 //    println!("{}", gen);
 
@@ -27,14 +21,8 @@ pub fn generic(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(LabelledGeneric)]
 pub fn labelled_generic(input: TokenStream) -> TokenStream {
-    // Construct a string representation of the type definition
-    let s = input.to_string();
-
-    // Parse the string representation
-    let ast = syn::parse_macro_input(&s).unwrap();
-
     // Build the impl
-    let gen = impl_labelled_generic(&ast);
+    let gen = impl_labelled_generic(&to_ast(&input));
 
 //    println!("{}", gen);
 
@@ -42,6 +30,13 @@ pub fn labelled_generic(input: TokenStream) -> TokenStream {
     gen.parse().unwrap()
 }
 
+
+fn to_ast(input: &TokenStream) -> MacroInput {
+    // Construct a string representation of the type definition
+    let s = input.to_string();
+    // Parse the string representation
+    syn::parse_macro_input(&s).unwrap()
+}
 
 fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     let name = &ast.ident;
