@@ -25,25 +25,26 @@ use std::marker::PhantomData;
 ///
 /// ```rust,ignore
 /// #[derive(LabelledGeneric)]
-/// struct ApiPerson<'a> {
-///     FirstName: &'a str,
-///     LastName: &'a str,
-///     Age: usize,
-/// }
-///
-/// #[derive(Generic)]
-/// struct DomainPerson<'a> {
+/// struct NewUser<'a> {
 ///     first_name: &'a str,
 ///     last_name: &'a str,
 ///     age: usize,
 /// }
 ///
-/// let a_person = ApiPerson {
+/// #[derive(LabelledGeneric)]
+/// struct SavedUser<'a> {
+///     first_name: &'a str,
+///     last_name: &'a str,
+///     age: usize,
+/// }
+///
+/// let n_user = NewUser {
 ///     first_name: "Joe",
 ///     last_name: "Blow",
 ///     age: 30,
 /// };
-/// let d_person = <DomainPerson as LabelledGeneric>::convert_from(a_person); // done
+///
+/// let s_user = <SavedUser as LabelledGeneric>::convert_from(n_user); // done
 /// ```
 pub trait LabelledGeneric {
 
