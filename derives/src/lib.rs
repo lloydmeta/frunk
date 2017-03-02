@@ -1,3 +1,12 @@
+#![doc(html_playground_url = "https://play.rust-lang.org/")]
+//! Frunk Derives
+//!
+//! This library holds logic for the nice custom derives Frunk.
+//!
+//! Links:
+//!   1. [Source on Github](https://github.com/lloydmeta/frunk)
+//!   2. [Crates.io page](https://crates.io/crates/frunk)
+
 extern crate proc_macro;
 #[macro_use]
 extern crate frunk_core;
