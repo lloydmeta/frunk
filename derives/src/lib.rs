@@ -25,6 +25,23 @@ pub fn generic(input: TokenStream) -> TokenStream {
     gen.parse().unwrap()
 }
 
+#[proc_macro_derive(LabelledGeneric)]
+pub fn labelled_generic(input: TokenStream) -> TokenStream {
+    // Construct a string representation of the type definition
+    let s = input.to_string();
+
+    // Parse the string representation
+    let ast = syn::parse_macro_input(&s).unwrap();
+
+    // Build the impl
+    let gen = impl_labelled_generic(&ast);
+
+//    println!("{}", gen);
+
+    // Return the generated impl
+    gen.parse().unwrap()
+}
+
 
 fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     let name = &ast.ident;
@@ -75,6 +92,84 @@ fn impl_generic(ast: &syn::MacroInput) -> quote::Tokens {
     }
 }
 
+
+fn impl_labelled_generic(ast: &syn::MacroInput) -> quote::Tokens {
+    let name = &ast.ident;
+    let generics = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let fields: &Vec<Field> = match ast.body {
+        Body::Struct(VariantData::Struct(ref fields)) => fields,
+        _ => panic!("Only Structs are supported. Tuple structs cannot be turned into Labelled Generics.")
+    };
+    let repr_type = build_labelled_repr(fields);
+
+    let fnames: Vec<Ident> = fields
+        .iter()
+        // it's impossible to not have idents because we're sure this isn't a tuple struct
+        .map(|f| f.ident.clone().unwrap())
+        .collect();
+
+    let hcons_constr = build_labelled_hcons_constr(&fields);
+    let hcons_pat = build_hcons_constr(&fnames);
+    let new_struct_constr = build_new_labelled_struct_constr(name, &fnames);
+    let struct_deconstr = quote! { #name { #(#fnames, )* } };
+
+    quote! {
+        impl #impl_generics ::frunk_core::generic::Generic<#repr_type> for #name #ty_generics #where_clause {
+
+            fn into(self) -> #repr_type {
+                let #struct_deconstr = self;
+                #hcons_constr
+            }
+
+            fn from(r: #repr_type) -> Self {
+                let #hcons_pat = r;
+                #new_struct_constr
+            }
+        }
+    }
+}
+
+fn build_labelled_repr(fields: &Vec<Field>) -> quote::Tokens {
+    match fields.len() {
+        0 => quote! { ::frunk_core::hlist::HNil },
+        1 => {
+            let field = fields[0].clone();
+            let labelled_type = build_labelled_type_for(&field);
+            quote! { ::frunk_core::hlist::HCons<#labelled_type, ::frunk_core::hlist::HNil> }
+        },
+        _ => {
+            let field = fields[0].clone();
+            let labelled_type = build_labelled_type_for(&field);
+            let tail = fields[1..].to_vec();
+            let tail_type = build_labelled_repr(&tail);
+            quote! { ::frunk_core::hlist::HCons<#labelled_type, #tail_type> }
+        }
+    }
+}
+
+fn build_labelled_type_for(field: &Field) -> quote::Tokens {
+    let ident = field.clone().ident.unwrap(); // this method is for labelled structs only
+    let name_as_type = build_type_level_name_for(&ident);
+    let ref field_type = field.ty;
+    quote! { ::frunk_core::labelled::Labelled<#name_as_type, #field_type> }
+}
+
+fn build_type_level_name_for(ident: &Ident) -> quote ::Tokens {
+    let name = ident.as_ref();
+    let name_as_types: Vec<quote::Tokens> = name.chars().map(|c| {
+        // Here we assume we have every single possible letter created via our label.
+        if c.is_alphabetic() {
+            let as_ident = Ident::new(c.to_string());
+            quote! { ::frunk_core::labelled::#as_ident }
+        } else {
+            let as_ident = Ident::new(format!("_{}", c));
+            quote! { ::frunk_core::labelled::#as_ident }
+        }
+    }).collect();
+    quote! { (#(#name_as_types),*) }
+}
+
 /*
     For some reason, normal macros don't work inside the quote (non-items not allowed error),
     so we re-do our macros procedurally here. Ironically easier to understand..
@@ -112,6 +207,31 @@ fn build_hcons_constr(field_types: &Vec<Ident>) -> quote::Tokens {
     }
 }
 
+fn build_labelled_hcons_constr(fields: &Vec<Field>) -> quote::Tokens {
+    match fields.len() {
+        0 => quote! { ::frunk_core::hlist::HNil },
+        1 => {
+            let field = fields[0].clone();
+            let labelled_constructor = build_labelled_constr_for(&field);
+            quote! { ::frunk_core::hlist::HCons{ head: #labelled_constructor, tail: ::frunk_core::hlist::HNil } }
+        },
+        _ => {
+            let field = fields[0].clone();
+            let labelled_constructor = build_labelled_constr_for(&field);
+            let tail = fields[1..].to_vec();
+            let hlist_tail = build_labelled_hcons_constr(&tail);
+            quote! { ::frunk_core::hlist::HCons{ head: #labelled_constructor, tail: #hlist_tail }}
+        }
+    }
+}
+
+fn build_labelled_constr_for(field: &Field) -> quote::Tokens {
+    let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
+    let field_type = field.ty.clone();
+    let field_name = field.ident.clone();
+    quote! { ::frunk_core::labelled::Label::<#name_as_type, #field_type>(#field_name) }
+}
+
 fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> quote::Tokens {
     if is_tuple_struct {
         let cloned_bind = bindnames.clone();
@@ -121,4 +241,10 @@ fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple
         let cloned_bind2 = bindnames.clone();
         quote! { #struct_name { #(#cloned_bind1: #cloned_bind2),* } }
     }
+}
+
+fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> quote::Tokens {
+        let cloned_bind1 = bindnames.clone();
+        let cloned_bind2 = bindnames.clone();
+        quote! { #struct_name { #(#cloned_bind1: #cloned_bind2.value),* } }
 }

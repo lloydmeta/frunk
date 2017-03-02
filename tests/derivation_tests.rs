@@ -2,6 +2,7 @@ extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;
 
+use frunk_core::labelled::*;
 use frunk::*; // for the Generic trait and HList
 use frunk::validated::*;
 
@@ -21,6 +22,20 @@ struct Strategist<'a> {
 
 #[derive(Generic, Debug, PartialEq)]
 struct President<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+#[derive(LabelledGeneric, Debug, PartialEq, Clone)]
+struct NewUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize,
+}
+
+#[derive(LabelledGeneric, Debug, PartialEq)]
+struct SavedUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
     age: usize,
@@ -86,6 +101,47 @@ fn test_struct_conversion_round_trip() {
     let p: President = convert_from(a);
     let a_again: Strategist = convert_from(p);
     assert_eq!(a_again, before)
+}
+
+#[test]
+fn test_struct_from_labelled_generic() {
+    let h = hlist![Label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
+                   Label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
+                   Label::<(a, g, e), usize>(3)];
+    let u: NewUser = from_generic(h);
+    assert_eq!(u,
+    NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    });
+}
+
+#[test]
+fn test_struct_into_labelled_generic() {
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let h = into_generic(u);
+    assert_eq!(h,
+    hlist![Label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
+                      Label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
+                      Label::<(a, g, e), usize>(3)]);
+}
+
+#[test]
+fn test_stuct_conversion_round_trip_labelled() {
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let before = u.clone();
+    let su: SavedUser = convert_from(u);
+    let u_again: NewUser = convert_from(su);
+    assert_eq!(u_again, before)
 }
 
 
