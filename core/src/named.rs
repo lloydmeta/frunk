@@ -15,15 +15,15 @@ macro_rules! simple_impls_for {
 simple_impls_for! { a b c d e f g h i j k m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
-pub struct NamedField<Name, Type> {
+pub struct Named<Name, Type> {
     name: PhantomData<Name>,
     pub value: Type
 }
 
-impl <Name, Type> NamedField <Name, Type> {
+impl <Name, Type> Named <Name, Type> {
 
-    pub fn new(value: Type) -> NamedField <Name, Type> {
-        NamedField { value: value, name: PhantomData }
+    pub fn new(value: Type) -> Named <Name, Type> {
+        Named { value: value, name: PhantomData }
     }
 }
 
@@ -33,8 +33,8 @@ mod tests {
 
     #[test]
     fn test_field_construction() {
-        let f1: NamedField<(a,g,e), i32> = NamedField::new(3);
-        let f2: NamedField<(a,g,e), i32> = NamedField::new(3);
+        let f1: Named<(a,g,e), i32> = Named::new(3);
+        let f2: Named<(a,g,e), i32> = Named::new(3);
         assert_eq!(f1, f2)
     }
 }
