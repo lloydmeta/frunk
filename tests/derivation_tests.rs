@@ -34,11 +34,19 @@ struct NewUser<'a> {
     age: usize,
 }
 
-#[derive(LabelledGeneric, Debug, PartialEq)]
+#[derive(LabelledGeneric, Generic, Debug, PartialEq, Clone)]
 struct SavedUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
     age: usize,
+}
+
+#[allow(non_snake_case)]
+#[derive(LabelledGeneric, Generic, Debug, PartialEq)]
+struct ApiUser<'a> {
+    FirstName: &'a str,
+    LastName: &'a str,
+    Age: usize,
 }
 
 #[allow(non_snake_case)]
@@ -147,6 +155,25 @@ fn test_stuct_conversion_round_trip_labelled() {
     let before = u.clone();
     let su = <SavedUser as LabelledGeneric>::convert_from(u);
     let u_again = <NewUser as LabelledGeneric>::convert_from(su);
+    assert_eq!(u_again, before)
+}
+
+#[test]
+fn test_mixed_conversions_round_trip() {
+    // Both SavedUser and ApiUser derive both Generic and LabelledGeneric
+    //
+    // Because their field names are different, their LabelledGeneric representations
+    // differ, so we can't use the LabelledGeneric typeclass to convert to and fro.
+    // Instead, we'll use the Generic typeclass to get the job done.
+    let u = SavedUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let before = u.clone();
+    let au = <ApiUser as Generic>::convert_from(u);
+    // let au2 = <ApiUser as LabelledGeneric>::convert_from(u); <-- will fail at compile time
+    let u_again = <SavedUser as Generic>::convert_from(au);
     assert_eq!(u_again, before)
 }
 
