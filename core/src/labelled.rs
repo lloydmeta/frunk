@@ -23,8 +23,8 @@ pub struct Labelled<Name, Type> {
 impl<Name, Type> Labelled<Name, Type> {
     pub fn new(value: Type) -> Labelled<Name, Type> {
         Labelled {
-            value: value,
             name: PhantomData,
+            value: value,
         }
     }
 }
