@@ -8,6 +8,9 @@ extern crate syn;
 use syn::{Ident, Body, VariantData, Field, Ty, MacroInput};
 use proc_macro::TokenStream;
 
+mod common;
+use common::build_hcons_constr;
+
 #[proc_macro_derive(Generic)]
 pub fn generic(input: TokenStream) -> TokenStream {
     // Build the impl
@@ -182,22 +185,6 @@ fn build_repr(field_types: &Vec<Ty>) -> quote::Tokens {
             let tail = field_types[1..].to_vec();
             let tail_type = build_repr(&tail);
             quote! { ::frunk_core::hlist::HCons<#h, #tail_type> }
-        }
-    }
-}
-
-fn build_hcons_constr(field_types: &Vec<Ident>) -> quote::Tokens {
-    match field_types.len() {
-        0 => quote! { ::frunk_core::hlist::HNil },
-        1 => {
-            let h = field_types[0].clone();
-            quote! { ::frunk_core::hlist::HCons{ head: #h, tail: ::frunk_core::hlist::HNil } }
-        },
-        _ => {
-            let h = field_types[0].clone();
-            let tail = field_types[1..].to_vec();
-            let hlist_tail = build_hcons_constr(&tail);
-            quote! { ::frunk_core::hlist::HCons{ head: #h, tail: #hlist_tail }}
         }
     }
 }
