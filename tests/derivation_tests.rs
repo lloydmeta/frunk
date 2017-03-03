@@ -187,7 +187,6 @@ fn test_reshaped_labelled_generic_conversion() {
         last_name: &'a str,
         age: usize
     }
-
     // Fields are jumbled :(
     #[derive(LabelledGeneric)]
     struct JumbledUser<'a> {
@@ -201,11 +200,11 @@ fn test_reshaped_labelled_generic_conversion() {
         last_name: "Ali",
         age: 30
     };
-
+    // Convert to labelled-generic representation
     let n_gen = into_labelled_generic(n_u);
+    // Reshape the labelled generic to fit the JumbledUser's generic Repr
     let jumbled_gen: <JumbledUser as LabelledGeneric>::Repr = n_gen.sculpt();
-
-    let j_u: JumbledUser = from_labelled_generic(jumbled_gen);
+    let j_u: JumbledUser = from_labelled_generic(jumbled_gen); // Done
 
     assert_eq!(j_u.first_name, "Moe");
     assert_eq!(j_u.last_name, "Ali");
