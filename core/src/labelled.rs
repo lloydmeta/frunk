@@ -14,7 +14,7 @@
 use std::marker::PhantomData;
 use hlist::*;
 
-/// A trait that converts from a type to a generic representation
+/// A trait that converts from a type to a labelled generic representation
 ///
 /// For the most part, you should be using the derivation that is available through
 /// frunk_derive to generate instances of this typeclass for your types.
@@ -48,16 +48,16 @@ use hlist::*;
 /// let s_user = <SavedUser as LabelledGeneric>::convert_from(n_user); // done
 /// ```
 pub trait LabelledGeneric {
-    /// The generic representation type
+    /// The labelled generic representation type
     type Repr;
 
     /// Go from something to Repr
     fn into(self) -> Self::Repr;
 
-    /// Go from Repr to something
+    /// Go from labelled Repr to something
     fn from(r: Self::Repr) -> Self;
 
-    /// From one type to another using a type with a compatible generic representation
+    /// From one type to another using a type with a compatible labelled generic representation
     fn convert_from<A>(a: A) -> Self
         where A: LabelledGeneric<Repr = Self::Repr>,
               Self: Sized
@@ -110,8 +110,8 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
-    where B: LabelledGeneric,
-          A: LabelledGeneric,
+    where A: LabelledGeneric,
+          B: LabelledGeneric,
           <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
     <B as LabelledGeneric>::sculpted_convert_from(a)
 }

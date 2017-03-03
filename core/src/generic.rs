@@ -1,6 +1,6 @@
 //! This module holds the machinery behind Generic.
 //!
-//! It contains the Generic trait and some helper methods for using the Generic type class
+//! It contains the Generic typeclass and some helper methods for using the Generic type class
 //! without having to use universal function call syntax.
 
 /// A trait that converts from a type to a generic representation
