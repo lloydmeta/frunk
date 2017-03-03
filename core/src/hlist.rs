@@ -693,10 +693,12 @@ mod tests {
 
     #[test]
     fn test_pluck() {
+
         let h = hlist![1, "hello", true, 42f32];
         let (t, r): (f32, _) = h.pluck();
         assert_eq!(t, 42f32);
         assert_eq!(r, hlist![1, "hello", true])
+
     }
 
     #[test]

@@ -218,8 +218,12 @@ mod tests {
 
     #[test]
     fn test_unlabelling() {
-        let labelled_hlist = hlist![label::<(n, a, m, e), &str>("joe"), label::<(a, g, e), i32>(3)];
+
+        let labelled_hlist = hlist![
+            label::<(n, a, m, e), &str>("joe"),
+            label::<(a, g, e), i32>(3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
+
     }
 }
