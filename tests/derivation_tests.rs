@@ -203,7 +203,7 @@ fn test_reshaped_labelled_generic_conversion() {
     // Convert to labelled-generic representation
     let n_gen = into_labelled_generic(n_u);
     // Reshape the labelled generic to fit the JumbledUser's generic Repr
-    let jumbled_gen: <JumbledUser as LabelledGeneric>::Repr = n_gen.sculpt();
+    let (jumbled_gen, _): (<JumbledUser as LabelledGeneric>::Repr, _) = n_gen.sculpt();
     let j_u: JumbledUser = from_labelled_generic(jumbled_gen); // Done
 
     assert_eq!(j_u.first_name, "Moe");

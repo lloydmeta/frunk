@@ -326,26 +326,31 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
 /// The "Indices" type parameter allows the compiler to figure out that the Target and Self
 /// can be morphed into each other
 pub trait Sculptor<Target, Indices> {
+    type Remainder;
+
     /// Consumes the current HList and returns an HList with the requested shape.
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
     ///
     /// let h = hlist![9000, "joe", 41f32];
-    /// let reshaped: Hlist!(f32, i32, &str) = h.sculpt();
+    /// // We toss away the remainder because we know there aren't any
+    /// let (reshaped, _): (Hlist![f32, i32, &str], _) = h.sculpt();
     /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"])
     ///
     /// # }
     /// ```
-    fn sculpt(self) -> Target;
+    fn sculpt(self) -> (Target, Self::Remainder);
 }
 
 /// Implementation for when the target is an empty HList (HNil)
 ///
 /// Index type is HCons<Here, HNil> because we are done
 impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
-    fn sculpt(self) -> HNil {
-        HNil
+    type Remainder = Source;
+
+    fn sculpt(self) -> (HNil, Self::Remainder) {
+        (HNil, self)
     }
 }
 
@@ -360,13 +365,18 @@ impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TT
         HCons<SHead, STail>: Plucker<THead, IndexHead>,
         <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail> {
 
-    fn sculpt(self) -> HCons<THead, TTail> {
+    type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
+
+    fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
         let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) = self.pluck();
-        let tail: TTail = r.sculpt();
-        HCons {
+        let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
+        (
+            HCons {
             head: p,
             tail: tail
-        }
+            },
+            tail_remainder
+        )
     }
 
 }
@@ -730,8 +740,9 @@ mod tests {
     fn test_sculpt() {
 
         let h = hlist![9000, "joe", 41f32];
-        let reshaped: Hlist!(f32, i32) = h.sculpt();
-        assert_eq!(reshaped, hlist![41f32, 9000])
+        let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
+        assert_eq!(reshaped, hlist![41f32, 9000]);
+        assert_eq!(remainder, hlist!["joe"])
 
     }
 }

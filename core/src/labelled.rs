@@ -68,12 +68,16 @@ pub trait LabelledGeneric {
 
     /// Converts from another type A into Self assuming that A and Self have labelled generic representations
     /// that can be sculpted into each other.
+    ///
+    /// Note that this method tosses away the "remainder" of the sculpted representation. In other
+    /// words, anything that is not needed from A gets tossed out.
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
         where A: LabelledGeneric,
               Self: Sized,
               <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices> {
         let a_gen = <A as LabelledGeneric>::into(a);
-        let self_gen: <Self as LabelledGeneric>::Repr = a_gen.sculpt();
+        // We toss away the remainder.
+        let (self_gen, _): (<Self as LabelledGeneric>::Repr, _) = a_gen.sculpt();
         <Self as LabelledGeneric>::from(self_gen)
     }
 }
@@ -211,6 +215,7 @@ mod tests {
         assert_eq!(f1, f2)
     }
 
+    #[test]
     fn test_unlabelling() {
         let labelled_hlist = hlist![label::<(n, a, m, e), &str>("joe"), label::<(a, g, e), i32>(3)];
         let unlabelled = labelled_hlist.into_unlabelled();
