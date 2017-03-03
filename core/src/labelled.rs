@@ -89,6 +89,17 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
     <B as LabelledGeneric>::convert_from(a)
 }
 
+/// Converts from one type into another assuming that their labelled generic representations
+/// can be sculpted into each other.
+pub fn aligned_labelled_convert_from<A, B, Indices>(a: A) -> B
+    where B: LabelledGeneric,
+          A: LabelledGeneric,
+          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
+    let a_gen = <A as LabelledGeneric>::into(a);
+    let b_gen: <B as LabelledGeneric>::Repr = a_gen.sculpt();
+    <B as LabelledGeneric>::from(b_gen)
+}
+
 // Create a bunch of enums that can be used to represent characters on the type level
 macro_rules! create_enums_for {
     ($($i: ident)*) => {
@@ -129,7 +140,6 @@ pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
 
 /// Trait for turning a Labelled HList into an un-labelled HList
 pub trait IntoUnlabelled {
-
     type Output;
 
     /// Turns the current HList into an unlabelled on.
@@ -159,17 +169,21 @@ pub trait IntoUnlabelled {
 /// Implementation for HNil
 impl IntoUnlabelled for HNil {
     type Output = HNil;
-    fn into_unlabelled(self) -> Self::Output { self }
+    fn into_unlabelled(self) -> Self::Output {
+        self
+    }
 }
 
 /// Implementation when we have a non-empty HCons holding a label in its head
-impl <Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail> where Tail: IntoUnlabelled {
-    type Output = HCons<Value, <Tail as IntoUnlabelled>::Output >;
+impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
+    where Tail: IntoUnlabelled
+{
+    type Output = HCons<Value, <Tail as IntoUnlabelled>::Output>;
 
     fn into_unlabelled(self) -> Self::Output {
         HCons {
             head: self.head.value,
-            tail: self.tail.into_unlabelled()
+            tail: self.tail.into_unlabelled(),
         }
     }
 }
@@ -186,11 +200,8 @@ mod tests {
     }
 
     fn test_unlabelling() {
-      let labelled_hlist = hlist![
-          label::<(n, a, m, e), &str>("joe"),
-          label::<(a, g, e), i32>(3)
-      ];
-      let unlabelled = labelled_hlist.into_unlabelled();
-      assert_eq!(unlabelled, hlist!["joe", 3])
+        let labelled_hlist = hlist![label::<(n, a, m, e), &str>("joe"), label::<(a, g, e), i32>(3)];
+        let unlabelled = labelled_hlist.into_unlabelled();
+        assert_eq!(unlabelled, hlist!["joe", 3])
     }
 }

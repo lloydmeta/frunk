@@ -276,7 +276,6 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 /// Similar to Selector, but returns the target and the remainder of the list (w/o target)
 /// in a pair.
 pub trait Plucker<Target, Index> {
-
     /// What is left after you pluck the target from the Self
     type Remainder;
 
@@ -324,7 +323,6 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
 /// An Sculptor trait, that allows us to extract/reshape/scult the current HList into another shape,
 /// provided that the requested shape's types are are contained within the current HList.
 pub trait Sculptor<Target, Indices> {
-
     /// Consumes the current HList and returns an HList with the requested shape.
     ///
     /// ```
