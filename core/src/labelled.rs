@@ -65,6 +65,17 @@ pub trait LabelledGeneric {
         let repr = <A as LabelledGeneric>::into(a);
         <Self as LabelledGeneric>::from(repr)
     }
+
+    /// Converts from another type A into Self assuming that A and Self have labelled generic representations
+    /// that can be sculpted into each other.
+    fn sculpted_convert_from<A, Indices>(a: A) -> Self
+        where A: LabelledGeneric,
+              Self: Sized,
+              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices> {
+        let a_gen = <A as LabelledGeneric>::into(a);
+        let self_gen: <Self as LabelledGeneric>::Repr = a_gen.sculpt();
+        <Self as LabelledGeneric>::from(self_gen)
+    }
 }
 
 /// Given a labelled generic Representation of an A, returns A
@@ -94,13 +105,11 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 ///
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
-pub fn aligned_labelled_convert_from<A, B, Indices>(a: A) -> B
+pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
     where B: LabelledGeneric,
           A: LabelledGeneric,
           <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
-    let a_gen = <A as LabelledGeneric>::into(a);
-    let b_gen: <B as LabelledGeneric>::Repr = a_gen.sculpt();
-    <B as LabelledGeneric>::from(b_gen)
+    <B as LabelledGeneric>::sculpted_convert_from(a)
 }
 
 // Create a bunch of enums that can be used to represent characters on the type level

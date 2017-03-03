@@ -220,7 +220,7 @@ fn test_aligned_labelled_convert_from() {
         age: 30
     };
     // even less boilerplate than before
-    let j_u: JumbledUser = aligned_labelled_convert_from(n_u); // Done
+    let j_u: JumbledUser = sculpted_convert_from(n_u); // Done
 
     assert_eq!(j_u.first_name, "Moe");
     assert_eq!(j_u.last_name, "Ali");
