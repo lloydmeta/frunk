@@ -352,8 +352,8 @@ impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
 /// Implementation for when we have a non-empty HCons target
 ///
 /// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
-/// Index for Plucking the first item of type THead out of Self and the rest is for the remainder to
-/// figure out.
+/// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
+/// Plucker's remainder induce.
 impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
     for HCons<SHead, STail>
     where
