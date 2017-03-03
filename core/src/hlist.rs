@@ -275,7 +275,9 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 ///
 /// Similar to Selector, but returns the target and the remainder of the list (w/o target)
 /// in a pair.
-pub trait Extractor<Target, Index> {
+pub trait Plucker<Target, Index> {
+
+    /// What is left after you pluck the target from the Self
     type Remainder;
 
     /// Returns the target with the remainder of the list in a pair
@@ -285,30 +287,30 @@ pub trait Extractor<Target, Index> {
     ///
     ///
     /// let h = hlist![1, "hello", true, 42f32];
-    /// let (t, r): (i32, _) = h.extract_from();
+    /// let (t, r): (i32, _) = h.pluck();
     /// assert_eq!(t, 1);
     /// assert_eq!(r, hlist!["hello", true, 42f32])
     /// # }
     /// ```
-    fn extract_from(self) -> (Target, Self::Remainder);
+    fn pluck(self) -> (Target, Self::Remainder);
 }
 
-impl<T, Tail> Extractor<T, Here> for HCons<T, Tail> {
+impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
     type Remainder = Tail;
 
-    fn extract_from(self) -> (T, Self::Remainder) {
+    fn pluck(self) -> (T, Self::Remainder) {
         (self.head, self.tail)
     }
 }
 
-impl<Head, Tail, FromTail, TailIndex> Extractor<FromTail, There<TailIndex>> for HCons<Head, Tail>
-    where Tail: Extractor<FromTail, TailIndex>
+impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
+    where Tail: Plucker<FromTail, TailIndex>
 {
-    type Remainder = HCons<Head, <Tail as Extractor<FromTail, TailIndex>>::Remainder>;
+    type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
 
-    fn extract_from(self) -> (FromTail, Self::Remainder) {
-        let (target, tail_remainder): (FromTail, <Tail as Extractor<FromTail, TailIndex>>::Remainder) =
-            <Tail as Extractor<FromTail, TailIndex>>::extract_from(self.tail);
+    fn pluck(self) -> (FromTail, Self::Remainder) {
+        let (target, tail_remainder): (FromTail, <Tail as Plucker<FromTail, TailIndex>>::Remainder) =
+            <Tail as Plucker<FromTail, TailIndex>>::pluck(self.tail);
         (target,
          HCons {
              head: self.head,
