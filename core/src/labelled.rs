@@ -91,6 +91,9 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 
 /// Converts from one type into another assuming that their labelled generic representations
 /// can be sculpted into each other.
+///
+/// The "Indices" type parameter allows the compiler to figure out that the two representations
+/// can indeed be morphed into each other.
 pub fn aligned_labelled_convert_from<A, B, Indices>(a: A) -> B
     where B: LabelledGeneric,
           A: LabelledGeneric,

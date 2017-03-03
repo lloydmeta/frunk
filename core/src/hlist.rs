@@ -322,6 +322,9 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
 
 /// An Sculptor trait, that allows us to extract/reshape/scult the current HList into another shape,
 /// provided that the requested shape's types are are contained within the current HList.
+///
+/// The "Indices" type parameter allows the compiler to figure out that the Target and Self
+/// can be morphed into each other
 pub trait Sculptor<Target, Indices> {
     /// Consumes the current HList and returns an HList with the requested shape.
     ///
@@ -338,6 +341,8 @@ pub trait Sculptor<Target, Indices> {
 }
 
 /// Implementation for when the target is an empty HList (HNil)
+///
+/// Index type is HCons<Here, HNil> because we are done
 impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
     fn sculpt(self) -> HNil {
         HNil
@@ -345,6 +350,10 @@ impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
 }
 
 /// Implementation for when we have a non-empty HCons target
+///
+/// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
+/// Index for Plucking the first item of type THead out of Self and the rest is for the remainder to
+/// figure out.
 impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
     for HCons<SHead, STail>
     where
