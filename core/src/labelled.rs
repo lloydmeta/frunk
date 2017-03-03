@@ -47,7 +47,6 @@ use std::marker::PhantomData;
 /// let s_user = <SavedUser as LabelledGeneric>::convert_from(n_user); // done
 /// ```
 pub trait LabelledGeneric {
-
     /// The generic representation type
     type Repr;
 
@@ -59,7 +58,7 @@ pub trait LabelledGeneric {
 
     /// From one type to another using a type with a compatible generic representation
     fn convert_from<A>(a: A) -> Self
-        where A: LabelledGeneric<Repr=Self::Repr>,
+        where A: LabelledGeneric<Repr = Self::Repr>,
               Self: Sized
     {
         let repr = <A as LabelledGeneric>::into(a);
@@ -69,22 +68,22 @@ pub trait LabelledGeneric {
 
 /// Given a labelled generic Representation of an A, returns A
 pub fn from_labelled_generic<A, Repr>(gen: Repr) -> A
-    where A: LabelledGeneric<Repr=Repr>
+    where A: LabelledGeneric<Repr = Repr>
 {
     <A as LabelledGeneric>::from(gen)
 }
 
 /// Given an A, returns its labelled generic Representation
 pub fn into_labelled_generic<A, Repr>(a: A) -> Repr
-    where A: LabelledGeneric<Repr=Repr>
+    where A: LabelledGeneric<Repr = Repr>
 {
     <A as LabelledGeneric>::into(a)
 }
 
 /// Converts one type into another assuming they have the same labelled generic Representation
 pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
-    where A: LabelledGeneric<Repr=Repr>,
-          B: LabelledGeneric<Repr=Repr>
+    where A: LabelledGeneric<Repr = Repr>,
+          B: LabelledGeneric<Repr = Repr>
 {
     <B as LabelledGeneric>::convert_from(a)
 }

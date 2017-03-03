@@ -271,6 +271,52 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
     }
 }
 
+/// Trait defining extraction from a given HList
+///
+/// Similar to Selector, but returns the target and the remainder of the list (w/o target)
+/// in a pair.
+pub trait Extractor<Target, Index> {
+    type Remainder;
+
+    /// Returns the target with the remainder of the list in a pair
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    ///
+    /// let h = hlist![1, "hello", true, 42f32];
+    /// let (t, r): (i32, _) = h.extract_from();
+    /// assert_eq!(t, 1);
+    /// assert_eq!(r, hlist!["hello", true, 42f32])
+    /// # }
+    /// ```
+    fn extract_from(self) -> (Target, Self::Remainder);
+}
+
+impl<T, Tail> Extractor<T, Here> for HCons<T, Tail> {
+    type Remainder = Tail;
+
+    fn extract_from(self) -> (T, Self::Remainder) {
+        (self.head, self.tail)
+    }
+}
+
+impl<Head, Tail, FromTail, TailIndex> Extractor<FromTail, There<TailIndex>> for HCons<Head, Tail>
+    where Tail: Extractor<FromTail, TailIndex>
+{
+    type Remainder = HCons<Head, <Tail as Extractor<FromTail, TailIndex>>::Remainder>;
+
+    fn extract_from(self) -> (FromTail, Self::Remainder) {
+        let (target, tail_remainder): (FromTail, <Tail as Extractor<FromTail, TailIndex>>::Remainder) =
+            <Tail as Extractor<FromTail, TailIndex>>::extract_from(self.tail);
+        (target,
+         HCons {
+             head: self.head,
+             tail: tail_remainder,
+         })
+    }
+}
+
 /// Trait that allows for reversing a given data structure.
 ///
 /// Implemented for HCons and HNil.
@@ -305,7 +351,7 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
     where Tail: IntoReverse,
           <Tail as IntoReverse>::Output: Add<HCons<H, HNil>>
 {
-    type Output = < < Tail as IntoReverse >::Output as Add<HCons<H, HNil>> >::Output;
+    type Output = <<Tail as IntoReverse>::Output as Add<HCons<H, HNil>>>::Output;
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
@@ -411,9 +457,9 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
-where
-    Tail: HFoldRightable<FolderTail, Init>,
-    F: FnOnce(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
+    where
+        Tail: HFoldRightable<FolderTail, Init>,
+        F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR {
     type Output = FolderHeadR;
 
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
@@ -584,44 +630,36 @@ mod tests {
 
     #[test]
     fn test_into_reverse() {
-
         let h1 = hlist![true, "hi"];
         let h2 = hlist![1, 32f32];
         assert_eq!(h1.into_reverse(), hlist!["hi", true]);
         assert_eq!(h2.into_reverse(), hlist![32f32, 1]);
-
     }
 
     #[test]
     fn test_foldr() {
-
         let h = hlist![1, false, 42f32];
         let folded = h.foldr(hlist![|i, acc| i + acc,
                                     |_, acc| if acc > 42f32 { 9000 } else { 0 },
                                     |f, acc| f + acc],
                              1f32);
         assert_eq!(folded, 9001)
-
     }
 
     #[test]
     fn test_foldl() {
-
         let h = hlist![1, false, 42f32];
         let folded = h.foldl(hlist![|acc, i| i + acc,
                                     |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
                                     |acc, f| f + acc],
                              1);
         assert_eq!(42f32, folded)
-
     }
 
     #[test]
     fn test_map() {
-
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
-
     }
 }
