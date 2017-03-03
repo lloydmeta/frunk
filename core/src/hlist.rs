@@ -276,7 +276,6 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 /// Similar to Selector, but returns the target and the remainder of the list (w/o target)
 /// in a pair.
 pub trait Plucker<Target, Index> {
-    type Idx;
 
     /// What is left after you pluck the target from the Self
     type Remainder;
@@ -299,7 +298,6 @@ pub trait Plucker<Target, Index> {
 /// Implementation when the pluck target is in head
 impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
     type Remainder = Tail;
-    type Idx = Here;
 
     fn pluck(self) -> (T, Self::Remainder) {
         (self.head, self.tail)
@@ -310,7 +308,6 @@ impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
 impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
     where Tail: Plucker<FromTail, TailIndex>
 {
-    type Idx = There<TailIndex>;
     type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
 
     fn pluck(self) -> (FromTail, Self::Remainder) {
