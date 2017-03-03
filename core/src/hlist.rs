@@ -721,8 +721,10 @@ mod tests {
 
     #[test]
     fn test_sculpt() {
+
         let h = hlist![9000, "joe", 41f32];
         let reshaped: Hlist!(f32, i32) = h.sculpt();
         assert_eq!(reshaped, hlist![41f32, 9000])
+
     }
 }

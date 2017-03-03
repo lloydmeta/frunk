@@ -12,6 +12,7 @@
 //! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
 
 use std::marker::PhantomData;
+use hlist::*;
 
 /// A trait that converts from a type to a generic representation
 ///
@@ -123,6 +124,53 @@ pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
     Labelled {
         name: PhantomData,
         value: value,
+    }
+}
+
+/// Trait for turning a Labelled HList into an un-labelled HList
+pub trait IntoUnlabelled {
+
+    type Output;
+
+    /// Turns the current HList into an unlabelled on.
+    ///
+    /// Effectively extracts the values held inside the individual Labelled
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # use frunk_core::labelled::*;
+    /// # use frunk_core::hlist::*;
+    /// # fn main() {
+    ///
+    /// let labelled_hlist = hlist![
+    ///     label::<(n, a, m, e), &str>("joe"),
+    ///     label::<(a, g, e), i32>(3)
+    /// ];
+    ///
+    /// let unlabelled = labelled_hlist.into_unlabelled();
+    ///
+    /// assert_eq!(unlabelled, hlist!["joe", 3])
+    ///
+    /// # }
+    /// ```
+    fn into_unlabelled(self) -> Self::Output;
+}
+
+/// Implementation for HNil
+impl IntoUnlabelled for HNil {
+    type Output = HNil;
+    fn into_unlabelled(self) -> Self::Output { self }
+}
+
+/// Implementation when we have a non-empty HCons holding a label in its head
+impl <Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail> where Tail: IntoUnlabelled {
+    type Output = HCons<Value, <Tail as IntoUnlabelled>::Output >;
+
+    fn into_unlabelled(self) -> Self::Output {
+        HCons {
+            head: self.head.value,
+            tail: self.tail.into_unlabelled()
+        }
     }
 }
 
