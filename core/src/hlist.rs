@@ -1,4 +1,4 @@
-//! Module that holds HList data structures and implementations
+//! Module that holds HList data structures, implementations, and typeclasses.
 //!
 //! Typically, you would want to use the `hlist!` macro to make it easier
 //! for you to use HList.
@@ -10,6 +10,42 @@
 //! let (a, b) = h.into_tuple2();
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
+//!
+//! // Reverse
+//! let h1 = hlist![true, "hi"];
+//! assert_eq!(h1.into_reverse(), hlist!["hi", true]);
+//!
+//! // foldr (foldl also available)
+//! let h2 = hlist![1, false, 42f32];
+//! let folded = h2.foldr(
+//!             hlist![
+//!                 |i, acc| i + acc,
+//!                 |_, acc| if acc > 42f32 { 9000 } else { 0 },
+//!                 |f, acc| f + acc
+//!             ],
+//!             1f32
+//!     );
+//! assert_eq!(folded, 9001);
+//!
+//! // Mapping over an HList
+//! let h3 = hlist![9000, "joe", 41f32];
+//! let mapped = h3.map(hlist![
+//!                         |n| n + 1,
+//!                         |s| s,
+//!                         |f| f + 1f32]);
+//! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+//!
+//! // Plucking a value out by type
+//! let h4 = hlist![1, "hello", true, 42f32];
+//! let (t, remainder): (bool, _) = h4.pluck();
+//! assert!(t);
+//! assert_eq!(remainder, hlist![1, "hello", 42f32]);
+//!
+//! // Resculpting an HList
+//! let h5 = hlist![9000, "joe", 41f32, true];
+//! let (reshaped, remainder2): (Hlist![f32, i32, &str], _) = h5.sculpt();
+//! assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
+//! assert_eq!(remainder2, hlist![true]);
 //! # }
 //! ```
 
@@ -271,6 +307,113 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
     }
 }
 
+/// Trait defining extraction from a given HList
+///
+/// Similar to Selector, but returns the target and the remainder of the list (w/o target)
+/// in a pair.
+pub trait Plucker<Target, Index> {
+    /// What is left after you pluck the target from the Self
+    type Remainder;
+
+    /// Returns the target with the remainder of the list in a pair
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// let h = hlist![1, "hello", true, 42f32];
+    /// let (t, r): (bool, _) = h.pluck();
+    /// assert!(t);
+    /// assert_eq!(r, hlist![1, "hello", 42f32])
+    /// # }
+    /// ```
+    fn pluck(self) -> (Target, Self::Remainder);
+}
+
+/// Implementation when the pluck target is in head
+impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
+    type Remainder = Tail;
+
+    fn pluck(self) -> (T, Self::Remainder) {
+        (self.head, self.tail)
+    }
+}
+
+/// Implementation when the pluck target is in the tail
+impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
+    where Tail: Plucker<FromTail, TailIndex>
+{
+    type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
+
+    fn pluck(self) -> (FromTail, Self::Remainder) {
+        let (target, tail_remainder): (FromTail, <Tail as Plucker<FromTail, TailIndex>>::Remainder) =
+            <Tail as Plucker<FromTail, TailIndex>>::pluck(self.tail);
+        (target,
+         HCons {
+             head: self.head,
+             tail: tail_remainder,
+         })
+    }
+}
+
+/// An Sculptor trait, that allows us to extract/reshape/scult the current HList into another shape,
+/// provided that the requested shape's types are are contained within the current HList.
+///
+/// The "Indices" type parameter allows the compiler to figure out that the Target and Self
+/// can be morphed into each other
+pub trait Sculptor<Target, Indices> {
+    type Remainder;
+
+    /// Consumes the current HList and returns an HList with the requested shape.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// let h = hlist![9000, "joe", 41f32, true];
+    /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+    /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
+    /// assert_eq!(remainder, hlist![true]);
+    /// # }
+    /// ```
+    fn sculpt(self) -> (Target, Self::Remainder);
+}
+
+/// Implementation for when the target is an empty HList (HNil)
+///
+/// Index type is HCons<Here, HNil> because we are done
+impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
+    type Remainder = Source;
+
+    fn sculpt(self) -> (HNil, Self::Remainder) {
+        (HNil, self)
+    }
+}
+
+/// Implementation for when we have a non-empty HCons target
+///
+/// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
+/// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
+/// Plucker's remainder induce.
+impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
+    for HCons<SHead, STail>
+    where
+        HCons<SHead, STail>: Plucker<THead, IndexHead>,
+        <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail> {
+
+    type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
+
+    fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
+        let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) = self.pluck();
+        let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
+        (
+            HCons {
+            head: p,
+            tail: tail
+            },
+            tail_remainder
+        )
+    }
+
+}
+
+
 /// Trait that allows for reversing a given data structure.
 ///
 /// Implemented for HCons and HNil.
@@ -305,7 +448,7 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
     where Tail: IntoReverse,
           <Tail as IntoReverse>::Output: Add<HCons<H, HNil>>
 {
-    type Output = < < Tail as IntoReverse >::Output as Add<HCons<H, HNil>> >::Output;
+    type Output = <<Tail as IntoReverse>::Output as Add<HCons<H, HNil>>>::Output;
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
@@ -411,9 +554,9 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
-where
-    Tail: HFoldRightable<FolderTail, Init>,
-    F: FnOnce(H, < Tail as HFoldRightable<FolderTail, Init> >::Output) -> FolderHeadR {
+    where
+        Tail: HFoldRightable<FolderTail, Init>,
+        F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR {
     type Output = FolderHeadR;
 
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
@@ -549,6 +692,16 @@ mod tests {
     }
 
     #[test]
+    fn test_pluck() {
+
+        let h = hlist![1, "hello", true, 42f32];
+        let (t, r): (f32, _) = h.pluck();
+        assert_eq!(t, 42f32);
+        assert_eq!(r, hlist![1, "hello", true])
+
+    }
+
+    #[test]
     fn test_macro() {
         assert_eq!(hlist![], HNil);
         let h: Hlist
@@ -584,44 +737,46 @@ mod tests {
 
     #[test]
     fn test_into_reverse() {
-
         let h1 = hlist![true, "hi"];
         let h2 = hlist![1, 32f32];
         assert_eq!(h1.into_reverse(), hlist!["hi", true]);
         assert_eq!(h2.into_reverse(), hlist![32f32, 1]);
-
     }
 
     #[test]
     fn test_foldr() {
-
         let h = hlist![1, false, 42f32];
         let folded = h.foldr(hlist![|i, acc| i + acc,
                                     |_, acc| if acc > 42f32 { 9000 } else { 0 },
                                     |f, acc| f + acc],
                              1f32);
         assert_eq!(folded, 9001)
-
     }
 
     #[test]
     fn test_foldl() {
-
         let h = hlist![1, false, 42f32];
         let folded = h.foldl(hlist![|acc, i| i + acc,
                                     |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
                                     |acc, f| f + acc],
                              1);
         assert_eq!(42f32, folded)
-
     }
 
     #[test]
     fn test_map() {
-
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_sculpt() {
+
+        let h = hlist![9000, "joe", 41f32];
+        let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
+        assert_eq!(reshaped, hlist![41f32, 9000]);
+        assert_eq!(remainder, hlist!["joe"])
 
     }
 }

@@ -113,7 +113,28 @@ let mapped = h3.map(hlist![
     |s| s,
     |f| f + 1f32]);
 assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+```
 
+You can pluck a type out of an `HList` using `pluck()`, which also gives you back the remainder after plucking that type
+out. This method is checked at compile-time to make sure that the type you ask for *can* be extracted.
+
+```rust
+let h = hlist![1, "hello", true, 42f32];
+let (t, remainder): (bool, _) = h.pluck();
+assert!(t);
+assert_eq!(remainder, hlist![1, "hello", 42f32])
+```
+
+Similarly, you can re-shape, or sculpt, an `Hlist`, there is a `sculpt()` method, which allows you to re-organise and/or
+cull the elements by type. Like `pluck()`, `sculpt()` gives you back your target with the remainder data in a pair. This
+method is also checked at compile time to make sure that it won't fail at runtime (the types in your requested target shape
+must be a subset of the types in the original `HList`.
+
+```rust
+let h = hlist![9000, "joe", 41f32, true];
+let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
+assert_eq!(remainder, hlist![true]);
 ```
 
 ### Generic
@@ -239,8 +260,16 @@ struct DeletedUser<'a> {
 }
 
 //  This would fail at compile time :)
-let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user); 
-```  
+let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
+
+// This will, however, work, because we make use of the Sculptor type-class
+// to type-safely reshape the representations to align/match each other.
+let d_user: DeletedUser = sculpted_convert_from(s_user); 
+```
+
+For more information how Generic and Labelled work, check out their respective Rustdocs:
+  * [Generic](https://beachape.com/frunk/frunk_core/generic/index.html)
+  * [Labelled](https://beachape.com/frunk/frunk_core/labelled/index.html)
 
 ### Validated
 

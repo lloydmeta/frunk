@@ -178,6 +178,56 @@ fn test_mixed_conversions_round_trip() {
 }
 
 
+#[derive(LabelledGeneric)]
+struct NormalUser<'a> {
+    first_name: &'a str,
+    last_name: &'a str,
+    age: usize
+}
+// Fields are jumbled :(
+#[derive(LabelledGeneric)]
+struct JumbledUser<'a> {
+    last_name: &'a str,
+    age: usize,
+    first_name: &'a str,
+}
+
+#[test]
+fn test_reshaped_labelled_generic_conversion() {
+
+    let n_u = NormalUser {
+        first_name: "Moe",
+        last_name: "Ali",
+        age: 30
+    };
+    // Convert to labelled-generic representation
+    let n_gen = into_labelled_generic(n_u);
+    // Reshape the labelled generic to fit the JumbledUser's generic Repr
+    let (jumbled_gen, _): (<JumbledUser as LabelledGeneric>::Repr, _) = n_gen.sculpt();
+    let j_u: JumbledUser = from_labelled_generic(jumbled_gen); // Done
+
+    assert_eq!(j_u.first_name, "Moe");
+    assert_eq!(j_u.last_name, "Ali");
+    assert_eq!(j_u.age, 30)
+}
+
+#[test]
+fn test_aligned_labelled_convert_from() {
+
+    let n_u = NormalUser {
+        first_name: "Moe",
+        last_name: "Ali",
+        age: 30
+    };
+    // even less boilerplate than before
+    let j_u: JumbledUser = sculpted_convert_from(n_u); // Done
+
+    assert_eq!(j_u.first_name, "Moe");
+    assert_eq!(j_u.last_name, "Ali");
+    assert_eq!(j_u.age, 30)
+}
+
+
 // Working with Validated
 
 #[derive(PartialEq, Eq, Debug)]
