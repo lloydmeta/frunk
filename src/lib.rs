@@ -89,6 +89,11 @@
 //!     age: usize,
 //! }
 //! // let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user); <-- this would fail at compile time :)
+//!
+//! // This will, however, work, because we make use of the Sculptor type-class
+//! // to type-safely reshape the representations to align/match each other.
+//! let d_user: DeletedUser = sculpted_convert_from(s_user);
+//! assert_eq!(d_user.first_name, "Joe");
 //! # }
 //! ```
 //!

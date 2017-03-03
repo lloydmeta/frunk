@@ -264,7 +264,7 @@ let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.
-let d_user: DeletedUser = aligned_labelled_convert_from(s_user); 
+let d_user: DeletedUser = sculpted_convert_from(s_user); 
 ```
 
 For more information how Generic and Labelled work, check out their respective Rustdocs:
