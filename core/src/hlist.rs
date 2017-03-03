@@ -283,8 +283,6 @@ pub trait Plucker<Target, Index> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
-    ///
     /// let h = hlist![1, "hello", true, 42f32];
     /// let (t, r): (bool, _) = h.pluck();
     /// assert!(t);
@@ -332,12 +330,10 @@ pub trait Sculptor<Target, Indices> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
-    /// let h = hlist![9000, "joe", 41f32];
-    /// // We toss away the remainder because we know there aren't any
-    /// let (reshaped, _): (Hlist![f32, i32, &str], _) = h.sculpt();
-    /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"])
-    ///
+    /// let h = hlist![9000, "joe", 41f32, true];
+    /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+    /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
+    /// assert_eq!(remainder, hlist![true]);
     /// # }
     /// ```
     fn sculpt(self) -> (Target, Self::Remainder);
