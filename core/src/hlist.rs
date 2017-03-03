@@ -277,6 +277,8 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 /// in a pair.
 pub trait Plucker<Target, Index> {
 
+    type Idx;
+
     /// What is left after you pluck the target from the Self
     type Remainder;
 
@@ -298,6 +300,7 @@ pub trait Plucker<Target, Index> {
 /// Implementation when the pluck target is in head
 impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
     type Remainder = Tail;
+    type Idx = Here;
 
     fn pluck(self) -> (T, Self::Remainder) {
         (self.head, self.tail)
@@ -308,6 +311,7 @@ impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
 impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
     where Tail: Plucker<FromTail, TailIndex>
 {
+    type Idx = There<TailIndex>;
     type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
 
     fn pluck(self) -> (FromTail, Self::Remainder) {
@@ -320,6 +324,34 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
          })
     }
 }
+
+pub trait Extractor<Target, Indices> {
+
+    fn extract_from(self) -> Target;
+}
+
+impl <Source> Extractor<HNil, HCons<Here, HNil>> for Source {
+
+    fn extract_from(self) -> HNil { HNil }
+}
+
+impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Extractor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
+    for HCons<SHead, STail>
+    where
+        HCons<SHead, STail>: Plucker<THead, IndexHead>,
+        <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Extractor<TTail, IndexTail> {
+
+    fn extract_from(self) -> HCons<THead, TTail> {
+        let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) = self.pluck();
+        let tail: TTail = r.extract_from();
+        HCons {
+            head: p,
+            tail: tail
+        }
+    }
+
+}
+
 
 /// Trait that allows for reversing a given data structure.
 ///
@@ -673,5 +705,12 @@ mod tests {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_extract_from() {
+        let h = hlist![9000, "joe", 41f32];
+        let extracted: Hlist!(f32, i32) = h.extract_from();
+        assert_eq!(extracted, hlist![41f32, 9000])
     }
 }
