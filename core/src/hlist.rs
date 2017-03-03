@@ -287,9 +287,9 @@ pub trait Plucker<Target, Index> {
     ///
     ///
     /// let h = hlist![1, "hello", true, 42f32];
-    /// let (t, r): (i32, _) = h.pluck();
-    /// assert_eq!(t, 1);
-    /// assert_eq!(r, hlist!["hello", true, 42f32])
+    /// let (t, r): (bool, _) = h.pluck();
+    /// assert!(t);
+    /// assert_eq!(r, hlist![1, "hello", 42f32])
     /// # }
     /// ```
     fn pluck(self) -> (Target, Self::Remainder);
@@ -594,6 +594,14 @@ mod tests {
         assert_eq!(retrieved.length(), 1);
         let new_list = h_cons(2, retrieved);
         assert_eq!(new_list.length(), 2);
+    }
+
+    #[test]
+    fn test_pluck() {
+        let h = hlist![1, "hello", true, 42f32];
+        let (t, r): (f32, _) = h.pluck();
+        assert_eq!(t, 42f32);
+        assert_eq!(r, hlist![1, "hello", true])
     }
 
     #[test]
