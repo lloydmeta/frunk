@@ -74,6 +74,7 @@ pub trait LabelledGeneric {
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
         where A: LabelledGeneric,
               Self: Sized,
+              // The labelled representation of A must be sculpt-able into the labelled representation of Self
               <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices> {
         let a_gen = <A as LabelledGeneric>::into(a);
         // We toss away the remainder.
@@ -112,6 +113,7 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
     where A: LabelledGeneric,
           B: LabelledGeneric,
+          // The labelled representation of A must be sculpt-able into the labelled representation of B
           <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
     <B as LabelledGeneric>::sculpted_convert_from(a)
 }
@@ -176,7 +178,6 @@ pub trait IntoUnlabelled {
     /// let unlabelled = labelled_hlist.into_unlabelled();
     ///
     /// assert_eq!(unlabelled, hlist!["joe", 3])
-    ///
     /// # }
     /// ```
     fn into_unlabelled(self) -> Self::Output;
