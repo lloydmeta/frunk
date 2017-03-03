@@ -276,7 +276,6 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 /// Similar to Selector, but returns the target and the remainder of the list (w/o target)
 /// in a pair.
 pub trait Plucker<Target, Index> {
-
     type Idx;
 
     /// What is left after you pluck the target from the Self
@@ -325,25 +324,41 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
     }
 }
 
-pub trait Extractor<Target, Indices> {
+/// An Sculptor trait, that allows us to extract/reshape/scult the current HList into another shape,
+/// provided that the requested shape's types are are contained within the current HList.
+pub trait Sculptor<Target, Indices> {
 
-    fn extract_from(self) -> Target;
+    /// Consumes the current HList and returns an HList with the requested shape.
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    ///
+    /// let h = hlist![9000, "joe", 41f32];
+    /// let reshaped: Hlist!(f32, i32, &str) = h.sculpt();
+    /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"])
+    ///
+    /// # }
+    /// ```
+    fn sculpt(self) -> Target;
 }
 
-impl <Source> Extractor<HNil, HCons<Here, HNil>> for Source {
-
-    fn extract_from(self) -> HNil { HNil }
+/// Implementation for when the target is an empty HList (HNil)
+impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
+    fn sculpt(self) -> HNil {
+        HNil
+    }
 }
 
-impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Extractor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
+/// Implementation for when we have a non-empty HCons target
+impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
     for HCons<SHead, STail>
     where
         HCons<SHead, STail>: Plucker<THead, IndexHead>,
-        <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Extractor<TTail, IndexTail> {
+        <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail> {
 
-    fn extract_from(self) -> HCons<THead, TTail> {
+    fn sculpt(self) -> HCons<THead, TTail> {
         let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) = self.pluck();
-        let tail: TTail = r.extract_from();
+        let tail: TTail = r.sculpt();
         HCons {
             head: p,
             tail: tail
@@ -708,9 +723,9 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_from() {
+    fn test_sculpt() {
         let h = hlist![9000, "joe", 41f32];
-        let extracted: Hlist!(f32, i32) = h.extract_from();
+        let extracted: Hlist!(f32, i32) = h.sculpt();
         assert_eq!(extracted, hlist![41f32, 9000])
     }
 }
