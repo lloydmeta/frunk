@@ -295,6 +295,7 @@ pub trait Plucker<Target, Index> {
     fn pluck(self) -> (Target, Self::Remainder);
 }
 
+/// Implementation when the pluck target is in head
 impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
     type Remainder = Tail;
 
@@ -303,6 +304,7 @@ impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
     }
 }
 
+/// Implementation when the pluck target is in the tail
 impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
     where Tail: Plucker<FromTail, TailIndex>
 {
