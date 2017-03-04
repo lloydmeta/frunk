@@ -3,6 +3,12 @@ use common::{build_hcons_constr, to_ast};
 use syn::{Ident, Body, VariantData, Field};
 use proc_macro::TokenStream;
 
+/// These are assumed to exist as enums in frunk_core::labelled
+const ALPHA_CHARS: &'static [char] = &['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+/// These are assumed to exist as enums in frunk_core::labelled as underscore prepended enums
+const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
 /// Given an AST, returns an implementation of Generic using HList with
 /// Labelled (see frunk_core::labelled) elements
 ///
@@ -82,18 +88,37 @@ fn build_labelled_type_for(field: &Field) -> Tokens {
 /// For example, given first_name, returns an AST for (f,i,r,s,t,__,n,a,m,e)
 fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
-    let name_as_types: Vec<Tokens> = name.chars().map(|c| {
-        // Here we assume we have every single possible letter created via our label.
-        if c.is_alphabetic() {
-            let as_ident = Ident::new(c.to_string());
-            quote! { ::frunk_core::labelled::#as_ident }
-        } else {
-            // non-alpha chars are represented with an underscore first.
-            let as_ident = Ident::new(format!("_{}", c));
-            quote! { ::frunk_core::labelled::#as_ident }
-        }
+    let name_as_idents: Vec<Ident> = name.chars().flat_map(|c| encode_as_ident(&c)).collect();
+    let name_as_types: Vec<Tokens> = name_as_idents.iter().map(|ident| {
+        quote! { ::frunk_core::labelled::#ident }
     }).collect();
     quote! { (#(#name_as_types),*) }
+}
+
+/// Given a char, encodes it as a vector of Ident
+///
+/// Takes care of checking to see whether the char can be used as is,
+/// or needs to be encoded as an underscored character (_ and numbers),
+/// or needs to be encoded as a unicode.
+///
+/// This method assumes that _uc and uc_ are in frunk_core::labelled as enums
+fn encode_as_ident(c: &char) -> Vec<Ident> {
+    if ALPHA_CHARS.contains(c) {
+        vec![Ident::new(c.to_string())]
+    } else if UNDERSCORE_CHARS.contains(c) {
+        vec![Ident::new(format!("_{}", c))]
+    } else {
+        // UTF escape and get the hexcode
+        let as_unicode: String = c.escape_unicode().collect();
+        // as_unicode is something like "\u{2764}" so we drop the first 3 chars and the last char
+        let hex_portion = &as_unicode[3..as_unicode.len() - 1];
+        let mut hex_idents: Vec<Ident> = hex_portion.chars().flat_map(|c| encode_as_ident(&c)).collect();
+        // sandwich between _uc and uc_
+        let mut book_ended: Vec<Ident> = vec![Ident::new("_uc")];
+        book_ended.append(&mut hex_idents);
+        book_ended.push(Ident::new("uc_"));
+        book_ended
+    }
 }
 
 /// Given a number of Idents that act as accessors and struct member
