@@ -74,7 +74,7 @@ pub trait LabelledGeneric {
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
         where A: LabelledGeneric,
               Self: Sized,
-              // The labelled representation of A must be sculpt-able into the labelled representation of Self
+    // The labelled representation of A must be sculpt-able into the labelled representation of Self
               <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices> {
         let a_gen = <A as LabelledGeneric>::into(a);
         // We toss away the remainder.
@@ -113,7 +113,7 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
     where A: LabelledGeneric,
           B: LabelledGeneric,
-          // The labelled representation of A must be sculpt-able into the labelled representation of B
+// The labelled representation of A must be sculpt-able into the labelled representation of B
           <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
     <B as LabelledGeneric>::sculpted_convert_from(a)
 }
@@ -171,8 +171,8 @@ pub trait IntoUnlabelled {
     /// # fn main() {
     ///
     /// let labelled_hlist = hlist![
-    ///     label::<(n, a, m, e), &str>("joe"),
-    ///     label::<(a, g, e), i32>(3)
+    ///     label::<(n, a, m, e), _>("joe"),
+    ///     label::<(a, g, e), _>(3)
     /// ];
     ///
     /// let unlabelled = labelled_hlist.into_unlabelled();
@@ -217,13 +217,21 @@ mod tests {
     }
 
     #[test]
-    fn test_unlabelling() {
+    fn test_anonymous_record_useage() {
+        let record = hlist![
+            label::<(n, a, m, e), _>("Joe"),
+            label::<(a, g, e), _>(30)
+        ];
+        let (name, _): (Labelled<(n, a, m, e), _>, _) = record.pluck();
+        assert_eq!(name.value, "Joe")
+    }
 
+    #[test]
+    fn test_unlabelling() {
         let labelled_hlist = hlist![
             label::<(n, a, m, e), &str>("joe"),
             label::<(a, g, e), i32>(3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
-
     }
 }
