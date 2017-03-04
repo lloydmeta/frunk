@@ -109,10 +109,12 @@ fn encode_as_ident(c: &char) -> Vec<Ident> {
         vec![Ident::new(format!("_{}", c))]
     } else {
         // UTF escape and get the hexcode
-        let as_unicode: String = c.escape_unicode().collect();
-        // as_unicode is something like "\u{2764}" so we drop the first 3 chars and the last char
-        let hex_portion = &as_unicode[3..as_unicode.len() - 1];
-        let mut hex_idents: Vec<Ident> = hex_portion.chars().flat_map(|c| encode_as_ident(&c)).collect();
+        let as_unicode = c.escape_unicode();
+        // as_unicode can be multiple unicode codepoints encoded as \u{2764}\u{fe0f} (❤️)
+        // so we filter on alphanumeric to get just u's as a delimiters along with the
+        // hex portions
+        let delimited_hex = as_unicode.filter(|c| c.is_alphanumeric());
+        let mut hex_idents: Vec<Ident> = delimited_hex.flat_map(|c| encode_as_ident(&c)).collect();
         // sandwich between _uc and uc_
         let mut book_ended: Vec<Ident> = vec![Ident::new("_uc")];
         book_ended.append(&mut hex_idents);
