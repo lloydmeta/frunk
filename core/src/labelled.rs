@@ -13,6 +13,7 @@
 
 use std::marker::PhantomData;
 use hlist::*;
+use self::internal::*;
 
 /// A trait that converts from a type to a labelled generic representation
 ///
@@ -165,7 +166,13 @@ create_enums_for_underlined! { __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0  }
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum _uc {}
 
+/// Implementation for bookending unicode characters
 impl AsStaticStr for _uc {
+
+    /// The escape character for the beginning of a unicode sequence
+    ///
+    /// If this is changed, make sure to update the characters used in
+    /// decoding (see self::internal)
     fn get_char() -> &'static str { "{" }
 }
 // Define these escape ones manually
@@ -173,27 +180,14 @@ impl AsStaticStr for _uc {
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum uc_ {}
 
+/// Implementation for bookending unicode characters
 impl AsStaticStr for uc_ {
+
+    /// The escape character for the end of a unicode sequence
+    ///
+    /// If this is changed, make sure to update the characters used in
+    /// decoding (see self::internal)
     fn get_char() -> &'static str { "}" }
-}
-
-/// Trait for getting the runtime String representation for a type
-///
-/// Used for turning a type into a string
-pub trait RuntimeString {
-    fn get_string() -> String;
-}
-
-impl RuntimeString for HNil {
-    fn get_string() -> String { "".to_string() }
-}
-
-impl <Char, Tail> RuntimeString for HCons<Char, Tail>
-    where Char: AsStaticStr,
-          Tail: RuntimeString {
-    fn get_string() -> String {
-        format!("{}{}", <Char as AsStaticStr>::get_char(), <Tail as RuntimeString>::get_string() )
-    }
 }
 
 /// Trait for getting the String representation of a Labelled's Name type
@@ -216,7 +210,10 @@ pub trait Named {
 impl <Name: RuntimeString, Value> Named for Labelled<Name, Value> {
 
     // TODO unescape Unicode chars
-    fn name(&self) -> String { <Name as RuntimeString>::get_string() }
+    fn name(&self) -> String {
+        let raw = <Name as RuntimeString>::get_string();
+        decode_unicode(raw)
+    }
 }
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
@@ -293,6 +290,125 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
             tail: self.tail.into_unlabelled(),
         }
     }
+}
+
+/// Holds logic internal to this module.
+///
+/// Do not use any of these traits or methods directly, as they may change or disappear at any time!
+mod internal {
+
+    use super::*;
+
+    /// Trait for getting the runtime String representation for a type
+    ///
+    /// DO NOT implement this trait yourself unless you know what you are doing.
+    pub trait RuntimeString {
+        fn get_string() -> String;
+    }
+
+    impl RuntimeString for HNil {
+        fn get_string() -> String { "".to_string() }
+    }
+
+    impl <Char, Tail> RuntimeString for HCons<Char, Tail>
+        where Char: AsStaticStr,
+              Tail: RuntimeString {
+        fn get_string() -> String {
+            format!("{}{}", <Char as AsStaticStr>::get_char(), <Tail as RuntimeString>::get_string() )
+        }
+    }
+
+    // Decoder states
+    #[derive(Eq, PartialEq)]
+    enum UnicodeDecoderState {
+        // Not processing unicode
+        Inactive,
+        // Just stepped into a unicode block of chars
+        JustStarted,
+        // Working on the current block of unicode chars
+        BuildingUnicodeCodepoint,
+    }
+
+    const UNICODE_BEGINS_CHAR: char = '{';
+    const UNICODE_ENDING_CHAR: char = '}';
+    const UNICODE_CODEPOINT_START: char = 'u';
+    const VALID_HEX_CHARS: &'static [char] = &['0','1','2','3','4','5','6','7','8','9', 'A','B','C','D','E','F', 'a','b','c','d','e','f'];
+
+    /// [DO NOT call this method] Given a String, tries to figure out if there are sequences
+    /// inside that are encoded as unicode, according to Frunk rules for type-level Strings.
+    ///
+    /// This inherently makes a lot of assumptions, one of which is that it will not fail ;)
+    /// The other is about how different names are encoded into type-level strings, and then
+    /// encoded into type-level unicode.
+    ///
+    /// For more details, see the test immediately following
+    pub fn decode_unicode(s_in: String) -> String {
+        if !s_in.contains(UNICODE_BEGINS_CHAR) && !s_in.contains(UNICODE_ENDING_CHAR){
+            s_in
+        } else {
+            let mut state = UnicodeDecoderState::Inactive;
+            let mut final_string = String::new();
+            let mut hex_buffer = String::new();
+            let mut u16_buffer: Vec<u16> = vec![];
+            for c in s_in.chars() {
+                if c == UNICODE_BEGINS_CHAR {
+                    state = UnicodeDecoderState::JustStarted;
+                } else if state == UnicodeDecoderState::JustStarted && c == UNICODE_CODEPOINT_START {
+                    // we have just started
+                    state = UnicodeDecoderState::BuildingUnicodeCodepoint;
+                } else if state == UnicodeDecoderState::BuildingUnicodeCodepoint && c == UNICODE_CODEPOINT_START {
+                    // Just finished a codepoint, so convert the hex to u16,
+                    // put it into the u16 buffer and clear the hex buffer
+                    let as_hex = hex_str_to_u16(&hex_buffer[..]);
+                    u16_buffer.push(as_hex);
+                    hex_buffer = String::new();
+                } else if c == UNICODE_ENDING_CHAR {
+                    // We finished the whole block
+
+                    // Convert what's left in the hex buffer to u16 and clear it
+                    let as_u16 = hex_str_to_u16(&hex_buffer[..]);
+                    u16_buffer.push(as_u16);
+                    hex_buffer = String::new();
+
+                    // Turn the whole u16 buffer into a single String
+                    let new_char = u16_vec_to_string(&u16_buffer[..]);
+                    // Push it into the char
+                    final_string = format!("{}{}", final_string, new_char);
+                    u16_buffer = vec![];
+                    state = UnicodeDecoderState::Inactive;
+                } else if state == UnicodeDecoderState::BuildingUnicodeCodepoint && VALID_HEX_CHARS.contains(&c) {
+                    hex_buffer.push(c);
+                } else {
+                    final_string.push(c);
+                }
+            }
+            final_string
+        }
+    }
+
+    #[test]
+    fn test_decode_unicode(){
+        let s = "John_Appleby_123456";
+        let processed = decode_unicode(s.to_string());
+        assert_eq!(processed, s.to_string());
+
+        let has_unicode = "John_appleby_{u2764ufe0f}_happy";
+        let processed_unicode = decode_unicode(has_unicode.to_string());
+        assert_eq!(processed_unicode, "John_appleby_\u{2764}\u{fe0f}_happy");
+
+        let all_letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
+        let processed_letters = decode_unicode(all_letters.to_string());
+        assert_eq!(processed_letters, all_letters.to_string())
+    }
+
+    fn hex_str_to_u16(hex_str: &str) -> u16 {
+        u16::from_str_radix(hex_str, 16).unwrap()
+    }
+
+    fn u16_vec_to_string(v: &[u16]) -> String {
+        String::from_utf16(v).unwrap()
+    }
+
 }
 
 #[cfg(test)]
