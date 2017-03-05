@@ -85,7 +85,7 @@ fn build_labelled_type_for(field: &Field) -> Tokens {
 /// Given an Ident returns an AST for its type level representation based on the
 /// enums generated in frunk_core::labelled.
 ///
-/// For example, given first_name, returns an AST for (f,i,r,s,t,__,n,a,m,e)
+/// For example, given first_name, returns an AST for Hlist!(f,i,r,s,t,__,n,a,m,e)
 fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
     let name_as_idents: Vec<Ident> = name.chars().flat_map(|c| encode_as_ident(&c)).collect();
@@ -168,7 +168,7 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
 ///
 /// This calls a method in frunk_core::labelled called "label"
 ///
-/// For example, given a field "age" of type i32, returns: label::<(a,g,e), i32>(age)
+/// For example, given a field "age" of type i32, returns: label::<Hlist!(a,g,e), i32>(age)
 fn build_labelled_constr_for(field: &Field) -> Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();

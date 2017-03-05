@@ -13,6 +13,7 @@
 
 use std::marker::PhantomData;
 use hlist::*;
+use std::fmt;
 use self::internal::*;
 
 /// A trait that converts from a type to a labelled generic representation
@@ -209,17 +210,27 @@ pub trait Named {
 
 impl <Name: RuntimeString, Value> Named for Labelled<Name, Value> {
 
-    // TODO unescape Unicode chars
     fn name(&self) -> String {
         let raw = <Name as RuntimeString>::get_string();
         decode_unicode(raw)
     }
 }
 
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Labelled<Name, Type> {
     name: PhantomData<Name>,
     pub value: Type,
+}
+
+impl <Name, Type> fmt::Debug for Labelled<Name, Type>
+    where
+        Type: fmt::Debug,
+        Name: RuntimeString {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let v_debug = format!("{:?}", self.value);
+        write!(f, "Labelled{{ name: {}, value: {} }}", self.name(), v_debug)
+    }
 }
 
 /// Helper function for building a new Labelled value.
@@ -354,7 +365,7 @@ mod internal {
                 if c == UNICODE_BEGINS_CHAR {
                     state = UnicodeDecoderState::JustStarted;
                 } else if state == UnicodeDecoderState::JustStarted && c == UNICODE_CODEPOINT_START {
-                    // we have just started
+                    // Start building
                     state = UnicodeDecoderState::BuildingUnicodeCodepoint;
                 } else if state == UnicodeDecoderState::BuildingUnicodeCodepoint && c == UNICODE_CODEPOINT_START {
                     // Just finished a codepoint, so convert the hex to u16,
@@ -365,19 +376,27 @@ mod internal {
                 } else if c == UNICODE_ENDING_CHAR {
                     // We finished the whole block
 
-                    // Convert what's left in the hex buffer to u16 and clear it
+                    // Convert what's left in the hex buffer to u16,
+                    // push it into the u16 buffer, and clear the hex buffer
                     let as_u16 = hex_str_to_u16(&hex_buffer[..]);
                     u16_buffer.push(as_u16);
                     hex_buffer = String::new();
 
                     // Turn the whole u16 buffer into a single String
                     let new_char = u16_vec_to_string(&u16_buffer[..]);
-                    // Push it into the char
+                    // Push the newly minted char into the final string, an reset
+                    // buffer and state
                     final_string = format!("{}{}", final_string, new_char);
                     u16_buffer = vec![];
                     state = UnicodeDecoderState::Inactive;
                 } else if state == UnicodeDecoderState::BuildingUnicodeCodepoint && VALID_HEX_CHARS.contains(&c) {
                     hex_buffer.push(c);
+                } else if state != UnicodeDecoderState::Inactive {
+                    // Something went wrong, let's try to salvage the hex_buffer and reset state
+                    final_string = format!("{}{}", final_string, hex_buffer);
+                    hex_buffer = String::new();
+                    u16_buffer = vec![];
+                    state = UnicodeDecoderState::Inactive;
                 } else {
                     final_string.push(c);
                 }
@@ -417,8 +436,8 @@ mod tests {
 
     #[test]
     fn test_field_construction() {
-        let f1 = label::<(a, g, e), i32>(3);
-        let f2 = label::<(a, g, e), i32>(3);
+        let f1 = label::<Hlist!(a, g, e), i32>(3);
+        let f2 = label::<Hlist!(a, g, e), i32>(3);
         assert_eq!(f1, f2)
     }
 
@@ -444,6 +463,8 @@ mod tests {
     #[test]
     fn test_get_string() {
         let labelled = label::<Hlist![n, a, m, e, _1, _2, _3], &str>("joe");
-        assert_eq!(labelled.name(), "name123".to_string())
+        assert_eq!(labelled.name(), "name123".to_string());
+
+        println!("YO {:?}", labelled)
     }
 }
