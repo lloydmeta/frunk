@@ -118,6 +118,14 @@ pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
     <B as LabelledGeneric>::sculpted_convert_from(a)
 }
 
+/// Trait for getting the static string representation of a type
+///
+/// Used mostly for building the runtime representation of the name of a labelled type, one
+/// char at a time.
+pub trait AsStaticStr {
+    fn get_char() -> &'static str;
+}
+
 // Create a bunch of enums that can be used to represent characters on the type level
 macro_rules! create_enums_for {
     ($($i: ident)*) => {
@@ -125,12 +133,91 @@ macro_rules! create_enums_for {
             #[allow(non_snake_case, non_camel_case_types)]
             #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
             pub enum $i {}
+
+            impl AsStaticStr for $i {
+                fn get_char() -> &'static str { stringify!($i) }
+            }
+        )*
+    }
+}
+
+// Same as above, but for identifiers that need to be prefixed with an underscore
+macro_rules! create_enums_for_underlined {
+    ($($i: ident)*) => {
+        $(
+            #[allow(non_snake_case, non_camel_case_types)]
+            #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+            pub enum $i {}
+
+            impl AsStaticStr for $i {
+                fn get_char() -> &'static str { &stringify!($i)[1..2] }
+            }
         )*
     }
 }
 
 // Add more as needed.
-create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 _uc uc_ }
+create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z }
+create_enums_for_underlined! { __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0  }
+
+// Define these escape ones manually
+#[allow(non_snake_case, non_camel_case_types)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+pub enum _uc {}
+
+impl AsStaticStr for _uc {
+    fn get_char() -> &'static str { "{" }
+}
+// Define these escape ones manually
+#[allow(non_snake_case, non_camel_case_types)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+pub enum uc_ {}
+
+impl AsStaticStr for uc_ {
+    fn get_char() -> &'static str { "}" }
+}
+
+/// Trait for getting the runtime String representation for a type
+///
+/// Used for turning a type into a string
+pub trait RuntimeString {
+    fn get_string() -> String;
+}
+
+impl RuntimeString for HNil {
+    fn get_string() -> String { "".to_string() }
+}
+
+impl <Char, Tail> RuntimeString for HCons<Char, Tail>
+    where Char: AsStaticStr,
+          Tail: RuntimeString {
+    fn get_string() -> String {
+        format!("{}{}", <Char as AsStaticStr>::get_char(), <Tail as RuntimeString>::get_string() )
+    }
+}
+
+/// Trait for getting the String representation of a Labelled's Name type
+pub trait Named {
+
+    /// Returns the label
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # use frunk_core::labelled::*;
+    /// # use frunk_core::hlist::*;
+    /// # fn main() {
+    /// let labelled = label::<Hlist![n, a, m, e], &str>("joe");
+    /// assert_eq!(labelled.name(), "name".to_string())
+    /// # }
+    /// ```
+    fn name(&self) -> String;
+}
+
+impl <Name: RuntimeString, Value> Named for Labelled<Name, Value> {
+
+    // TODO unescape Unicode chars
+    fn name(&self) -> String { <Name as RuntimeString>::get_string() }
+}
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Labelled<Name, Type> {
@@ -229,9 +316,15 @@ mod tests {
     #[test]
     fn test_unlabelling() {
         let labelled_hlist = hlist![
-            label::<(n, a, m, e), &str>("joe"),
-            label::<(a, g, e), i32>(3)];
+            label::<Hlist![n, a, m, e], &str>("joe"),
+            label::<Hlist![a, g, e], i32>(3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
+    }
+
+    #[test]
+    fn test_get_string() {
+        let labelled = label::<Hlist![n, a, m, e, _1, _2, _3], &str>("joe");
+        assert_eq!(labelled.name(), "name123".to_string())
     }
 }
