@@ -230,11 +230,14 @@ pub struct Labelled<Name, Type> {
 /// Useful so that users don't need to deal with PhantomData directly.
 ///
 /// ```
+/// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
-/// let f1 = label::<(a, g, e), i32>(3);
-/// let f2 = label::<(a, g, e), i32>(3);
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let f1 = label::<Hlist![a, g, e], i32>(3);
+/// let f2 = label::<Hlist![a, g, e], i32>(3);
 /// assert_eq!(f1, f2)
-///
+/// # }
 /// ```
 pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
     Labelled {
@@ -258,8 +261,8 @@ pub trait IntoUnlabelled {
     /// # fn main() {
     ///
     /// let labelled_hlist = hlist![
-    ///     label::<(n, a, m, e), _>("joe"),
-    ///     label::<(a, g, e), _>(3)
+    ///     label::<Hlist![n, a, m, e], _>("joe"),
+    ///     label::<Hlist![a, g, e], _>(3)
     /// ];
     ///
     /// let unlabelled = labelled_hlist.into_unlabelled();
@@ -306,10 +309,10 @@ mod tests {
     #[test]
     fn test_anonymous_record_useage() {
         let record = hlist![
-            label::<(n, a, m, e), _>("Joe"),
-            label::<(a, g, e), _>(30)
+            label::<Hlist![n, a, m, e], _>("Joe"),
+            label::<Hlist![a, g, e], _>(30)
         ];
-        let (name, _): (Labelled<(n, a, m, e), _>, _) = record.pluck();
+        let (name, _): (Labelled<Hlist![n, a, m, e], _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 

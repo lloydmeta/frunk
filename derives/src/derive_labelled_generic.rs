@@ -89,10 +89,26 @@ fn build_labelled_type_for(field: &Field) -> Tokens {
 fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
     let name_as_idents: Vec<Ident> = name.chars().flat_map(|c| encode_as_ident(&c)).collect();
-    let name_as_types: Vec<Tokens> = name_as_idents.iter().map(|ident| {
+    let name_as_tokens: Vec<Tokens> = name_as_idents.iter().map(|ident| {
         quote! { ::frunk_core::labelled::#ident }
     }).collect();
-    quote! { (#(#name_as_types),*) }
+    build_hcons_type(&name_as_tokens)
+}
+
+fn build_hcons_type(idents: &Vec<Tokens>) -> Tokens {
+    match idents.len() {
+        0 => quote! { ::frunk_core::hlist::HNil },
+        1 => {
+            let h = idents[0].clone();
+            quote! { ::frunk_core::hlist::HCons<#h, ::frunk_core::hlist::HNil> }
+        },
+        _ => {
+            let h = idents[0].clone();
+            let tail = idents[1..].to_vec();
+            let tail_type = build_hcons_type(&tail);
+            quote! { ::frunk_core::hlist::HCons<#h, #tail_type> }
+        }
+    }
 }
 
 /// Given a char, encodes it as a vector of Ident
