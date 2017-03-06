@@ -217,56 +217,48 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
     }
 }
 
-/// Returns a string resulting from the concatenation of the types provided
+/// Used for creating a Labelled value
+///
+/// There are two forms of this macro:
+///
+/// * Create an instance of the `Labelled` struct with the name
+///   set to the the concatenation of the types passed in the
+///   tuple used as the first argument.
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// assert_eq!(type_string!(a), "a");
-/// assert_eq!(type_string!(a,b,c,d), "abcd");
-/// assert_eq!(type_string!(a,b,c,d,), "abcd");
-/// assert_eq!(type_string!(), "")
+/// let labelled = label![(n,a,m,e), 30];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
+///
+/// * Create an instance of the `Labelled` struct with a custom, name,
+///   passed as the last argument in the macro
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = label![(a,g,e), 30, "Age"];
+/// assert_eq!(labelled.name, "Age");
 /// # }
 /// ```
 #[macro_export]
-macro_rules! type_string {
-    // Nothing
-    () => { "" };
-
-    // Just a single item
-    ($single: ty) => {
-        stringify!($single)
-    };
-
-    ($($repeated: ty),+) => {
-        concat!($( type_string!($repeated)), * )
-    };
-    // Trailing comma case
-    ($($repeated: ty,)+) => {
-        type_string!($($repeated), *)
-    };
-
-}
-
-#[macro_export]
 macro_rules! label {
-    // We are provided a stable name
-    (($($repeated: ty),*), $value: expr, $name: expr) => {
-        $crate::labelled::label_with_name::<($($repeated),*),_>($name, $value)
-    };
-    // No name provided, trailing comma types case
-    (($($repeated: ty,)*), $value: expr, $name: expr) => {
-        label!( ($($repeated),*), $value, $name )
-    };
-    // No name provided
+    // No name provided and type is a tuple
     (($($repeated: ty),*), $value: expr) => {
-        label!( ($($repeated),*), $value, type_string!($($repeated),*))
+        label!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
     };
-    // No name provided, trailing comma types case
+    // No name provided and type is a tuple, but with trailing commas
     (($($repeated: ty,)*), $value: expr) => {
         label!( ($($repeated),*), $value )
+    };
+    // We are provided any type, with a stable name
+    ($name_type: ty, $value: expr, $name: expr) => {
+        $crate::labelled::label_with_name::<$name_type,_>($name, $value)
     }
 }
 
