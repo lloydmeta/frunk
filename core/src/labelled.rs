@@ -17,7 +17,8 @@
 /// # use frunk_core::hlist::*;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "Lloyd"];
-/// assert_eq!(labelled.name, "name")
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "Lloyd")
 /// # }
 /// ```
 
@@ -154,7 +155,8 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// # use frunk_core::hlist::*;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
-/// assert_eq!(labelled.name, "name")
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
@@ -256,7 +258,8 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 /// # use frunk_core::hlist::*;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
-/// assert_eq!(labelled.name, "name")
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
 ///
@@ -272,6 +275,7 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 /// enum first_name {}
 /// let labelled = field![first_name, "Joe"];
 /// assert_eq!(labelled.name, "first_name");
+/// assert_eq!(labelled.value, "Joe");
 /// # }
 /// ```
 ///
@@ -285,6 +289,7 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 /// # fn main() {
 /// let labelled = field![(a,g,e), 30, "Age"];
 /// assert_eq!(labelled.name, "Age");
+/// assert_eq!(labelled.value, 30);
 /// # }
 /// ```
 #[macro_export]
