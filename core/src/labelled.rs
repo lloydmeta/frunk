@@ -169,7 +169,7 @@ impl <Name, Type> fmt::Debug for Field<Name, Type>
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v_debug = format!("{:?}", self.value);
-        write!(f, "Labelled{{ name: {}, value: {} }}", self.name, v_debug)
+        write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
     }
 }
 
@@ -192,13 +192,13 @@ pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<
     }
 }
 
-/// Trait for turning a Labelled HList into an un-labelled HList
+/// Trait for turning a Field HList into an un-labelled HList
 pub trait IntoUnlabelled {
     type Output;
 
     /// Turns the current HList into an unlabelled on.
     ///
-    /// Effectively extracts the values held inside the individual Labelled
+    /// Effectively extracts the values held inside the individual Field
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core;
@@ -241,13 +241,14 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
     }
 }
 
-/// Used for creating a Labelled value
+/// Used for creating a Field
 ///
-/// There are two forms of this macro:
+/// There are 3 forms of this macro:
 ///
-/// * Create an instance of the `Labelled` struct with the name
-///   set to the the concatenation of the types passed in the
-///   tuple used as the first argument.
+/// * Create an instance of the `Field` struct with a tuple name type
+///   and any given value. The runtime-retrievable static name
+///   field will be set to the the concatenation of the types passed in the
+///   tuple type used as the first argument.
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
@@ -259,8 +260,23 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 /// # }
 /// ```
 ///
-/// * Create an instance of the `Labelled` struct with a custom, name,
-///   passed as the last argument in the macro
+/// * Create an instance of the `Field` struct with a custom, non-tuple
+///   name type and a value. The runtime-retrievable static name field
+///   will be set to the stringified version of the type provided.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// enum first_name {}
+/// let labelled = field![first_name, "Joe"];
+/// assert_eq!(labelled.name, "first_name");
+/// # }
+/// ```
+///
+/// * Create an instance of the `Field` struct with any name type and value,
+///   _and_ a custom name, passed as the last argument in the macro
 /// ```
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
@@ -279,6 +295,10 @@ macro_rules! field {
     // No name provided and type is a tuple, but with trailing commas
     (($($repeated: ty,)*), $value: expr) => {
         field!( ($($repeated),*), $value )
+    };
+    // We are provided any type, with no stable name
+    ($name_type: ty, $value: expr) => {
+        field!( $name_type, $value, stringify!($name_type) )
     };
     // We are provided any type, with a stable name
     ($name_type: ty, $value: expr, $name: expr) => {
