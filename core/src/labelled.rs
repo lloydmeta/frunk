@@ -208,10 +208,10 @@ pub trait Named {
     fn name(&self) -> String;
 }
 
-impl <Name: RuntimeString, Value> Named for Labelled<Name, Value> {
+impl <Name: HasRuntimeString, Value> Named for Labelled<Name, Value> {
 
     fn name(&self) -> String {
-        let raw = <Name as RuntimeString>::get_string();
+        let raw = <Name as HasRuntimeString>::get_string();
         decode_unicode(raw)
     }
 }
@@ -225,7 +225,7 @@ pub struct Labelled<Name, Type> {
 impl <Name, Type> fmt::Debug for Labelled<Name, Type>
     where
         Type: fmt::Debug,
-        Name: RuntimeString {
+        Name: HasRuntimeString {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v_debug = format!("{:?}", self.value);
@@ -313,19 +313,19 @@ mod internal {
     /// Trait for getting the runtime String representation for a type
     ///
     /// DO NOT implement this trait yourself unless you know what you are doing.
-    pub trait RuntimeString {
+    pub trait HasRuntimeString {
         fn get_string() -> String;
     }
 
-    impl RuntimeString for HNil {
+    impl HasRuntimeString for HNil {
         fn get_string() -> String { "".to_string() }
     }
 
-    impl <Char, Tail> RuntimeString for HCons<Char, Tail>
+    impl <Char, Tail> HasRuntimeString for HCons<Char, Tail>
         where Char: AsStaticStr,
-              Tail: RuntimeString {
+              Tail: HasRuntimeString {
         fn get_string() -> String {
-            format!("{}{}", <Char as AsStaticStr>::get_char(), <Tail as RuntimeString>::get_string() )
+            format!("{}{}", <Char as AsStaticStr>::get_char(), <Tail as HasRuntimeString>::get_string() )
         }
     }
 
