@@ -1,4 +1,3 @@
-#![recursion_limit="128"]
 extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;

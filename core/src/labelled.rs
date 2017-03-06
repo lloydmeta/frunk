@@ -153,8 +153,7 @@ impl <Name, Type> fmt::Debug for Labelled<Name, Type>
 ///
 /// If you don't want to provide a custom name and want to rely on the type you provide
 /// to build a name, then please use the label! macro.
-pub fn label_with_name<Label, Value>(value: Value, name: &'static str) -> Labelled<Label, Value>
-    where Label: HList {
+pub fn label_with_name<Label, Value>(value: Value, name: &'static str) -> Labelled<Label, Value> {
     Labelled {
         name_type_holder: PhantomData,
         name: name,
@@ -248,7 +247,7 @@ macro_rules! type_string {
 macro_rules! label {
     // We are provided a stable name
     (($($repeated: ty),*), $value: expr, $name: expr) => {
-        $crate::labelled::label_with_name::<Hlist!($($repeated),*),_>($value, $name)
+        $crate::labelled::label_with_name::<($($repeated),*),_>($value, $name)
     };
     // No name provided, trailing comma types case
     (($($repeated: ty,)*), $value: expr, $name: expr) => {
@@ -299,7 +298,7 @@ mod tests {
             label!((n, a, m, e), "Joe"),
             label!((a, g, e), 30)
         ];
-        let (name, _): (Labelled<Hlist![n, a, m, e], _>, _) = record.pluck();
+        let (name, _): (Labelled<(n, a, m, e), _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 
