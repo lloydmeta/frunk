@@ -120,9 +120,9 @@ fn test_struct_conversion_round_trip() {
 
 #[test]
 fn test_struct_from_labelled_generic() {
-    let h = hlist![label::<Hlist!(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
-                   label::<Hlist!(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
-                   label::<Hlist!(a, g, e), usize>(3)];
+    let h = hlist![label!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
+                   label!((l, a, s, t, __, n, a, m, e), "Drumpty"),
+                   label!((a, g, e), 3)];
     let u: NewUser = from_labelled_generic(h);
     assert_eq!(u,
                NewUser {
@@ -141,9 +141,9 @@ fn test_struct_into_labelled_generic() {
     };
     let h = into_labelled_generic(u);
     assert_eq!(h,
-               hlist![label::<Hlist!(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
-                      label::<Hlist!(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
-                      label::<Hlist!(a, g, e), usize>(3)]);
+               hlist![label!((f, i, r, s, t, __, n, a, m, e), "Humpty", "first_name"),
+                      label!((l, a, s, t, __, n, a, m, e),"Drumpty", "last_name"),
+                      label!((a, g, e), 3)]);
 }
 
 #[test]

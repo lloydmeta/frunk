@@ -37,8 +37,8 @@ fn labelled_conversion(b: &mut Bencher) {
 
 #[bench]
 fn name(b: &mut Bencher) {
-    let field = label::<Hlist![f,i,r,s,t,__,n,a,m,e], _>(30);
+    let field = label!((f,i,r,s,t,__,n,a,m,e), 30);
     b.iter(|| {
-        field.name()
+        field.name
     })
 }

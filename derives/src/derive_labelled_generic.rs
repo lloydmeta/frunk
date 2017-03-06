@@ -166,14 +166,16 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
 /// Given a field, returns an AST for calling the Labelled constructor that holds its
 /// value.
 ///
-/// This calls a method in frunk_core::labelled called "label"
+/// This calls a method in frunk_core::labelled called "label_with_name", filling in the value and the
+/// field name.
 ///
-/// For example, given a field "age" of type i32, returns: label::<Hlist!(a,g,e), i32>(age)
+/// For example, given a field "age" of type i32, returns: label_with_name::<Hlist!(a,g,e), i32>(age, "age")
 fn build_labelled_constr_for(field: &Field) -> Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();
     let field_name = field.ident.clone();
-    quote! { ::frunk_core::labelled::label::<#name_as_type, #field_type>(#field_name) }
+    let field_name_str = field.ident.clone().unwrap().as_ref().to_string();
+    quote! { ::frunk_core::labelled::label_with_name::<#name_as_type, #field_type>(#field_name, #field_name_str) }
 }
 
 /// Given a struct name, and a number of Idents that act as accessors and struct member
