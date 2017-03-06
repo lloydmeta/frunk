@@ -10,6 +10,16 @@
 //! users to use LabelledGeneric without using universal function call syntax.
 //!
 //! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
+//!
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = label![(n,a,m,e), "Lloyd"];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
 
 use std::marker::PhantomData;
 use hlist::*;
@@ -133,6 +143,20 @@ macro_rules! create_enums_for {
 // Add more as needed.
 create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
+/// A Label contains a type-level Name, a runtime value, and
+/// a reference to a `&'static str` name.
+///
+/// To construct one, use the `label!` macro.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = label![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Labelled<Name, Type> {
     name_type_holder: PhantomData<Name>,
@@ -230,7 +254,7 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = label![(n,a,m,e), 30];
+/// let labelled = label![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name")
 /// # }
 /// ```

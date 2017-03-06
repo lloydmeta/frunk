@@ -132,6 +132,18 @@ fn test_struct_from_labelled_generic() {
 }
 
 #[test]
+fn test_labelled_generic_names(){
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let h = into_labelled_generic(u);
+    let l_name: &Labelled<(l,a,s,t,__,n,a,m,e), _> = h.get();
+    assert_eq!(l_name.name, "last_name")
+}
+
+#[test]
 fn test_struct_into_labelled_generic() {
     let u = NewUser {
         first_name: "Humpty",

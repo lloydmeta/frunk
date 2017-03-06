@@ -153,7 +153,7 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
 /// This calls a method in frunk_core::labelled called "label_with_name", filling in the value and the
 /// field name.
 ///
-/// For example, given a field "age" of type i32, returns: label_with_name::<Hlist!(a,g,e), i32>(age, "age")
+/// For example, given a field "age" of type i32, returns: label_with_name::<(a,g,e), i32>(age, "age")
 fn build_labelled_constr_for(field: &Field) -> Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();
