@@ -267,7 +267,7 @@ let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
 let d_user: DeletedUser = sculpted_convert_from(s_user); 
 ```
 
-For more information how Generic and Labelled work, check out their respective Rustdocs:
+For more information how Generic and Field work, check out their respective Rustdocs:
   * [Generic](https://beachape.com/frunk/frunk_core/generic/index.html)
   * [Labelled](https://beachape.com/frunk/frunk_core/labelled/index.html)
 

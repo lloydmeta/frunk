@@ -10,9 +10,20 @@
 //! users to use LabelledGeneric without using universal function call syntax.
 //!
 //! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
+//!
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = field![(n,a,m,e), "Lloyd"];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
 
 use std::marker::PhantomData;
 use hlist::*;
+use std::fmt;
 
 /// A trait that converts from a type to a labelled generic representation
 ///
@@ -45,7 +56,7 @@ use hlist::*;
 ///     age: 30,
 /// };
 ///
-/// let s_user = <SavedUser as LabelledGeneric>::convert_from(n_user); // done
+/// let s_user = <SavedUser as LabelledGeneric>::sculpted_convert_from(n_user); // done
 /// ```
 pub trait LabelledGeneric {
     /// The labelled generic representation type
@@ -130,39 +141,64 @@ macro_rules! create_enums_for {
 }
 
 // Add more as needed.
-create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 _uc uc_ }
+create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
-pub struct Labelled<Name, Type> {
-    name: PhantomData<Name>,
+/// A Label contains a type-level Name, a runtime value, and
+/// a reference to a `&'static str` name.
+///
+/// To construct one, use the `field!` macro.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = field![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
+pub struct Field<Name, Type> {
+    name_type_holder: PhantomData<Name>,
+    pub name: &'static str,
     pub value: Type,
 }
 
-/// Helper function for building a new Labelled value.
+impl <Name, Type> fmt::Debug for Field<Name, Type>
+    where Type: fmt::Debug {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let v_debug = format!("{:?}", self.value);
+        write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
+    }
+}
+
+/// Returns a new Field for a given value and custom name.
 ///
-/// Useful so that users don't need to deal with PhantomData directly.
+/// If you don't want to provide a custom name and want to rely on the type you provide
+/// to build a name, then please use the field! macro.
 ///
 /// ```
 /// # use frunk_core::labelled::*;
-/// let f1 = label::<(a, g, e), i32>(3);
-/// let f2 = label::<(a, g, e), i32>(3);
-/// assert_eq!(f1, f2)
-///
+/// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
+/// assert_eq!(l.value, "joe");
+/// assert_eq!(l.name, "name");
 /// ```
-pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
-    Labelled {
-        name: PhantomData,
+pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
+    Field {
+        name_type_holder: PhantomData,
+        name: name,
         value: value,
     }
 }
 
-/// Trait for turning a Labelled HList into an un-labelled HList
+/// Trait for turning a Field HList into an un-labelled HList
 pub trait IntoUnlabelled {
     type Output;
 
     /// Turns the current HList into an unlabelled on.
     ///
-    /// Effectively extracts the values held inside the individual Labelled
+    /// Effectively extracts the values held inside the individual Field
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core;
@@ -171,8 +207,8 @@ pub trait IntoUnlabelled {
     /// # fn main() {
     ///
     /// let labelled_hlist = hlist![
-    ///     label::<(n, a, m, e), _>("joe"),
-    ///     label::<(a, g, e), _>(3)
+    ///     field!((n, a, m, e), "joe"),
+    ///     field!((a, g, e), 3)
     /// ];
     ///
     /// let unlabelled = labelled_hlist.into_unlabelled();
@@ -192,7 +228,7 @@ impl IntoUnlabelled for HNil {
 }
 
 /// Implementation when we have a non-empty HCons holding a label in its head
-impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
+impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
     where Tail: IntoUnlabelled
 {
     type Output = HCons<Value, <Tail as IntoUnlabelled>::Output>;
@@ -205,33 +241,122 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
     }
 }
 
+/// Used for creating a Field
+///
+/// There are 3 forms of this macro:
+///
+/// * Create an instance of the `Field` struct with a tuple name type
+///   and any given value. The runtime-retrievable static name
+///   field will be set to the the concatenation of the types passed in the
+///   tuple type used as the first argument.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = field![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name")
+/// # }
+/// ```
+///
+/// * Create an instance of the `Field` struct with a custom, non-tuple
+///   name type and a value. The runtime-retrievable static name field
+///   will be set to the stringified version of the type provided.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// enum first_name {}
+/// let labelled = field![first_name, "Joe"];
+/// assert_eq!(labelled.name, "first_name");
+/// # }
+/// ```
+///
+/// * Create an instance of the `Field` struct with any name type and value,
+///   _and_ a custom name, passed as the last argument in the macro
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = field![(a,g,e), 30, "Age"];
+/// assert_eq!(labelled.name, "Age");
+/// # }
+/// ```
+#[macro_export]
+macro_rules! field {
+    // No name provided and type is a tuple
+    (($($repeated: ty),*), $value: expr) => {
+        field!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
+    };
+    // No name provided and type is a tuple, but with trailing commas
+    (($($repeated: ty,)*), $value: expr) => {
+        field!( ($($repeated),*), $value )
+    };
+    // We are provided any type, with no stable name
+    ($name_type: ty, $value: expr) => {
+        field!( $name_type, $value, stringify!($name_type) )
+    };
+    // We are provided any type, with a stable name
+    ($name_type: ty, $value: expr, $name: expr) => {
+        $crate::labelled::field_with_name::<$name_type,_>($name, $value)
+    }
+}
+
+#[test]
+fn test_label_new_building() {
+    let l1 = field!((a, b, c), 3);
+    assert_eq!(l1.value, 3);
+    assert_eq!(l1.name, "abc");
+    let l2 = field!((a, b, c,), 3);
+    assert_eq!(l2.value, 3);
+    assert_eq!(l2.name, "abc");
+
+    // test named
+    let l3 = field!((a,b,c), 3, "nope");
+    assert_eq!(l3.value, 3);
+    assert_eq!(l3.name, "nope");
+    let l4 = field!((a,b,c,), 3, "nope");
+    assert_eq!(l4.value, 3);
+    assert_eq!(l4.name, "nope");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_field_construction() {
-        let f1 = label::<(a, g, e), i32>(3);
-        let f2 = label::<(a, g, e), i32>(3);
+        let f1 = field!((a, g, e), 3);
+        let f2 = field!((a, g, e), 3);
         assert_eq!(f1, f2)
     }
 
     #[test]
     fn test_anonymous_record_useage() {
         let record = hlist![
-            label::<(n, a, m, e), _>("Joe"),
-            label::<(a, g, e), _>(30)
+            field!((n, a, m, e), "Joe"),
+            field!((a, g, e), 30)
         ];
-        let (name, _): (Labelled<(n, a, m, e), _>, _) = record.pluck();
+        let (name, _): (Field<(n, a, m, e), _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 
     #[test]
     fn test_unlabelling() {
         let labelled_hlist = hlist![
-            label::<(n, a, m, e), &str>("joe"),
-            label::<(a, g, e), i32>(3)];
+            field!((n, a, m, e), "joe"),
+            field!((a, g, e), 3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
+    }
+
+    #[test]
+    fn test_name() {
+        let labelled = field!((n, a, m, e), "joe");
+        assert_eq!(labelled.name, "name")
     }
 }

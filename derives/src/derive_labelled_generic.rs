@@ -10,7 +10,7 @@ const ALPHA_CHARS: &'static [char] = &['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '
 const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 /// Given an AST, returns an implementation of Generic using HList with
-/// Labelled (see frunk_core::labelled) elements
+/// Field (see frunk_core::labelled) elements
 ///
 /// Only works with Structs and Tuple Structs
 pub fn impl_labelled_generic(input: TokenStream) -> Tokens {
@@ -73,26 +73,26 @@ fn build_labelled_repr(fields: &Vec<Field>) -> Tokens {
     }
 }
 
-/// Given a field, returns an AST for its Labelled (see labelled module in core) type,
+/// Given a field, returns an AST for its Field (see labelled module in core) type,
 /// which holds its name (or an approximation) and type.
 fn build_labelled_type_for(field: &Field) -> Tokens {
     let ident = field.clone().ident.unwrap(); // this method is for labelled structs only
     let name_as_type = build_type_level_name_for(&ident);
     let ref field_type = field.ty;
-    quote! { ::frunk_core::labelled::Labelled<#name_as_type, #field_type> }
+    quote! { ::frunk_core::labelled::Field<#name_as_type, #field_type> }
 }
 
 /// Given an Ident returns an AST for its type level representation based on the
 /// enums generated in frunk_core::labelled.
 ///
-/// For example, given first_name, returns an AST for (f,i,r,s,t,__,n,a,m,e)
+/// For example, given first_name, returns an AST for Hlist!(f,i,r,s,t,__,n,a,m,e)
 fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
     let name_as_idents: Vec<Ident> = name.chars().flat_map(|c| encode_as_ident(&c)).collect();
-    let name_as_types: Vec<Tokens> = name_as_idents.iter().map(|ident| {
+    let name_as_tokens: Vec<Tokens> = name_as_idents.iter().map(|ident| {
         quote! { ::frunk_core::labelled::#ident }
     }).collect();
-    quote! { (#(#name_as_types),*) }
+    quote! { (#(#name_as_tokens),*) }
 }
 
 /// Given a char, encodes it as a vector of Ident
@@ -125,7 +125,7 @@ fn encode_as_ident(c: &char) -> Vec<Ident> {
 
 /// Given a number of Idents that act as accessors and struct member
 /// names, returns an AST representing how to construct an HList containing
-/// Labelled values.
+/// Field values.
 ///
 /// Assumes that there are bindings in the immediate environment with those names that
 /// are bound to properly-typed values.
@@ -134,12 +134,12 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {
             let field = fields[0].clone();
-            let labelled_constructor = build_labelled_constr_for(&field);
+            let labelled_constructor = build_field_constr_for(&field);
             quote! { ::frunk_core::hlist::HCons{ head: #labelled_constructor, tail: ::frunk_core::hlist::HNil } }
         },
         _ => {
             let field = fields[0].clone();
-            let labelled_constructor = build_labelled_constr_for(&field);
+            let labelled_constructor = build_field_constr_for(&field);
             let tail = fields[1..].to_vec();
             let hlist_tail = build_labelled_hcons_constr(&tail);
             quote! { ::frunk_core::hlist::HCons{ head: #labelled_constructor, tail: #hlist_tail }}
@@ -147,24 +147,26 @@ fn build_labelled_hcons_constr(fields: &Vec<Field>) -> Tokens {
     }
 }
 
-/// Given a field, returns an AST for calling the Labelled constructor that holds its
+/// Given a field, returns an AST for calling the Field constructor that holds its
 /// value.
 ///
-/// This calls a method in frunk_core::labelled called "label"
+/// This calls a method in frunk_core::labelled called "field_with_name", filling in the value and the
+/// field name.
 ///
-/// For example, given a field "age" of type i32, returns: label::<(a,g,e), i32>(age)
-fn build_labelled_constr_for(field: &Field) -> Tokens {
+/// For example, given a field "age" of type i32, returns: field_with_name::<(a,g,e), i32>(age, "age")
+fn build_field_constr_for(field: &Field) -> Tokens {
     let name_as_type = build_type_level_name_for(&field.clone().ident.unwrap());
     let field_type = field.ty.clone();
     let field_name = field.ident.clone();
-    quote! { ::frunk_core::labelled::label::<#name_as_type, #field_type>(#field_name) }
+    let field_name_str = field.ident.clone().unwrap().as_ref().to_string();
+    quote! { ::frunk_core::labelled::field_with_name::<#name_as_type, #field_type>(#field_name_str, #field_name) }
 }
 
 /// Given a struct name, and a number of Idents that act as accessors and struct member
 /// names, returns an AST representing how to construct said struct.
 ///
 /// Assumes that there are bindings in the immediate environment with those names that
-/// are bound to Labelled values.
+/// are bound to Field values.
 ///
 /// The opposite of build_labelled_hcons_constr
 fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> Tokens {

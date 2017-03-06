@@ -35,7 +35,7 @@ pub fn generic(input: TokenStream) -> TokenStream {
     gen.parse().unwrap()
 }
 
-/// Derives a Generic instance based on Labelled + HList for
+/// Derives a Generic instance based on Field + HList for
 /// a given Struct (Tuple Structs not supported because they have
 /// no labels)
 ///

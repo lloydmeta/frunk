@@ -119,9 +119,9 @@ fn test_struct_conversion_round_trip() {
 
 #[test]
 fn test_struct_from_labelled_generic() {
-    let h = hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
-                   label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
-                   label::<(a, g, e), usize>(3)];
+    let h = hlist![field!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
+                   field!((l, a, s, t, __, n, a, m, e), "Drumpty"),
+                   field!((a, g, e), 3)];
     let u: NewUser = from_labelled_generic(h);
     assert_eq!(u,
                NewUser {
@@ -129,6 +129,20 @@ fn test_struct_from_labelled_generic() {
                    last_name: "Drumpty",
                    age: 3,
                });
+}
+
+#[test]
+fn test_labelled_generic_names(){
+    let u = NewUser {
+        first_name: "Humpty",
+        last_name: "Drumpty",
+        age: 3,
+    };
+    let h = into_labelled_generic(u);
+    let l_name_field: &Field<(l,a,s,t,__,n,a,m,e), _> = h.get();
+    assert_eq!(l_name_field.name, "last_name");
+    let f_name_field: &Field<(f,i,r,s,t,__,n,a,m,e), _> = h.get();
+    assert_eq!(f_name_field.name, "first_name")
 }
 
 #[test]
@@ -140,9 +154,9 @@ fn test_struct_into_labelled_generic() {
     };
     let h = into_labelled_generic(u);
     assert_eq!(h,
-               hlist![label::<(f, i, r, s, t, __, n, a, m, e), &str>("Humpty"),
-                      label::<(l, a, s, t, __, n, a, m, e), &str>("Drumpty"),
-                      label::<(a, g, e), usize>(3)]);
+               hlist![field!((f, i, r, s, t, __, n, a, m, e), "Humpty", "first_name"),
+                      field!((l, a, s, t, __, n, a, m, e),"Drumpty", "last_name"),
+                      field!((a, g, e), 3)]);
 }
 
 #[test]
