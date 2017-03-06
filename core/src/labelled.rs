@@ -277,6 +277,7 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 ///
 /// * Create an instance of the `Field` struct with any name type and value,
 ///   _and_ a custom name, passed as the last argument in the macro
+///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
