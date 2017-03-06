@@ -16,7 +16,7 @@
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = label![(n,a,m,e), "Lloyd"];
+/// let labelled = field![(n,a,m,e), "Lloyd"];
 /// assert_eq!(labelled.name, "name")
 /// # }
 /// ```
@@ -146,25 +146,25 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// A Label contains a type-level Name, a runtime value, and
 /// a reference to a `&'static str` name.
 ///
-/// To construct one, use the `label!` macro.
+/// To construct one, use the `field!` macro.
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = label![(n,a,m,e), "joe"];
+/// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name")
 /// # }
 /// ```
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
-pub struct Labelled<Name, Type> {
+pub struct Field<Name, Type> {
     name_type_holder: PhantomData<Name>,
     pub name: &'static str,
     pub value: Type,
 }
 
-impl <Name, Type> fmt::Debug for Labelled<Name, Type>
+impl <Name, Type> fmt::Debug for Field<Name, Type>
     where Type: fmt::Debug {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -173,19 +173,19 @@ impl <Name, Type> fmt::Debug for Labelled<Name, Type>
     }
 }
 
-/// Returns a new label for a given value and custom name.
+/// Returns a new Field for a given value and custom name.
 ///
 /// If you don't want to provide a custom name and want to rely on the type you provide
-/// to build a name, then please use the label! macro.
+/// to build a name, then please use the field! macro.
 ///
 /// ```
 /// # use frunk_core::labelled::*;
-/// let l = label_with_name::<(n,a,m,e),_>("name", "joe");
+/// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
 /// assert_eq!(l.value, "joe");
 /// assert_eq!(l.name, "name");
 /// ```
-pub fn label_with_name<Label, Value>(name: &'static str, value: Value) -> Labelled<Label, Value> {
-    Labelled {
+pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
+    Field {
         name_type_holder: PhantomData,
         name: name,
         value: value,
@@ -207,8 +207,8 @@ pub trait IntoUnlabelled {
     /// # fn main() {
     ///
     /// let labelled_hlist = hlist![
-    ///     label!((n, a, m, e), "joe"),
-    ///     label!((a, g, e), 3)
+    ///     field!((n, a, m, e), "joe"),
+    ///     field!((a, g, e), 3)
     /// ];
     ///
     /// let unlabelled = labelled_hlist.into_unlabelled();
@@ -228,7 +228,7 @@ impl IntoUnlabelled for HNil {
 }
 
 /// Implementation when we have a non-empty HCons holding a label in its head
-impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
+impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
     where Tail: IntoUnlabelled
 {
     type Output = HCons<Value, <Tail as IntoUnlabelled>::Output>;
@@ -254,7 +254,7 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = label![(n,a,m,e), "joe"];
+/// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name")
 /// # }
 /// ```
@@ -266,40 +266,40 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = label![(a,g,e), 30, "Age"];
+/// let labelled = field![(a,g,e), 30, "Age"];
 /// assert_eq!(labelled.name, "Age");
 /// # }
 /// ```
 #[macro_export]
-macro_rules! label {
+macro_rules! field {
     // No name provided and type is a tuple
     (($($repeated: ty),*), $value: expr) => {
-        label!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
+        field!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
     };
     // No name provided and type is a tuple, but with trailing commas
     (($($repeated: ty,)*), $value: expr) => {
-        label!( ($($repeated),*), $value )
+        field!( ($($repeated),*), $value )
     };
     // We are provided any type, with a stable name
     ($name_type: ty, $value: expr, $name: expr) => {
-        $crate::labelled::label_with_name::<$name_type,_>($name, $value)
+        $crate::labelled::field_with_name::<$name_type,_>($name, $value)
     }
 }
 
 #[test]
 fn test_label_new_building() {
-    let l1 = label!((a, b, c), 3);
+    let l1 = field!((a, b, c), 3);
     assert_eq!(l1.value, 3);
     assert_eq!(l1.name, "abc");
-    let l2 = label!((a, b, c,), 3);
+    let l2 = field!((a, b, c,), 3);
     assert_eq!(l2.value, 3);
     assert_eq!(l2.name, "abc");
 
     // test named
-    let l3 = label!((a,b,c), 3, "nope");
+    let l3 = field!((a,b,c), 3, "nope");
     assert_eq!(l3.value, 3);
     assert_eq!(l3.name, "nope");
-    let l4 = label!((a,b,c,), 3, "nope");
+    let l4 = field!((a,b,c,), 3, "nope");
     assert_eq!(l4.value, 3);
     assert_eq!(l4.name, "nope");
 }
@@ -310,33 +310,33 @@ mod tests {
 
     #[test]
     fn test_field_construction() {
-        let f1 = label!((a, g, e), 3);
-        let f2 = label!((a, g, e), 3);
+        let f1 = field!((a, g, e), 3);
+        let f2 = field!((a, g, e), 3);
         assert_eq!(f1, f2)
     }
 
     #[test]
     fn test_anonymous_record_useage() {
         let record = hlist![
-            label!((n, a, m, e), "Joe"),
-            label!((a, g, e), 30)
+            field!((n, a, m, e), "Joe"),
+            field!((a, g, e), 30)
         ];
-        let (name, _): (Labelled<(n, a, m, e), _>, _) = record.pluck();
+        let (name, _): (Field<(n, a, m, e), _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 
     #[test]
     fn test_unlabelling() {
         let labelled_hlist = hlist![
-            label!((n, a, m, e), "joe"),
-            label!((a, g, e), 3)];
+            field!((n, a, m, e), "joe"),
+            field!((a, g, e), 3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
     }
 
     #[test]
     fn test_name() {
-        let labelled = label!((n, a, m, e), "joe");
+        let labelled = field!((n, a, m, e), "joe");
         assert_eq!(labelled.name, "name")
     }
 }

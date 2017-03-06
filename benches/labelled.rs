@@ -37,7 +37,7 @@ fn labelled_conversion(b: &mut Bencher) {
 
 #[bench]
 fn name(b: &mut Bencher) {
-    let field = label!((f,i,r,s,t,__,n,a,m,e), 30);
+    let field = field!((f,i,r,s,t,__,n,a,m,e), 30);
     b.iter(|| {
         field.name
     })
