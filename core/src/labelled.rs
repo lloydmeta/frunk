@@ -56,7 +56,7 @@ use std::fmt;
 ///     age: 30,
 /// };
 ///
-/// let s_user = <SavedUser as LabelledGeneric>::convert_from(n_user); // done
+/// let s_user = <SavedUser as LabelledGeneric>::sculpted_convert_from(n_user); // done
 /// ```
 pub trait LabelledGeneric {
     /// The labelled generic representation type
