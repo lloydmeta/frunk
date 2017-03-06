@@ -254,6 +254,22 @@ pub fn label<Label, Value>(value: Value) -> Labelled<Label, Value> {
     }
 }
 
+
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+pub struct LabelledNew<Name, Type> {
+    name_type_holder: PhantomData<Name>,
+    pub name: &'static str,
+    pub value: Type,
+}
+
+pub fn build_label_new<Label, Value>(value: Value, name: &'static str) -> LabelledNew<Label, Value> where Label: HList {
+    LabelledNew {
+        name_type_holder: PhantomData,
+        name: name,
+        value: value,
+    }
+}
+
 /// Trait for turning a Labelled HList into an un-labelled HList
 pub trait IntoUnlabelled {
     type Output;
@@ -303,6 +319,79 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Labelled<Label, Value>, Tail>
     }
 }
 
+/// Returns a string resulting from the concatenation of the types provided
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// assert_eq!(type_string!(a), "a");
+/// assert_eq!(type_string!(a,b,c,d), "abcd");
+/// assert_eq!(type_string!(a,b,c,d,), "abcd");
+/// assert_eq!(type_string!(), "")
+/// # }
+/// ```
+#[macro_export]
+macro_rules! type_string {
+    // Nothing
+    () => { "" };
+
+    // Just a single item
+    ($single: ty) => {
+        stringify!($single)
+    };
+
+    ($($repeated: ty),+) => {
+        concat!($( type_string!($repeated)), * )
+    };
+    // Trailing comma case
+    ($($repeated: ty,)+) => {
+        type_string!($($repeated), *)
+    };
+
+}
+
+#[macro_export]
+macro_rules! label_new {
+    (($($repeated: ty),*), $value: expr) => {
+        $crate::labelled::build_label_new::<Hlist!($($repeated),*),_>($value, type_string!($($repeated),*))
+    };
+    // trailing comma case
+    (($($repeated: ty,)*), $value: expr) => {
+        label_new!( ($($repeated),*), $value )
+    };
+    // We are provided a stable name
+    (($($repeated: ty),*), $value: expr, $name: expr) => {
+        $crate::labelled::build_label_new::<Hlist!($($repeated),*),_>($value, $name)
+    };
+    // trailing comma case
+    (($($repeated: ty,)*), $value: expr, $name: expr) => {
+        label_new!( ($($repeated),*), $value, $name )
+    }
+
+}
+
+#[test]
+fn test_label_new_building() {
+    let l1 = label_new!((a, b, c), 3);
+    assert_eq!(l1.value, 3);
+    assert_eq!(l1.name, "abc");
+    let l2 = label_new!((a, b, c,), 3);
+    assert_eq!(l2.value, 3);
+    assert_eq!(l2.name, "abc");
+
+    // test named
+    let l3 = label_new!((a,b,c), 3, "nope");
+    assert_eq!(l3.value, 3);
+    assert_eq!(l3.name, "nope");
+    let l4 = label_new!((a,b,c,), 3, "nope");
+    assert_eq!(l4.value, 3);
+    assert_eq!(l4.name, "nope");
+}
+
+
+
 /// Holds logic internal to this module.
 ///
 /// Do not use any of these traits or methods directly, as they may change or disappear at any time!
@@ -331,6 +420,7 @@ mod internal {
 
     // Decoder states
     #[derive(Eq, PartialEq)]
+    #[doc(hidden)]
     enum UnicodeDecoderState {
         // Not processing unicode
         Inactive,
