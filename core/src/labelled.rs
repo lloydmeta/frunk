@@ -153,7 +153,14 @@ impl <Name, Type> fmt::Debug for Labelled<Name, Type>
 ///
 /// If you don't want to provide a custom name and want to rely on the type you provide
 /// to build a name, then please use the label! macro.
-pub fn label_with_name<Label, Value>(value: Value, name: &'static str) -> Labelled<Label, Value> {
+///
+/// ```
+/// # use frunk_core::labelled::*;
+/// let l = label_with_name::<(n,a,m,e),_>("name", "joe");
+/// assert_eq!(l.value, "joe");
+/// assert_eq!(l.name, "name");
+/// ```
+pub fn label_with_name<Label, Value>(name: &'static str, value: Value) -> Labelled<Label, Value> {
     Labelled {
         name_type_holder: PhantomData,
         name: name,
@@ -247,7 +254,7 @@ macro_rules! type_string {
 macro_rules! label {
     // We are provided a stable name
     (($($repeated: ty),*), $value: expr, $name: expr) => {
-        $crate::labelled::label_with_name::<($($repeated),*),_>($value, $name)
+        $crate::labelled::label_with_name::<($($repeated),*),_>($name, $value)
     };
     // No name provided, trailing comma types case
     (($($repeated: ty,)*), $value: expr, $name: expr) => {

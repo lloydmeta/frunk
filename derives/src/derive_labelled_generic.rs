@@ -159,7 +159,7 @@ fn build_labelled_constr_for(field: &Field) -> Tokens {
     let field_type = field.ty.clone();
     let field_name = field.ident.clone();
     let field_name_str = field.ident.clone().unwrap().as_ref().to_string();
-    quote! { ::frunk_core::labelled::label_with_name::<#name_as_type, #field_type>(#field_name, #field_name_str) }
+    quote! { ::frunk_core::labelled::label_with_name::<#name_as_type, #field_type>(#field_name_str, #field_name) }
 }
 
 /// Given a struct name, and a number of Idents that act as accessors and struct member
