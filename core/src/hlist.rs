@@ -377,8 +377,8 @@ pub trait Sculptor<Target, Indices> {
 
 /// Implementation for when the target is an empty HList (HNil)
 ///
-/// Index type is HCons<Here, HNil> because we are done
-impl<Source> Sculptor<HNil, HCons<Here, HNil>> for Source {
+/// Index type is HNil because we don't need an index for finding HNil
+impl<Source> Sculptor<HNil, HNil> for Source {
     type Remainder = Source;
 
     fn sculpt(self) -> (HNil, Self::Remainder) {
@@ -404,8 +404,8 @@ impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TT
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
         (
             HCons {
-            head: p,
-            tail: tail
+                head: p,
+                tail: tail
             },
             tail_remainder
         )
