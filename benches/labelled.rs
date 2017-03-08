@@ -22,6 +22,12 @@ struct SavedUser<'a> {
     last_name: &'a str,
     age: usize
 }
+#[derive(LabelledGeneric)]
+struct JumbledUser<'a> {
+    age: usize,
+    last_name: &'a str,
+    first_name: &'a str,
+}
 
 #[bench]
 fn labelled_conversion(b: &mut Bencher) {
@@ -31,13 +37,24 @@ fn labelled_conversion(b: &mut Bencher) {
             last_name: "Schmoe",
             age: 30
         };
-        <SavedUser as LabelledGeneric>::sculpted_convert_from(n_u)
+        <SavedUser as LabelledGeneric>::convert_from(n_u)
+    })
+}
+#[bench]
+fn sculpted_conversion(b: &mut Bencher) {
+    b.iter(|| {
+        let n_u = NewUser {
+            first_name: "Joe",
+            last_name: "Schmoe",
+            age: 30
+        };
+        <JumbledUser as LabelledGeneric>::sculpted_convert_from(n_u)
     })
 }
 
 #[bench]
 fn name(b: &mut Bencher) {
-    let field = field!((f,i,r,s,t,__,n,a,m,e), 30);
+    let field = field!((f,i,r,s,t,__,n,a,m,e), "Joe");
     b.iter(|| {
         field.name
     })
