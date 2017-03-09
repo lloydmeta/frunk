@@ -92,7 +92,13 @@ fn test_aligned_labelled_convert_from() {
 ///
 /// If we wanted to, we could even make the time field type a parameter too for
 /// even more generalisation.
-fn to_audited<O, I, Indices>(o: I) -> O
+///
+/// Type parameters:
+///
+/// I stands for Input
+/// O stands for Output
+/// Indices is for the indices used for sculpting I with created_at Field into O's generic representation
+fn to_audited<I, O, Indices>(o: I) -> O
     where I: LabelledGeneric,
           O: LabelledGeneric,
           HCons<Field<(c, r, e, a, t, e, d, __, a, t), Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>
