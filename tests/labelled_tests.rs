@@ -86,6 +86,8 @@ fn test_aligned_labelled_convert_from() {
     assert_eq!(j_u.age, 30)
 }
 
+type CreatedAt = (c, r, e, a, t, e, d, __, a, t);
+
 /// Converts from the Input type to the Output type,
 /// provided that the Output type has a compatible labelled representation
 /// with Input *AND* has a created_at Time field
@@ -101,11 +103,11 @@ fn test_aligned_labelled_convert_from() {
 fn to_audited<I, O, Indices>(o: I) -> O
     where I: LabelledGeneric,
           O: LabelledGeneric,
-          HCons<Field<(c, r, e, a, t, e, d, __, a, t), Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>
+          HCons<Field<CreatedAt, Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>
 {
     // Add created_at field to LabelledGeneric repr of I
     let i_with_time = HCons {
-        head: field!((c, r, e, a, t, e, d, __, a, t), time::now()),
+        head: field!(CreatedAt, time::now()),
         tail: into_labelled_generic(o),
     };
     // sculpt it to fit Output LabelledGeneric representation
@@ -119,7 +121,9 @@ fn test_generalised_auditing() {
     let now = time::now().tm_nsec;
     // Need to help the compiler out by annotating, but no biggie
     let n_u_audited: NormalUserWithAudit = to_audited(NormalUser::build());
-    let j_u_audited: JumbledUserWithAudit = to_audited(JumbledUser::build());
+
+    // We can even go from NormalUser to JumbledUser since they have compatible LabelledGeneric::Reprs
+    let j_u_audited: JumbledUserWithAudit = to_audited(NormalUser::build());
     assert!(n_u_audited.created_at.tm_nsec >= now);
     assert!(j_u_audited.created_at.tm_nsec >= now);
 }

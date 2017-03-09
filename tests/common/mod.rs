@@ -85,19 +85,6 @@ pub struct JumbledUser<'a> {
     pub first_name: &'a str,
 }
 
-impl<'a> JumbledUser<'a> {
-    /// Helper function for building a NormalUser
-    #[allow(dead_code)]
-    pub fn build() -> JumbledUser<'a> {
-        JumbledUser {
-            first_name: "Moe",
-            last_name: "Ali",
-            age: 30,
-        }
-    }
-}
-
-
 #[derive(LabelledGeneric)]
 pub struct NormalUserWithAudit<'a> {
     pub first_name: &'a str,
