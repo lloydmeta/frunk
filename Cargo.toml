@@ -7,6 +7,9 @@ license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic", "Validated", "Semigroup", "Monoid"]
 
+[dev-dependencies]
+time = "0.1.36"
+
 [dependencies.frunk_core]
 path = "core"
 version = "0.0.8"

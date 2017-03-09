@@ -12,14 +12,14 @@ use test::Bencher;
 struct NewUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
-    age: usize
+    age: usize,
 }
 
 #[derive(Generic)]
 struct SavedUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
-    age: usize
+    age: usize,
 }
 
 #[bench]
@@ -28,7 +28,7 @@ fn generic_conversion(b: &mut Bencher) {
         let n_u = NewUser {
             first_name: "Joe",
             last_name: "Schmoe",
-            age: 30
+            age: 30,
         };
         <SavedUser as Generic>::convert_from(n_u)
     })

@@ -13,14 +13,14 @@ use test::Bencher;
 struct NewUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
-    age: usize
+    age: usize,
 }
 
 #[derive(LabelledGeneric)]
 struct SavedUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
-    age: usize
+    age: usize,
 }
 #[derive(LabelledGeneric)]
 struct JumbledUser<'a> {
@@ -35,7 +35,7 @@ fn labelled_conversion(b: &mut Bencher) {
         let n_u = NewUser {
             first_name: "Joe",
             last_name: "Schmoe",
-            age: 30
+            age: 30,
         };
         <SavedUser as LabelledGeneric>::convert_from(n_u)
     })
@@ -46,7 +46,7 @@ fn sculpted_conversion(b: &mut Bencher) {
         let n_u = NewUser {
             first_name: "Joe",
             last_name: "Schmoe",
-            age: 30
+            age: 30,
         };
         <JumbledUser as LabelledGeneric>::sculpted_convert_from(n_u)
     })
@@ -54,8 +54,6 @@ fn sculpted_conversion(b: &mut Bencher) {
 
 #[bench]
 fn name(b: &mut Bencher) {
-    let field = field!((f,i,r,s,t,__,n,a,m,e), "Joe");
-    b.iter(|| {
-        field.name
-    })
+    let field = field!((f, i, r, s, t, __, n, a, m, e), "Joe");
+    b.iter(|| field.name)
 }
