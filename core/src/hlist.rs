@@ -134,7 +134,6 @@ impl<H, T> HCons<H, T> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
@@ -155,7 +154,6 @@ impl<H, T> HCons<H, T> {
 ///
 /// ```
 /// # use frunk_core::hlist::*;
-///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
 /// assert_eq!(h1, "what");
@@ -173,7 +171,6 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -206,7 +203,6 @@ macro_rules! hlist {
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![h1, h2, h3] = h;
 /// assert_eq!(h1, 13.5f32);
@@ -230,7 +226,6 @@ macro_rules! hlist_pat {
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 /// # }
 /// ```
@@ -299,7 +294,6 @@ pub trait Selector<S, I> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// let f: &f32 = h.get();
@@ -448,14 +442,12 @@ pub trait IntoReverse {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.into_reverse(), nil);
     ///
     /// let h = hlist![1, "hello", true, 42f32];
     /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
-    ///
     /// # }
     /// ```
     fn into_reverse(self) -> Self::Output;
@@ -499,7 +491,6 @@ pub trait HMappable<Mapper> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.map(HNil), HNil);
@@ -550,7 +541,6 @@ pub trait HFoldRightable<Folder, Init> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.foldr(HNil, 0), 0);
@@ -603,7 +593,6 @@ pub trait HFoldLeftable<Folder, Init> {
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.foldl(HNil, 0), 0);

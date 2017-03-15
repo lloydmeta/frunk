@@ -2,6 +2,8 @@
 //!
 //! You can, for example, combine tuples.
 //!
+//! # Examples
+//!
 //! ```
 //! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
@@ -57,9 +59,10 @@ pub struct Any<T>(pub T);
 pub trait Semigroup {
     /// Associative operation taking which combines two values.
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use frunk::semigroup::*;
-    ///
     /// assert_eq!(Some(1).combine(&Some(2)), Some(3))
     /// ```
     fn combine(&self, other: &Self) -> Self;
@@ -96,9 +99,10 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 ///
 /// If the sequence is empty, returns None. Otherwise, returns Some(total).
 ///
+/// # Examples
+///
 /// ```
 /// # use frunk::semigroup::*;
-///
 /// let v1 = &vec![1, 2, 3];
 /// assert_eq!(combine_all_option(v1), Some(6));
 ///
