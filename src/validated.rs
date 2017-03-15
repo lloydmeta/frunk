@@ -5,13 +5,14 @@
 //! having all the errors returned to you all at once. In the case that everything went well, you get
 //! an `HList` of all your results.
 //!
+//! # Examples
+//!
 //! ```
 //! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*;
 //! # use frunk::validated::*;
 //! # fn main() {
-//!
 //! #[derive(PartialEq, Eq, Debug)]
 //! struct Person {
 //!     age: i32,
@@ -61,9 +62,10 @@ impl<T, E> Validated<T, E>
 {
     /// Returns true if this validation is Ok, false otherwise
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use frunk::validated::*;
-    ///
     /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
     /// let v = r1.into_validated();
     /// assert!(v.is_ok());
@@ -77,9 +79,10 @@ impl<T, E> Validated<T, E>
 
     /// Returns true if this validation is Err, false otherwise
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use frunk::validated::*;
-    ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
@@ -93,13 +96,14 @@ impl<T, E> Validated<T, E>
     /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
     /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk;
     /// # #[macro_use] extern crate frunk_core;
     /// # use frunk_core::hlist::*;
     /// # use frunk::validated::*;
     /// # fn main() {
-    ///
     /// #[derive(PartialEq, Eq, Debug)]
     /// struct Person {
     ///     age: i32,
@@ -141,9 +145,10 @@ impl<T, E> Validated<T, E>
 pub trait IntoValidated<T, E> {
     /// Consumes the current Result into a Validated so that we can begin chaining
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use frunk::validated::*;
-    ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
@@ -166,6 +171,8 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 }
 
 /// Implements Add for the current Validated with a Result, returning a new Validated.
+///
+/// # Examples
 ///
 /// ```
 /// # #[macro_use] extern crate frunk;
@@ -193,6 +200,8 @@ impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
 }
 
 /// Implements Add for the current Validated with another Validated, returning a new Validated.
+///
+/// # Examples
 ///
 /// ```
 /// # #[macro_use] extern crate frunk;

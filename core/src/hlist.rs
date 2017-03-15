@@ -3,6 +3,8 @@
 //! Typically, you would want to use the `hlist!` macro to make it easier
 //! for you to use HList.
 //!
+//! # Examples
+//!
 //! ```
 //! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
 //! let h = hlist![1, "hi"];
@@ -59,6 +61,8 @@ use std::marker::PhantomData;
 pub trait HList: Sized {
     /// Returns the length of a given HList
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
     /// let h = hlist![1, "hi"];
@@ -68,6 +72,8 @@ pub trait HList: Sized {
     fn length(&self) -> u32;
 
     /// Prepends an item to the current HList
+    ///
+    /// # Examples
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
@@ -88,7 +94,7 @@ pub trait HList: Sized {
 
 /// Represents the right-most end of a heterogeneous list
 ///
-/// Used to begin one:
+/// # Examples
 ///
 /// ```
 /// # use frunk_core::hlist::*;
@@ -124,9 +130,10 @@ impl<H, T> HCons<H, T> {
     /// Returns the head of the list and the tail of the list as a tuple2.
     /// The original list is consumed
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
@@ -143,9 +150,10 @@ impl<H, T> HCons<H, T> {
 /// the element prepended to the original list. The original list
 /// is consumed
 ///
+/// # Examples
+///
 /// ```
 /// # use frunk_core::hlist::*;
-///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
 /// assert_eq!(h1, "what");
@@ -159,9 +167,10 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 ///
 /// Helps to avoid having to write nested `HCons`.
 ///
+/// # Examples
+///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -190,9 +199,10 @@ macro_rules! hlist {
 ///
 /// Taken from https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md
 ///
+/// # Examples
+///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![h1, h2, h3] = h;
 /// assert_eq!(h1, 13.5f32);
@@ -212,9 +222,10 @@ macro_rules! hlist_pat {
 /// This is a type macro (introduced in Rust 1.13) that makes it easier
 /// to write nested type signatures.
 ///
+/// # Examples
+///
 /// ```
 /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-///
 /// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 /// # }
 /// ```
@@ -279,9 +290,10 @@ pub struct There<T>(PhantomData<T>);
 pub trait Selector<S, I> {
     /// Allows you to retrieve a unique type from an HList
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// let f: &f32 = h.get();
@@ -316,6 +328,8 @@ pub trait Plucker<Target, Index> {
     type Remainder;
 
     /// Returns the target with the remainder of the list in a pair
+    ///
+    /// # Examples
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
@@ -363,6 +377,8 @@ pub trait Sculptor<Target, Indices> {
     type Remainder;
 
     /// Consumes the current HList and returns an HList with the requested shape.
+    ///
+    /// # Examples
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
@@ -422,16 +438,16 @@ pub trait IntoReverse {
 
     /// Reverses a given data structure.
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.into_reverse(), nil);
     ///
     /// let h = hlist![1, "hello", true, 42f32];
     /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
-    ///
     /// # }
     /// ```
     fn into_reverse(self) -> Self::Output;
@@ -471,9 +487,10 @@ pub trait HMappable<Mapper> {
     /// Maps over the current data structure using functions stored in another
     /// data structure.
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.map(HNil), HNil);
@@ -520,9 +537,10 @@ pub trait HFoldRightable<Folder, Init> {
 
     /// foldr over a data structure
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.foldr(HNil, 0), 0);
@@ -571,9 +589,10 @@ pub trait HFoldLeftable<Folder, Init> {
 
     /// foldl over a data structure
     ///
+    /// # Examples
+    ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    ///
     /// let nil = HNil;
     ///
     /// assert_eq!(nil.foldl(HNil, 0), 0);
@@ -626,6 +645,8 @@ pub trait IntoTuple2 {
 
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
     /// and have a nicer type signature.
+    ///
+    /// # Examples
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {

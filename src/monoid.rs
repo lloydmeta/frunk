@@ -6,6 +6,8 @@
 //! Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
 //! their values are summed in the new map?
 //!
+//! # Examples
+//!
 //! ```
 //! # use frunk::monoid::*;
 //! # use std::collections::*;
@@ -36,6 +38,8 @@ use std::hash::Hash;
 pub trait Monoid: Semigroup {
     /// For a given Monoid, returns its empty/zero value
     ///
+    /// # Examples
+    ///
     /// ```
     /// # use frunk::monoid::*;
     ///
@@ -45,6 +49,8 @@ pub trait Monoid: Semigroup {
 }
 
 /// Return this combined with itself `n` times.
+///
+/// # Examples
 ///
 /// ```
 /// # use frunk::monoid::*;
@@ -62,6 +68,8 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 }
 
 /// Given a sequence of `xs`, combine them and return the total
+///
+/// # Examples
 ///
 /// ```
 /// # use frunk::monoid::*;

@@ -11,16 +11,18 @@
 //!
 //! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
 //!
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::labelled::*;
-/// # use frunk_core::hlist::*;
-/// # fn main() {
-/// let labelled = field![(n,a,m,e), "Lloyd"];
-/// assert_eq!(labelled.name, "name");
-/// assert_eq!(labelled.value, "Lloyd")
-/// # }
-/// ```
+//! # Examples
+//!
+//! ```
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::labelled::*;
+//! # use frunk_core::hlist::*;
+//! # fn main() {
+//! let labelled = field![(n,a,m,e), "Lloyd"];
+//! assert_eq!(labelled.name, "name");
+//! assert_eq!(labelled.value, "Lloyd")
+//! # }
+//! ```
 
 use std::marker::PhantomData;
 use hlist::*;
@@ -35,6 +37,8 @@ use std::fmt;
 /// this trait in real life. Since frunk_derive depends on this trait, I can't actually
 /// pull it in as a dependency here (otherwise the dependency would be circular) and show
 /// how to use it in a proper doc test.
+///
+/// # Examples
 ///
 /// ```rust,ignore
 /// #[derive(LabelledGeneric)]
@@ -149,6 +153,8 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 ///
 /// To construct one, use the `field!` macro.
 ///
+/// # Examples
+///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::labelled::*;
@@ -180,6 +186,8 @@ impl <Name, Type> fmt::Debug for Field<Name, Type>
 /// If you don't want to provide a custom name and want to rely on the type you provide
 /// to build a name, then please use the field! macro.
 ///
+/// # Examples
+///
 /// ```
 /// # use frunk_core::labelled::*;
 /// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
@@ -201,6 +209,8 @@ pub trait IntoUnlabelled {
     /// Turns the current HList into an unlabelled on.
     ///
     /// Effectively extracts the values held inside the individual Field
+    ///
+    /// # Examples
     ///
     /// ```
     /// # #[macro_use] extern crate frunk_core;
@@ -251,6 +261,8 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 ///   and any given value. The runtime-retrievable static name
 ///   field will be set to the the concatenation of the types passed in the
 ///   tuple type used as the first argument.
+///
+/// # Examples
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;

@@ -13,6 +13,8 @@
 /// pull it in as a dependency here (otherwise the dependency would be circular) and show
 /// how to use it in a proper doc test.
 ///
+/// # Examples
+///
 /// ```rust,ignore
 /// #[derive(Generic)]
 /// struct ApiPerson<'a> {
