@@ -4,6 +4,8 @@
 //! This library forms the core of Frunk. It should ideally be minimalistic,
 //! containing only the fundamental building blocks of generic programming.
 //!
+//! # Examples
+//!
 //! ```
 //! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*;
