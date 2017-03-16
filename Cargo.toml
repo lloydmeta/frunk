@@ -4,7 +4,7 @@ version = "0.1.19"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Generic, LabelledGeneric, Validated, Monoid, Semigroup and friends."
 license = "MIT"
-documentation = "https://docs.rs/frunk/0.1.19/frunk/"
+documentation = "https://docs.rs/frunk"
 repository = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic", "Validated", "Semigroup", "Monoid"]
 

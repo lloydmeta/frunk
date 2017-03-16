@@ -4,7 +4,7 @@ version = "0.0.9"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
-documentation = "https://docs.rs/frunk_core/0.0.9/frunk_core/"
+documentation = "https://docs.rs/frunk_core"
 repository = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic"]
 

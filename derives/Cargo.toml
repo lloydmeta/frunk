@@ -4,7 +4,7 @@ version = "0.0.10"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_derives contains the custom derivations for certain traits in Frunk."
 license = "MIT"
-documentation = "https://docs.rs/frunk_derives/0.0.10/frunk_derives/"
+documentation = "https://docs.rs/frunk_derives"
 repository = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic", "derives"]
 
