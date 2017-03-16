@@ -4,5 +4,9 @@ version = "0.0.9"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
-homepage = "https://github.com/lloydmeta/frunk"
+documentation = "https://docs.rs/frunk_core/0.0.9/frunk_core/"
+repository = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic"]
+
+[badges]
+travis-ci = { repository = "lloydmeta/frunk" }

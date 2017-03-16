@@ -4,8 +4,12 @@ version = "0.1.19"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Generic, LabelledGeneric, Validated, Monoid, Semigroup and friends."
 license = "MIT"
-homepage = "https://github.com/lloydmeta/frunk"
+documentation = "https://docs.rs/frunk/0.1.19/frunk/"
+repository = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic", "Validated", "Semigroup", "Monoid"]
+
+[badges]
+travis-ci = { repository = "lloydmeta/frunk" }
 
 [dev-dependencies]
 time = "0.1.36"
