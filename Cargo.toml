@@ -6,7 +6,7 @@ description = "Frunk provides developers with a number of functional programming
 license = "MIT"
 documentation = "https://docs.rs/frunk"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = [ "HList", "Generic", "Validated", "Semigroup", "Monoid"]
+keywords = ["Frunk", "HList", "Generic", "Validated", "Semigroup", "Monoid"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }

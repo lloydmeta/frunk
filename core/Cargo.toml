@@ -6,7 +6,7 @@ description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
 documentation = "https://docs.rs/frunk_core"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = [ "HList", "Generic", "LabelledGeneric"]
+keywords = ["Frunk", "HList", "Generic", "LabelledGeneric"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }

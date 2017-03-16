@@ -6,7 +6,7 @@ description = "frunk_derives contains the custom derivations for certain traits 
 license = "MIT"
 documentation = "https://docs.rs/frunk_derives"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = [ "HList", "Generic", "derives"]
+keywords = ["Frunk", "derives"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
