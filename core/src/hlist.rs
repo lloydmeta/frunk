@@ -231,6 +231,11 @@ macro_rules! hlist_pat {
     {} => { $crate::hlist::HNil };
     { $head:pat, $($tail:tt), +} => { $crate::hlist::HCons{ head: $head, tail: hlist_pat!($($tail),*) } };
     { $head:pat } => { $crate::hlist::HCons { head: $head, tail: $crate::hlist::HNil } };
+
+    // <-- Forward trailing comma variants
+    { $head:pat, $($tail:tt,) +} => { hlist_pat!($head, $($tail),*) };
+    { $head:pat, } => { hlist_pat!($head) };
+    // Forward trailing comma variants -->
 }
 
 /// Returns a type signature for an HList of the provided types
@@ -774,12 +779,23 @@ mod tests {
 
     #[test]
     fn test_pattern_matching() {
+        let hlist_pat!(one1) = hlist!["one"];
+        assert_eq!(one1, "one");
+        let hlist_pat!(one2,) = hlist!["one"];
+        assert_eq!(one2, "one");
+
         let h = hlist![5, 3.2f32, true, "blue".to_owned()];
         let hlist_pat!(five, float, right, s) = h;
         assert_eq!(five, 5);
         assert_eq!(float, 3.2f32);
         assert_eq!(right, true);
         assert_eq!(s, "blue".to_owned());
+
+        let h2 = hlist![13.5f32, "hello", Some(41)];
+        let hlist_pat![a, b, c,] = h2;
+        assert_eq!(a, 13.5f32);
+        assert_eq!(b, "hello");
+        assert_eq!(c, Some(41));
     }
 
     #[test]
