@@ -175,7 +175,13 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
 /// assert_eq!(h2, "hello");
-/// assert_eq!(h3, Some(41))
+/// assert_eq!(h3, Some(41));
+///
+/// // Also works when you have trailing commas
+/// let h4 = hlist!["yo",];
+/// let h5 = hlist![13.5f32, "hello", Some(41),];
+/// assert_eq!(h4, hlist!["yo"]);
+/// assert_eq!(h5, hlist![13.5f32, "hello", Some(41)]);
 /// # }
 /// ```
 #[macro_export]
@@ -193,6 +199,16 @@ macro_rules! hlist {
         $crate::hlist::HCons { head: $first, tail: hlist!($($repeated), *)}
     };
 
+    // <-- Forwarding of trailing comma variants
+    ($first: expr, $( $repeated: expr, ) +) => {
+        hlist!($first, $($repeated),*)
+    };
+
+    ($first: expr, ) => {
+        hlist!($first)
+    };
+    // Forwarding of trailing comma variants -->
+
 }
 
 /// Macro for pattern-matching on HLists.
@@ -207,7 +223,7 @@ macro_rules! hlist {
 /// let hlist_pat![h1, h2, h3] = h;
 /// assert_eq!(h1, 13.5f32);
 /// assert_eq!(h2, "hello");
-/// assert_eq!(h3, Some(41))
+/// assert_eq!(h3, Some(41));
 /// # }
 /// ```
 #[macro_export]
@@ -242,6 +258,16 @@ macro_rules! Hlist {
     ($first: ty, $( $repeated: ty ), +) => {
         $crate::hlist::HCons<$first, Hlist!($($repeated), *)>
     };
+
+    // <-- Forward trailing comma variants
+    ($single: ty,) => {
+        Hlist![$single]
+    };
+
+    ($first: ty, $( $repeated: ty, ) +) => {
+        Hlist![$first, $($repeated),*]
+    };
+    // Forward trailing comma variants -->
 }
 
 impl<RHS> Add<RHS> for HNil
@@ -407,12 +433,11 @@ impl<Source> Sculptor<HNil, HNil> for Source {
 /// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
 /// Plucker's remainder induce.
-impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
-    for HCons<SHead, STail>
+impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
+for HCons<SHead, STail>
     where
         HCons<SHead, STail>: Plucker<THead, IndexHead>,
         <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail> {
-
     type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
 
     fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
@@ -426,7 +451,6 @@ impl <THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TT
             tail_remainder
         )
     }
-
 }
 
 
@@ -468,10 +492,10 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
-        HCons {
-            head: self.head,
-            tail: HNil,
-        }
+            HCons {
+                head: self.head,
+                tail: HNil,
+            }
     }
 }
 
@@ -624,7 +648,7 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
-    for HCons<H, Tail>
+for HCons<H, Tail>
     where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
           F: FnOnce(Acc, H) -> FolderHeadR
 {
@@ -714,16 +738,14 @@ mod tests {
 
     #[test]
     fn test_pluck() {
-
         let h = hlist![1, "hello", true, 42f32];
         let (t, r): (f32, _) = h.pluck();
         assert_eq!(t, 42f32);
         assert_eq!(r, hlist![1, "hello", true])
-
     }
 
     #[test]
-    fn test_macro() {
+    fn test_hlist_macro() {
         assert_eq!(hlist![], HNil);
         let h: Hlist
         !(i32, &str, i32) = hlist![1, "2", 3];
@@ -736,6 +758,18 @@ mod tests {
         let (h3, tail3) = tail2.pop();
         assert_eq!(h3, 3);
         assert_eq!(tail3, HNil);
+    }
+
+
+    #[test]
+    #[allow(non_snake_case)]
+    fn test_Hlist_macro() {
+        let h1: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h2: Hlist!(i32, &str, i32,) = hlist![1, "2", 3];
+        let h3: Hlist!(i32) = hlist![1];
+        let h4: Hlist!(i32,) = hlist![1,];
+        assert_eq!(h1, h2);
+        assert_eq!(h3, h4);
     }
 
     #[test]
@@ -793,11 +827,9 @@ mod tests {
 
     #[test]
     fn test_sculpt() {
-
         let h = hlist![9000, "joe", 41f32];
         let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
         assert_eq!(reshaped, hlist![41f32, 9000]);
         assert_eq!(remainder, hlist!["joe"])
-
     }
 }
