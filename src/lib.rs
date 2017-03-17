@@ -101,8 +101,10 @@
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
+#[allow(unused_imports)]
 #[macro_use]
 extern crate frunk_core;
+#[allow(unused_imports)]
 #[macro_use]
 extern crate frunk_derives;
 

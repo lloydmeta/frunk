@@ -1,5 +1,4 @@
 extern crate frunk;
-#[macro_use] // for the hlist macro
 extern crate frunk_core;
 
 use frunk::*; // for the Generic trait and HList

@@ -8,14 +8,15 @@
 /// For the most part, you should be using the derivation that is available through
 /// frunk_derive to generate instances of this typeclass for your types.
 ///
-/// I would highly recommend you check out `derivation_tests.rs` to see how to actually use
-/// this trait in real life. Since frunk_derive depends on this trait, I can't actually
-/// pull it in as a dependency here (otherwise the dependency would be circular) and show
-/// how to use it in a proper doc test.
-///
 /// # Examples
 ///
-/// ```rust,ignore
+/// ```rust
+/// #[allow(unused_imports)]
+/// # #[macro_use] extern crate frunk_derives;
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::hlist::*; fn main() {
+/// use frunk_core::hlist::*;
+/// use frunk_core::generic::*;
 /// #[derive(Generic)]
 /// struct ApiPerson<'a> {
 ///     FirstName: &'a str,
@@ -31,11 +32,12 @@
 /// }
 ///
 /// let a_person = ApiPerson {
-///     first_name: "Joe",
-///     last_name: "Blow",
-///     age: 30,
+///     FirstName: "Joe",
+///     LastName: "Blow",
+///     Age: 30,
 /// };
 /// let d_person: DomainPerson = convert_from(a_person); // done
+/// # }
 /// ```
 pub trait Generic {
     /// The generic representation type

@@ -6,3 +6,7 @@ description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
 homepage = "https://github.com/lloydmeta/frunk"
 keywords = [ "HList", "Generic"]
+
+[dev-dependencies.frunk_derives]
+path = "../derives"
+version = "0.0.10"

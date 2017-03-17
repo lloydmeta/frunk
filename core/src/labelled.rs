@@ -30,17 +30,21 @@ use std::fmt;
 
 /// A trait that converts from a type to a labelled generic representation
 ///
+/// LabelledGenerics allow us to have completely type-safe, boilerplate free conversions
+/// between different structs.
+///
 /// For the most part, you should be using the derivation that is available through
 /// frunk_derive to generate instances of this typeclass for your types.
 ///
-/// I would highly recommend you check out `derivation_tests.rs` to see how to actually use
-/// this trait in real life. Since frunk_derive depends on this trait, I can't actually
-/// pull it in as a dependency here (otherwise the dependency would be circular) and show
-/// how to use it in a proper doc test.
-///
 /// # Examples
 ///
-/// ```rust,ignore
+/// ```rust
+/// #[allow(unused_imports)]
+/// # #[macro_use] extern crate frunk_derives;
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::hlist::*; fn main() {
+/// use frunk_core::hlist::*;
+/// use frunk_core::labelled::*;
 /// #[derive(LabelledGeneric)]
 /// struct NewUser<'a> {
 ///     first_name: &'a str,
@@ -48,11 +52,12 @@ use std::fmt;
 ///     age: usize,
 /// }
 ///
+/// // Notice that the fields are mismatched in terms of ordering
 /// #[derive(LabelledGeneric)]
 /// struct SavedUser<'a> {
-///     first_name: &'a str,
 ///     last_name: &'a str,
 ///     age: usize,
+///     first_name: &'a str,
 /// }
 ///
 /// let n_user = NewUser {
@@ -61,8 +66,10 @@ use std::fmt;
 ///     age: 30,
 /// };
 ///
-/// let s_user = <SavedUser as LabelledGeneric>::sculpted_convert_from(n_user); // done
-/// ```
+/// // sculpted_convert_from automagically sculpts the labelled generic
+/// // representation of the source object to that of the target type
+/// let s_user: SavedUser = sculpted_convert_from(n_user); // done
+/// # }
 pub trait LabelledGeneric {
     /// The labelled generic representation type
     type Repr;
