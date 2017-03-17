@@ -1,6 +1,6 @@
 [package]
 name = "frunk_core"
-version = "0.0.9"
+version = "0.0.10"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
@@ -10,3 +10,7 @@ keywords = ["Frunk", "HList", "Generic", "LabelledGeneric"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
+
+[dev-dependencies.frunk_derives]
+path = "../derives"
+version = "0.0.11"

@@ -1,12 +1,12 @@
 [package]
 name = "frunk"
-version = "0.1.19"
+version = "0.1.20"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Generic, LabelledGeneric, Validated, Monoid, Semigroup and friends."
 license = "MIT"
 documentation = "https://docs.rs/frunk"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = ["Frunk", "HList", "Generic", "Validated", "Semigroup", "Monoid"]
+keywords = ["Frunk", "HList", "Generic", "Validated", "Monoid"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
@@ -16,8 +16,8 @@ time = "0.1.36"
 
 [dependencies.frunk_core]
 path = "core"
-version = "0.0.9"
+version = "0.0.10"
 
 [dependencies.frunk_derives]
 path = "derives"
-version = "0.0.10"
+version = "0.0.11"

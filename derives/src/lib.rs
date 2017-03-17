@@ -8,7 +8,6 @@
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
 extern crate proc_macro;
-#[macro_use]
 extern crate frunk_core;
 #[macro_use]
 extern crate quote;

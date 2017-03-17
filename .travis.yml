@@ -15,7 +15,7 @@ script:
   - |
     travis-cargo build &&
     travis-cargo test &&
-    travis-cargo test -- -p frunk_core &&
+    cd core && travis-cargo test &&
     travis-cargo doc
 
 after_success:
