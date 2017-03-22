@@ -376,7 +376,9 @@ impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
 /// # use frunk_core::labelled::*;
 /// # use frunk_core::hlist::*;
 /// # fn main() {
-/// let labelled = field![(a,g,e), 30, "Age"];
+/// // useful aliasing of our type-level string
+/// type age = (a, g, e);
+/// let labelled = field![age, 30, "Age"];
 /// assert_eq!(labelled.name, "Age");
 /// assert_eq!(labelled.value, 30);
 /// # }
@@ -401,52 +403,62 @@ macro_rules! field {
     }
 }
 
-#[test]
-fn test_label_new_building() {
-    let l1 = field!((a, b, c), 3);
-    assert_eq!(l1.value, 3);
-    assert_eq!(l1.name, "abc");
-    let l2 = field!((a, b, c), 3);
-    assert_eq!(l2.value, 3);
-    assert_eq!(l2.name, "abc");
 
-    // test named
-    let l3 = field!((a, b, c), 3, "nope");
-    assert_eq!(l3.value, 3);
-    assert_eq!(l3.name, "nope");
-    let l4 = field!((a, b, c), 3, "nope");
-    assert_eq!(l4.value, 3);
-    assert_eq!(l4.name, "nope");
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    // Set up some aliases
+    #[allow(non_camel_case_types)]
+    type abc = (a, b, c);
+    #[allow(non_camel_case_types)]
+    type name = (n, a, m, e);
+    #[allow(non_camel_case_types)]
+    type age = (a, g, e);
+
+    #[test]
+    fn test_label_new_building() {
+        let l1 = field!(abc, 3);
+        assert_eq!(l1.value, 3);
+        assert_eq!(l1.name, "abc");
+        let l2 = field!((a, b, c), 3);
+        assert_eq!(l2.value, 3);
+        assert_eq!(l2.name, "abc");
+
+        // test named
+        let l3 = field!(abc, 3, "nope");
+        assert_eq!(l3.value, 3);
+        assert_eq!(l3.name, "nope");
+        let l4 = field!((a, b, c), 3, "nope");
+        assert_eq!(l4.value, 3);
+        assert_eq!(l4.name, "nope");
+    }
+
     #[test]
     fn test_field_construction() {
-        let f1 = field!((a, g, e), 3);
+        let f1 = field!(age, 3);
         let f2 = field!((a, g, e), 3);
         assert_eq!(f1, f2)
     }
 
     #[test]
-    fn test_anonymous_record_useage() {
-        let record = hlist![field!((n, a, m, e), "Joe"), field!((a, g, e), 30)];
-        let (name, _): (Field<(n, a, m, e), _>, _) = record.pluck();
+    fn test_anonymous_record_usage() {
+        let record = hlist![field!(name, "Joe"), field!((a, g, e), 30)];
+        let (name, _): (Field<name, _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 
     #[test]
     fn test_unlabelling() {
-        let labelled_hlist = hlist![field!((n, a, m, e), "joe"), field!((a, g, e), 3)];
+        let labelled_hlist = hlist![field!(name, "joe"), field!((a, g, e), 3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
     }
 
     #[test]
     fn test_name() {
-        let labelled = field!((n, a, m, e), "joe");
+        let labelled = field!(name, "joe");
         assert_eq!(labelled.name, "name")
     }
 }
