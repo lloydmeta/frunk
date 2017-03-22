@@ -2,6 +2,37 @@
 //!
 //! It contains the Generic typeclass and some helper methods for using the Generic type class
 //! without having to use universal function call syntax.
+//!
+//! # Examples
+//!
+//! ```rust
+//! # #[allow(unused_imports)]
+//! # #[macro_use] extern crate frunk_derives;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*; fn main() {
+//! # use frunk_core::hlist::*;
+//! # use frunk_core::generic::*;
+//! #[derive(Generic)]
+//! struct ApiPerson<'a> {
+//!     FirstName: &'a str,
+//!     LastName: &'a str,
+//!     Age: usize,
+//! }
+//!
+//! #[derive(Generic)]
+//! struct DomainPerson<'a> {
+//!     first_name: &'a str,
+//!     last_name: &'a str,
+//!     age: usize,
+//! }
+//!
+//! let a_person = ApiPerson {
+//!     FirstName: "Joe",
+//!     LastName: "Blow",
+//!     Age: 30,
+//! };
+//! let d_person: DomainPerson = convert_from(a_person); // done
+//! # }
 
 /// A trait that converts from a type to a generic representation
 ///
@@ -11,7 +42,7 @@
 /// # Examples
 ///
 /// ```rust
-/// #[allow(unused_imports)]
+/// # #[allow(unused_imports)]
 /// # #[macro_use] extern crate frunk_derives;
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::hlist::*; fn main() {

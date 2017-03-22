@@ -34,8 +34,8 @@
 //! # #[macro_use] extern crate frunk_derives;
 //! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*; fn main() {
-//! use frunk_core::hlist::*;
-//! use frunk_core::labelled::*;
+//! # use frunk_core::hlist::*;
+//! # use frunk_core::labelled::*;
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
 //!     first_name: &'a str,
