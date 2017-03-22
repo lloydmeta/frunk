@@ -18,9 +18,48 @@
 //! # use frunk_core::labelled::*;
 //! # use frunk_core::hlist::*;
 //! # fn main() {
-//! let labelled = field![(n,a,m,e), "Lloyd"];
+//! // Optionally alias our tuple that represents our type-level string
+//! type name = (n,a,m,e);
+//! let labelled = field![name, "Lloyd"];
 //! assert_eq!(labelled.name, "name");
 //! assert_eq!(labelled.value, "Lloyd")
+//! # }
+//! ```
+//!
+//! A more common usage is to use LabelledGeneric to transform strucst that have mis-matched
+//! fields !
+//!
+//! ```
+//! # #[allow(unused_imports)]
+//! # #[macro_use] extern crate frunk_derives;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*; fn main() {
+//! use frunk_core::hlist::*;
+//! use frunk_core::labelled::*;
+//! #[derive(LabelledGeneric)]
+//! struct NewUser<'a> {
+//!     first_name: &'a str,
+//!     last_name: &'a str,
+//!     age: usize,
+//! }
+//!
+//! // Notice that the fields are mismatched in terms of ordering
+//! // *and* also in terms of the number of fields.
+//! #[derive(LabelledGeneric)]
+//! struct ShortUser<'a> {
+//!     last_name: &'a str,
+//!     first_name: &'a str,
+//! }
+//!
+//! let n_user = NewUser {
+//!     first_name: "Joe",
+//!     last_name: "Blow",
+//!     age: 30,
+//! };
+//!
+//! // transform_from automagically sculpts the labelled generic
+//! // representation of the source object to that of the target type
+//! let s_user: ShortUser = transform_from(n_user); // done
 //! # }
 //! ```
 
@@ -39,7 +78,7 @@ use std::fmt;
 /// # Examples
 ///
 /// ```rust
-/// #[allow(unused_imports)]
+/// # #[allow(unused_imports)]
 /// # #[macro_use] extern crate frunk_derives;
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::hlist::*; fn main() {
