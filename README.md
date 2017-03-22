@@ -1,4 +1,4 @@
-# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Frunk](https://docs.rs/frunk/badge.svg)](https://docs.rs/frunk)
 
 > **frunk** *frəNGk*
 >  * Functional programming toolbelt in Rust.
@@ -264,7 +264,7 @@ let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.
-let d_user: DeletedUser = sculpted_convert_from(s_user); 
+let d_user: DeletedUser = transform_from(s_user); 
 ```
 
 For more information how Generic and Field work, check out their respective Rustdocs:

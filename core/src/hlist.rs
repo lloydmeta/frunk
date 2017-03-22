@@ -438,23 +438,23 @@ impl<Source> Sculptor<HNil, HNil> for Source {
 /// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
 /// Plucker's remainder induce.
-impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>>
-for HCons<SHead, STail>
-    where
-        HCons<SHead, STail>: Plucker<THead, IndexHead>,
-        <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail> {
+impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>,
+                                                                HCons<IndexHead, IndexTail>>
+    for HCons<SHead, STail>
+    where HCons<SHead, STail>: Plucker<THead, IndexHead>,
+          <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail>
+{
     type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
 
     fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
-        let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) = self.pluck();
+        let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) =
+            self.pluck();
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
-        (
-            HCons {
-                head: p,
-                tail: tail
-            },
-            tail_remainder
-        )
+        (HCons {
+             head: p,
+             tail: tail,
+         },
+         tail_remainder)
     }
 }
 
@@ -497,10 +497,10 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
-            HCons {
-                head: self.head,
-                tail: HNil,
-            }
+        HCons {
+            head: self.head,
+            tail: HNil,
+        }
     }
 }
 
@@ -600,10 +600,11 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
-    where
-        Tail: HFoldRightable<FolderTail, Init>,
-        F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR {
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
+    for HCons<H, Tail>
+    where Tail: HFoldRightable<FolderTail, Init>,
+          F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR
+{
     type Output = FolderHeadR;
 
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
@@ -653,7 +654,7 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
-for HCons<H, Tail>
+    for HCons<H, Tail>
     where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
           F: FnOnce(Acc, H) -> FolderHeadR
 {
