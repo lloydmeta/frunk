@@ -66,9 +66,9 @@ use std::fmt;
 ///     age: 30,
 /// };
 ///
-/// // sculpted_convert_from automagically sculpts the labelled generic
+/// // transform_from automagically sculpts the labelled generic
 /// // representation of the source object to that of the target type
-/// let s_user: SavedUser = sculpted_convert_from(n_user); // done
+/// let s_user: SavedUser = transform_from(n_user); // done
 /// # }
 pub trait LabelledGeneric {
     /// The labelled generic representation type
@@ -94,11 +94,27 @@ pub trait LabelledGeneric {
     ///
     /// Note that this method tosses away the "remainder" of the sculpted representation. In other
     /// words, anything that is not needed from A gets tossed out.
+    #[deprecated = "obsolete, transform_from instead"]
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
         where A: LabelledGeneric,
               Self: Sized,
-    // The labelled representation of A must be sculpt-able into the labelled representation of Self
-              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices> {
+              // The labelled representation of A must be sculpt-able into the labelled representation of Self
+              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>
+    {
+        <Self as LabelledGeneric>::transform_from(a)
+    }
+
+    /// Converts from another type A into Self assuming that A and Self have labelled generic representations
+    /// that can be sculpted into each other.
+    ///
+    /// Note that this method tosses away the "remainder" of the sculpted representation. In other
+    /// words, anything that is not needed from A gets tossed out.
+    fn transform_from<A, Indices>(a: A) -> Self
+        where A: LabelledGeneric,
+              Self: Sized,
+              // The labelled representation of A must be sculpt-able into the labelled representation of Self
+              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>
+    {
         let a_gen = <A as LabelledGeneric>::into(a);
         // We toss away the remainder.
         let (self_gen, _): (<Self as LabelledGeneric>::Repr, _) = a_gen.sculpt();
@@ -133,12 +149,27 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 ///
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
+#[deprecated = "obsolete, transform_from instead"]
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
     where A: LabelledGeneric,
           B: LabelledGeneric,
-// The labelled representation of A must be sculpt-able into the labelled representation of B
-          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices> {
-    <B as LabelledGeneric>::sculpted_convert_from(a)
+          // The labelled representation of A must be sculpt-able into the labelled representation of B
+          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>
+{
+    <B as LabelledGeneric>::transform_from(a)
+}
+/// Converts from one type into another assuming that their labelled generic representations
+/// can be sculpted into each other.
+///
+/// The "Indices" type parameter allows the compiler to figure out that the two representations
+/// can indeed be morphed into each other.
+pub fn transform_from<A, B, Indices>(a: A) -> B
+    where A: LabelledGeneric,
+          B: LabelledGeneric,
+          // The labelled representation of A must be sculpt-able into the labelled representation of B
+          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>
+{
+    <B as LabelledGeneric>::transform_from(a)
 }
 
 // Create a bunch of enums that can be used to represent characters on the type level
@@ -179,9 +210,9 @@ pub struct Field<Name, Type> {
     pub value: Type,
 }
 
-impl <Name, Type> fmt::Debug for Field<Name, Type>
-    where Type: fmt::Debug {
-
+impl<Name, Type> fmt::Debug for Field<Name, Type>
+    where Type: fmt::Debug
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v_debug = format!("{:?}", self.value);
         write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
@@ -336,15 +367,15 @@ fn test_label_new_building() {
     let l1 = field!((a, b, c), 3);
     assert_eq!(l1.value, 3);
     assert_eq!(l1.name, "abc");
-    let l2 = field!((a, b, c,), 3);
+    let l2 = field!((a, b, c), 3);
     assert_eq!(l2.value, 3);
     assert_eq!(l2.name, "abc");
 
     // test named
-    let l3 = field!((a,b,c), 3, "nope");
+    let l3 = field!((a, b, c), 3, "nope");
     assert_eq!(l3.value, 3);
     assert_eq!(l3.name, "nope");
-    let l4 = field!((a,b,c,), 3, "nope");
+    let l4 = field!((a, b, c), 3, "nope");
     assert_eq!(l4.value, 3);
     assert_eq!(l4.name, "nope");
 }
@@ -362,19 +393,14 @@ mod tests {
 
     #[test]
     fn test_anonymous_record_useage() {
-        let record = hlist![
-            field!((n, a, m, e), "Joe"),
-            field!((a, g, e), 30)
-        ];
+        let record = hlist![field!((n, a, m, e), "Joe"), field!((a, g, e), 30)];
         let (name, _): (Field<(n, a, m, e), _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
     }
 
     #[test]
     fn test_unlabelling() {
-        let labelled_hlist = hlist![
-            field!((n, a, m, e), "joe"),
-            field!((a, g, e), 3)];
+        let labelled_hlist = hlist![field!((n, a, m, e), "joe"), field!((a, g, e), 3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
     }

@@ -48,7 +48,7 @@ fn sculpted_conversion(b: &mut Bencher) {
             last_name: "Schmoe",
             age: 30,
         };
-        <JumbledUser as LabelledGeneric>::sculpted_convert_from(n_u)
+        <JumbledUser as LabelledGeneric>::transform_from(n_u)
     })
 }
 
