@@ -18,6 +18,8 @@ use frunk::semigroup::*;
 
 /// Function for checking adherence to the associativity law
 ///
+///  (x <> y) <> z = x <> (y <> z)
+///
 /// # Examples
 ///
 /// ```

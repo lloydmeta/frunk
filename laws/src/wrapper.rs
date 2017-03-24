@@ -3,6 +3,7 @@
 //! own
 
 use frunk::semigroup::*;
+use frunk::monoid::*;
 use quickcheck::*;
 
 /// The Wrapper NewType. Used for writing implementations of traits
@@ -45,5 +46,11 @@ impl<A: Arbitrary> Arbitrary for Wrapper<Product<A>> {
 impl<A: Semigroup> Semigroup for Wrapper<A> {
     fn combine(&self, other: &Self) -> Self {
         Wrapper(self.0.combine(&other.0))
+    }
+}
+
+impl<A: Monoid> Monoid for Wrapper<A> {
+    fn empty() -> Self {
+        Wrapper(<A as Monoid>::empty())
     }
 }

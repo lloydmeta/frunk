@@ -8,4 +8,5 @@ extern crate frunk;
 extern crate quickcheck;
 
 pub mod semigroup_laws;
+pub mod monoid_laws;
 pub mod wrapper;
