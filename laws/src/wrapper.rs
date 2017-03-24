@@ -5,6 +5,10 @@
 use frunk::semigroup::*;
 use quickcheck::*;
 
+/// The Wrapper NewType. Used for writing implementations of traits
+/// that we don't own for type we don't own.
+///
+/// Avoids the orphan typeclass instances problem in Haskell.
 #[derive(Eq, PartialEq, PartialOrd, Debug, Clone)]
 pub struct Wrapper<A>(A);
 
