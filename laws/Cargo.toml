@@ -16,5 +16,5 @@ path = ".."
 version = "0.1.12"
 
 
-[dependencies]
+[dev-dependencies]
 quickcheck = "0.3"
