@@ -21,3 +21,7 @@ version = "0.0.11"
 [dependencies.frunk_derives]
 path = "derives"
 version = "0.0.12"
+
+[dev-dependencies.frunk_laws]
+path = "laws"
+version = "0.0.1"
