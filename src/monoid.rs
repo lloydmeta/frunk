@@ -34,7 +34,7 @@ use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
-/// A Monoid is a Sempigroup that has an empty/ zero value
+/// A Monoid is a Semigroup that has an empty/ zero value
 pub trait Monoid: Semigroup {
     /// For a given Monoid, returns its empty/zero value
     ///

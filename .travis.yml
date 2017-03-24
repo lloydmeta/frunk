@@ -15,8 +15,9 @@ script:
   - |
     travis-cargo build &&
     travis-cargo test &&
-    cd core && travis-cargo test &&
-    travis-cargo doc
+    cd ${TRAVIS_BUILD_DIR}/core && travis-cargo test &&
+    cd ${TRAVIS_BUILD_DIR}/laws && travis-cargo test &&
+    cd ${TRAVIS_BUILD_DIR} && travis-cargo doc
 
 after_success:
   - travis-cargo doc-upload

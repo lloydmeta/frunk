@@ -1,0 +1,20 @@
+[package]
+name = "frunk_laws"
+version = "0.0.1"
+authors = ["Lloyd <lloydmeta@gmail.com>"]
+description = "frunk_laws contains laws for algebras declared in Frunk."
+license = "MIT"
+documentation = "https://docs.rs/frunk_laws"
+repository = "https://github.com/lloydmeta/frunk"
+keywords = ["Frunk", "laws", "testing", "algebras"]
+
+[badges]
+travis-ci = { repository = "lloydmeta/frunk" }
+
+[dependencies.frunk]
+path = ".."
+version = "0.1.12"
+
+
+[dependencies]
+quickcheck = "0.3"
