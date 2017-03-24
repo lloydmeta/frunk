@@ -5,7 +5,7 @@
 //! algebras declared in Frunk
 
 extern crate frunk;
-#[cfg(test)]
 extern crate quickcheck;
 
 pub mod semigroup_laws;
+pub mod wrapper;
