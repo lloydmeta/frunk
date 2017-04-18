@@ -105,6 +105,20 @@ impl<Head, I, Tail, TailIndex> IntoCoproduct<I, There<TailIndex>> for Coproduct<
     }
 }
 
+/// Function for returning a Coproduct from a given type
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+/// type I32Bool = Coproduct!(i32, f32);
+/// let co1: I32Bool = into_coproduct(42f32);
+/// let get_from_1a: Option<&i32> = co1.get();
+/// let get_from_1b: Option<&f32> = co1.get();
+/// assert_eq!(get_from_1a, None);
+/// assert_eq!(get_from_1b, Some(&42f32));
+/// # }
+/// ```
 pub fn into_coproduct<C, I, Index>(to_into: I) -> C
     where C: IntoCoproduct<I, Index>
 {
