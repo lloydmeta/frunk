@@ -185,8 +185,8 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
 
 /// Trait for implementing "folding" a Coproduct into a value.
 ///
-/// The Folder should be an HList of closures that correspond (in order) to the
-/// types used in declaring the Coproduct type
+/// The Folder should be an HList of closures that correspond (in order, for now..) to the
+/// types used in declaring the Coproduct type.
 ///
 /// # Example
 ///

@@ -270,6 +270,38 @@ let d_user: DeletedUser = transform_from(s_user);
 For more information how Generic and Field work, check out their respective Rustdocs:
   * [Generic](https://beachape.com/frunk/frunk_core/generic/index.html)
   * [Labelled](https://beachape.com/frunk/frunk_core/labelled/index.html)
+  
+### Coproduct
+
+If you've ever wanted to have an adhoc union / sum type of types that you do not control, you may want
+to take a look at `Coproduct`. In Rust, thanks to `enum`, you could potentially declare one every time you
+want a sum type to do this, but there is a light-weight way of doing it through Frunk:
+
+```rust
+#[macro_use] extern crate frunk; // for the Coproduct! type macro
+use frunk::coproduct::*;
+
+// Declare the types we want in our Coproduct
+type I32Bool = Coproduct!(i32, f32, bool);
+
+let co1: I32Bool = into_coproduct(3);
+let get_from_1a: Option<&i32> = co1.get();
+let get_from_1b: Option<&bool> = co1.get();
+// This will fail at compile time because i8 is not in our Coproduct type
+// let get_from_1b: Option<&i8> = co1.get();
+assert_eq!(get_from_1a, Some(&3));
+
+// None because co1 does not contain a bool, it contains an i32
+assert_eq!(get_from_1b, None);
+
+// We can fold our Coproduct into a single value by handling all cases
+let folder = hlist![|i| format!("int {}", i),
+                    |f| format!("float {}", f),
+                    |b| (if b { "t" } else { "f" }).to_string()];
+assert_eq!(co1.fold(&folder), "int 3".to_string());
+```
+
+For more information, check out the []docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html) 
 
 ### Validated
 
