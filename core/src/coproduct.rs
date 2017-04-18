@@ -160,7 +160,9 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
 }
 
 impl<F, R> CoproductFoldable<F, R> for CNil {
-    fn fold(self, _: & F) -> R { unreachable!()}
+    fn fold(self, _: &F) -> R {
+        unreachable!()
+    }
 }
 
 #[cfg(test)]
@@ -186,25 +188,22 @@ mod tests {
         let get_from_2b: Option<&bool> = co2.get();
         assert_eq!(get_from_2a, None);
         assert_eq!(get_from_2b, Some(&false));
-
     }
+
     #[test]
     fn test_coproduct_fold() {
-        type I32StrBool = Coproduct!(i32, bool);
+        type I32StrBool = Coproduct!(i32, f32, bool);
 
         let co1: I32StrBool = into_coproduct(3);
         let co2: I32StrBool = into_coproduct(true);
+        let co3: I32StrBool = into_coproduct(42f32);
 
-        let folder = hlist![
-            |i| format!("num {}", i),
-            |b| (if b { "t" } else { "f"}).to_owned()
-        ];
+        let folder = hlist![|i| format!("int {}", i),
+                            |f| format!("float {}", f),
+                            |b| (if b { "t" } else { "f" }).to_string()];
 
-        let folded1 = co1.fold(&folder);
-        assert_eq!(folded1, "num 3".to_owned());
-
-        let folded2 = co2.fold(&folder);
-        assert_eq!(folded2, "t".to_owned());
-
+        assert_eq!(co1.fold(&folder), "int 3".to_string());
+        assert_eq!(co2.fold(&folder), "t".to_string());
+        assert_eq!(co3.fold(&folder), "float 42".to_string());
     }
 }

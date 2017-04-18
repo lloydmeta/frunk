@@ -840,10 +840,7 @@ mod tests {
     #[test]
     fn test_map() {
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.map(hlist![
-            |n| n + 1,
-            |s| s, |f| f + 1f32]
-        );
+        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
     }
 
