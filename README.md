@@ -32,12 +32,13 @@ For a deep dive, RustDocs are available for:
 1. [HList](#hlist)
 2. [Generic](#generic)
     * 2.1 [LabelledGeneric](#labelledgeneric)
-3. [Validated](#validated)
-4. [Semigroup](#semigroup)
-5. [Monoid](#monoid)
-6. [Todo](#todo)
-7. [Contributing](#contributing)
-8. [Inspirations](#inspirations)
+3. [Coproduct](#coproduct)
+4. [Validated](#validated)
+5. [Semigroup](#semigroup)
+6. [Monoid](#monoid)
+7. [Todo](#todo)
+8. [Contributing](#contributing)
+9. [Inspirations](#inspirations)
 
 ## Examples
 
