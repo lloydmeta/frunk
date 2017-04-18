@@ -3,17 +3,46 @@
 //! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+//! # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 //! type I32Bool = Coproduct!(i32, bool);
 //! let co1: I32Bool = into_coproduct(3);
+//! let co2: I32Bool = into_coproduct(true);
+//!
+//! // Getting stuff
 //! let get_from_1a: Option<&i32> = co1.get();
 //! let get_from_1b: Option<&bool> = co1.get();
 //! assert_eq!(get_from_1a, Some(&3));
 //! assert_eq!(get_from_1b, None);
+//!
+//! let get_from_2a: Option<&i32> = co2.get();
+//! let get_from_2b: Option<&bool> = co2.get();
+//! assert_eq!(get_from_2a, None);
+//! assert_eq!(get_from_2b, Some(&true));
+//! # }
+//! ```
+//!
+//! Or, if you want to "fold" over all possible values of a coproduct
+//!
+//! ```
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk::hlist::*;
+//! # use frunk::coproduct::*; fn main() {
+//! # type I32Bool = Coproduct!(i32, bool);
+//! # let co1: I32Bool = into_coproduct(3);
+//! # let co2: I32Bool = into_coproduct(true);
+//!
+//! let folder = hlist![
+//!   |i| format!("i32 {}", i),
+//!   |b| String::from(if b { "t" } else { "f" })
+//! ];
+//!
+//! assert_eq!(co1.fold(&folder), "i32 3".to_string());
+//! assert_eq!(co2.fold(&folder), "t".to_string());
 //! # }
 //! ```
 
-use hlist::*;
+use frunk_core::hlist::*;
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -24,7 +53,7 @@ use hlist::*;
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coproduct!(i32, bool);
 /// let co1: I32Bool = into_coproduct(3);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -55,7 +84,7 @@ pub enum CNil {}
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coproduct!(i32, bool);
 /// let co1: I32Bool = into_coproduct(3);
 /// # }
@@ -110,7 +139,7 @@ impl<Head, I, Tail, TailIndex> IntoCoproduct<I, There<TailIndex>> for Coproduct<
 /// # Example
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coproduct!(i32, f32);
 /// let co1: I32Bool = into_coproduct(42f32);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -162,9 +191,9 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
 /// # Example
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk;
+/// # use frunk::coproduct::*;
+/// # use frunk::hlist::*; fn main() {
 /// type I32StrBool = Coproduct!(i32, f32, bool);
 ///
 /// let co1: I32StrBool = into_coproduct(3);
