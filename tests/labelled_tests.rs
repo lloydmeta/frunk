@@ -3,7 +3,8 @@ extern crate frunk;
 extern crate frunk_core;
 extern crate time; //Time library
 
-use frunk::*; // for the Generic trait and HList
+use frunk::hlist::*;
+use frunk::labelled::*;
 
 mod common;
 

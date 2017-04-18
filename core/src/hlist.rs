@@ -389,7 +389,8 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
     type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
 
     fn pluck(self) -> (FromTail, Self::Remainder) {
-        let (target, tail_remainder): (FromTail, <Tail as Plucker<FromTail, TailIndex>>::Remainder) =
+        let (target, tail_remainder): (FromTail,
+                                       <Tail as Plucker<FromTail, TailIndex>>::Remainder) =
             <Tail as Plucker<FromTail, TailIndex>>::pluck(self.tail);
         (target,
          HCons {
@@ -661,7 +662,8 @@ impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail
     type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR>>::Output;
 
     fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
-        self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
+        self.tail
+            .foldl(folder.tail, (folder.head)(acc, self.head))
     }
 }
 

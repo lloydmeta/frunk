@@ -1,7 +1,7 @@
 extern crate frunk;
 extern crate frunk_core;
 
-use frunk::*; // for the Generic trait and HList
+use frunk::generic::*; // for the Generic trait and HList
 use frunk::validated::*;
 
 mod common;

@@ -111,10 +111,7 @@ extern crate frunk_derives;
 pub mod semigroup;
 pub mod monoid;
 pub mod validated;
+pub mod coproduct;
 
-pub use frunk_core::hlist::*;
-pub use frunk_core::labelled::*;
-// this needs to be globally imported in order for custom derives to work w/o fuss
-pub use frunk_core::generic::*;
-
+pub use frunk_core::*;
 pub use frunk_derives::*;
