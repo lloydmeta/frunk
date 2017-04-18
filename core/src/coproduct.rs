@@ -13,7 +13,7 @@
 //! # }
 //! ```
 
-use hlist::{Here, There};
+use hlist::*;
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -35,7 +35,9 @@ use hlist::{Here, There};
 /// ```
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum Coproduct<H, T> {
+    /// Coproduct is either H or T, in this case, it is H
     Inl(H),
+    /// Coproduct is either H or T, in this case, it is T
     Inr(T),
 }
 
@@ -125,7 +127,6 @@ impl<Head, Tail> CoproductSelector<Head, Here> for Coproduct<Head, Tail> {
     }
 }
 
-
 impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailIndex>>
     for Coproduct<Head, Tail>
     where Tail: CoproductSelector<FromTail, TailIndex>
@@ -139,12 +140,28 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
     }
 }
 
-pub fn get_from<C, T, Indices>(coprod: &C) -> Option<&T>
-    where C: CoproductSelector<T, Indices>
-{
-    <C as CoproductSelector<T, Indices>>::get(coprod)
+pub trait CoproductFoldable<Folder, Output> {
+    fn fold(self, f: Folder) -> Output;
 }
 
+impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
+    where F: FnOnce(CH) -> R,
+          CTail: CoproductFoldable<FTail, R>
+{
+    fn fold(self, f: HCons<F, FTail>) -> R {
+        use self::Coproduct::*;
+        let f_head = f.head;
+        let f_tail = f.tail;
+        match self {
+            Inl(r) => (f_head)(r),
+            Inr(rest) => rest.fold(f_tail),
+        }
+    }
+}
+
+impl<F, R> CoproductFoldable<F, R> for CNil {
+    fn fold(self, _: F) -> R { unreachable!()}
+}
 
 #[cfg(test)]
 mod tests {
@@ -169,6 +186,27 @@ mod tests {
         let get_from_2b: Option<&bool> = co2.get();
         assert_eq!(get_from_2a, None);
         assert_eq!(get_from_2b, Some(&false));
+
+    }
+    #[test]
+    fn test_coproduct_fold() {
+        type I32StrBool = Coproduct!(i32, bool);
+
+        let co1: I32StrBool = into_coproduct(3);
+        let co2: I32StrBool = into_coproduct(true);
+
+        let folded1 = co1.fold(hlist![
+            |i| format!("num {}", i),
+            |b| (if b { "t" } else { "f"}).to_owned()
+        ]);
+        assert_eq!(folded1, "num 3".to_owned());
+
+
+        let folded2 = co2.fold(hlist![
+            |i| format!("num {}", i),
+            |b| (if b { "t" } else { "f"}).to_owned()
+        ]);
+        assert_eq!(folded2, "t".to_owned());
 
     }
 }
