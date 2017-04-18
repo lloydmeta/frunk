@@ -1,13 +1,48 @@
+//! Module that holds Coproduct data structures, traits, and implementations
+//!
+//! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
+//!
+//! ```
+//! # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+//! type I32Bool = Coproduct!(i32, bool);
+//! let co1: I32Bool = into_coproduct(3);
+//! let get_from_1a: Option<&i32> = co1.get();
+//! let get_from_1b: Option<&bool> = co1.get();
+//! assert_eq!(get_from_1a, Some(&3));
+//! assert_eq!(get_from_1b, None);
+//! # }
+//! ```
+
 use hlist::{Here, There};
 
-/// Enum type representing a Coproduct
+/// Enum type representing a Coproduct. Think of this as a Result, but capable
+/// of supporting any arbitrary number of types instead of just 2.
+///
+/// To consctruct a Coproduct, you would typically declare a type using the `Coproduct!` type
+/// macro and then use the `into_coproduct` method.
+///
+/// # Examples
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::coproduct::*; fn main() {
+/// type I32Bool = Coproduct!(i32, bool);
+/// let co1: I32Bool = into_coproduct(3);
+/// let get_from_1a: Option<&i32> = co1.get();
+/// let get_from_1b: Option<&bool> = co1.get();
+/// assert_eq!(get_from_1a, Some(&3));
+/// assert_eq!(get_from_1b, None);
+/// # }
+/// ```
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum Coproduct<H, T> {
     Inl(H),
     Inr(T),
 }
 
-/// Phantom type for signature purposes only
+/// Phantom type for signature purposes only (has no value)
+///
+/// Used by the macro to terminate the Coproduct type signature
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum CNil {}
 
 /// Returns a type signature for a Coproduct of the provided types
@@ -114,22 +149,26 @@ pub fn get_from<C, T, Indices>(coprod: &C) -> Option<&T>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::Coproduct::*;
 
     #[test]
     fn test_into_coproduct() {
-        type I32Bool = Coproduct!(i32, bool);
+        type I32StrBool = Coproduct!(i32, &'static str, bool);
 
-        let co1: I32Bool = into_coproduct(3);
+        let co1: I32StrBool = into_coproduct(3);
+        assert_eq!(co1, Inl(3));
         let get_from_1a: Option<&i32> = co1.get();
         let get_from_1b: Option<&bool> = co1.get();
         assert_eq!(get_from_1a, Some(&3));
         assert_eq!(get_from_1b, None);
 
 
-        let co2: I32Bool = into_coproduct(false);
+        let co2: I32StrBool = into_coproduct(false);
+        assert_eq!(co2, Inr(Inr(Inl(false))));
         let get_from_2a: Option<&i32> = co2.get();
         let get_from_2b: Option<&bool> = co2.get();
         assert_eq!(get_from_2a, None);
         assert_eq!(get_from_2b, Some(&false));
+
     }
 }
