@@ -140,6 +140,32 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
     }
 }
 
+/// Trait for implementing "folding" a Coproduct into a value.
+///
+/// The Folder should be an HList of closures that correspond (in order) to the
+/// types used in declaring the Coproduct type
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # use frunk_core::hlist::*; fn main() {
+/// type I32StrBool = Coproduct!(i32, f32, bool);
+///
+/// let co1: I32StrBool = into_coproduct(3);
+/// let co2: I32StrBool = into_coproduct(true);
+/// let co3: I32StrBool = into_coproduct(42f32);
+///
+/// let folder = hlist![|i| format!("int {}", i),
+///                             |f| format!("float {}", f),
+///                             |b| (if b { "t" } else { "f" }).to_string()];
+///
+/// assert_eq!(co1.fold(&folder), "int 3".to_string());
+/// assert_eq!(co2.fold(&folder), "t".to_string());
+/// assert_eq!(co3.fold(&folder), "float 42".to_string());
+/// # }
+/// ```
 pub trait CoproductFoldable<Folder, Output> {
     fn fold(self, f: &Folder) -> Output;
 }
@@ -159,6 +185,8 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
     }
 }
 
+/// This is literally impossible; CNil is not instantiable
+#[doc(hidden)]
 impl<F, R> CoproductFoldable<F, R> for CNil {
     fn fold(self, _: &F) -> R {
         unreachable!()
