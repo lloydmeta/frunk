@@ -1,5 +1,6 @@
 use hlist::{Here, There};
 
+/// Enum type representing a Coproduct
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
 pub enum Coproduct<H, T> {
     Inl(H),
@@ -46,27 +47,6 @@ macro_rules! Coproduct {
     };
     // Forward trailing comma variants -->
 }
-
-
-pub trait CoproductFold<H, T> {
-    fn fold<A, F1, F2>(self, l: F1, r: F2) -> A
-        where F1: FnOnce(H) -> A,
-              F2: FnOnce(T) -> A;
-}
-
-impl<H, T> CoproductFold<H, T> for Coproduct<H, T> {
-    fn fold<A, F1, F2>(self, l: F1, r: F2) -> A
-        where F1: FnOnce(H) -> A,
-              F2: FnOnce(T) -> A
-    {
-        use self::Coproduct::*;
-        match self {
-            Inl(v) => l(v),
-            Inr(v) => r(v),
-        }
-    }
-}
-
 
 // <-- For turning something into a Coproduct
 pub trait IntoCoproduct<InsertType, Index> {
