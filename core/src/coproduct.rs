@@ -141,17 +141,17 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
 }
 
 pub trait CoproductFoldable<Folder, Output> {
-    fn fold(self, f: Folder) -> Output;
+    fn fold(self, f: &Folder) -> Output;
 }
 
 impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
-    where F: FnOnce(CH) -> R,
+    where F: Fn(CH) -> R,
           CTail: CoproductFoldable<FTail, R>
 {
-    fn fold(self, f: HCons<F, FTail>) -> R {
+    fn fold(self, f: &HCons<F, FTail>) -> R {
         use self::Coproduct::*;
-        let f_head = f.head;
-        let f_tail = f.tail;
+        let ref f_head = f.head;
+        let ref f_tail = f.tail;
         match self {
             Inl(r) => (f_head)(r),
             Inr(rest) => rest.fold(f_tail),
@@ -160,7 +160,7 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
 }
 
 impl<F, R> CoproductFoldable<F, R> for CNil {
-    fn fold(self, _: F) -> R { unreachable!()}
+    fn fold(self, _: & F) -> R { unreachable!()}
 }
 
 #[cfg(test)]
@@ -195,17 +195,15 @@ mod tests {
         let co1: I32StrBool = into_coproduct(3);
         let co2: I32StrBool = into_coproduct(true);
 
-        let folded1 = co1.fold(hlist![
+        let folder = hlist![
             |i| format!("num {}", i),
             |b| (if b { "t" } else { "f"}).to_owned()
-        ]);
+        ];
+
+        let folded1 = co1.fold(&folder);
         assert_eq!(folded1, "num 3".to_owned());
 
-
-        let folded2 = co2.fold(hlist![
-            |i| format!("num {}", i),
-            |b| (if b { "t" } else { "f"}).to_owned()
-        ]);
+        let folded2 = co2.fold(&folder);
         assert_eq!(folded2, "t".to_owned());
 
     }
