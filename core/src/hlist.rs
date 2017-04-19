@@ -655,25 +655,30 @@ impl<F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, F
     }
 }
 
-// Todo: enable this when the compiler stops smoking crack
+// TODO: enable this when the compiler stops smoking crack
+// Likely same as https://github.com/rust-lang/rust/issues/39959
 //
 // At the moment, we get a diverging requirement evaluation a la
 // overflow evaluating the requirement `<_ as std::ops::FnOnce<(&_, _)>>::Output`
 //
-//impl<'a, F, R, H, Init> HFoldRightable<HCons<F, HNil>, Init, Here> for &'a HCons<H, HNil>
-//    where F: FnOnce(&'a H, Init) -> R {
-//    type Output = R;
+// or
 //
-//    fn foldr(self, f: HCons<F, HNil>, init: Init) -> Self::Output {
-//        let ref h = self.head;
-//        let f = f.head;
-//        f(h, init)
+// overflow evaluating the requirement `<&_ as hlist::HFoldRightable<_, _, _>>::Output`
+//
+// Depending on the exit-case implementation
+//
+//impl<'a, F, Init> HFoldRightable<F, Init, Here> for &'a HNil {
+//    type Output = Init;
+//
+//    fn foldr(self, _: F, i: Init) -> Self::Output {
+//        i
 //    }
 //}
 //
+//
 //impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for &'a HCons<H, Tail>
 //    where
-//        F: FnOnce(&'a H, <&'a Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
+//        F: Fn(&'a H, <&'a Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
 //        &'a Tail: HFoldRightable<FolderTail, Init, Index>
 //
 //{
@@ -947,15 +952,16 @@ mod tests {
     }
 
     // Todo enable when compiler is fixed
-    //    #[test]
-    //    fn test_foldr_non_consuming() {
-    //        let h = hlist![1, false, 42f32];
-    //        let folded = h.as_ref().foldr(hlist![|&i, acc| i + acc,
-    //                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-    //                                             |&f, acc| f + acc],
-    //                                      1f32);
-    //        assert_eq!(folded, 9001)
-    //    }
+//    #[test]
+//    fn test_foldr_non_consuming() {
+//        let h = hlist![1, false, 42f32];
+//        let folder = hlist![|&i, acc| i + acc,
+//                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
+//                                             |&f, acc| f + acc];
+//        let folded = h.as_ref().foldr(folder,
+//                                      1f32);
+//        assert_eq!(folded, 9001)
+//    }
 
     #[test]
     fn test_foldl_consuming() {

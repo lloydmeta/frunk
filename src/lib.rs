@@ -15,9 +15,9 @@
 //! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*; fn main() {
-//! use frunk_core::hlist::*;
-//! use frunk_core::generic::*;
-//! use frunk_core::labelled::*;
+//! use frunk::hlist::*;
+//! use frunk::generic::*;
+//! use frunk::labelled::*;
 //! use frunk::monoid::*;
 //! use frunk::semigroup::*;
 //! use frunk::validated::*;
