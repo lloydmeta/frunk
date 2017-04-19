@@ -31,14 +31,21 @@
 //! # type I32Bool = Coproduct!(i32, bool);
 //! # let co1: I32Bool = into_coproduct(3);
 //! # let co2: I32Bool = into_coproduct(true);
-//!
 //! let folder = hlist![
-//!   |i| format!("i32 {}", i),
-//!   |b| String::from(if b { "t" } else { "f" })
+//!   |&i| format!("i32 {}", i),
+//!   |&b| String::from(if b { "t" } else { "f" })
 //! ];
 //!
-//! assert_eq!(co1.fold(&folder), "i32 3".to_string());
-//! assert_eq!(co2.fold(&folder), "t".to_string());
+//! assert_eq!(co1.as_ref().fold(&folder), "i32 3".to_string());
+//! assert_eq!(co2.as_ref().fold(&folder), "t".to_string());
+//!
+//! // There is also a value consuming-variant of fold
+//!
+//! let folded = co1.fold(hlist![
+//!   |i| format!("i32 {}", i),
+//!   |b| String::from(if b { "t" } else { "f" })
+//! ]);
+//! assert_eq!(folded, "i32 3".to_string());
 //! # }
 //! ```
 
@@ -200,27 +207,27 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
 /// let co2: I32StrBool = into_coproduct(true);
 /// let co3: I32StrBool = into_coproduct(42f32);
 ///
-/// let folder = hlist![|i| format!("int {}", i),
-///                             |f| format!("float {}", f),
-///                             |b| (if b { "t" } else { "f" }).to_string()];
+/// let folder = hlist![|&i| format!("int {}", i),
+///                     |&f| format!("float {}", f),
+///                     |&b| (if b { "t" } else { "f" }).to_string()];
 ///
-/// assert_eq!(co1.fold(&folder), "int 3".to_string());
-/// assert_eq!(co2.fold(&folder), "t".to_string());
-/// assert_eq!(co3.fold(&folder), "float 42".to_string());
+/// assert_eq!(co1.as_ref().fold(&folder), "int 3".to_string());
+/// assert_eq!(co2.as_ref().fold(&folder), "t".to_string());
+/// assert_eq!(co3.as_ref().fold(&folder), "float 42".to_string());
 /// # }
 /// ```
 pub trait CoproductFoldable<Folder, Output> {
-    fn fold(self, f: &Folder) -> Output;
+    fn fold(self, f: Folder) -> Output;
 }
 
 impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
-    where F: Fn(CH) -> R,
+    where F: FnOnce(CH) -> R,
           CTail: CoproductFoldable<FTail, R>
 {
-    fn fold(self, f: &HCons<F, FTail>) -> R {
+    fn fold(self, f: HCons<F, FTail>) -> R {
         use self::Coproduct::*;
-        let ref f_head = f.head;
-        let ref f_tail = f.tail;
+        let f_head = f.head;
+        let f_tail = f.tail;
         match self {
             Inl(r) => (f_head)(r),
             Inr(rest) => rest.fold(f_tail),
@@ -228,11 +235,40 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
     }
 }
 
+impl<'a, F, R, FTail, CH, CTail> CoproductFoldable<&'a HCons<F, FTail>, R> for &'a Coproduct<CH, CTail>
+    where F: Fn(&'a CH) -> R,
+          &'a CTail: CoproductFoldable<&'a FTail, R>
+{
+    fn fold(self, f: &'a HCons<F, FTail>) -> R {
+        use self::Coproduct::*;
+        let ref f_head = f.head;
+        let ref f_tail = f.tail;
+        match *self {
+            Inl(ref r) => (f_head)(r),
+            Inr(ref rest) => <&'a CTail as CoproductFoldable<&'a FTail, R>>::fold(rest, f_tail),
+        }
+    }
+}
+
 /// This is literally impossible; CNil is not instantiable
 #[doc(hidden)]
 impl<F, R> CoproductFoldable<F, R> for CNil {
-    fn fold(self, _: &F) -> R {
+    fn fold(self, _: F) -> R {
         unreachable!()
+    }
+}
+
+/// This is literally impossible; &CNil is not instantiable
+#[doc(hidden)]
+impl<'a, F, R> CoproductFoldable<&'a F, R> for &'a CNil {
+    fn fold(self, _: &'a F) -> R {
+        unreachable!()
+    }
+}
+
+impl <CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
+    fn as_ref(&self) -> &Coproduct<CH, CTail> {
+        self
     }
 }
 
@@ -262,19 +298,31 @@ mod tests {
     }
 
     #[test]
-    fn test_coproduct_fold() {
+    fn test_coproduct_fold_consuming() {
+        type I32StrBool = Coproduct!(i32, f32, bool);
+
+        let co1: I32StrBool = into_coproduct(3);
+        let folded = co1.fold(hlist![|i| format!("int {}", i),
+                                      |f| format!("float {}", f),
+                                      |b| (if b { "t" } else { "f" }).to_string()]);
+
+        assert_eq!(folded, "int 3".to_string());
+    }
+
+    #[test]
+    fn test_coproduct_fold_non_consuming() {
         type I32StrBool = Coproduct!(i32, f32, bool);
 
         let co1: I32StrBool = into_coproduct(3);
         let co2: I32StrBool = into_coproduct(true);
         let co3: I32StrBool = into_coproduct(42f32);
 
-        let folder = hlist![|i| format!("int {}", i),
-                            |f| format!("float {}", f),
-                            |b| (if b { "t" } else { "f" }).to_string()];
+        let folder = hlist![|&i| format!("int {}", i),
+                            |&f| format!("float {}", f),
+                            |&b| (if b { "t" } else { "f" }).to_string()];
 
-        assert_eq!(co1.fold(&folder), "int 3".to_string());
-        assert_eq!(co2.fold(&folder), "t".to_string());
-        assert_eq!(co3.fold(&folder), "float 42".to_string());
+        assert_eq!(co1.as_ref().fold(&folder), "int 3".to_string());
+        assert_eq!(co2.as_ref().fold(&folder), "t".to_string());
+        assert_eq!(co3.as_ref().fold(&folder), "float 42".to_string());
     }
 }

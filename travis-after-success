@@ -9,9 +9,9 @@ if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS
     cd  "${TRAVIS_REPO_SLUG}-bench" && \
     # Bench master
     git checkout master && \
-    cargo bench > benches-control && \
+    cargo bench > "${TRAVIS_BUILD_DIR}/benches-control" && \
     # Bench variable
-    git checkout ${TRAVIS_COMMIT} && \
+    cd ${TRAVIS_BUILD_DIR} && \
     cargo bench > benches-variable && \
     cargo install cargo-benchcmp --force && \
     cargo benchcmp benches-control benches-variable;
