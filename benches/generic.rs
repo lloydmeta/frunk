@@ -5,7 +5,7 @@ extern crate frunk;
 extern crate frunk_core;
 extern crate test;
 
-use frunk::*;
+use frunk::generic::*;
 use test::Bencher;
 
 #[derive(Generic)]
@@ -25,11 +25,11 @@ struct SavedUser<'a> {
 #[bench]
 fn generic_conversion(b: &mut Bencher) {
     b.iter(|| {
-        let n_u = NewUser {
-            first_name: "Joe",
-            last_name: "Schmoe",
-            age: 30,
-        };
-        <SavedUser as Generic>::convert_from(n_u)
-    })
+               let n_u = NewUser {
+                   first_name: "Joe",
+                   last_name: "Schmoe",
+                   age: 30,
+               };
+               SavedUser::convert_from(n_u)
+           })
 }
