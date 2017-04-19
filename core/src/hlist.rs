@@ -169,7 +169,7 @@ impl<H, T> HCons<H, T> {
 /// assert_eq!(h2, 1.23f32);
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    HCons { head: h, tail: tail}
+    HCons { head: h, tail: tail }
 }
 
 /// Returns an `HList` based on the values passed in.
@@ -557,7 +557,7 @@ impl<F> HMappable<F> for HNil {
 }
 
 impl<'a, F, R, H> HMappable<HCons<F, HNil>> for &'a HCons<H, HNil>
-    where F: Fn(&'a H) -> R {
+    where F: FnOnce(&'a H) -> R {
     type Output = HCons<R, HNil>;
 
     fn map(self, f: HCons<F, HNil>) -> Self::Output {
@@ -583,7 +583,7 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
 
 // TODO take a mapper by reference when https://github.com/rust-lang/rust/issues/39959 is fixed
 impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
-    where F: Fn(&'a H) -> MapperHeadR,
+    where F: FnOnce(&'a H) -> MapperHeadR,
           &'a Tail: HMappable<MapperTail>
 {
     type Output = HCons<MapperHeadR, <&'a Tail as HMappable<MapperTail>>::Output>;
@@ -600,10 +600,13 @@ impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> fo
 }
 
 /// Foldr for HLists
-pub trait HFoldRightable<Folder, Init> {
+pub trait HFoldRightable<Folder, Init, Index> {
     type Output;
 
     /// foldr over a data structure
+    ///
+    /// Sadly, due to a compiler quirk, only the value-consuming (the original hlist) variant
+    /// exists for foldr.
     ///
     /// # Examples
     ///
@@ -631,7 +634,7 @@ pub trait HFoldRightable<Folder, Init> {
     fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Init> HFoldRightable<F, Init> for HNil {
+impl<F, Init> HFoldRightable<F, Init, Here> for HNil {
     type Output = Init;
 
     fn foldr(self, _: F, i: Init) -> Self::Output {
@@ -639,10 +642,10 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
-for HCons<H, Tail>
-    where Tail: HFoldRightable<FolderTail, Init>,
-          F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR
+
+impl<F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for HCons<H, Tail>
+    where Tail: HFoldRightable<FolderTail, Init, Index>,
+          F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR
 {
     type Output = FolderHeadR;
 
@@ -652,8 +655,42 @@ for HCons<H, Tail>
     }
 }
 
+// Todo: enable this when the compiler stops smoking crack
+//
+// At the moment, we get a diverging requirement evaluation a la
+// overflow evaluating the requirement `<_ as std::ops::FnOnce<(&_, _)>>::Output`
+//
+//impl<'a, F, R, H, Init> HFoldRightable<HCons<F, HNil>, Init, Here> for &'a HCons<H, HNil>
+//    where F: FnOnce(&'a H, Init) -> R {
+//    type Output = R;
+//
+//    fn foldr(self, f: HCons<F, HNil>, init: Init) -> Self::Output {
+//        let ref h = self.head;
+//        let f = f.head;
+//        f(h, init)
+//    }
+//}
+//
+//impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for &'a HCons<H, Tail>
+//    where
+//        F: FnOnce(&'a H, <&'a Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
+//        &'a Tail: HFoldRightable<FolderTail, Init, Index>
+//
+//{
+//    type Output = FolderHeadR;
+//
+//    fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+//        let f_h = folder.head;
+//        let f_tail = folder.tail;
+//        let ref h = self.head;
+//        let ref tail = self.tail;
+//        let folded_tail = tail.foldr(f_tail, init);
+//        (f_h)(h, folded_tail)
+//    }
+//}
+
 /// Left fold for a given data structure
-pub trait HFoldLeftable<Folder, Init> {
+pub trait HFoldLeftable<Folder, Init, Index> {
     type Output;
 
     /// foldl over a data structure
@@ -668,23 +705,36 @@ pub trait HFoldLeftable<Folder, Init> {
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// let folded = h.foldl(
+    /// let folded = h.as_ref().foldl(
+    ///     hlist![
+    ///         |acc, &i| i + acc,
+    ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+    ///         |acc, &f| f + acc
+    ///     ],
+    ///     1
+    /// );
+    ///
+    /// assert_eq!(42f32, folded);
+    ///
+    /// // There is also a value-consuming version that passes values to your folding
+    /// // functions:
+    ///
+    /// let folded2 = h.foldl(
     ///     hlist![
     ///         |acc, i| i + acc,
     ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
     ///         |acc, f| f + acc
     ///     ],
-    ///     1
+    ///     8918
     /// );
     ///
-    /// assert_eq!(42f32, folded)
-    ///
+    /// assert_eq!(9042f32, folded2)
     /// # }
     /// ```
     fn foldl(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
+impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
     type Output = Acc;
 
     fn foldl(self, _: F, acc: Acc) -> Self::Output {
@@ -692,16 +742,43 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
+impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil> where
+    F: FnOnce(Acc, &'a H) -> R {
+    type Output = R;
+
+    fn foldl(self, folder: HCons<F, HNil>, acc: Acc) -> Self::Output {
+        let f = folder.head;
+        let ref h = self.head;
+        f(acc, h)
+    }
+}
+
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>>
 for HCons<H, Tail>
-    where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
+    where Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
           F: FnOnce(Acc, H) -> FolderHeadR
 {
-    type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR>>::Output;
+    type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR, Index>>::Output;
 
     fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
         self.tail
             .foldl(folder.tail, (folder.head)(acc, self.head))
+    }
+}
+
+impl<'a, F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>>
+for &'a HCons<H, Tail>
+    where &'a Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
+          F: FnOnce(Acc, &'a H) -> FolderHeadR
+{
+    type Output = <&'a Tail as HFoldLeftable<FolderTail, FolderHeadR, Index>>::Output;
+
+    fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
+        let ref h = self.head;
+        let ref t = self.tail;
+        let f_head = folder.head;
+        let f_tail = folder.tail;
+        t.foldl(f_tail, (f_head)(acc, h))
     }
 }
 
@@ -860,7 +937,7 @@ mod tests {
     }
 
     #[test]
-    fn test_foldr() {
+    fn test_foldr_consuming() {
         let h = hlist![1, false, 42f32];
         let folded = h.foldr(hlist![|i, acc| i + acc,
                                     |_, acc| if acc > 42f32 { 9000 } else { 0 },
@@ -869,13 +946,34 @@ mod tests {
         assert_eq!(folded, 9001)
     }
 
+    // Todo enable when compiler is fixed
+    //    #[test]
+    //    fn test_foldr_non_consuming() {
+    //        let h = hlist![1, false, 42f32];
+    //        let folded = h.as_ref().foldr(hlist![|&i, acc| i + acc,
+    //                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
+    //                                             |&f, acc| f + acc],
+    //                                      1f32);
+    //        assert_eq!(folded, 9001)
+    //    }
+
     #[test]
-    fn test_foldl() {
+    fn test_foldl_consuming() {
         let h = hlist![1, false, 42f32];
         let folded = h.foldl(hlist![|acc, i| i + acc,
                                     |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
                                     |acc, f| f + acc],
                              1);
+        assert_eq!(42f32, folded)
+    }
+
+    #[test]
+    fn test_foldl_non_consuming() {
+        let h = hlist![1, false, 42f32];
+        let folded = h.as_ref().foldl(hlist![|acc, &i| i + acc,
+                                             |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                                             |acc, &f| f + acc],
+                                      1);
         assert_eq!(42f32, folded)
     }
 
