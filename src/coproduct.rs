@@ -238,8 +238,6 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
 
 impl<'a, F, R, FTail, CH, CTail> CoproductFoldable<&'a HCons<F, FTail>, R> for &'a Coproduct<CH, CTail>
     where F: Fn(&'a CH) -> R,
-          CTail: 'a,
-          FTail: 'a,
           &'a CTail: CoproductFoldable<&'a FTail, R>
 {
     fn fold(self, f: &'a HCons<F, FTail>) -> R {

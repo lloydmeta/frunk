@@ -581,6 +581,7 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
     }
 }
 
+// TODO take a mapper by reference when https://github.com/rust-lang/rust/issues/39959 is fixed
 impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
     where F: Fn(&'a H) -> MapperHeadR,
           &'a Tail: HMappable<MapperTail>
