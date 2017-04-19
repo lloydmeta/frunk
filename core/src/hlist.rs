@@ -538,11 +538,20 @@ pub trait HMappable<Mapper> {
     ///
     /// // Sadly we need to help the compiler understand the bool type in our mapper
     ///
-    /// let mapped = h.map(hlist![
-    ///     |n| n + 1,
-    ///     |b: bool| !b,
-    ///     |f| f + 1f32]);
+    /// let mapped = h.as_ref().map(hlist![
+    ///     |&n| n + 1,
+    ///     |b: &bool| !b,
+    ///     |&f| f + 1f32]);
     /// assert_eq!(mapped, hlist![2, true, 43f32]);
+    ///
+    /// // There is also a value-consuming version that passes values to your functions
+    /// // instead of just references:
+    ///
+    /// let mapped2 = h.map(hlist![
+    ///     |n| n + 3,
+    ///     |b: bool| !b,
+    ///     |f| f + 8959f32]);
+    /// assert_eq!(mapped2, hlist![4, true, 9001f32]);
     /// # }
     /// ```
     fn map(self, folder: Mapper) -> Self::Output;
@@ -722,7 +731,7 @@ pub trait HFoldLeftable<Folder, Init, Index> {
     /// assert_eq!(42f32, folded);
     ///
     /// // There is also a value-consuming version that passes values to your folding
-    /// // functions:
+    /// // functions instead of just references:
     ///
     /// let folded2 = h.foldl(
     ///     hlist![
