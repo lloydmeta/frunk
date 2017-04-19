@@ -29,12 +29,13 @@
 //!     );
 //! assert_eq!(folded, 9001);
 //!
-//! // Mapping over an HList
 //! let h3 = hlist![9000, "joe", 41f32];
-//! let mapped = h3.map(hlist![
-//!                         |n| n + 1,
-//!                         |s| s,
-//!                         |f| f + 1f32]);
+//! // Mapping over an HList (we use as_ref() to map over the HList without consuming it,
+//! // but you can use the value-consuming version by leaving it off.)
+//! let mapped = h3.as_ref().map(hlist![
+//!                               |&n| n + 1,
+//!                               |&s| s,
+//!                               |&f| f + 1f32]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 //!
 //! // Plucking a value out by type
@@ -112,6 +113,10 @@ impl HList for HNil {
     }
 }
 
+impl AsRef<HNil> for HNil {
+    fn as_ref(&self) -> &HNil { self }
+}
+
 /// Represents the most basic non-empty HList. Its value is held in `head`
 /// while its tail is another HList.
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
@@ -124,6 +129,10 @@ impl<H, T: HList> HList for HCons<H, T> {
     fn length(&self) -> u32 {
         1 + self.tail.length()
     }
+}
+
+impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
+    fn as_ref(&self) -> &HCons<H, T> { self }
 }
 
 impl<H, T> HCons<H, T> {
@@ -160,7 +169,7 @@ impl<H, T> HCons<H, T> {
 /// assert_eq!(h2, 1.23f32);
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    tail.prepend(h)
+    HCons { head: h, tail: tail}
 }
 
 /// Returns an `HList` based on the values passed in.
@@ -440,8 +449,8 @@ impl<Source> Sculptor<HNil, HNil> for Source {
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
 /// Plucker's remainder induce.
 impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>,
-                                                                HCons<IndexHead, IndexTail>>
-    for HCons<SHead, STail>
+    HCons<IndexHead, IndexTail>>
+for HCons<SHead, STail>
     where HCons<SHead, STail>: Plucker<THead, IndexHead>,
           <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail>
 {
@@ -452,9 +461,9 @@ impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTa
             self.pluck();
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
         (HCons {
-             head: p,
-             tail: tail,
-         },
+            head: p,
+            tail: tail,
+        },
          tail_remainder)
     }
 }
@@ -498,10 +507,10 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
-        HCons {
-            head: self.head,
-            tail: HNil,
-        }
+            HCons {
+                head: self.head,
+                tail: HNil,
+            }
     }
 }
 
@@ -547,6 +556,17 @@ impl<F> HMappable<F> for HNil {
     }
 }
 
+impl<'a, F, R, H> HMappable<HCons<F, HNil>> for &'a HCons<H, HNil>
+    where F: Fn(&'a H) -> R {
+    type Output = HCons<R, HNil>;
+
+    fn map(self, f: HCons<F, HNil>) -> Self::Output {
+        let ref h = self.head;
+        let f = f.head;
+        HCons { head: f(h), tail: HNil }
+    }
+}
+
 impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
     where F: FnOnce(H) -> MapperHeadR,
           Tail: HMappable<MapperTail>
@@ -557,6 +577,23 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
         HCons {
             head: f(self.head),
             tail: self.tail.map(mapper.tail),
+        }
+    }
+}
+
+impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
+    where F: Fn(&'a H) -> MapperHeadR,
+          &'a Tail: HMappable<MapperTail>
+{
+    type Output = HCons<MapperHeadR, <&'a Tail as HMappable<MapperTail>>::Output>;
+    fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
+        let f = mapper.head;
+        let mapper_tail = mapper.tail;
+        let ref self_head = self.head;
+        let ref self_tail = self.tail;
+        HCons {
+            head: f(self_head),
+            tail: self_tail.map(mapper_tail),
         }
     }
 }
@@ -602,7 +639,7 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
-    for HCons<H, Tail>
+for HCons<H, Tail>
     where Tail: HFoldRightable<FolderTail, Init>,
           F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR
 {
@@ -655,7 +692,7 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
 }
 
 impl<F, FolderHeadR, FolderTail, H, Tail, Acc> HFoldLeftable<HCons<F, FolderTail>, Acc>
-    for HCons<H, Tail>
+for HCons<H, Tail>
     where Tail: HFoldLeftable<FolderTail, FolderHeadR>,
           F: FnOnce(Acc, H) -> FolderHeadR
 {
@@ -772,10 +809,14 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_Hlist_macro() {
-        let h1: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
-        let h2: Hlist!(i32, &str, i32,) = hlist![1, "2", 3];
-        let h3: Hlist!(i32) = hlist![1];
-        let h4: Hlist!(i32,) = hlist![1,];
+        let h1: Hlist
+        !(i32, &str, i32) = hlist![1, "2", 3];
+        let h2: Hlist
+        !(i32, &str, i32, ) = hlist![1, "2", 3];
+        let h3: Hlist
+        !(i32) = hlist![1];
+        let h4: Hlist
+        !(i32, ) = hlist![1,];
         assert_eq!(h1, h2);
         assert_eq!(h3, h4);
     }
@@ -838,9 +879,22 @@ mod tests {
     }
 
     #[test]
-    fn test_map() {
+    fn test_map_consuming() {
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
+        let mapped = h.map(hlist![
+            |n| n + 1,
+            |s| s,
+            |f| f + 1f32]);
+        assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_map_non_consuming() {
+        let h = hlist![9000, "joe", 41f32];
+        let mapped = h.as_ref().map(hlist![
+            |&n| n + 1,
+            |&s| s,
+            |&f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
     }
 
