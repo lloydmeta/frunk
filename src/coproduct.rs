@@ -31,7 +31,6 @@
 //! # type I32Bool = Coproduct!(i32, bool);
 //! # let co1: I32Bool = into_coproduct(3);
 //! # let co2: I32Bool = into_coproduct(true);
-//!
 //! let folder = hlist![
 //!   |&i| format!("i32 {}", i),
 //!   |&b| String::from(if b { "t" } else { "f" })
