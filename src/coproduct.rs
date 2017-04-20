@@ -35,21 +35,23 @@
 //! # type I32Bool = Coproduct!(i32, bool);
 //! # let co1: I32Bool = into_coproduct(3);
 //! # let co2: I32Bool = into_coproduct(true);
+//!
+//! // In the below, we use unimplemented!() to make it obvious hat we know what type of
+//! // item is inside our coproducts co1 and co2 but in real life, you should be writing
+//! // complete functions for all the cases when folding coproducts
 //! assert_eq!(
 //!     co1.as_ref().fold(hlist![|&i| format!("i32 {}", i),
-//!                              |&b| String::from(if b { "t" } else { "f" })]),
+//!                              |&b| unimplemented!() /* we know this won't happen for co1 */ ]),
 //!     "i32 3".to_string());
 //! assert_eq!(
-//!     co2.as_ref().fold(hlist![|&i| format!("i32 {}", i),
+//!     co2.as_ref().fold(hlist![|&i| unimplemented!() /* we know this won't happen for co2 */,
 //!                              |&b| String::from(if b { "t" } else { "f" })]),
 //!     "t".to_string());
 //!
 //! // There is also a value consuming-variant of fold
 //!
-//! let folded = co1.fold(hlist![
-//!   |i| format!("i32 {}", i),
-//!   |b| String::from(if b { "t" } else { "f" })
-//! ]);
+//! let folded = co1.fold(hlist![|i| format!("i32 {}", i),
+//!                              |b| String::from(if b { "t" } else { "f" })]);
 //! assert_eq!(folded, "i32 3".to_string());
 //! # }
 //! ```
