@@ -167,7 +167,22 @@ pub fn into_coproduct<C, I, Index>(to_into: I) -> C
 }
 // For turning something into a Coproduct -->
 
-/// Trait for retrieving a coproduct element by type
+/// Trait for retrieving a coproduct element reference by type.
+///
+/// Returns an Option<&YourType> (notice that the inside of the option is a reference)
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// type I32Bool = Coproduct!(i32, f32);
+/// let co1: I32Bool = into_coproduct(42f32);
+/// let get_from_1a: Option<&i32> = co1.get();
+/// let get_from_1b: Option<&f32> = co1.get();
+/// assert_eq!(get_from_1a, None);
+/// assert_eq!(get_from_1b, Some(&42f32));
+/// # }
+/// ```
 pub trait CoproductSelector<S, I> {
     fn get(&self) -> Option<&S>;
 }
@@ -190,6 +205,49 @@ for Coproduct<Head, Tail>
         use self::Coproduct::*;
         match *self {
             Inr(ref rest) => rest.get(),
+            _ => None, // Impossible
+        }
+    }
+}
+
+/// Trait for retrieving a coproduct element by type.
+///
+/// Returns an Option<YourType> (notice that the inside of the option is a value)
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// type I32Bool = Coproduct!(i32, f32);
+/// let co1: I32Bool = into_coproduct(42f32);
+/// let get_from_1a: Option<i32> = co1.take();
+/// let get_from_1b: Option<f32> = co1.take();
+/// assert_eq!(get_from_1a, None);
+/// assert_eq!(get_from_1b, Some(42f32));
+/// # }
+/// ```
+pub trait CoproductTaker<S, I> {
+    fn take(self) -> Option<S>;
+}
+
+impl<Head, Tail> CoproductTaker<Head, Here> for Coproduct<Head, Tail> {
+    fn take(self) -> Option<Head> {
+        use self::Coproduct::*;
+        match self {
+            Inl(thing) => Some(thing),
+            _ => None, // Impossible
+        }
+    }
+}
+
+impl<Head, FromTail, Tail, TailIndex> CoproductTaker<FromTail, There<TailIndex>>
+for Coproduct<Head, Tail>
+    where Tail: CoproductTaker<FromTail, TailIndex>
+{
+    fn take(self) -> Option<FromTail> {
+        use self::Coproduct::*;
+        match self {
+            Inr(rest) => rest.take(),
             _ => None, // Impossible
         }
     }
