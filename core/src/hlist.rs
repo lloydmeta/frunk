@@ -198,7 +198,7 @@ macro_rules! hlist {
 
     // Just a single item
     ($single: expr) => {
-        $crate::hlist::HCons { head: $single, tail: HNil }
+        $crate::hlist::HCons { head: $single, tail: $crate::hlist::HNil }
     };
 
     ($first: expr, $( $repeated: expr ), +) => {
@@ -263,7 +263,7 @@ macro_rules! Hlist {
 
     // Just a single item
     ($single: ty) => {
-        $crate::hlist::HCons<$single, HNil>
+        $crate::hlist::HCons<$single, $crate::hlist::HNil>
     };
 
     ($first: ty, $( $repeated: ty ), +) => {

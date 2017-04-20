@@ -2,7 +2,6 @@ extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;
 
-use frunk::hlist::*;
 use frunk::generic::*;
 
 mod common;

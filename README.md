@@ -279,11 +279,11 @@ to take a look at `Coproduct`. In Rust, thanks to `enum`, you could potentially 
 want a sum type to do this, but there is a light-weight way of doing it through Frunk:
 
 ```rust
-#[macro_use] extern crate frunk; // for the Coproduct! type macro
+#[macro_use] extern crate frunk; // for the Coprod! type macro
 use frunk::coproduct::*;
 
 // Declare the types we want in our Coproduct
-type I32Bool = Coproduct!(i32, f32, bool);
+type I32Bool = Coprod!(i32, f32, bool);
 
 let co1: I32Bool = into_coproduct(3);
 let get_from_1a: Option<&i32> = co1.get();
