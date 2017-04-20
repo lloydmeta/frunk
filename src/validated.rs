@@ -44,7 +44,7 @@
 //! # }
 //! ```
 
-use frunk_core::hlist::*;
+use super::hlist::*;
 use std::ops::Add;
 
 /// A Validated is either an Ok holding an HList or an Err, holding a vector
@@ -239,7 +239,6 @@ impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
 
 #[cfg(test)]
 mod tests {
-    use frunk_core::hlist::*;
     use super::*;
 
     #[test]
@@ -317,13 +316,14 @@ mod tests {
     fn test_to_result_ok() {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
                 get_email(YahNah::Yah);
-        let person = v.into_result().map(|hlist_pat!(name, age, email)| {
-            Person {
-                name: name,
-                age: age,
-                email: email,
-            }
-        });
+        let person = v.into_result()
+            .map(|hlist_pat!(name, age, email)| {
+                     Person {
+                         name: name,
+                         age: age,
+                         email: email,
+                     }
+                 });
 
         assert_eq!(person.unwrap(),
                    Person {
