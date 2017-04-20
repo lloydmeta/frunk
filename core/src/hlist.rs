@@ -20,11 +20,9 @@
 //! // foldr (foldl also available)
 //! let h2 = hlist![1, false, 42f32];
 //! let folded = h2.foldr(
-//!             hlist![
-//!                 |i, acc| i + acc,
-//!                 |_, acc| if acc > 42f32 { 9000 } else { 0 },
-//!                 |f, acc| f + acc
-//!             ],
+//!             hlist![|i, acc| i + acc,
+//!                    |_, acc| if acc > 42f32 { 9000 } else { 0 },
+//!                    |f, acc| f + acc],
 //!             1f32
 //!     );
 //! assert_eq!(folded, 9001);
@@ -32,10 +30,9 @@
 //! let h3 = hlist![9000, "joe", 41f32];
 //! // Mapping over an HList (we use as_ref() to map over the HList without consuming it,
 //! // but you can use the value-consuming version by leaving it off.)
-//! let mapped = h3.as_ref().map(hlist![
-//!                               |&n| n + 1,
-//!                               |&s| s,
-//!                               |&f| f + 1f32]);
+//! let mapped = h3.as_ref().map(hlist![|&n| n + 1,
+//!                                     |&s| s,
+//!                                     |&f| f + 1f32]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 //!
 //! // Plucking a value out by type

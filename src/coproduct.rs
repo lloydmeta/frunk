@@ -18,6 +18,10 @@
 //! let get_from_2b: Option<&bool> = co2.get();
 //! assert_eq!(get_from_2a, None);
 //! assert_eq!(get_from_2b, Some(&true));
+//!
+//! // *Taking* stuff (by value)
+//! let take_from_1a: Option<i32> = co1.take();
+//! assert_eq!(take_from_1a, Some(3));
 //! # }
 //! ```
 //!
@@ -32,16 +36,12 @@
 //! # let co1: I32Bool = into_coproduct(3);
 //! # let co2: I32Bool = into_coproduct(true);
 //! assert_eq!(
-//!     co1.as_ref().fold(hlist![
-//!                         |&i| format!("i32 {}", i),
-//!                         |&b| String::from(if b { "t" } else { "f" })
-//!                             ]),
+//!     co1.as_ref().fold(hlist![|&i| format!("i32 {}", i),
+//!                              |&b| String::from(if b { "t" } else { "f" })]),
 //!     "i32 3".to_string());
 //! assert_eq!(
-//!     co2.as_ref().fold(hlist![
-//!                         |&i| format!("i32 {}", i),
-//!                         |&b| String::from(if b { "t" } else { "f" })
-//!                             ]),
+//!     co2.as_ref().fold(hlist![|&i| format!("i32 {}", i),
+//!                              |&b| String::from(if b { "t" } else { "f" })]),
 //!     "t".to_string());
 //!
 //! // There is also a value consuming-variant of fold
