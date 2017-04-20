@@ -85,7 +85,8 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 pub fn combine_all<T>(xs: &Vec<T>) -> T
     where T: Monoid + Semigroup + Clone
 {
-    xs.iter().fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
+    xs.iter()
+        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
 }
 
 impl<T> Monoid for Option<T>

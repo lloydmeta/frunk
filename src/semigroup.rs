@@ -72,7 +72,9 @@ pub trait Semigroup {
 /// if all of the sub-element types are also Semiups
 impl<H: Semigroup, T: HList + Semigroup> Semigroup for HCons<H, T> {
     fn combine(&self, other: &Self) -> Self {
-        self.tail.combine(&other.tail).prepend(self.head.combine(&other.head))
+        self.tail
+            .combine(&other.tail)
+            .prepend(self.head.combine(&other.head))
     }
 }
 

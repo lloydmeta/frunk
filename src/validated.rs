@@ -317,13 +317,14 @@ mod tests {
     fn test_to_result_ok() {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
                 get_email(YahNah::Yah);
-        let person = v.into_result().map(|hlist_pat!(name, age, email)| {
-            Person {
-                name: name,
-                age: age,
-                email: email,
-            }
-        });
+        let person = v.into_result()
+            .map(|hlist_pat!(name, age, email)| {
+                     Person {
+                         name: name,
+                         age: age,
+                         email: email,
+                     }
+                 });
 
         assert_eq!(person.unwrap(),
                    Person {

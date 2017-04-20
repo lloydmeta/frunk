@@ -198,7 +198,7 @@ impl<Head, Tail> CoproductSelector<Head, Here> for Coproduct<Head, Tail> {
 }
 
 impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailIndex>>
-for Coproduct<Head, Tail>
+    for Coproduct<Head, Tail>
     where Tail: CoproductSelector<FromTail, TailIndex>
 {
     fn get(&self) -> Option<&FromTail> {
@@ -241,7 +241,7 @@ impl<Head, Tail> CoproductTaker<Head, Here> for Coproduct<Head, Tail> {
 }
 
 impl<Head, FromTail, Tail, TailIndex> CoproductTaker<FromTail, There<TailIndex>>
-for Coproduct<Head, Tail>
+    for Coproduct<Head, Tail>
     where Tail: CoproductTaker<FromTail, TailIndex>
 {
     fn take(self) -> Option<FromTail> {
@@ -364,8 +364,8 @@ mod tests {
 
         let co1: I32StrBool = into_coproduct(3);
         let folded = co1.fold(hlist![|i| format!("int {}", i),
-                                      |f| format!("float {}", f),
-                                      |b| (if b { "t" } else { "f" }).to_string()]);
+                                     |f| format!("float {}", f),
+                                     |b| (if b { "t" } else { "f" }).to_string()]);
 
         assert_eq!(folded, "int 3".to_string());
     }
@@ -378,24 +378,20 @@ mod tests {
         let co2: I32StrBool = into_coproduct(true);
         let co3: I32StrBool = into_coproduct(42f32);
 
-        assert_eq!(
-            co1.as_ref().fold(hlist![
-                            |&i| format!("int {}", i),
-                            |&f| format!("float {}", f),
-                            |&b| (if b { "t" } else { "f" }).to_string()]
-            )
-            , "int 3".to_string());
-        assert_eq!(
-            co2.as_ref().fold(hlist![
-                            |&i| format!("int {}", i),
-                            |&f| format!("float {}", f),
-                            |&b| (if b { "t" } else { "f" }).to_string()]),
-            "t".to_string());
-        assert_eq!(
-            co3.as_ref().fold(hlist![
-                            |&i| format!("int {}", i),
-                            |&f| format!("float {}", f),
-                            |&b| (if b { "t" } else { "f" }).to_string()]),
-            "float 42".to_string());
+        assert_eq!(co1.as_ref()
+                       .fold(hlist![|&i| format!("int {}", i),
+                                    |&f| format!("float {}", f),
+                                    |&b| (if b { "t" } else { "f" }).to_string()]),
+                   "int 3".to_string());
+        assert_eq!(co2.as_ref()
+                       .fold(hlist![|&i| format!("int {}", i),
+                                    |&f| format!("float {}", f),
+                                    |&b| (if b { "t" } else { "f" }).to_string()]),
+                   "t".to_string());
+        assert_eq!(co3.as_ref()
+                       .fold(hlist![|&i| format!("int {}", i),
+                                    |&f| format!("float {}", f),
+                                    |&b| (if b { "t" } else { "f" }).to_string()]),
+                   "float 42".to_string());
     }
 }

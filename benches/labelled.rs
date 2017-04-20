@@ -56,7 +56,7 @@ struct BigStruct24Fields {
     u: i8,
     v: i32,
     w: f64,
-    x: usize
+    x: usize,
 }
 
 #[derive(LabelledGeneric)]
@@ -85,7 +85,7 @@ struct BigStruct25Fields {
     v: i32,
     w: f64,
     x: usize,
-    y: String
+    y: String,
 }
 
 #[derive(LabelledGeneric)]
@@ -203,7 +203,7 @@ impl From<BigStruct25Fields> for BigStruct25FieldsReverse {
             v: b.v,
             w: b.w,
             x: b.x,
-            y: b.y
+            y: b.y,
         }
     }
 }
@@ -270,33 +270,33 @@ fn build_big_struct_25fields() -> BigStruct25Fields {
 #[bench]
 fn labelled_conversion(b: &mut Bencher) {
     b.iter(|| {
-        let n_u = NewUser {
-            first_name: "Joe",
-            last_name: "Schmoe",
-            age: 30,
-        };
-        <SavedUser as LabelledGeneric>::convert_from(n_u)
-    })
+               let n_u = NewUser {
+                   first_name: "Joe",
+                   last_name: "Schmoe",
+                   age: 30,
+               };
+               <SavedUser as LabelledGeneric>::convert_from(n_u)
+           })
 }
 
 #[bench]
 fn sculpted_conversion(b: &mut Bencher) {
     b.iter(|| {
-        let n_u = NewUser {
-            first_name: "Joe",
-            last_name: "Schmoe",
-            age: 30,
-        };
-        JumbledUser::transform_from(n_u)
-    })
+               let n_u = NewUser {
+                   first_name: "Joe",
+                   last_name: "Schmoe",
+                   age: 30,
+               };
+               JumbledUser::transform_from(n_u)
+           })
 }
 
 #[bench]
 fn big_transform_from_24fields(b: &mut Bencher) {
     b.iter(|| {
-        let j = BigStruct24FieldsReverse::transform_from(build_big_struct_24fields());
-        j
-    })
+               let j = BigStruct24FieldsReverse::transform_from(build_big_struct_24fields());
+               j
+           })
 }
 
 #[bench]
