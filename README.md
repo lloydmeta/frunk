@@ -295,11 +295,12 @@ assert_eq!(get_from_1a, Some(&3));
 // None because co1 does not contain a bool, it contains an i32
 assert_eq!(get_from_1b, None);
 
-// We can fold our Coproduct into a single value by handling all cases
-let folder = hlist![|i| format!("int {}", i),
+// We can fold our Coproduct into a single value by handling all types in it
+assert_eq!(
+    co1.fold(hlist![|i| format!("int {}", i),
                     |f| format!("float {}", f),
-                    |b| (if b { "t" } else { "f" }).to_string()];
-assert_eq!(co1.fold(&folder), "int 3".to_string());
+                    |b| (if b { "t" } else { "f" }).to_string()]), 
+    "int 3".to_string());
 ```
 
 For more information, check out the []docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html) 
