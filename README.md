@@ -303,7 +303,7 @@ assert_eq!(
     "int 3".to_string());
 ```
 
-For more information, check out the []docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html) 
+For more information, check out the [docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html) 
 
 ### Validated
 

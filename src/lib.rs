@@ -5,9 +5,11 @@
 //! in effective, useful, and idiomatic ways. Examples of things that are included in rust are:
 //!
 //!   1. HLists (heterogeneously-typed lists)
-//!   2. Validated (accumulator for Result)
-//!   3. Semigroup
-//!   4. Monoid
+//!   2. LabelledGeneric, and Generic
+//!   3. Coproduct
+//!   4. Validated (accumulator for Result)
+//!   5. Semigroup
+//!   6. Monoid
 //!
 //! Here is a small taste of what Frunk has to offer:
 //!
