@@ -435,6 +435,7 @@ pub trait Sculptor<Target, Indices> {
 impl<Source> Sculptor<HNil, HNil> for Source {
     type Remainder = Source;
 
+    #[inline(always)]
     fn sculpt(self) -> (HNil, Self::Remainder) {
         (HNil, self)
     }
@@ -453,6 +454,7 @@ for HCons<SHead, STail>
 {
     type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
 
+    #[inline(always)]
     fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
         let (p, r): (THead, <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder) =
             self.pluck();
