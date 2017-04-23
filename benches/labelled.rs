@@ -309,21 +309,21 @@ fn big_from_24fields(b: &mut Bencher) {
 
 // Hilariously, uncommenting this out will kill the performance in the above 2 benchmarks
 
-//#[bench]
-//fn big_transform_from_25fields(b: &mut Bencher) {
-//    b.iter(|| {
-//        let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
-//        j
-//    })
-//}
-//
-//#[bench]
-//fn big_from_25fields(b: &mut Bencher) {
-//    b.iter(|| {
-//        let j = <BigStruct25FieldsReverse as From<BigStruct25Fields>>::from(build_big_struct_25fields());
-//        j
-//    })
-//}
+#[bench]
+fn big_transform_from_25fields(b: &mut Bencher) {
+    b.iter(|| {
+        let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
+        j
+    })
+}
+
+#[bench]
+fn big_from_25fields(b: &mut Bencher) {
+    b.iter(|| {
+        let j = <BigStruct25FieldsReverse as From<BigStruct25Fields>>::from(build_big_struct_25fields());
+        j
+    })
+}
 
 
 
