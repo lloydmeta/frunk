@@ -5,10 +5,10 @@ extern crate frunk_core; // for hlist macro
 use frunk::coproduct::*;
 
 #[test]
-fn test_into_coproduct() {
+fn test_inject_coproduct() {
     type I32StrBool = Coprod!(i32, &'static str, bool);
 
-    let co1: I32StrBool = into_coproduct(3);
+    let co1 = I32StrBool::inject(3);
     let get_from_1a: Option<&i32> = co1.get();
     let get_from_1b: Option<&bool> = co1.get();
     assert_eq!(get_from_1a, Some(&3));
@@ -19,7 +19,7 @@ fn test_into_coproduct() {
 fn test_coproduct_fold_consuming() {
     type I32StrBool = Coprod!(i32, f32, bool);
 
-    let co1: I32StrBool = into_coproduct(3);
+    let co1 = I32StrBool::inject(3);
     let folded = co1.fold(hlist![|i| format!("int {}", i),
                                  |f| format!("float {}", f),
                                  |b| (if b { "t" } else { "f" }).to_string()]);
@@ -31,7 +31,7 @@ fn test_coproduct_fold_consuming() {
 fn test_coproduct_fold_non_consuming() {
     type I32StrBool = Coprod!(i32, f32, bool);
 
-    let co: I32StrBool = into_coproduct(true);;
+    let co = I32StrBool::inject(true);
 
     assert_eq!(co.as_ref()
                    .fold(hlist![|&i| format!("int {}", i),

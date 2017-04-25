@@ -285,15 +285,19 @@ use frunk::coproduct::*;
 // Declare the types we want in our Coproduct
 type I32Bool = Coprod!(i32, f32, bool);
 
-let co1: I32Bool = into_coproduct(3);
+let co1 = I32Bool::inject(3);
 let get_from_1a: Option<&i32> = co1.get();
 let get_from_1b: Option<&bool> = co1.get();
-// This will fail at compile time because i8 is not in our Coproduct type
-// let get_from_1b: Option<&i8> = co1.get();
-assert_eq!(get_from_1a, Some(&3));
 
+assert_eq!(get_from_1a, Some(&3));
 // None because co1 does not contain a bool, it contains an i32
 assert_eq!(get_from_1b, None);
+
+// This will fail at compile time because i8 is not in our Coproduct type
+let nope_get_from_1b: Option<&i8> = co1.get(); // <-- will fail
+// It's also impossible to inject something into a coproduct that is of the wrong type
+// (not contained in the coproduct type)
+let nope_co = I32Bool::inject(42f32); // <-- will fail
 
 // We can fold our Coproduct into a single value by handling all types in it
 assert_eq!(

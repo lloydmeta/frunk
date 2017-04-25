@@ -4,9 +4,12 @@
 //!
 //! ```
 //! # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+//! // For simplicity, assign our Coproduct type to a type alias
+//! // This is purely optional.
 //! type I32Bool = Coprod!(i32, bool);
-//! let co1: I32Bool = into_coproduct(3);
-//! let co2: I32Bool = into_coproduct(true);
+//! // Inject things into our Coproduct type
+//! let co1 = I32Bool::inject(3);
+//! let co2 = I32Bool::inject(true);
 //!
 //! // Getting stuff
 //! let get_from_1a: Option<&i32> = co1.get();
@@ -33,9 +36,8 @@
 //! # use frunk::hlist::*;
 //! # use frunk::coproduct::*; fn main() {
 //! # type I32Bool = Coprod!(i32, bool);
-//! # let co1: I32Bool = into_coproduct(3);
-//! # let co2: I32Bool = into_coproduct(true);
-//!
+//! # let co1 = I32Bool::inject(3);
+//! # let co2 = I32Bool::inject(true);
 //! // In the below, we use unimplemented!() to make it obvious hat we know what type of
 //! // item is inside our coproducts co1 and co2 but in real life, you should be writing
 //! // complete functions for all the cases when folding coproducts
@@ -62,14 +64,14 @@ use frunk_core::hlist::*;
 /// of supporting any arbitrary number of types instead of just 2.
 ///
 /// To consctruct a Coproduct, you would typically declare a type using the `Coprod!` type
-/// macro and then use the `into_coproduct` method.
+/// macro and then use the `inject` method.
 ///
 /// # Examples
 ///
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coprod!(i32, bool);
-/// let co1: I32Bool = into_coproduct(3);
+/// let co1 = I32Bool::inject(3);
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&bool> = co1.get();
 /// assert_eq!(get_from_1a, Some(&3));
@@ -100,7 +102,7 @@ pub enum CNil {}
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coprod!(i32, bool);
-/// let co1: I32Bool = into_coproduct(3);
+/// let co1 = I32Bool::inject(3);
 /// # }
 /// ```
 #[macro_export]
@@ -128,45 +130,37 @@ macro_rules! Coprod {
     // Forward trailing comma variants -->
 }
 
-// <-- For turning something into a Coproduct
-pub trait IntoCoproduct<InsertType, Index> {
-    fn into(to_insert: InsertType) -> Self;
-}
-
-impl<I, Tail> IntoCoproduct<I, Here> for Coproduct<I, Tail> {
-    fn into(to_insert: I) -> Self {
-        Coproduct::Inl(to_insert)
-    }
-}
-
-impl<Head, I, Tail, TailIndex> IntoCoproduct<I, There<TailIndex>> for Coproduct<Head, Tail>
-    where Tail: IntoCoproduct<I, TailIndex>
-{
-    fn into(to_insert: I) -> Self {
-        let tail_inserted = <Tail as IntoCoproduct<I, TailIndex>>::into(to_insert);
-        Coproduct::Inr(tail_inserted)
-    }
-}
-
-/// Function for returning a Coproduct from a given type
-///
-/// # Example
+/// Trait for injecting something into a coproduct
 ///
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coprod!(i32, f32);
-/// let co1: I32Bool = into_coproduct(42f32);
+/// let co1 = I32Bool::inject(42f32);
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
 /// assert_eq!(get_from_1a, None);
 /// assert_eq!(get_from_1b, Some(&42f32));
 /// # }
 /// ```
-pub fn into_coproduct<C, I, Index>(to_into: I) -> C
-    where C: IntoCoproduct<I, Index>
-{
-    <C as IntoCoproduct<I, Index>>::into(to_into)
+pub trait CoprodInjector<InjectType, Index> {
+    fn inject(to_insert: InjectType) -> Self;
 }
+
+impl<I, Tail> CoprodInjector<I, Here> for Coproduct<I, Tail> {
+    fn inject(to_insert: I) -> Self {
+        Coproduct::Inl(to_insert)
+    }
+}
+
+impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct<Head, Tail>
+    where Tail: CoprodInjector<I, TailIndex>
+{
+    fn inject(to_insert: I) -> Self {
+        let tail_inserted = <Tail as CoprodInjector<I, TailIndex>>::inject(to_insert);
+        Coproduct::Inr(tail_inserted)
+    }
+}
+
 // For turning something into a Coproduct -->
 
 /// Trait for retrieving a coproduct element reference by type.
@@ -178,7 +172,9 @@ pub fn into_coproduct<C, I, Index>(to_into: I) -> C
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coprod!(i32, f32);
-/// let co1: I32Bool = into_coproduct(42f32);
+///
+/// let co1 = I32Bool::inject(42f32);
+///
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
 /// assert_eq!(get_from_1a, None);
@@ -221,7 +217,9 @@ impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailInde
 /// ```
 /// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
 /// type I32Bool = Coprod!(i32, f32);
-/// let co1: I32Bool = into_coproduct(42f32);
+///
+/// let co1 = I32Bool::inject(42f32);
+///
 /// let get_from_1a: Option<i32> = co1.take();
 /// let get_from_1b: Option<f32> = co1.take();
 /// assert_eq!(get_from_1a, None);
@@ -266,11 +264,11 @@ impl<Head, FromTail, Tail, TailIndex> CoproductTaker<FromTail, There<TailIndex>>
 /// # #[macro_use] extern crate frunk;
 /// # use frunk::coproduct::*;
 /// # use frunk::hlist::*; fn main() {
-/// type I32StrBool = Coprod!(i32, f32, bool);
+/// type I32F32StrBool = Coprod!(i32, f32, bool);
 ///
-/// let co1: I32StrBool = into_coproduct(3);
-/// let co2: I32StrBool = into_coproduct(true);
-/// let co3: I32StrBool = into_coproduct(42f32);
+/// let co1 = I32F32StrBool::inject(3);
+/// let co2 = I32F32StrBool::inject(true);
+/// let co3 = I32F32StrBool::inject(42f32);
 ///
 /// let folder = hlist![|&i| format!("int {}", i),
 ///                     |&f| format!("float {}", f),
@@ -341,10 +339,10 @@ mod tests {
     use super::Coproduct::*;
 
     #[test]
-    fn test_into_coproduct() {
+    fn test_coproduct_inject() {
         type I32StrBool = Coprod!(i32, &'static str, bool);
 
-        let co1: I32StrBool = into_coproduct(3);
+        let co1 = I32StrBool::inject(3);
         assert_eq!(co1, Inl(3));
         let get_from_1a: Option<&i32> = co1.get();
         let get_from_1b: Option<&bool> = co1.get();
@@ -352,7 +350,7 @@ mod tests {
         assert_eq!(get_from_1b, None);
 
 
-        let co2: I32StrBool = into_coproduct(false);
+        let co2 = I32StrBool::inject(false);
         assert_eq!(co2, Inr(Inr(Inl(false))));
         let get_from_2a: Option<&i32> = co2.get();
         let get_from_2b: Option<&bool> = co2.get();
@@ -362,9 +360,9 @@ mod tests {
 
     #[test]
     fn test_coproduct_fold_consuming() {
-        type I32StrBool = Coprod!(i32, f32, bool);
+        type I32F32StrBool = Coprod!(i32, f32, bool);
 
-        let co1: I32StrBool = into_coproduct(3);
+        let co1 = I32F32StrBool::inject(3);
         let folded = co1.fold(hlist![|i| format!("int {}", i),
                                      |f| format!("float {}", f),
                                      |b| (if b { "t" } else { "f" }).to_string()]);
@@ -376,9 +374,9 @@ mod tests {
     fn test_coproduct_fold_non_consuming() {
         type I32StrBool = Coprod!(i32, f32, bool);
 
-        let co1: I32StrBool = into_coproduct(3);
-        let co2: I32StrBool = into_coproduct(true);
-        let co3: I32StrBool = into_coproduct(42f32);
+        let co1 = I32StrBool::inject(3);
+        let co2 = I32StrBool::inject(true);
+        let co3 = I32StrBool::inject(42f32);
 
         assert_eq!(co1.as_ref()
                        .fold(hlist![|&i| format!("int {}", i),
