@@ -312,9 +312,9 @@ fn big_from_24fields(b: &mut Bencher) {
 #[bench]
 fn big_transform_from_25fields(b: &mut Bencher) {
     b.iter(|| {
-        let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
-        j
-    })
+               let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
+               j
+           })
 }
 
 #[bench]
