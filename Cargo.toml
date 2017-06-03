@@ -1,6 +1,6 @@
 [package]
 name = "frunk"
-version = "0.1.28"
+version = "0.1.29"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Coproduct, Generic, LabelledGeneric, Validated, Monoid, Semigroup and friends."
 license = "MIT"
@@ -16,12 +16,12 @@ time = "0.1.36"
 
 [dependencies.frunk_core]
 path = "core"
-version = "0.0.15"
+version = "0.0.16"
 
 [dependencies.frunk_derives]
 path = "derives"
-version = "0.0.16"
+version = "0.0.17"
 
 [dev-dependencies.frunk_laws]
 path = "laws"
-version = "0.0.6"
+version = "0.0.7"
