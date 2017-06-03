@@ -10,7 +10,7 @@ use quickcheck::*;
 /// that we don't own for type we don't own.
 ///
 /// Avoids the orphan typeclass instances problem in Haskell.
-#[derive(Eq, PartialEq, PartialOrd, Debug, Clone)]
+#[derive(Eq, PartialEq, PartialOrd, Debug, Clone, Hash)]
 pub struct Wrapper<A>(A);
 
 impl<A: Arbitrary + Ord + Clone> Arbitrary for Wrapper<Max<A>> {
