@@ -78,7 +78,7 @@ use frunk_core::hlist::*;
 /// assert_eq!(get_from_1b, None);
 /// # }
 /// ```
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub enum Coproduct<H, T> {
     /// Coproduct is either H or T, in this case, it is H
     Inl(H),
@@ -89,7 +89,7 @@ pub enum Coproduct<H, T> {
 /// Phantom type for signature purposes only (has no value)
 ///
 /// Used by the macro to terminate the Coproduct type signature
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub enum CNil {}
 
 /// Returns a type signature for a Coproduct of the provided types

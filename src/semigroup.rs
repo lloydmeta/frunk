@@ -36,23 +36,23 @@ use std::collections::hash_map::Entry;
 use frunk_core::hlist::*;
 
 /// Wrapper type for types that are ordered and can have a Max combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Max<T: Ord>(pub T);
 
 /// Wrapper type for types that are ordered and can have a Min combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Min<T: Ord>(pub T);
 
 /// Wrapper type for types that can have a Product combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Product<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise && combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct All<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise || combination
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Any<T>(pub T);
 
 /// A Semigroup is a class of thing that has a definable combine operation

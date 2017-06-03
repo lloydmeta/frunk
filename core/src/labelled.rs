@@ -216,7 +216,7 @@ macro_rules! create_enums_for {
     ($($i: ident)*) => {
         $(
             #[allow(non_snake_case, non_camel_case_types)]
-            #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord)]
+            #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
             pub enum $i {}
         )*
     }
@@ -242,7 +242,7 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
-#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Field<Name, Type> {
     name_type_holder: PhantomData<Name>,
     pub name: &'static str,
