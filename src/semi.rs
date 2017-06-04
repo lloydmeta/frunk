@@ -58,35 +58,37 @@ impl<'a> Semi<HNil> for &'a HNil {
     }
 }
 
-impl<T> Semi<Option<T>> for Option<T>
-    where T: Semi<T>
+impl<T, TO> Semi<Option<TO>> for Option<T>
+    where T: Semi<TO>,
+          TO: From<T>
 {
-    fn combine(self, other: Self) -> Option<T> {
+    fn combine(self, other: Self) -> Option<TO> {
         if let Some(s) = self {
             if let Some(o) = other {
                 Some(s.combine(o))
             } else {
-                Some(s)
+                Some(TO::from(s))
             }
         } else {
-            other
+            other.map(TO::from)
         }
     }
 }
 
-impl<'a, T> Semi<Option<T>> for &'a Option<T>
-    where &'a T: Semi<T>,
-          T: Clone
+impl<'a, T, TO> Semi<Option<TO>> for &'a Option<T>
+    where &'a T: Semi<TO>,
+          T: Clone,
+          TO: From<T>
 {
-    fn combine(self, other: Self) -> Option<T> {
+    fn combine(self, other: Self) -> Option<TO> {
         if let &Some(ref s) = self {
             if let &Some(ref o) = other {
                 Some(s.combine(o))
             } else {
-                (*self).clone()
+                (*self).clone().map(TO::from)
             }
         } else {
-            (*other).clone()
+            (*other).clone().map(TO::from)
         }
     }
 }
@@ -210,6 +212,11 @@ mod tests {
     #[test]
     fn test_combine_str() {
         assert_eq!("hello".combine(" world"), "hello world")
+    }
+
+    #[test]
+    fn test_combine_option_str() {
+        assert_eq!(Some("hello").combine(Some(" world")), Some("hello world".to_string()))
     }
 
 }
