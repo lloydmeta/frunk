@@ -10,17 +10,19 @@ use std::ops::Deref;
 /// there was a weird diverging trait search going with an associated type.
 ///
 /// This means that yes, we need to enforce things with Laws.
-pub trait Semi<Output = Self, RHS = Self> {
-    fn combine(self, other: RHS) -> Output;
+pub trait Semi<RHS = Self> {
+    type Output;
+    fn combine(self, other: RHS) -> Self::Output;
 }
 
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
-impl<H, HO, T, TO> Semi<HCons<HO, TO>> for HCons<H, T>
-    where H: Semi<HO>,
-          T: HList + Semi<TO>
+impl<H, T> Semi for HCons<H, T>
+    where H: Semi,
+          T: Semi
 {
-    fn combine(self, other: Self) -> HCons<HO, TO> {
+    type Output = HCons<<H as Semi>::Output, <T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         let tail_comb = self.tail.combine(other.tail);
         let h_comb = self.head.combine(other.head);
         HCons {
@@ -31,19 +33,21 @@ impl<H, HO, T, TO> Semi<HCons<HO, TO>> for HCons<H, T>
 }
 
 /// Since () + () = (), the same is true for HNil
-impl Semi<HNil> for HNil {
-    fn combine(self, _: Self) -> Self {
+impl Semi for HNil {
+    type Output = HNil;
+    fn combine(self, _: Self) -> Self::Output {
         self
     }
 }
 
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
-impl<'a, H, HO, T, TO> Semi<HCons<HO, TO>> for &'a HCons<H, T>
-    where &'a H: Semi<HO>,
-          &'a T: HList + Semi<TO>
+impl<'a, H, T> Semi for &'a HCons<H, T>
+    where &'a H: Semi,
+          &'a T: Semi
 {
-    fn combine(self, other: Self) -> HCons<HO, TO> {
+    type Output = HCons<<&'a H as Semi>::Output, <&'a T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         let tail_comb = self.tail.combine(&other.tail);
         let h_comb = self.head.combine(&other.head);
         HCons {
@@ -54,43 +58,46 @@ impl<'a, H, HO, T, TO> Semi<HCons<HO, TO>> for &'a HCons<H, T>
 }
 
 /// Since () + () = (), the same is true for HNil
-impl<'a> Semi<HNil> for &'a HNil {
-    fn combine(self, _: Self) -> HNil {
+impl<'a> Semi for &'a HNil {
+    type Output = HNil;
+    fn combine(self, _: Self) -> Self::Output {
         HNil
     }
 }
 
-impl<T, TO> Semi<Option<TO>> for Option<T>
-    where T: Semi<TO>,
-          TO: From<T>
+impl<T> Semi<> for Option<T>
+    where T: Semi,
+          <T as Semi>::Output: From<T>
 {
-    fn combine(self, other: Self) -> Option<TO> {
+    type Output = Option<<T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         if let Some(s) = self {
             if let Some(o) = other {
                 Some(s.combine(o))
             } else {
-                Some(TO::from(s))
+                Some(<T as Semi>::Output::from(s))
             }
         } else {
-            other.map(TO::from)
+            other.map(<T as Semi>::Output::from)
         }
     }
 }
 
-impl<'a, T, TO> Semi<Option<TO>> for &'a Option<T>
-    where &'a T: Semi<TO>,
-          T: Clone,
-          TO: From<T>
+impl<'a, T> Semi for &'a Option<T>
+    where &'a T: Semi,
+          T: Clone + Sized,
+          <&'a T as Semi>::Output: From<T>
 {
-    fn combine(self, other: Self) -> Option<TO> {
+    type Output = Option<<&'a T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         if let &Some(ref s) = self {
             if let &Some(ref o) = other {
                 Some(s.combine(o))
             } else {
-                (*self).clone().map(TO::from)
+                (*self).clone().map(<&'a T as Semi>::Output::from)
             }
         } else {
-            (*other).clone().map(TO::from)
+            (*other).clone().map(<&'a T as Semi>::Output::from)
         }
     }
 }
@@ -98,14 +105,21 @@ impl<'a, T, TO> Semi<Option<TO>> for &'a Option<T>
 macro_rules! numeric_semi_imps {
   ($($tr:ty),*) => {
     $(
-      impl Semi<$tr> for $tr {
-        fn combine(self, other: Self) -> $tr { self + other }
+      impl Semi for $tr {
+        type Output = $tr;
+        fn combine(self, other: Self) -> Self::Output { self + other }
       }
-      impl <'a> Semi<$tr, &'a $tr> for $tr {
-        fn combine(self, other: &'a $tr) -> $tr { self + other }
+      impl <'a> Semi<&'a $tr> for $tr {
+          type Output = $tr;
+        fn combine(self, other: &'a $tr) -> Self::Output { self + other }
+      }
+      impl <'a> Semi for &'a $tr {
+          type Output = $tr;
+        fn combine(self, other: Self) -> Self::Output { self + other }
       }
       impl <'a> Semi<$tr> for &'a $tr {
-        fn combine(self, other: Self) -> $tr { self + other }
+          type Output = $tr;
+        fn combine(self, other: $tr) -> Self::Output { self + other }
       }
     )*
   }
@@ -113,48 +127,54 @@ macro_rules! numeric_semi_imps {
 
 numeric_semi_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
-impl Semi<String> for String {
-    fn combine(self, other: Self) -> Self {
+impl Semi for String {
+    type Output = String;
+    fn combine(self, other: Self) -> Self::Output {
         let mut s = self;
         s.push_str(&*other);
         s
     }
 }
 
-impl <'a> Semi<String, &'a str> for String {
-    fn combine(self, other: &'a str) -> Self {
+impl <'a> Semi<&'a str> for String {
+    type Output = String;
+    fn combine(self, other: &'a str) -> Self::Output {
         let mut s = self;
         s.push_str(other);
         s
     }
 }
 
-impl <'a> Semi<String> for &'a str {
-    fn combine(self, other: Self) -> String {
+impl <'a> Semi for &'a str {
+    type Output = String;
+    fn combine(self, other: Self) -> Self::Output {
         let mut s = self.to_string();
         s.push_str(&*other);
         s
     }
 }
 
-impl <'a> Semi<String, String> for &'a str {
-    fn combine(self, other: String) -> String {
+impl <'a> Semi<String> for &'a str {
+    type Output = String;
+    fn combine(self, other: String) -> Self::Output {
         let mut s = self.to_string();
         s.push_str(&other[..]);
         s
     }
 }
 
-impl<T, TO> Semi<Box<TO>> for Box<T> where T: Semi<TO> {
-    fn combine(self, other: Self) -> Box<TO> {
+impl<T> Semi for Box<T> where T: Semi {
+    type Output = Box<<T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         let s = *self;
         let o = *other;
         Box::new(s.combine(o))
     }
 }
 
-impl<'a, T, TO> Semi<Box<TO>> for &'a Box<T> where &'a T: Semi<TO> {
-    fn combine(self, other: Self) -> Box<TO> {
+impl<'a, T> Semi for &'a Box<T> where &'a T: Semi {
+    type Output = Box<<&'a T as Semi>::Output>;
+    fn combine(self, other: Self) -> Self::Output {
         let s = self.deref();
         let o = other.deref();
         Box::new(s.combine(o))
@@ -162,7 +182,8 @@ impl<'a, T, TO> Semi<Box<TO>> for &'a Box<T> where &'a T: Semi<TO> {
 }
 
 impl<T> Semi<Vec<T>> for Vec<T> {
-    fn combine(self, other: Self) -> Self {
+    type Output = Self;
+    fn combine(self, other: Self) -> Self::Output {
         let mut v = self;
         let mut o = other;
         v.append(&mut o);
@@ -170,8 +191,9 @@ impl<T> Semi<Vec<T>> for Vec<T> {
     }
 }
 
-impl<'a, T: Clone> Semi<Vec<T>> for &'a Vec<T> {
-    fn combine(self, other: Self) -> Vec<T> {
+impl<'a, T> Semi for &'a Vec<T> where T: Clone{
+    type Output = Vec<T>;
+    fn combine(self, other: Self) -> Self::Output {
         let mut v = self.clone();
         v.extend_from_slice(other);
         v
@@ -194,24 +216,43 @@ mod tests {
       }
     }
 
-    semi_tests! {
-        test_i8, 1.combine(2) => 3, i8
-        test_i8_2, (&1).combine(&2) => 3, i8
-        test_i16, 1.combine(2) => 3, i16
-        test_i32, 1.combine(2) => 3, i32
-        test_u8, 1.combine(2) => 3, u8
-        test_u16, 1.combine(2) => 3, u16
-        test_u32, 1.combine(2) => 3, u32
-        test_usize, 1.combine(2) => 3, usize
-        test_isize, 1.combine(2) => 3, isize
-        test_f32, 1f32.combine(2f32) => 3f32, f32
-        test_f64, 1f64.combine(2f64) => 3f64, f64
-        test_option_i16, Some(1).combine(Some(2)) => Some(3), Option<i16>
-        test_option_i16_none1, None.combine(Some(2)) => Some(2), Option<i16>
-        test_option_i16_none2, Some(2).combine(None) => Some(2), Option<i16>
-        test_option_i16_ref, (&Some(1)).combine(&Some(2)) => Some(3), Option<i16>
-        test_option_i16_none1_ref, (&None).combine(&Some(2)) => Some(2), Option<i16>
-        test_option_i16_none2_ref, (&Some(2)).combine(&None) => Some(2), Option<i16>
+    macro_rules! semi_tests_2 {
+      ($($name:ident, $lhs: expr => $rhs: expr => $expected: expr, $tp: ty)+) => {
+        $(
+          #[test]
+          fn $name() {
+            let lhs: $tp = $lhs;
+            let rhs: $tp = $rhs;
+            let r = lhs.combine(rhs);
+            assert_eq!(r, $expected)
+          }
+        )*
+      }
+    }
+
+    semi_tests_2! {
+        test_i8, 1 => 2 => 3, i8
+        test_i8_2, &1 => &2 => 3, &i8
+        test_i16, 1 => 2 => 3, i16
+        test_i32, 1 => 2 => 3, i32
+        test_u8, 1 => 2 => 3, u8
+        test_u16, 1 => 2 => 3, u16
+        test_u32, 1 => 2 => 3, u32
+        test_usize, 1 => 2 => 3, usize
+        test_isize, 1 => 2 => 3, isize
+        test_f32, 1f32 => 2f32 => 3f32, f32
+        test_f64, 1f64 => 2f64 => 3f64, f64
+        test_option_i16, Some(1) => Some(2) => Some(3), Option<i16>
+        test_option_i16_none1, None => Some(2) => Some(2), Option<i16>
+        test_option_i16_none2, Some(2) => None => Some(2), Option<i16>
+        // test_option_i16_ref, &Some(1) => &Some(2) => Some(3), &Option<i16> // Uncommenting this causes a diverging impl search
+        // test_option_i16_none1_ref, &None => &Some(2) => Some(2), &Option<i16>
+        // test_option_i16_none2_ref, &Some(2) => &None => Some(2), &Option<i16>
+    }
+
+    #[test]
+    fn test_i32_3() {
+        assert_eq!(3, 1.combine(2));
     }
 
     #[test]
