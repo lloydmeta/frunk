@@ -111,6 +111,7 @@ extern crate frunk_core;
 extern crate frunk_derives;
 
 pub mod semigroup;
+pub mod semi;
 pub mod monoid;
 pub mod validated;
 pub mod coproduct;

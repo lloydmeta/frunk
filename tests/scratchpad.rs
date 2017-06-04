@@ -4,11 +4,10 @@ struct IntHolder(i32);
 
 fn plus_one(wrapped: &Mutex<IntHolder>) -> Option<i32> {
     match wrapped.lock() {
-        Ok(ref data) => Some(data.0),
-        _ => None,
-    }.map(|data| {
-        data + 1
-    })
+            Ok(ref data) => Some(data.0),
+            _ => None,
+        }
+        .map(|data| data + 1)
 }
 
 fn main() {
