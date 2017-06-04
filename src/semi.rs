@@ -4,12 +4,14 @@ use std::ops::Deref;
 /// Output is a parameter because we want to allow Semi to not
 /// necessarily return Self (e.g. in the case of Self being a pointer)
 ///
+/// RHS is also a parameter in case we need to chain more combinations together..
+///
 /// Also, using a type parameter instead of an associated type because
 /// there was a weird diverging trait search going with an associated type.
 ///
 /// This means that yes, we need to enforce things with Laws.
-pub trait Semi<Output = Self> {
-    fn combine(self, other: Self) -> Output;
+pub trait Semi<Output = Self, RHS = Self> {
+    fn combine(self, other: RHS) -> Output;
 }
 
 /// Allow the combination of any two HLists having the same structure
@@ -99,6 +101,9 @@ macro_rules! numeric_semi_imps {
       impl Semi<$tr> for $tr {
         fn combine(self, other: Self) -> $tr { self + other }
       }
+      impl <'a> Semi<$tr, &'a $tr> for $tr {
+        fn combine(self, other: &'a $tr) -> $tr { self + other }
+      }
       impl <'a> Semi<$tr> for &'a $tr {
         fn combine(self, other: Self) -> $tr { self + other }
       }
@@ -116,10 +121,26 @@ impl Semi<String> for String {
     }
 }
 
+impl <'a> Semi<String, &'a str> for String {
+    fn combine(self, other: &'a str) -> Self {
+        let mut s = self;
+        s.push_str(other);
+        s
+    }
+}
+
 impl <'a> Semi<String> for &'a str {
     fn combine(self, other: Self) -> String {
         let mut s = self.to_string();
         s.push_str(&*other);
+        s
+    }
+}
+
+impl <'a> Semi<String, String> for &'a str {
+    fn combine(self, other: String) -> String {
+        let mut s = self.to_string();
+        s.push_str(&other[..]);
         s
     }
 }
@@ -212,6 +233,20 @@ mod tests {
     #[test]
     fn test_combine_str() {
         assert_eq!("hello".combine(" world"), "hello world")
+    }
+
+    #[test]
+    fn test_combine_str_chained() {
+        assert_eq!("hello".combine(" world").combine(" yay"), "hello world yay")
+    }
+
+    #[test]
+    fn test_combine_i32_chained() {
+        let i1: i32 = 50;
+        let i2: i32 = 51;
+        let i3: i32 = 52;
+        let c: i32 = (&i1).combine(&i2).combine(&i3);
+        assert_eq!(c, 153)
     }
 
     #[test]
