@@ -8,7 +8,7 @@
 //! ```
 //! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
 //! let h = hlist![1, "hi"];
-//! assert_eq!(h.length(), 2);
+//! assert_eq!(h.len(), 2);
 //! let (a, b) = h.into_tuple2();
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
@@ -57,6 +57,10 @@ use std::marker::PhantomData;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
+
+    #[deprecated(since="0.1.30", note="Please use len() or static_len() instead.")]
+    fn length(&self) -> u32 { <Self as HList>::static_len() as u32}
+
     /// Returns the length of a given HList
     ///
     /// # Examples
@@ -64,10 +68,22 @@ pub trait HList: Sized {
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
     /// let h = hlist![1, "hi"];
-    /// assert_eq!(h.length(), 2);
+    /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
-    fn length(&self) -> u32;
+    fn len(&self) -> usize { <Self as HList>::static_len() }
+
+    /// Returns the length of a given HList type without making use of any references, or
+    /// in fact, any values at all.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
+    /// # }
+    /// ```
+    #[inline]
+    fn static_len() -> usize;
 
     /// Prepends an item to the current HList
     ///
@@ -105,9 +121,7 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
-    fn length(&self) -> u32 {
-        0
-    }
+    fn static_len() -> usize { 0}
 }
 
 impl AsRef<HNil> for HNil {
@@ -123,9 +137,7 @@ pub struct HCons<H, T> {
 }
 
 impl<H, T: HList> HList for HCons<H, T> {
-    fn length(&self) -> u32 {
-        1 + self.tail.length()
-    }
+    fn static_len() -> usize { 1 + <T as HList>::static_len()  }
 }
 
 impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
@@ -867,9 +879,9 @@ mod tests {
     fn test_contained_list() {
         let c = HasHList(h_cons(1, HNil));
         let retrieved = c.0;
-        assert_eq!(retrieved.length(), 1);
+        assert_eq!(retrieved.len(), 1);
         let new_list = h_cons(2, retrieved);
-        assert_eq!(new_list.length(), 2);
+        assert_eq!(new_list.len(), 2);
     }
 
     #[test]
@@ -1017,5 +1029,10 @@ mod tests {
         let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
         assert_eq!(reshaped, hlist![41f32, 9000]);
         assert_eq!(remainder, hlist!["joe"])
+    }
+
+    #[test]
+    fn test_static_len() {
+        assert_eq!(<Hlist![usize, &str, f32] as HList>::static_len(), 3);
     }
 }
