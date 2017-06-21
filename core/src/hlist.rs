@@ -8,7 +8,7 @@
 //! ```
 //! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
 //! let h = hlist![1, "hi"];
-//! assert_eq!(h.length(), 2);
+//! assert_eq!(h.len(), 2);
 //! let (a, b) = h.into_tuple2();
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
@@ -57,6 +57,11 @@ use std::marker::PhantomData;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
+    #[deprecated(since="0.1.30", note="Please use len() or static_len() instead.")]
+    fn length(&self) -> u32 {
+        <Self as HList>::static_len() as u32
+    }
+
     /// Returns the length of a given HList
     ///
     /// # Examples
@@ -64,10 +69,24 @@ pub trait HList: Sized {
     /// ```
     /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
     /// let h = hlist![1, "hi"];
-    /// assert_eq!(h.length(), 2);
+    /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
-    fn length(&self) -> u32;
+    fn len(&self) -> usize {
+        <Self as HList>::static_len()
+    }
+
+    /// Returns the length of a given HList type without making use of any references, or
+    /// in fact, any values at all.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
+    /// # }
+    /// ```
+    #[inline]
+    fn static_len() -> usize;
 
     /// Prepends an item to the current HList
     ///
@@ -105,13 +124,15 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
-    fn length(&self) -> u32 {
+    fn static_len() -> usize {
         0
     }
 }
 
 impl AsRef<HNil> for HNil {
-    fn as_ref(&self) -> &HNil { self }
+    fn as_ref(&self) -> &HNil {
+        self
+    }
 }
 
 /// Represents the most basic non-empty HList. Its value is held in `head`
@@ -123,13 +144,15 @@ pub struct HCons<H, T> {
 }
 
 impl<H, T: HList> HList for HCons<H, T> {
-    fn length(&self) -> u32 {
-        1 + self.tail.length()
+    fn static_len() -> usize {
+        1 + <T as HList>::static_len()
     }
 }
 
 impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
-    fn as_ref(&self) -> &HCons<H, T> { self }
+    fn as_ref(&self) -> &HCons<H, T> {
+        self
+    }
 }
 
 impl<H, T> HCons<H, T> {
@@ -166,7 +189,10 @@ impl<H, T> HCons<H, T> {
 /// assert_eq!(h2, 1.23f32);
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    HCons { head: h, tail: tail }
+    HCons {
+        head: h,
+        tail: tail,
+    }
 }
 
 /// Returns an `HList` based on the values passed in.
@@ -447,8 +473,8 @@ impl<Source> Sculptor<HNil, HNil> for Source {
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
 /// Plucker's remainder induce.
 impl<THead, TTail, SHead, STail, IndexHead, IndexTail> Sculptor<HCons<THead, TTail>,
-    HCons<IndexHead, IndexTail>>
-for HCons<SHead, STail>
+                                                                HCons<IndexHead, IndexTail>>
+    for HCons<SHead, STail>
     where HCons<SHead, STail>: Plucker<THead, IndexHead>,
           <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail>
 {
@@ -460,9 +486,9 @@ for HCons<SHead, STail>
             self.pluck();
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
         (HCons {
-            head: p,
-            tail: tail,
-        },
+             head: p,
+             tail: tail,
+         },
          tail_remainder)
     }
 }
@@ -506,10 +532,10 @@ impl<H, Tail> IntoReverse for HCons<H, Tail>
 
     fn into_reverse(self) -> Self::Output {
         self.tail.into_reverse() +
-            HCons {
-                head: self.head,
-                tail: HNil,
-            }
+        HCons {
+            head: self.head,
+            tail: HNil,
+        }
     }
 }
 
@@ -565,13 +591,17 @@ impl<F> HMappable<F> for HNil {
 }
 
 impl<'a, F, R, H> HMappable<HCons<F, HNil>> for &'a HCons<H, HNil>
-    where F: FnOnce(&'a H) -> R {
+    where F: FnOnce(&'a H) -> R
+{
     type Output = HCons<R, HNil>;
 
     fn map(self, f: HCons<F, HNil>) -> Self::Output {
         let ref h = self.head;
         let f = f.head;
-        HCons { head: f(h), tail: HNil }
+        HCons {
+            head: f(h),
+            tail: HNil,
+        }
     }
 }
 
@@ -651,7 +681,10 @@ impl<F, Init> HFoldRightable<F, Init, Here> for HNil {
 }
 
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>,
+                                                                      Init,
+                                                                      There<Index>>
+    for HCons<H, Tail>
     where Tail: HFoldRightable<FolderTail, Init, Index>,
           F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR
 {
@@ -755,8 +788,9 @@ impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
     }
 }
 
-impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil> where
-    F: FnOnce(Acc, &'a H) -> R {
+impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil>
+    where F: FnOnce(Acc, &'a H) -> R
+{
     type Output = R;
 
     fn foldl(self, folder: HCons<F, HNil>, acc: Acc) -> Self::Output {
@@ -766,8 +800,10 @@ impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H,
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>>
-for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>,
+                                                                    Acc,
+                                                                    There<Index>>
+    for HCons<H, Tail>
     where Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
           F: FnOnce(Acc, H) -> FolderHeadR
 {
@@ -779,8 +815,11 @@ for HCons<H, Tail>
     }
 }
 
-impl<'a, F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>>
-for &'a HCons<H, Tail>
+impl<'a, F, FolderHeadR, FolderTail, H, Tail, Acc, Index> HFoldLeftable<HCons<F, FolderTail>,
+                                                                        Acc,
+                                                                        There<Index>>
+    for
+    &'a HCons<H, Tail>
     where &'a Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
           F: FnOnce(Acc, &'a H) -> FolderHeadR
 {
@@ -867,9 +906,9 @@ mod tests {
     fn test_contained_list() {
         let c = HasHList(h_cons(1, HNil));
         let retrieved = c.0;
-        assert_eq!(retrieved.length(), 1);
+        assert_eq!(retrieved.len(), 1);
         let new_list = h_cons(2, retrieved);
-        assert_eq!(new_list.length(), 2);
+        assert_eq!(new_list.len(), 2);
     }
 
     #[test]
@@ -960,16 +999,16 @@ mod tests {
     }
 
     // Todo enable when compiler is fixed
-//    #[test]
-//    fn test_foldr_non_consuming() {
-//        let h = hlist![1, false, 42f32];
-//        let folder = hlist![|&i, acc| i + acc,
-//                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-//                                             |&f, acc| f + acc];
-//        let folded = h.as_ref().foldr(folder,
-//                                      1f32);
-//        assert_eq!(folded, 9001)
-//    }
+    //    #[test]
+    //    fn test_foldr_non_consuming() {
+    //        let h = hlist![1, false, 42f32];
+    //        let folder = hlist![|&i, acc| i + acc,
+    //                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
+    //                                             |&f, acc| f + acc];
+    //        let folded = h.as_ref().foldr(folder,
+    //                                      1f32);
+    //        assert_eq!(folded, 9001)
+    //    }
 
     #[test]
     fn test_foldl_consuming() {
@@ -984,30 +1023,25 @@ mod tests {
     #[test]
     fn test_foldl_non_consuming() {
         let h = hlist![1, false, 42f32];
-        let folded = h.as_ref().foldl(hlist![|acc, &i| i + acc,
-                                             |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-                                             |acc, &f| f + acc],
-                                      1);
+        let folded = h.as_ref()
+            .foldl(hlist![|acc, &i| i + acc,
+                          |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                          |acc, &f| f + acc],
+                   1);
         assert_eq!(42f32, folded)
     }
 
     #[test]
     fn test_map_consuming() {
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.map(hlist![
-            |n| n + 1,
-            |s| s,
-            |f| f + 1f32]);
+        let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
     }
 
     #[test]
     fn test_map_non_consuming() {
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.as_ref().map(hlist![
-            |&n| n + 1,
-            |&s| s,
-            |&f| f + 1f32]);
+        let mapped = h.as_ref().map(hlist![|&n| n + 1, |&s| s, |&f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
     }
 
@@ -1017,5 +1051,10 @@ mod tests {
         let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
         assert_eq!(reshaped, hlist![41f32, 9000]);
         assert_eq!(remainder, hlist!["joe"])
+    }
+
+    #[test]
+    fn test_static_len() {
+        assert_eq!(<Hlist![usize, &str, f32] as HList>::static_len(), 3);
     }
 }

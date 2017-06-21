@@ -30,7 +30,7 @@
 //!
 //! // HLists
 //! let h = hlist![1, "hi"];
-//! assert_eq!(h.length(), 2);
+//! assert_eq!(h.len(), 2);
 //! let hlist_pat!(a, b) = h;
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
