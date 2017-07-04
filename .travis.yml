@@ -14,8 +14,8 @@ before_script:
 script:
   - |
     travis-cargo build &&
-    travis-cargo build --example generic &&
-    travis-cargo build --example labelled &&
+    travis-cargo build -- --example generic &&
+    travis-cargo build -- --example labelled &&
     travis-cargo test &&
     cd ${TRAVIS_BUILD_DIR}/core && travis-cargo test &&
     cd ${TRAVIS_BUILD_DIR}/laws && travis-cargo test &&
