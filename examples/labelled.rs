@@ -41,5 +41,5 @@ fn main() {
     let d_user: DeletedUser = transform_from(s_user);
 
     assert_eq!(d_user.first_name, "Joe");
-    println!("{}", p.last_name);
+    println!("{}", d_user.last_name);
 }
