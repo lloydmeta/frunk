@@ -14,16 +14,20 @@ use self::time::*;
 
 #[test]
 fn test_struct_from_labelled_generic() {
-    let h = hlist![field!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
-                   field!((l, a, s, t, __, n, a, m, e), "Drumpty"),
-                   field!((a, g, e), 3)];
+    let h = hlist![
+        field!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
+        field!((l, a, s, t, __, n, a, m, e), "Drumpty"),
+        field!((a, g, e), 3),
+    ];
     let u: NewUser = from_labelled_generic(h);
-    assert_eq!(u,
-               NewUser {
-                   first_name: "Humpty",
-                   last_name: "Drumpty",
-                   age: 3,
-               });
+    assert_eq!(
+        u,
+        NewUser {
+            first_name: "Humpty",
+            last_name: "Drumpty",
+            age: 3,
+        }
+    );
 }
 
 #[test]
@@ -48,10 +52,14 @@ fn test_struct_into_labelled_generic() {
         age: 3,
     };
     let h = into_labelled_generic(u);
-    assert_eq!(h,
-               hlist![field!((f, i, r, s, t, __, n, a, m, e), "Humpty", "first_name"),
-                      field!((l, a, s, t, __, n, a, m, e), "Drumpty", "last_name"),
-                      field!((a, g, e), 3)]);
+    assert_eq!(
+        h,
+        hlist![
+            field!((f, i, r, s, t, __, n, a, m, e), "Humpty", "first_name"),
+            field!((l, a, s, t, __, n, a, m, e), "Drumpty", "last_name"),
+            field!((a, g, e), 3),
+        ]
+    );
 }
 
 #[test]

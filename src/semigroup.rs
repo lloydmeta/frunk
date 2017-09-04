@@ -72,9 +72,9 @@ pub trait Semigroup {
 /// if all of the sub-element types are also Semiups
 impl<H: Semigroup, T: HList + Semigroup> Semigroup for HCons<H, T> {
     fn combine(&self, other: &Self) -> Self {
-        self.tail
-            .combine(&other.tail)
-            .prepend(self.head.combine(&other.head))
+        self.tail.combine(&other.tail).prepend(
+            self.head.combine(&other.head),
+        )
     }
 }
 
@@ -87,7 +87,8 @@ impl Semigroup for HNil {
 
 /// Return this combined with itself `n` times.
 pub fn combine_n<T>(o: &T, times: u32) -> T
-    where T: Semigroup + Clone
+where
+    T: Semigroup + Clone,
 {
     let mut x = o.clone();
     // note: range is non-inclusive in the upper bound
@@ -112,7 +113,8 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 /// assert_eq!(combine_all_option(&v2), None);
 /// ```
 pub fn combine_all_option<T>(xs: &Vec<T>) -> Option<T>
-    where T: Semigroup + Clone
+where
+    T: Semigroup + Clone,
 {
     match xs.first() {
         Some(ref head) => {
@@ -157,7 +159,8 @@ macro_rules! numeric_product_semigroup_imps {
 numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
 impl<T> Semigroup for Option<T>
-    where T: Semigroup + Clone
+where
+    T: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
         match *self {
@@ -195,7 +198,8 @@ impl<T: Clone> Semigroup for Vec<T> {
 }
 
 impl<T> Semigroup for Cell<T>
-    where T: Semigroup + Copy
+where
+    T: Semigroup + Copy,
 {
     fn combine(&self, other: &Self) -> Self {
         Cell::new(self.get().combine(&(other.get())))
@@ -211,7 +215,8 @@ impl<T: Semigroup> Semigroup for RefCell<T> {
 }
 
 impl<T> Semigroup for HashSet<T>
-    where T: Eq + Hash + Clone
+where
+    T: Eq + Hash + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
         let mut h = HashSet::new();
@@ -226,8 +231,9 @@ impl<T> Semigroup for HashSet<T>
 }
 
 impl<K, V> Semigroup for HashMap<K, V>
-    where K: Eq + Hash + Clone,
-          V: Semigroup + Clone
+where
+    K: Eq + Hash + Clone,
+    V: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
         let mut h: HashMap<K, V> = HashMap::new();
@@ -252,7 +258,8 @@ impl<K, V> Semigroup for HashMap<K, V>
 }
 
 impl<T> Semigroup for Max<T>
-    where T: Ord + Clone
+where
+    T: Ord + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
         let x = self.0.clone();
@@ -265,7 +272,8 @@ impl<T> Semigroup for Max<T>
 }
 
 impl<T> Semigroup for Min<T>
-    where T: Ord + Clone
+where
+    T: Ord + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
         let x = self.0.clone();

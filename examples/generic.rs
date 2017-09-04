@@ -13,11 +13,13 @@ struct Person<'a> {
 fn main() {
     let h = hlist!("Joe", "Blow", 30);
     let p: Person = from_generic(h);
-    assert_eq!(p,
-               Person {
-                   first_name: "Joe",
-                   last_name: "Blow",
-                   age: 30,
-               });
+    assert_eq!(
+        p,
+        Person {
+            first_name: "Joe",
+            last_name: "Blow",
+            age: 30,
+        }
+    );
     println!("{}", p.first_name);
 }

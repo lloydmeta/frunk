@@ -25,11 +25,11 @@ struct SavedUser<'a> {
 #[bench]
 fn generic_conversion(b: &mut Bencher) {
     b.iter(|| {
-               let n_u = NewUser {
-                   first_name: "Joe",
-                   last_name: "Schmoe",
-                   age: 30,
-               };
-               SavedUser::convert_from(n_u)
-           })
+        let n_u = NewUser {
+            first_name: "Joe",
+            last_name: "Schmoe",
+            age: 30,
+        };
+        SavedUser::convert_from(n_u)
+    })
 }
