@@ -20,9 +20,11 @@ fn test_coproduct_fold_consuming() {
     type I32StrBool = Coprod!(i32, f32, bool);
 
     let co1 = I32StrBool::inject(3);
-    let folded = co1.fold(hlist![|i| format!("int {}", i),
-                                 |f| format!("float {}", f),
-                                 |b| (if b { "t" } else { "f" }).to_string()]);
+    let folded = co1.fold(hlist![
+        |i| format!("int {}", i),
+        |f| format!("float {}", f),
+        |b| (if b { "t" } else { "f" }).to_string(),
+    ]);
 
     assert_eq!(folded, "int 3".to_string());
 }
@@ -33,9 +35,12 @@ fn test_coproduct_fold_non_consuming() {
 
     let co = I32StrBool::inject(true);
 
-    assert_eq!(co.as_ref()
-                   .fold(hlist![|&i| format!("int {}", i),
-                                |&f| format!("float {}", f),
-                                |&b| (if b { "t" } else { "f" }).to_string()]),
-               "t".to_string());
+    assert_eq!(
+        co.as_ref().fold(hlist![
+            |&i| format!("int {}", i),
+            |&f| format!("float {}", f),
+            |&b| (if b { "t" } else { "f" }).to_string(),
+        ]),
+        "t".to_string()
+    );
 }

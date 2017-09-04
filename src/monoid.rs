@@ -58,7 +58,8 @@ pub trait Monoid: Semigroup {
 /// assert_eq!(combine_n(&Some(2), 4), Some(8));
 /// ```
 pub fn combine_n<T>(o: &T, times: u32) -> T
-    where T: Monoid + Semigroup + Clone
+where
+    T: Monoid + Semigroup + Clone,
 {
     if times == 0 {
         <T as Monoid>::empty()
@@ -83,14 +84,17 @@ pub fn combine_n<T>(o: &T, times: u32) -> T
 /// assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
 /// ```
 pub fn combine_all<T>(xs: &Vec<T>) -> T
-    where T: Monoid + Semigroup + Clone
+where
+    T: Monoid + Semigroup + Clone,
 {
-    xs.iter()
-        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
+    xs.iter().fold(<T as Monoid>::empty(), |acc, next| {
+        acc.combine(&next)
+    })
 }
 
 impl<T> Monoid for Option<T>
-    where T: Semigroup + Clone
+where
+    T: Semigroup + Clone,
 {
     fn empty() -> Self {
         None
@@ -104,7 +108,8 @@ impl Monoid for String {
 }
 
 impl<T> Monoid for Vec<T>
-    where T: Clone
+where
+    T: Clone,
 {
     fn empty() -> Self {
         Vec::new()
@@ -112,7 +117,8 @@ impl<T> Monoid for Vec<T>
 }
 
 impl<T> Monoid for HashSet<T>
-    where T: Hash + Eq + Clone
+where
+    T: Hash + Eq + Clone,
 {
     fn empty() -> Self {
         HashSet::new()
@@ -120,8 +126,9 @@ impl<T> Monoid for HashSet<T>
 }
 
 impl<K, V> Monoid for HashMap<K, V>
-    where K: Eq + Hash + Clone,
-          V: Semigroup + Clone
+where
+    K: Eq + Hash + Clone,
+    V: Semigroup + Clone,
 {
     fn empty() -> Self {
         HashMap::new()
@@ -292,15 +299,19 @@ mod tests {
         assert_eq!(combine_all(&empty_vec_opt_int), None);
 
         let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
-        assert_eq!(combine_all(&vec_of_some_strings),
-                   Some("Hello World".to_owned()));
+        assert_eq!(
+            combine_all(&vec_of_some_strings),
+            Some("Hello World".to_owned())
+        );
     }
 
     #[test]
     fn test_combine_all_hashset() {
         let vec_of_no_hashes: Vec<HashSet<i32>> = Vec::new();
-        assert_eq!(combine_all(&vec_of_no_hashes),
-                   <HashSet<i32> as Monoid>::empty());
+        assert_eq!(
+            combine_all(&vec_of_no_hashes),
+            <HashSet<i32> as Monoid>::empty()
+        );
 
         let mut h1 = HashSet::new();
         h1.insert(1);
@@ -319,8 +330,10 @@ mod tests {
     #[test]
     fn test_combine_all_hashmap() {
         let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
-        assert_eq!(combine_all(&vec_of_no_hashmaps),
-                   <HashMap<i32, String> as Monoid>::empty());
+        assert_eq!(
+            combine_all(&vec_of_no_hashmaps),
+            <HashMap<i32, String> as Monoid>::empty()
+        );
 
         let mut h1: HashMap<i32, String> = HashMap::new();
         h1.insert(1, String::from("Hello")); // h1 is HashMap( 1 -> "Hello")

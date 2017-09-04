@@ -42,10 +42,12 @@ fn get_age(yah_nah: YahNah) -> Result<usize, Nope> {
 fn test_to_result_ok() {
     let v = get_name(YahNah::Yah).into_validated() + get_name(YahNah::Yah) + get_age(YahNah::Yah);
     let person: Result<Person, _> = v.into_result().map(|h| from_generic(h)); // much simpler
-    assert_eq!(person.unwrap(),
-               Person {
-                   first_name: "James",
-                   last_name: "James",
-                   age: 32,
-               });
+    assert_eq!(
+        person.unwrap(),
+        Person {
+            first_name: "James",
+            last_name: "James",
+            age: 32,
+        }
+    );
 }

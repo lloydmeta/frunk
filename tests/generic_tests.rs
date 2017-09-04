@@ -11,12 +11,14 @@ use common::*;
 fn test_struct_from_generic() {
     let h = hlist!("Humpty", "Drumpty", 3);
     let p: Person = from_generic(h);
-    assert_eq!(p,
-               Person {
-                   first_name: "Humpty",
-                   last_name: "Drumpty",
-                   age: 3,
-               });
+    assert_eq!(
+        p,
+        Person {
+            first_name: "Humpty",
+            last_name: "Drumpty",
+            age: 3,
+        }
+    );
 }
 
 #[test]
@@ -45,12 +47,14 @@ fn test_struct_conversion() {
         age: 3,
     };
     let pres = <President as Generic>::convert_from(a);
-    assert_eq!(pres,
-               President {
-                   first_name: "Steve",
-                   last_name: "Cannon",
-                   age: 3,
-               })
+    assert_eq!(
+        pres,
+        President {
+            first_name: "Steve",
+            last_name: "Cannon",
+            age: 3,
+        }
+    )
 }
 
 #[test]

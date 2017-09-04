@@ -121,8 +121,9 @@ pub trait LabelledGeneric {
 
     /// From one type to another using a type with a compatible labelled generic representation
     fn convert_from<A>(a: A) -> Self
-        where A: LabelledGeneric<Repr = Self::Repr>,
-              Self: Sized
+    where
+        A: LabelledGeneric<Repr = Self::Repr>,
+        Self: Sized,
     {
         let repr = <A as LabelledGeneric>::into(a);
         <Self as LabelledGeneric>::from(repr)
@@ -135,10 +136,11 @@ pub trait LabelledGeneric {
     /// words, anything that is not needed from A gets tossed out.
     #[deprecated = "obsolete, transform_from instead"]
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
-        where A: LabelledGeneric,
-              Self: Sized,
-              // The labelled representation of A must be sculpt-able into the labelled representation of Self
-              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>
+    where
+        A: LabelledGeneric,
+        Self: Sized,
+        // The labelled representation of A must be sculpt-able into the labelled representation of Self
+        <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>,
     {
         <Self as LabelledGeneric>::transform_from(a)
     }
@@ -149,10 +151,11 @@ pub trait LabelledGeneric {
     /// Note that this method tosses away the "remainder" of the sculpted representation. In other
     /// words, anything that is not needed from A gets tossed out.
     fn transform_from<A, Indices>(a: A) -> Self
-        where A: LabelledGeneric,
-              Self: Sized,
-              // The labelled representation of A must be sculpt-able into the labelled representation of Self
-              <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>
+    where
+        A: LabelledGeneric,
+        Self: Sized,
+        // The labelled representation of A must be sculpt-able into the labelled representation of Self
+        <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>,
     {
         let a_gen = <A as LabelledGeneric>::into(a);
         // We toss away the remainder.
@@ -163,22 +166,25 @@ pub trait LabelledGeneric {
 
 /// Given a labelled generic Representation of an A, returns A
 pub fn from_labelled_generic<A, Repr>(gen: Repr) -> A
-    where A: LabelledGeneric<Repr = Repr>
+where
+    A: LabelledGeneric<Repr = Repr>,
 {
     <A as LabelledGeneric>::from(gen)
 }
 
 /// Given an A, returns its labelled generic Representation
 pub fn into_labelled_generic<A, Repr>(a: A) -> Repr
-    where A: LabelledGeneric<Repr = Repr>
+where
+    A: LabelledGeneric<Repr = Repr>,
 {
     <A as LabelledGeneric>::into(a)
 }
 
 /// Converts one type into another assuming they have the same labelled generic Representation
 pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
-    where A: LabelledGeneric<Repr = Repr>,
-          B: LabelledGeneric<Repr = Repr>
+where
+    A: LabelledGeneric<Repr = Repr>,
+    B: LabelledGeneric<Repr = Repr>,
 {
     <B as LabelledGeneric>::convert_from(a)
 }
@@ -190,10 +196,11 @@ pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
 /// can indeed be morphed into each other.
 #[deprecated = "obsolete, transform_from instead"]
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
-    where A: LabelledGeneric,
-          B: LabelledGeneric,
-          // The labelled representation of A must be sculpt-able into the labelled representation of B
-          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>
+where
+    A: LabelledGeneric,
+    B: LabelledGeneric,
+    // The labelled representation of A must be sculpt-able into the labelled representation of B
+    <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>,
 {
     <B as LabelledGeneric>::transform_from(a)
 }
@@ -203,10 +210,11 @@ pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
 pub fn transform_from<A, B, Indices>(a: A) -> B
-    where A: LabelledGeneric,
-          B: LabelledGeneric,
-          // The labelled representation of A must be sculpt-able into the labelled representation of B
-          <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>
+where
+    A: LabelledGeneric,
+    B: LabelledGeneric,
+    // The labelled representation of A must be sculpt-able into the labelled representation of B
+    <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>,
 {
     <B as LabelledGeneric>::transform_from(a)
 }
@@ -250,7 +258,8 @@ pub struct Field<Name, Type> {
 }
 
 impl<Name, Type> fmt::Debug for Field<Name, Type>
-    where Type: fmt::Debug
+where
+    Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v_debug = format!("{:?}", self.value);
@@ -318,7 +327,8 @@ impl IntoUnlabelled for HNil {
 
 /// Implementation when we have a non-empty HCons holding a label in its head
 impl<Label, Value, Tail> IntoUnlabelled for HCons<Field<Label, Value>, Tail>
-    where Tail: IntoUnlabelled
+where
+    Tail: IntoUnlabelled,
 {
     type Output = HCons<Value, <Tail as IntoUnlabelled>::Output>;
 
