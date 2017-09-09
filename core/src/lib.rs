@@ -61,3 +61,7 @@
 pub mod hlist;
 pub mod generic;
 pub mod labelled;
+
+#[cfg(feature = "with_serde")]
+#[macro_use]
+extern crate serde_derive;
