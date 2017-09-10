@@ -116,18 +116,10 @@ pub fn combine_all_option<T>(xs: &Vec<T>) -> Option<T>
 where
     T: Semigroup + Clone,
 {
-    match xs.first() {
-        Some(ref head) => {
-            let tail = xs[1..].to_vec();
-            // TODO figure out how to write this as a fold
-            let mut x = (*head).clone();
-            for i in tail {
-                x = x.combine(&i)
-            }
-            Some(x)
-        }
-        _ => None,
-    }
+    xs.iter().skip(1).fold(
+        xs.first().map(|v| v.clone()),
+        |acc, next| acc.map(|v| v.combine(next)),
+    )
 }
 
 macro_rules! numeric_semigroup_imps {
@@ -498,10 +490,14 @@ mod tests {
 
     #[test]
     fn test_combine_all_option() {
+        let v0 = &Vec::<i32>::new();
+        assert_eq!(combine_all_option(v0), None);
         let v1 = &vec![1, 2, 3];
         assert_eq!(combine_all_option(v1), Some(6));
         let v2 = &vec![Some(1), Some(2), Some(3)];
         assert_eq!(combine_all_option(v2), Some(Some(6)));
+        let v3 = &vec![1];
+        assert_eq!(combine_all_option(v3), Some(1));
     }
 
     #[test]
