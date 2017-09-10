@@ -2,7 +2,7 @@
 //! instances of typeclasses that we don't define for types we don't
 //! own
 
-use frunk::semigroup::*;
+use frunk::semi::*;
 use frunk::monoid::*;
 use quickcheck::*;
 
@@ -43,9 +43,9 @@ impl<A: Arbitrary> Arbitrary for Wrapper<Product<A>> {
     }
 }
 
-impl<A: Semigroup> Semigroup for Wrapper<A> {
-    fn combine(&self, other: &Self) -> Self {
-        Wrapper(self.0.combine(&other.0))
+impl<A: Semi> Semi for Wrapper<A> {
+    fn combine(self, other: Self) -> Self {
+        Wrapper(self.0.combine(other.0))
     }
 }
 

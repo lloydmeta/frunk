@@ -1,6 +1,6 @@
 //! Module for holding Monoid typeclass definitions and default implementations
 //!
-//! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to
+//! A `Monoid` is a Semi that has a defined empty/zero value. This allows us to
 //! define a `combine_all` method to work on a list of said things:
 //!
 //! Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
@@ -12,7 +12,7 @@
 //! # use frunk::monoid::*;
 //! # use std::collections::*;
 //! let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
-//! assert_eq!(combine_all(&vec_of_no_hashmaps),
+//! assert_eq!(combine_all(vec_of_no_hashmaps),
 //!                    <HashMap<i32, String> as Monoid>::empty());
 //!
 //! let mut h1: HashMap<i32, String> = HashMap::new();
@@ -28,14 +28,14 @@
 //! h_expected.insert(1, String::from("Hello World"));
 //! h_expected.insert(2, String::from("Goodbye"));
 //! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
-//! assert_eq!(combine_all(&vec_of_hashes), h_expected);
+//! assert_eq!(combine_all(vec_of_hashes), h_expected);
 //! ```
-use super::semigroup::{Semigroup, Product, All, Any};
+use super::semi::{Semi, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
-/// A Monoid is a Semigroup that has an empty/ zero value
-pub trait Monoid: Semigroup {
+/// A Monoid is a Semi that has an empty/ zero value
+pub trait Monoid: Semi + Sized {
     /// For a given Monoid, returns its empty/zero value
     ///
     /// # Examples
@@ -55,16 +55,16 @@ pub trait Monoid: Semigroup {
 /// ```
 /// # use frunk::monoid::*;
 ///
-/// assert_eq!(combine_n(&Some(2), 4), Some(8));
+/// assert_eq!(combine_n(Some(2), 4), Some(8));
 /// ```
-pub fn combine_n<T>(o: &T, times: u32) -> T
+pub fn combine_n<T>(o: T, times: u32) -> T
 where
-    T: Monoid + Semigroup + Clone,
+    T: Monoid + Semi + Clone,
 {
     if times == 0 {
         <T as Monoid>::empty()
     } else {
-        super::semigroup::combine_n(o, times)
+        super::semi::combine_n(o, times)
     }
 }
 
@@ -75,26 +75,26 @@ where
 /// ```
 /// # use frunk::monoid::*;
 ///
-/// assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
+/// assert_eq!(combine_all(vec![Some(1), Some(3)]), Some(4));
 ///
 /// let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
-/// assert_eq!(combine_all(&empty_vec_opt_int), None);
+/// assert_eq!(combine_all(empty_vec_opt_int), None);
 ///
 /// let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
-/// assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
+/// assert_eq!(combine_all(vec_of_some_strings), Some(String::from("Hello World")));
 /// ```
-pub fn combine_all<T>(xs: &Vec<T>) -> T
+pub fn combine_all<T>(xs: Vec<T>) -> T
 where
-    T: Monoid + Semigroup + Clone,
+    T: Monoid + Semi + Clone,
 {
-    xs.iter().fold(<T as Monoid>::empty(), |acc, next| {
-        acc.combine(&next)
+    xs.into_iter().fold(<T as Monoid>::empty(), |acc, next| {
+        acc.combine(next)
     })
 }
 
 impl<T> Monoid for Option<T>
 where
-    T: Semigroup + Clone,
+    T: Semi + Clone,
 {
     fn empty() -> Self {
         None
@@ -128,7 +128,7 @@ where
 impl<K, V> Monoid for HashMap<K, V>
 where
     K: Eq + Hash + Clone,
-    V: Semigroup + Clone,
+    V: Semi + Clone,
 {
     fn empty() -> Self {
         HashMap::new()
@@ -278,29 +278,29 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::semigroup::{Product, All, Any};
+    use super::super::semi::{Product, All, Any};
 
     #[test]
     fn test_combine_n() {
-        assert_eq!(combine_n(&1, 0), 0);
-        assert_eq!(combine_n(&2, 1), 2);
-        assert_eq!(combine_n(&Some(2), 0), None);
-        assert_eq!(combine_n(&Some(2), 4), Some(8));
+        assert_eq!(combine_n(1, 0), 0);
+        assert_eq!(combine_n(2, 1), 2);
+        assert_eq!(combine_n(Some(2), 0), None);
+        assert_eq!(combine_n(Some(2), 4), Some(8));
     }
 
     #[test]
     fn test_combine_all_basic() {
-        assert_eq!(combine_all(&vec![1, 2, 3]), 6);
+        assert_eq!(combine_all(vec![1, 2, 3]), 6);
 
         let empty_vec_int: Vec<i32> = Vec::new();
-        assert_eq!(combine_all(&empty_vec_int), 0);
+        assert_eq!(combine_all(empty_vec_int), 0);
 
         let empty_vec_opt_int: Vec<Option<i32>> = Vec::new();
-        assert_eq!(combine_all(&empty_vec_opt_int), None);
+        assert_eq!(combine_all(empty_vec_opt_int), None);
 
         let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
         assert_eq!(
-            combine_all(&vec_of_some_strings),
+            combine_all(vec_of_some_strings),
             Some("Hello World".to_owned())
         );
     }
@@ -309,7 +309,7 @@ mod tests {
     fn test_combine_all_hashset() {
         let vec_of_no_hashes: Vec<HashSet<i32>> = Vec::new();
         assert_eq!(
-            combine_all(&vec_of_no_hashes),
+            combine_all(vec_of_no_hashes),
             <HashSet<i32> as Monoid>::empty()
         );
 
@@ -324,14 +324,14 @@ mod tests {
         h_expected.insert(1);
         h_expected.insert(2);
         h_expected.insert(3);
-        assert_eq!(combine_all(&vec_of_hashes), h_expected);
+        assert_eq!(combine_all(vec_of_hashes), h_expected);
     }
 
     #[test]
     fn test_combine_all_hashmap() {
         let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
         assert_eq!(
-            combine_all(&vec_of_no_hashmaps),
+            combine_all(vec_of_no_hashmaps),
             <HashMap<i32, String> as Monoid>::empty()
         );
 
@@ -348,31 +348,31 @@ mod tests {
         h_expected.insert(1, String::from("Hello World"));
         h_expected.insert(2, String::from("Goodbye"));
         h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
-        assert_eq!(combine_all(&vec_of_hashes), h_expected);
+        assert_eq!(combine_all(vec_of_hashes), h_expected);
     }
 
     #[test]
     fn test_combine_all_all() {
         let v1: Vec<All<i32>> = Vec::new();
-        assert_eq!(combine_all(&v1), All(!0));
-        assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
+        assert_eq!(combine_all(v1), All(!0));
+        assert_eq!(combine_all(vec![All(3), All(7)]), All(3));
 
         let v2: Vec<All<bool>> = Vec::new();
-        assert_eq!(combine_all(&v2), All(true));
-        assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
-        assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
+        assert_eq!(combine_all(v2), All(true));
+        assert_eq!(combine_all(vec![All(false), All(false)]), All(false));
+        assert_eq!(combine_all(vec![All(true), All(true)]), All(true));
     }
 
     #[test]
     fn test_combine_all_any() {
         let v1: Vec<Any<i32>> = Vec::new();
-        assert_eq!(combine_all(&v1), Any(0));
-        assert_eq!(combine_all(&vec![Any(3), Any(8)]), Any(11));
+        assert_eq!(combine_all(v1), Any(0));
+        assert_eq!(combine_all(vec![Any(3), Any(8)]), Any(11));
 
         let v2: Vec<Any<bool>> = Vec::new();
-        assert_eq!(combine_all(&v2), Any(false));
-        assert_eq!(combine_all(&vec![Any(false), Any(false)]), Any(false));
-        assert_eq!(combine_all(&vec![Any(true), Any(false)]), Any(true));
+        assert_eq!(combine_all(v2), Any(false));
+        assert_eq!(combine_all(vec![Any(false), Any(false)]), Any(false));
+        assert_eq!(combine_all(vec![Any(true), Any(false)]), Any(true));
     }
 
     #[test]
@@ -383,13 +383,13 @@ mod tests {
         let tuples = vec![t1, t2, t3];
 
         let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
-        assert_eq!(combine_all(&tuples), expected)
+        assert_eq!(combine_all(tuples), expected)
     }
 
     #[test]
     fn test_combine_all_product() {
         let v = vec![Product(2), Product(3), Product(4)];
-        assert_eq!(combine_all(&v), Product(24))
+        assert_eq!(combine_all(v), Product(24))
     }
 
 }

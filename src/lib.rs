@@ -21,12 +21,12 @@
 //! use frunk::generic::*;
 //! use frunk::labelled::*;
 //! use frunk::monoid::*;
-//! use frunk::semigroup::*;
+//! use frunk::semi::*;
 //! use frunk::validated::*;
 //!
 //! // Combining Monoids
 //! let v = vec![Some(1), Some(3)];
-//! assert_eq!(combine_all(&v), Some(4));
+//! assert_eq!(combine_all(v), Some(4));
 //!
 //! // HLists
 //! let h = hlist![1, "hi"];
@@ -38,7 +38,7 @@
 //! let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
 //! let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
 //! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_owned()];
-//! assert_eq!(h1.combine(&h2), h3);
+//! assert_eq!(h1.combine(h2), h3);
 //!
 //! // Generic and LabelledGeneric-based programming
 //! // Allows Structs to play well easily with HLists

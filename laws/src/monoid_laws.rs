@@ -36,8 +36,8 @@ use frunk::monoid::*;
 /// quickcheck(left_identity as fn(String) -> bool);
 /// # }
 /// ```
-pub fn left_identity<A: Monoid + Eq>(a: A) -> bool {
-    <A as Monoid>::empty().combine(&a) == a
+pub fn left_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
+    <A as Monoid>::empty().combine(a.clone()) == a
 }
 
 /// Right identity law
@@ -56,8 +56,8 @@ pub fn left_identity<A: Monoid + Eq>(a: A) -> bool {
 /// quickcheck(right_identity as fn(String) -> bool);
 /// # }
 /// ```
-pub fn right_identity<A: Monoid + Eq>(a: A) -> bool {
-    a.combine(&<A as Monoid>::empty()) == a
+pub fn right_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
+    a.clone().combine(<A as Monoid>::empty()) == a
 }
 
 
@@ -66,7 +66,7 @@ pub fn right_identity<A: Monoid + Eq>(a: A) -> bool {
 mod tests {
     use super::*;
     use wrapper::*;
-    use frunk::semigroup::*;
+    use frunk::semi::*;
     use quickcheck::quickcheck;
     use std::collections::{HashSet, HashMap};
 
