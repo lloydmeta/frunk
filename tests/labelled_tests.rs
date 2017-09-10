@@ -14,8 +14,7 @@ use self::time::*;
 
 #[test]
 fn test_struct_from_labelled_generic() {
-    let h =
-        hlist![
+    let h = hlist![
         field!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
         field!((l, a, s, t, __, n, a, m, e), "Drumpty"),
         field!((a, g, e), 3),

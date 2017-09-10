@@ -66,7 +66,7 @@ assert_eq!(hlist![1].tail, HNil);
 HLists have a `hlist_pat!` macro for pattern matching;
 ```rust
 let h: Hlist!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
-// We use the Hlist! type macro to make it easier to write 
+// We use the Hlist! type macro to make it easier to write
 // a type signature for HLists, which is a series of nested HCons
 // h has an expanded static type of: HCons<&str, HCons<&str, HCons<i32, HCons<bool, HNil>>>>
 
@@ -140,20 +140,20 @@ assert_eq!(remainder, hlist![true]);
 
 ### Generic
 
-`Generic` is a way of representing a type in ... a generic way. By coding around `Generic`, you can to write functions 
+`Generic` is a way of representing a type in ... a generic way. By coding around `Generic`, you can to write functions
 that abstract over types and arity, but still have the ability to recover your original type afterwards. This can be a fairly powerful thing.
 
-Frunk comes out of the box with a nice custom `Generic` derivation so that boilerplate is kept to a minimum. 
+Frunk comes out of the box with a nice custom `Generic` derivation so that boilerplate is kept to a minimum.
 
 Here are some examples:
 
 #### HList ⇄ Struct
 
 ```rust
-extern crate frunk;
 #[macro_use] // for the hlist macro
+extern crate frunk;
 extern crate frunk_core;
-use frunk::*; // for the Generic trait and HList
+use frunk::generic::*; // for the Generic trait and HList
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -174,9 +174,9 @@ assert_eq!(p,
 
 This also works the other way too; just pass a struct to `into_generic` and get its generic representation.
 
-#### Converting between Structs 
+#### Converting between Structs
 
-Sometimes you may have 2 different types that are structurally the same (e.g. different domains but the same data). Use cases include: 
+Sometimes you may have 2 different types that are structurally the same (e.g. different domains but the same data). Use cases include:
 
  * You have a models for deserialising from an external API and equivalents for your app logic
  * You want to represent different stages of the same data using types (see [this question on StackOverflow](http://stackoverflow.com/questions/31949455/transform-one-case-class-into-another-when-the-argument-list-is-the-same))
@@ -214,7 +214,7 @@ that is _labelled_. This means that if two structs derive `LabelledGeneric`, you
 field names match!
 
 Here's an example:
-  
+
 ```rust
 // Suppose that again, we have different User types representing the same data
 // in different stages in our application logic.
@@ -265,13 +265,13 @@ let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.
-let d_user: DeletedUser = transform_from(s_user); 
+let d_user: DeletedUser = transform_from(s_user);
 ```
 
 For more information how Generic and Field work, check out their respective Rustdocs:
   * [Generic](https://beachape.com/frunk/frunk_core/generic/index.html)
   * [Labelled](https://beachape.com/frunk/frunk_core/labelled/index.html)
-  
+
 ### Coproduct
 
 If you've ever wanted to have an adhoc union / sum type of types that you do not control, you may want
@@ -303,22 +303,22 @@ let nope_co = I32Bool::inject(42f32); // <-- will fail
 assert_eq!(
     co1.fold(hlist![|i| format!("int {}", i),
                     |f| format!("float {}", f),
-                    |b| (if b { "t" } else { "f" }).to_string()]), 
+                    |b| (if b { "t" } else { "f" }).to_string()]),
     "int 3".to_string());
 ```
 
-For more information, check out the [docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html) 
+For more information, check out the [docs for Coproduct](https://beachape.com/frunk/frunk/coproduct/index.html)
 
 ### Validated
 
 `Validated` is a way of running a bunch of operations that can go wrong (for example,
-functions returning `Result<T, E>`) and, in the case of one or more things going wrong, 
+functions returning `Result<T, E>`) and, in the case of one or more things going wrong,
 having all the errors returned to you all at once. In the case that everything went well, you get
-an `HList` of all your results. 
+an `HList` of all your results.
 
-Mapping (and otherwise working with plain) `Result`s is different because it will 
-stop at the first error, which can be annoying in the very common case (outlined 
-best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)). 
+Mapping (and otherwise working with plain) `Result`s is different because it will
+stop at the first error, which can be annoying in the very common case (outlined
+best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)).
 
 To use `Validated`, first:
 ```rust
@@ -349,7 +349,7 @@ let validation = get_name().into_validated() + get_age() + get_street();
 // When needed, turn the `Validated` back into a Result and map as usual
 let try_person = validation.into_result()
                            // Destructure our hlist
-                           .map(|hlist_pat!(name, age, street)| { 
+                           .map(|hlist_pat!(name, age, street)| {
                                Person {
                                    name: name,
                                    age: age,
@@ -368,7 +368,7 @@ assert_eq!(try_person.unwrap(),
 
 If, on the other hand, our `Result`s are faulty:
 ```rust
-/// This next pair of functions always return Recover::Err 
+/// This next pair of functions always return Recover::Err
 fn get_name_faulty() -> Result<String, String> {
     Result::Err("crap name".to_owned())
 }
@@ -383,7 +383,7 @@ let try_person2 = validation2.into_result()
 
 // Notice that we have an accumulated list of errors!
 assert_eq!(try_person2.unwrap_err(),
-           vec!["crap name".to_owned(), "crap age".to_owned()]); 
+           vec!["crap name".to_owned(), "crap age".to_owned()]);
 ```
 
 ### Semigroup
@@ -395,7 +395,7 @@ use frunk::semigroup::*;
 
 assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
-assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise && 
+assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise &&
 assert_eq!(All(true).combine(&All(false)), All(false));
 ```
 
@@ -434,10 +434,10 @@ Benchmarks are available in `./benches` and can be run with:
 It would be nice to use something like [bench-cmp](https://github.com/BurntSushi/cargo-benchcmp) to compare
 before and after, but for some reason, there is no output. Should investigate why.
 
-### Not yet implemented 
+### Not yet implemented
 
 Given that Rust has no support for Higher Kinded Types, I'm not sure if these
-are even possible to implement. In addition, Rustaceans are used to calling `iter()` 
+are even possible to implement. In addition, Rustaceans are used to calling `iter()`
 on collections to get a lazy view, manipulating their elements with `map`
 or `and_then`, and then doing a `collect()` at the end to keep things
 efficient. The usefulness of these following structures maybe limited in that context.
@@ -449,7 +449,7 @@ efficient. The usefulness of these following structures maybe limited in that co
 
 ## Contributing
 
-Yes please ! 
+Yes please !
 
 The following are considered important, in keeping with the spirit of Rust and functional programming:
 

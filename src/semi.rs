@@ -2,26 +2,32 @@ use frunk_core::hlist::*;
 use std::ops::{Deref, BitAnd, BitOr};
 use std::borrow::Borrow;
 use std::cmp::Ordering;
-
+use std::collections::{HashSet, HashMap};
+use std::collections::hash_map::Entry;
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub struct Max<T: Ord>(pub T);
 
 /// Wrapper type for types that are ordered and can have a Min combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub struct Min<T: Ord>(pub T);
 
 /// Wrapper type for types that can have a Product combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub struct Product<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise && combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub struct All<T>(pub T);
 
 /// Wrapper type for boolean that acts as a bitwise || combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub struct Any<T>(pub T);
 
 /// Output is a parameter because we want to allow Semi to not
@@ -125,16 +131,16 @@ where
 
 
 /// Return this combined with itself `n` times.
-pub fn combine_n<T>(mut o: T, times: u32) -> T
+pub fn combine_n<T>(o: T, times: u32) -> T
 where
     T: Semi + Clone,
 {
     // note: range is non-inclusive in the upper bound
+    let mut x = o.clone();
     for _ in 1..times {
-        let x = o.clone();
-        o = o.combine(x);
+        x = x.combine(o.clone());
     }
-    o
+    x
 }
 
 /// Given a sequence of `xs`, combine them and return the total
@@ -159,9 +165,9 @@ where
         None
     } else {
         // Chop off xs
-        let mut vec2 = xs.split_off(1);
-        vec2.pop().map(|mut x| {
-            for i in xs.into_iter() {
+        let tail = xs.split_off(1);
+        xs.pop().map(|mut x| {
+            for i in tail.into_iter() {
                 x = x.combine(i)
             }
             x
@@ -432,5 +438,21 @@ mod tests {
         assert_eq!(Any(3).combine(Any(5)), Any(7));
         assert_eq!(Any(true).combine(Any(false)), Any(true));
     }
+
+    #[test]
+    fn test_combine_all_option() {
+        let v1 = vec![1, 2, 3];
+        assert_eq!(combine_all_option(v1), Some(6));
+        let v2 = vec![Some(1), Some(2), Some(3)];
+        assert_eq!(combine_all_option(v2), Some(Some(6)));
+    }
+
+    #[test]
+    fn test_combine_n() {
+        assert_eq!(combine_n(1, 3), 3);
+        assert_eq!(combine_n(2, 1), 2);
+        assert_eq!(combine_n(Some(2), 4), Some(8));
+    }
+
 
 }
