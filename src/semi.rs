@@ -2,6 +2,8 @@ use frunk_core::hlist::*;
 use std::ops::{Deref, BitAnd, BitOr};
 use std::borrow::Borrow;
 use std::cmp::Ordering;
+use std::cell::*;
+use std::hash::Hash;
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::Entry;
 
@@ -323,6 +325,74 @@ macro_rules! numeric_product_semigroup_imps {
 
 numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
+impl<T> Semi for Cell<T>
+where
+    T: Semi + Copy,
+{
+    fn combine(self, other: Self) -> Self {
+        Cell::new(self.get().combine((other.get())))
+    }
+}
+
+impl<T, Out> Semi<RefCell<Out>> for RefCell<T>
+where
+    T: ToOwned,
+    <T as ToOwned>::Owned: Semi<Out>,
+{
+    fn combine(self, other: Self) -> RefCell<Out> {
+        let self_b = self.borrow().deref().to_owned();
+        let other_b = other.borrow().to_owned();
+        RefCell::new(self_b.combine(other_b))
+    }
+}
+
+impl<T> Semi for HashSet<T>
+where
+    T: Eq + Hash,
+{
+    fn combine(self, other: Self) -> Self {
+        let mut h = HashSet::new();
+        for i in self {
+            h.insert(i);
+        }
+        for i in other {
+            h.insert(i);
+        }
+        h
+    }
+}
+
+impl<K, V> Semi for HashMap<K, V>
+where
+    K: Eq + Hash,
+    V: Semi,
+{
+    fn combine(self, other: Self) -> Self {
+        let mut h: HashMap<K, V> = HashMap::new();
+        for (k, v) in self {
+            h.insert(k, v);
+        }
+        let mut combined = vec![];
+        for (k, v) in other {
+            match h.entry(k) {
+                Entry::Occupied(o) => {
+                    // Store and insert later
+                    let (k, existing) = o.remove_entry();
+                    let comb = existing.combine(v);
+                    combined.push((k, comb));
+                }
+                Entry::Vacant(o) => {
+                    o.insert(v);
+                }
+            }
+        }
+        for (k, v) in combined {
+            h.insert(k, v);
+        }
+        h
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -454,5 +524,46 @@ mod tests {
         assert_eq!(combine_n(Some(2), 4), Some(8));
     }
 
+    #[test]
+    fn test_hashset() {
+        let mut v1 = HashSet::new();
+        v1.insert(1);
+        v1.insert(2);
+        assert!(!v1.contains(&3));
+        let mut v2 = HashSet::new();
+        v2.insert(3);
+        v2.insert(4);
+        assert!(!v2.contains(&1));
+        let mut expected = HashSet::new();
+        expected.insert(1);
+        expected.insert(2);
+        expected.insert(3);
+        expected.insert(4);
+        assert_eq!(v1.combine(v2), expected)
+    }
+
+
+    #[test]
+    fn test_hashmap() {
+        let mut v1: HashMap<i32, Option<String>> = HashMap::new();
+        v1.insert(1, Some("Hello".to_owned()));
+        v1.insert(2, Some("Goodbye".to_owned()));
+        v1.insert(4, None);
+        let mut v2: HashMap<i32, Option<String>> = HashMap::new();
+        v2.insert(1, Some(" World".to_owned()));
+        v2.insert(4, Some("Nope".to_owned()));
+        let mut expected = HashMap::new();
+        expected.insert(1, Some("Hello World".to_owned()));
+        expected.insert(2, Some("Goodbye".to_owned()));
+        expected.insert(4, Some("Nope".to_owned()));
+        assert_eq!(v1.combine(v2), expected)
+    }
+
+    #[test]
+    fn test_refcell() {
+        let v1 = RefCell::new(1);
+        let v2 = RefCell::new(2);
+        assert_eq!(v1.combine(v2), RefCell::new(3))
+    }
 
 }
