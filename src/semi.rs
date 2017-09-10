@@ -128,9 +128,8 @@ impl<Str: Borrow<str>> Semi<String, Str> for String {
 
 impl<'a, Str: Borrow<str>> Semi<String, Str> for &'a str {
     fn combine(self, other: Str) -> String {
-        let mut s = self.to_string();
-        s.push_str(other.borrow());
-        s
+        let s = self.to_string();
+        s.combine(other)
     }
 }
 
