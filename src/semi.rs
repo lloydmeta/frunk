@@ -1,3 +1,32 @@
+//! Module for holding the Semigroup typeclass definition and typeclass instances
+//!
+//! You can, for example, combine tuples.
+//!
+//! # Examples
+//!
+//! ```
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::hlist::*; fn main() {
+//! use frunk_core::hlist::*;
+//! use frunk::semi::*;
+//! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+//! let t2 = (1, 2.5f32, String::from(" world"), None);
+//!
+//! let expected = (2, 5.0f32, String::from("hi world"), Some(3));
+//!
+//! assert_eq!(t1.combine(t2), expected);
+//!
+//! // ultimately, the Tuple-based Semigroup implementations are only available for a maximum of
+//! // 26 elements. If you need more, use HList, which is has no such limit.
+//!
+//! let h1 = hlist![1, 3.3, 53i64];
+//! let h2 = hlist![2, 1.2, 1i64];
+//! let h3 = hlist![3, 4.5, 54];
+//! assert_eq!(h1.combine(h2), h3)
+//! # }
+//! ```
+
 use frunk_core::hlist::*;
 use std::ops::{Deref, BitAnd, BitOr};
 use std::borrow::Borrow;
@@ -152,12 +181,12 @@ where
 /// # Examples
 ///
 /// ```
-/// # use frunk::semigroup::*;
-/// let v1 = &vec![1, 2, 3];
+/// # use frunk::semi::*;
+/// let v1 = vec![1, 2, 3];
 /// assert_eq!(combine_all_option(v1), Some(6));
 ///
 /// let v2: Vec<i16> = Vec::new(); // empty!
-/// assert_eq!(combine_all_option(&v2), None);
+/// assert_eq!(combine_all_option(v2), None);
 /// ```
 pub fn combine_all_option<T>(mut xs: Vec<T>) -> Option<T>
 where
@@ -391,6 +420,59 @@ where
         }
         h
     }
+}
+
+
+macro_rules! tuple_impls {
+    () => {}; // no more
+
+    (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+// Invoke recursive reversal of list that ends in the macro expansion implementation
+// of the reversed list
+//
+        tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
+        tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
+    };
+
+// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
+// + is empty (see next pattern)
+//
+    ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+      tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
+    };
+
+// Finally expand into our implementation
+    ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
+        impl<$typ: Semi, $( $ntyp: Semi),*> Semi for ($typ, $( $ntyp ),*) {
+            fn combine(self, other: Self) -> Self {
+                (self.$idx.combine(other.$idx), $(self.$nidx.combine(other.$nidx), )*)
+            }
+        }
+    }
+}
+
+tuple_impls! {
+    (20 => U),
+    (19 => T),
+    (18 => S),
+    (17 => R),
+    (16 => Q),
+    (15 => P),
+    (14 => O),
+    (13 => N),
+    (12 => M),
+    (11 => L),
+    (10 => K),
+    (9 => J),
+    (8 => I),
+    (7 => H),
+    (6 => G),
+    (5 => F),
+    (4 => E),
+    (3 => D),
+    (2 => C),
+    (1 => B),
+    (0 => A),
 }
 
 #[cfg(test)]
