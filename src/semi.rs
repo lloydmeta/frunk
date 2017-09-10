@@ -1,6 +1,28 @@
 use frunk_core::hlist::*;
-use std::ops::Deref;
+use std::ops::{Deref, BitAnd, BitOr};
 use std::borrow::Borrow;
+use std::cmp::Ordering;
+
+
+/// Wrapper type for types that are ordered and can have a Max combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct Max<T: Ord>(pub T);
+
+/// Wrapper type for types that are ordered and can have a Min combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct Min<T: Ord>(pub T);
+
+/// Wrapper type for types that can have a Product combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct Product<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise && combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct All<T>(pub T);
+
+/// Wrapper type for boolean that acts as a bitwise || combination
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct Any<T>(pub T);
 
 /// Output is a parameter because we want to allow Semi to not
 /// necessarily return Self (e.g. in the case of Self being a pointer)
@@ -14,6 +36,7 @@ use std::borrow::Borrow;
 pub trait Semi<Output = Self, RHS = Self> {
     fn combine(self, other: RHS) -> Output;
 }
+
 
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
@@ -100,6 +123,52 @@ where
     }
 }
 
+
+/// Return this combined with itself `n` times.
+pub fn combine_n<T>(mut o: T, times: u32) -> T
+where
+    T: Semi + Clone,
+{
+    // note: range is non-inclusive in the upper bound
+    for _ in 1..times {
+        let x = o.clone();
+        o = o.combine(x);
+    }
+    o
+}
+
+/// Given a sequence of `xs`, combine them and return the total
+///
+/// If the sequence is empty, returns None. Otherwise, returns Some(total).
+///
+/// # Examples
+///
+/// ```
+/// # use frunk::semigroup::*;
+/// let v1 = &vec![1, 2, 3];
+/// assert_eq!(combine_all_option(v1), Some(6));
+///
+/// let v2: Vec<i16> = Vec::new(); // empty!
+/// assert_eq!(combine_all_option(&v2), None);
+/// ```
+pub fn combine_all_option<T>(mut xs: Vec<T>) -> Option<T>
+where
+    T: Semi,
+{
+    if xs.len() < 1 {
+        None
+    } else {
+        // Chop off xs
+        let mut vec2 = xs.split_off(1);
+        vec2.pop().map(|mut x| {
+            for i in xs.into_iter() {
+                x = x.combine(i)
+            }
+            x
+        })
+    }
+}
+
 macro_rules! numeric_semi_imps {
   ($($tr:ty),*) => {
     $(
@@ -172,6 +241,82 @@ impl<'a, T: Clone> Semi<Vec<T>> for &'a Vec<T> {
     }
 }
 
+impl<T> Semi for Max<T>
+where
+    T: Ord,
+{
+    fn combine(self, Max(y): Self) -> Self {
+        let Max(x) = self;
+        match x.cmp(&y) {
+            Ordering::Less => Max(y),
+            _ => Max(x),
+        }
+    }
+}
+impl<T> Semi for Min<T>
+where
+    T: Ord,
+{
+    fn combine(self, Min(y): Self) -> Self {
+        let Min(x) = self;
+        match x.cmp(&y) {
+            Ordering::Less => Min(x),
+            _ => Min(y),
+        }
+    }
+}
+
+// Deriving for all BitAnds sucks because we are then bound on ::Output, which may not be the same type
+macro_rules! simple_all_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semi for All<$tr> {
+                fn combine(self, other: Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    All(x.bitand(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_all_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+
+macro_rules! simple_any_impls {
+    ($($tr:ty)*) => {
+        $(
+            impl Semi for Any<$tr> {
+                fn combine(self, other: Self) -> Self {
+                    let x = self.0;
+                    let y = other.0;
+                    Any(x.bitor(y))
+                }
+            }
+        )*
+    }
+}
+
+simple_any_impls! { bool usize u8 u16 u32 u64 isize i8 i16 i32 i64 }
+
+
+macro_rules! numeric_product_semigroup_imps {
+  ($($tr:ty),*) => {
+    $(
+      impl Semi for Product<$tr> {
+        fn combine(self, other: Self) -> Self {
+            let Product(x) = self;
+            let Product(y) = other;
+            Product(x * y)
+         }
+      }
+    )*
+  }
+}
+
+numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,7 +376,10 @@ mod tests {
 
     #[test]
     fn test_combine_string() {
-        assert_eq!("hello".to_string().combine(" world".to_string()), "hello world")
+        assert_eq!(
+            "hello".to_string().combine(" world".to_string()),
+            "hello world"
+        )
     }
 
     #[test]
@@ -254,6 +402,35 @@ mod tests {
             Some("hello").combine(Some(" world")),
             Some("hello world".to_string())
         )
+    }
+
+
+    #[test]
+    fn test_max() {
+        assert_eq!(Max(1).combine(Max(2)), Max(2));
+
+        let v = vec![Max(1), Max(2), Max(3)];
+        assert_eq!(combine_all_option(v), Some(Max(3)));
+    }
+
+    #[test]
+    fn test_min() {
+        assert_eq!(Min(1).combine(Min(2)), Min(1));
+
+        let v = vec![Min(1), Min(2), Min(3)];
+        assert_eq!(combine_all_option(v), Some(Min(1)));
+    }
+
+    #[test]
+    fn test_all() {
+        assert_eq!(All(3).combine(All(5)), All(1));
+        assert_eq!(All(true).combine(All(false)), All(false));
+    }
+
+    #[test]
+    fn test_any() {
+        assert_eq!(Any(3).combine(Any(5)), Any(7));
+        assert_eq!(Any(true).combine(Any(false)), Any(true));
     }
 
 }
