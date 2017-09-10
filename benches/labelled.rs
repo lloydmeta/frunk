@@ -270,39 +270,42 @@ fn build_big_struct_25fields() -> BigStruct25Fields {
 #[bench]
 fn labelled_conversion(b: &mut Bencher) {
     b.iter(|| {
-               let n_u = NewUser {
-                   first_name: "Joe",
-                   last_name: "Schmoe",
-                   age: 30,
-               };
-               <SavedUser as LabelledGeneric>::convert_from(n_u)
-           })
+        let n_u = NewUser {
+            first_name: "Joe",
+            last_name: "Schmoe",
+            age: 30,
+        };
+        <SavedUser as LabelledGeneric>::convert_from(n_u)
+    })
 }
 
 #[bench]
 fn sculpted_conversion(b: &mut Bencher) {
     b.iter(|| {
-               let n_u = NewUser {
-                   first_name: "Joe",
-                   last_name: "Schmoe",
-                   age: 30,
-               };
-               JumbledUser::transform_from(n_u)
-           })
+        let n_u = NewUser {
+            first_name: "Joe",
+            last_name: "Schmoe",
+            age: 30,
+        };
+        JumbledUser::transform_from(n_u)
+    })
 }
 
 #[bench]
 fn big_transform_from_24fields(b: &mut Bencher) {
     b.iter(|| {
-               let j = BigStruct24FieldsReverse::transform_from(build_big_struct_24fields());
-               j
-           })
+        let j = BigStruct24FieldsReverse::transform_from(build_big_struct_24fields());
+        j
+    })
 }
 
 #[bench]
 fn big_from_24fields(b: &mut Bencher) {
     b.iter(|| {
-        let j = <BigStruct24FieldsReverse as From<BigStruct24Fields>>::from(build_big_struct_24fields());
+        let j =
+            <BigStruct24FieldsReverse as From<BigStruct24Fields>>::from(
+                build_big_struct_24fields(),
+            );
         j
     })
 }
@@ -312,15 +315,18 @@ fn big_from_24fields(b: &mut Bencher) {
 #[bench]
 fn big_transform_from_25fields(b: &mut Bencher) {
     b.iter(|| {
-               let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
-               j
-           })
+        let j = BigStruct25FieldsReverse::transform_from(build_big_struct_25fields());
+        j
+    })
 }
 
 #[bench]
 fn big_from_25fields(b: &mut Bencher) {
     b.iter(|| {
-        let j = <BigStruct25FieldsReverse as From<BigStruct25Fields>>::from(build_big_struct_25fields());
+        let j =
+            <BigStruct25FieldsReverse as From<BigStruct25Fields>>::from(
+                build_big_struct_25fields(),
+            );
         j
     })
 }

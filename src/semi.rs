@@ -17,8 +17,9 @@ pub trait Semi<Output = Self, RHS = Self> {
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
 impl<H, HO, T, TO> Semi<HCons<HO, TO>> for HCons<H, T>
-    where H: Semi<HO>,
-          T: HList + Semi<TO>
+where
+    H: Semi<HO>,
+    T: HList + Semi<TO>,
 {
     fn combine(self, other: Self) -> HCons<HO, TO> {
         let tail_comb = self.tail.combine(other.tail);
@@ -40,8 +41,9 @@ impl Semi<HNil> for HNil {
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
 impl<'a, H, HO, T, TO> Semi<HCons<HO, TO>> for &'a HCons<H, T>
-    where &'a H: Semi<HO>,
-          &'a T: HList + Semi<TO>
+where
+    &'a H: Semi<HO>,
+    &'a T: HList + Semi<TO>,
 {
     fn combine(self, other: Self) -> HCons<HO, TO> {
         let tail_comb = self.tail.combine(&other.tail);
@@ -61,8 +63,9 @@ impl<'a> Semi<HNil> for &'a HNil {
 }
 
 impl<T, TO> Semi<Option<TO>> for Option<T>
-    where T: Semi<TO>,
-          TO: From<T>
+where
+    T: Semi<TO>,
+    TO: From<T>,
 {
     fn combine(self, other: Self) -> Option<TO> {
         if let Some(s) = self {
@@ -78,9 +81,10 @@ impl<T, TO> Semi<Option<TO>> for Option<T>
 }
 
 impl<'a, T, TO> Semi<Option<TO>> for &'a Option<T>
-    where &'a T: Semi<TO>,
-          T: Clone,
-          TO: From<T>
+where
+    &'a T: Semi<TO>,
+    T: Clone,
+    TO: From<T>,
 {
     fn combine(self, other: Self) -> Option<TO> {
         if let &Some(ref s) = self {
@@ -113,39 +117,27 @@ macro_rules! numeric_semi_imps {
 
 numeric_semi_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
-impl Semi<String> for String {
-    fn combine(self, other: Self) -> Self {
+use std::borrow::Borrow;
+impl<Str: Borrow<str>> Semi<String, Str> for String {
+    fn combine(self, other: Str) -> Self {
         let mut s = self;
-        s.push_str(&*other);
+        s.push_str(other.borrow());
         s
     }
 }
 
-impl <'a> Semi<String, &'a str> for String {
-    fn combine(self, other: &'a str) -> Self {
-        let mut s = self;
-        s.push_str(other);
-        s
-    }
-}
-
-impl <'a> Semi<String> for &'a str {
-    fn combine(self, other: Self) -> String {
+impl<'a, Str: Borrow<str>> Semi<String, Str> for &'a str {
+    fn combine(self, other: Str) -> String {
         let mut s = self.to_string();
-        s.push_str(&*other);
+        s.push_str(other.borrow());
         s
     }
 }
 
-impl <'a> Semi<String, String> for &'a str {
-    fn combine(self, other: String) -> String {
-        let mut s = self.to_string();
-        s.push_str(&other[..]);
-        s
-    }
-}
-
-impl<T, TO> Semi<Box<TO>> for Box<T> where T: Semi<TO> {
+impl<T, TO> Semi<Box<TO>> for Box<T>
+where
+    T: Semi<TO>,
+{
     fn combine(self, other: Self) -> Box<TO> {
         let s = *self;
         let o = *other;
@@ -153,7 +145,10 @@ impl<T, TO> Semi<Box<TO>> for Box<T> where T: Semi<TO> {
     }
 }
 
-impl<'a, T, TO> Semi<Box<TO>> for &'a Box<T> where &'a T: Semi<TO> {
+impl<'a, T, TO> Semi<Box<TO>> for &'a Box<T>
+where
+    &'a T: Semi<TO>,
+{
     fn combine(self, other: Self) -> Box<TO> {
         let s = self.deref();
         let o = other.deref();
@@ -251,7 +246,10 @@ mod tests {
 
     #[test]
     fn test_combine_option_str() {
-        assert_eq!(Some("hello").combine(Some(" world")), Some("hello world".to_string()))
+        assert_eq!(
+            Some("hello").combine(Some(" world")),
+            Some("hello world".to_string())
+        )
     }
 
 }

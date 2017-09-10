@@ -51,14 +51,16 @@ use std::ops::Add;
 /// of collected errors.
 #[derive(PartialEq, Debug, Eq, Clone, PartialOrd, Ord, Hash)]
 pub enum Validated<T, E>
-    where T: HList
+where
+    T: HList,
 {
     Ok(T),
     Err(Vec<E>),
 }
 
 impl<T, E> Validated<T, E>
-    where T: HList
+where
+    T: HList,
 {
     /// Returns true if this validation is Ok, false otherwise
     ///
@@ -162,9 +164,9 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
             Result::Err(e) => Validated::Err(vec![e]),
             Result::Ok(v) => {
                 Validated::Ok(HCons {
-                                  head: v,
-                                  tail: HNil,
-                              })
+                    head: v,
+                    tail: HNil,
+                })
             }
         }
     }
@@ -188,8 +190,9 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 /// ```
 ///
 impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
-    where T: HList + Add<HCons<T2, HNil>>,
-          <T as Add<HCons<T2, HNil>>>::Output: HList
+where
+    T: HList + Add<HCons<T2, HNil>>,
+    <T as Add<HCons<T2, HNil>>>::Output: HList,
 {
     type Output = Validated<<T as Add<HCons<T2, HNil>>>::Output, E>;
 
@@ -218,9 +221,10 @@ impl<T, E, T2> Add<Result<T2, E>> for Validated<T, E>
 /// # }
 /// ```
 impl<T, E, T2> Add<Validated<T2, E>> for Validated<T, E>
-    where T: HList + Add<T2>,
-          T2: HList,
-          <T as Add<T2>>::Output: HList
+where
+    T: HList + Add<T2>,
+    T2: HList,
+    <T as Add<T2>>::Output: HList,
 {
     type Output = Validated<<T as Add<T2>>::Output, E>;
 
@@ -315,38 +319,41 @@ mod tests {
     #[test]
     fn test_to_result_ok() {
         let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
-                get_email(YahNah::Yah);
-        let person = v.into_result()
-            .map(|hlist_pat!(name, age, email)| {
-                     Person {
-                         name: name,
-                         age: age,
-                         email: email,
-                     }
-                 });
+            get_email(YahNah::Yah);
+        let person = v.into_result().map(|hlist_pat!(name, age, email)| {
+            Person {
+                name: name,
+                age: age,
+                email: email,
+            }
+        });
 
-        assert_eq!(person.unwrap(),
-                   Person {
-                       name: "James".to_owned(),
-                       age: 32,
-                       email: "hello@world.com".to_owned(),
-                   });
+        assert_eq!(
+            person.unwrap(),
+            Person {
+                name: "James".to_owned(),
+                age: 32,
+                email: "hello@world.com".to_owned(),
+            }
+        );
     }
 
     #[test]
     fn test_to_result_all_faulty() {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
-                get_email(YahNah::Nah);
+            get_email(YahNah::Nah);
         let person = v.into_result().map(|_| unimplemented!());
 
-        assert_eq!(person.unwrap_err(),
-                   vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]);
+        assert_eq!(
+            person.unwrap_err(),
+            vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]
+        );
     }
 
     #[test]
     fn test_to_result_one_faulty() {
         let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) +
-                get_email(YahNah::Nah);
+            get_email(YahNah::Nah);
         let person = v.into_result().map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);
