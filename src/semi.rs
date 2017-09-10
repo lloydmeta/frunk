@@ -1,5 +1,6 @@
 use frunk_core::hlist::*;
 use std::ops::Deref;
+use std::borrow::Borrow;
 
 /// Output is a parameter because we want to allow Semi to not
 /// necessarily return Self (e.g. in the case of Self being a pointer)
@@ -117,7 +118,6 @@ macro_rules! numeric_semi_imps {
 
 numeric_semi_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
-use std::borrow::Borrow;
 impl<Str: Borrow<str>> Semi<String, Str> for String {
     fn combine(self, other: Str) -> Self {
         let mut s = self;
