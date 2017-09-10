@@ -33,7 +33,7 @@ where
 }
 
 /// Since () + () = (), the same is true for HNil
-impl Semi<HNil> for HNil {
+impl Semi for HNil {
     fn combine(self, _: Self) -> Self {
         self
     }
@@ -103,7 +103,7 @@ where
 macro_rules! numeric_semi_imps {
   ($($tr:ty),*) => {
     $(
-      impl Semi<$tr> for $tr {
+      impl Semi for $tr {
         fn combine(self, other: Self) -> $tr { self + other }
       }
       impl <'a> Semi<$tr, &'a $tr> for $tr {
@@ -155,7 +155,7 @@ where
     }
 }
 
-impl<T> Semi<Vec<T>> for Vec<T> {
+impl<T> Semi for Vec<T> {
     fn combine(self, other: Self) -> Self {
         let mut v = self;
         let mut o = other;
@@ -227,6 +227,11 @@ mod tests {
     #[test]
     fn test_combine_str() {
         assert_eq!("hello".combine(" world"), "hello world")
+    }
+
+    #[test]
+    fn test_combine_string() {
+        assert_eq!("hello".to_string().combine(" world".to_string()), "hello world")
     }
 
     #[test]
