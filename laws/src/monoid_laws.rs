@@ -66,7 +66,7 @@ pub fn right_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
 mod tests {
     use super::*;
     use wrapper::*;
-    use frunk::semi::*;
+    use frunk::semigroup::*;
     use quickcheck::quickcheck;
     use std::collections::{HashSet, HashMap};
 

@@ -1,4 +1,4 @@
-//! Module that holds laws for Semi implementations
+//! Module that holds laws for Semigroup implementations
 //!
 //! # Examples
 //!
@@ -7,14 +7,14 @@
 //! # extern crate frunk_laws;
 //! # extern crate frunk;
 //! # use quickcheck::quickcheck;
-//! # use frunk::semi::*;
+//! # use frunk::semigroup::*;
 //! # fn main() {
 //! use frunk_laws::semigroup_laws::*;
 //! quickcheck(associativity as fn(Vec<i8>, Vec<i8>, Vec<i8>) -> bool)
 //! # }
 //! ```
 
-use frunk::semi::*;
+use frunk::semigroup::*;
 
 /// Function for checking adherence to the associativity law
 ///
@@ -27,13 +27,13 @@ use frunk::semi::*;
 /// # extern crate frunk_laws;
 /// # extern crate frunk;
 /// # use quickcheck::quickcheck;
-/// # use frunk::semi::*;
+/// # use frunk::semigroup::*;
 /// # fn main() {
 /// use frunk_laws::semigroup_laws::*;
 /// quickcheck(associativity as fn(Vec<i8>, Vec<i8>, Vec<i8>) -> bool)
 /// # }
 /// ```
-pub fn associativity<A: Semi + Eq + Clone>(a: A, b: A, c: A) -> bool {
+pub fn associativity<A: Semigroup + Eq + Clone>(a: A, b: A, c: A) -> bool {
     a.clone().combine(b.clone()).combine(c.clone()) == a.combine(b.combine(c))
 }
 

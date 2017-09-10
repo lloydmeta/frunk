@@ -21,7 +21,7 @@
 //! use frunk::generic::*;
 //! use frunk::labelled::*;
 //! use frunk::monoid::*;
-//! use frunk::semi::*;
+//! use frunk::semigroup::*;
 //! use frunk::validated::*;
 //!
 //! // Combining Monoids
@@ -111,7 +111,6 @@ extern crate frunk_core;
 extern crate frunk_derives;
 
 pub mod semigroup;
-pub mod semi;
 pub mod monoid;
 pub mod validated;
 pub mod coproduct;

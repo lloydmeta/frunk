@@ -1,6 +1,6 @@
 //! Module for holding Monoid typeclass definitions and default implementations
 //!
-//! A `Monoid` is a Semi that has a defined empty/zero value. This allows us to
+//! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to
 //! define a `combine_all` method to work on a list of said things:
 //!
 //! Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
@@ -30,12 +30,12 @@
 //! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
 //! assert_eq!(combine_all(vec_of_hashes), h_expected);
 //! ```
-use super::semi::{Semi, Product, All, Any};
+use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
 
-/// A Monoid is a Semi that has an empty/ zero value
-pub trait Monoid: Semi + Sized {
+/// A Monoid is a Semigroup that has an empty/ zero value
+pub trait Monoid: Semigroup + Sized {
     /// For a given Monoid, returns its empty/zero value
     ///
     /// # Examples
@@ -59,12 +59,12 @@ pub trait Monoid: Semi + Sized {
 /// ```
 pub fn combine_n<T>(o: T, times: u32) -> T
 where
-    T: Monoid + Semi + Clone,
+    T: Monoid + Semigroup + Clone,
 {
     if times == 0 {
         <T as Monoid>::empty()
     } else {
-        super::semi::combine_n(o, times)
+        super::semigroup::combine_n(o, times)
     }
 }
 
@@ -85,7 +85,7 @@ where
 /// ```
 pub fn combine_all<T>(xs: Vec<T>) -> T
 where
-    T: Monoid + Semi + Clone,
+    T: Monoid + Semigroup + Clone,
 {
     xs.into_iter().fold(<T as Monoid>::empty(), |acc, next| {
         acc.combine(next)
@@ -94,7 +94,7 @@ where
 
 impl<T> Monoid for Option<T>
 where
-    T: Semi,
+    T: Semigroup,
 {
     fn empty() -> Self {
         None
@@ -126,7 +126,7 @@ where
 impl<K, V> Monoid for HashMap<K, V>
 where
     K: Eq + Hash,
-    V: Semi,
+    V: Semigroup,
 {
     fn empty() -> Self {
         HashMap::new()
@@ -276,7 +276,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::semi::{Product, All, Any};
+    use super::super::semigroup::{Product, All, Any};
 
     #[test]
     fn test_combine_n() {
