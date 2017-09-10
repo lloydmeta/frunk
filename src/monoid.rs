@@ -94,7 +94,7 @@ where
 
 impl<T> Monoid for Option<T>
 where
-    T: Semi + Clone,
+    T: Semi,
 {
     fn empty() -> Self {
         None
@@ -108,8 +108,6 @@ impl Monoid for String {
 }
 
 impl<T> Monoid for Vec<T>
-where
-    T: Clone,
 {
     fn empty() -> Self {
         Vec::new()
@@ -118,7 +116,7 @@ where
 
 impl<T> Monoid for HashSet<T>
 where
-    T: Hash + Eq + Clone,
+    T: Hash + Eq,
 {
     fn empty() -> Self {
         HashSet::new()
@@ -127,8 +125,8 @@ where
 
 impl<K, V> Monoid for HashMap<K, V>
 where
-    K: Eq + Hash + Clone,
-    V: Semi + Clone,
+    K: Eq + Hash,
+    V: Semi,
 {
     fn empty() -> Self {
         HashMap::new()
