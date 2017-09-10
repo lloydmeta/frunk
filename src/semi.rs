@@ -99,30 +99,6 @@ impl Semi for HNil {
     }
 }
 
-/// Allow the combination of any two HLists having the same structure
-/// if all of the sub-element types are also Semiups
-impl<'a, H, HO, T, TO> Semi<HCons<HO, TO>> for &'a HCons<H, T>
-where
-    &'a H: Semi<HO>,
-    &'a T: HList + Semi<TO>,
-{
-    fn combine(self, other: Self) -> HCons<HO, TO> {
-        let tail_comb = self.tail.combine(&other.tail);
-        let h_comb = self.head.combine(&other.head);
-        HCons {
-            head: h_comb,
-            tail: tail_comb,
-        }
-    }
-}
-
-/// Since () + () = (), the same is true for HNil
-impl<'a> Semi<HNil> for &'a HNil {
-    fn combine(self, _: Self) -> HNil {
-        HNil
-    }
-}
-
 impl<T, TO> Semi<Option<TO>> for Option<T>
 where
     T: Semi<TO>,
@@ -140,26 +116,6 @@ where
         }
     }
 }
-
-impl<'a, T, TO> Semi<Option<TO>> for &'a Option<T>
-where
-    &'a T: Semi<TO>,
-    T: Clone,
-    TO: From<T>,
-{
-    fn combine(self, other: Self) -> Option<TO> {
-        if let &Some(ref s) = self {
-            if let &Some(ref o) = other {
-                Some(s.combine(o))
-            } else {
-                (*self).clone().map(TO::from)
-            }
-        } else {
-            (*other).clone().map(TO::from)
-        }
-    }
-}
-
 
 /// Return this combined with itself `n` times.
 pub fn combine_n<T>(o: T, times: u32) -> T
@@ -266,14 +222,6 @@ impl<T> Semi for Vec<T> {
         let mut v = self;
         let mut o = other;
         v.append(&mut o);
-        v
-    }
-}
-
-impl<'a, T: Clone> Semi<Vec<T>> for &'a Vec<T> {
-    fn combine(self, other: Self) -> Vec<T> {
-        let mut v = self.clone();
-        v.extend_from_slice(other);
         v
     }
 }
@@ -506,9 +454,6 @@ mod tests {
         test_option_i16, Some(1).combine(Some(2)) => Some(3), Option<i16>
         test_option_i16_none1, None.combine(Some(2)) => Some(2), Option<i16>
         test_option_i16_none2, Some(2).combine(None) => Some(2), Option<i16>
-        test_option_i16_ref, (&Some(1)).combine(&Some(2)) => Some(3), Option<i16>
-        test_option_i16_none1_ref, (&None).combine(&Some(2)) => Some(2), Option<i16>
-        test_option_i16_none2_ref, (&Some(2)).combine(&None) => Some(2), Option<i16>
     }
 
     #[test]
