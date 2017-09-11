@@ -57,7 +57,7 @@ pub trait Monoid: Semigroup + Sized {
 ///
 /// assert_eq!(combine_n(Some(2), 4), Some(8));
 /// ```
-pub fn combine_n<T>(o: T, times: u32) -> T
+pub fn combine_n<T>(o: T, times: usize) -> T
 where
     T: Monoid + Semigroup + Clone,
 {

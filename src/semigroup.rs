@@ -118,7 +118,7 @@ where
 }
 
 /// Return this combined with itself `n` times.
-pub fn combine_n<T>(o: T, times: u32) -> T
+pub fn combine_n<T>(o: T, times: usize) -> T
 where
     T: Semigroup + Clone,
 {
