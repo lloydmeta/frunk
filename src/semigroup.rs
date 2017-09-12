@@ -347,8 +347,16 @@ where
 impl<K, V, Out, RHS> Semigroup<HashMap<K, Out>, HashMap<K, RHS>> for HashMap<K, V>
 where
     K: Eq + Hash,
-    V: Semigroup<Out, RHS>,
-    Out: From<V> + From<RHS> + Semigroup<Out, RHS>,
+    V: Semigroup<
+        Out,
+        RHS,
+    >,
+    Out: From<V>
+        + From<RHS>
+        + Semigroup<
+        Out,
+        RHS,
+    >,
 {
     fn combine(self, other: HashMap<K, RHS>) -> HashMap<K, Out> {
         let mut h: HashMap<K, Out> = HashMap::new();
@@ -359,7 +367,7 @@ where
         for (k, v) in other {
             match h.entry(k) {
                 Entry::Occupied(o) => {
-// Store and insert later
+                    // Store and insert later
                     let (k, existing) = o.remove_entry();
                     let comb = existing.combine(v);
                     combined.push((k, comb));
