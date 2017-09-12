@@ -15,27 +15,28 @@
 //! assert_eq!(combine_all(vec_of_no_hashmaps),
 //!                    <HashMap<i32, String> as Monoid>::empty());
 //!
-//! let mut h1: HashMap<i32, String> = HashMap::new();
-//! h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
-//! let mut h2: HashMap<i32, String> = HashMap::new();
-//! h2.insert(1, String::from(" World"));
-//! h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
-//! let mut h3: HashMap<i32, String> = HashMap::new();
-//! h3.insert(3, String::from("Cruel World"));
+//! let mut h1: HashMap<i32, &str>  = HashMap::new();
+//! h1.insert(1, "Hello");  // h1 is HashMap( 1 -> "Hello")
+//! let mut h2: HashMap<i32, &str>  = HashMap::new();
+//! h2.insert(1, " World");
+//! h2.insert(2, "Goodbye");  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+//! let mut h3 = HashMap::new();
+//! h3.insert(3, "Cruel World");
 //! let vec_of_hashes = vec![h1, h2, h3];
 //!
 //! let mut h_expected: HashMap<i32, String> = HashMap::new();
-//! h_expected.insert(1, String::from("Hello World"));
-//! h_expected.insert(2, String::from("Goodbye"));
-//! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+//! h_expected.insert(1, "Hello World".to_string());
+//! h_expected.insert(2, "Goodbye".to_string());
+//! h_expected.insert(3, "Cruel World".to_string()); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
 //! assert_eq!(combine_all(vec_of_hashes), h_expected);
 //! ```
 use super::semigroup::{Semigroup, Product, All, Any};
 use std::collections::*;
 use std::hash::Hash;
+use std::borrow::Borrow;
 
 /// A Monoid is a Semigroup that has an empty/ zero value
-pub trait Monoid: Semigroup + Sized {
+pub trait Monoid<Out = Self, RHS = Self>: Semigroup<Out, RHS> + Sized {
     /// For a given Monoid, returns its empty/zero value
     ///
     /// # Examples
@@ -45,7 +46,7 @@ pub trait Monoid: Semigroup + Sized {
     ///
     /// assert_eq!(<i16 as Monoid>::empty(), 0);
     /// ```
-    fn empty() -> Self;
+    fn empty() -> Out;
 }
 
 /// Return this combined with itself `n` times.
@@ -57,12 +58,13 @@ pub trait Monoid: Semigroup + Sized {
 ///
 /// assert_eq!(combine_n(Some(2), 4), Some(8));
 /// ```
-pub fn combine_n<T>(o: T, times: usize) -> T
+pub fn combine_n<Out, T>(o: T, times: usize) -> Out
 where
-    T: Monoid + Semigroup + Clone,
+    T: Monoid<Out, T> + Semigroup<Out, T> + Clone,
+    Out: Semigroup<Out, T> + From<T>,
 {
     if times == 0 {
-        <T as Monoid>::empty()
+        <T as Monoid<Out, T>>::empty()
     } else {
         super::semigroup::combine_n(o, times)
     }
@@ -80,36 +82,46 @@ where
 /// let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
 /// assert_eq!(combine_all(empty_vec_opt_int), None);
 ///
-/// let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
-/// assert_eq!(combine_all(vec_of_some_strings), Some(String::from("Hello World")));
+/// let vec_of_some_strings = vec![Some("Hello"), Some(" World")];
+/// assert_eq!(combine_all(vec_of_some_strings), Some("Hello World".to_string()));
 /// ```
-pub fn combine_all<T>(xs: Vec<T>) -> T
+pub fn combine_all<T, Out>(xs: Vec<T>) -> Out
 where
-    T: Monoid + Semigroup + Clone,
+    T: Monoid<Out>,
+    Out: Monoid<Out, T>,
 {
-    xs.into_iter().fold(<T as Monoid>::empty(), |acc, next| {
-        acc.combine(next)
-    })
+    xs.into_iter().fold(
+        <T as Monoid<Out>>::empty(),
+        |acc, next| acc.combine(next),
+    )
 }
 
-impl<T> Monoid for Option<T>
+impl<T, Out, RHS> Monoid<Option<Out>, RHS> for Option<T>
 where
-    T: Semigroup,
+    Option<T>: Semigroup<Option<Out>, RHS>,
 {
-    fn empty() -> Self {
+    fn empty() -> Option<Out> {
         None
     }
 }
 
-impl Monoid for String {
+impl<'a, Str: Borrow<str>> Monoid<String, Str> for String {
     fn empty() -> Self {
         String::new()
     }
 }
 
-impl<T> Monoid for Vec<T>
+impl<'a, Str: Borrow<str>> Monoid<String, Str> for &'a str {
+    fn empty() -> String {
+        String::new()
+    }
+}
+
+impl<T, Out> Monoid<Vec<Out>, T> for Vec<T>
+where
+    Vec<T>: Semigroup<Vec<Out>, T>,
 {
-    fn empty() -> Self {
+    fn empty() -> Vec<Out> {
         Vec::new()
     }
 }
@@ -123,12 +135,15 @@ where
     }
 }
 
-impl<K, V> Monoid for HashMap<K, V>
+impl<K, V, Out, RHS> Monoid<HashMap<K, Out>, HashMap<K, RHS>> for HashMap<K, V>
 where
+    HashMap<K, V>: Semigroup<
+        HashMap<K, Out>,
+        HashMap<K, RHS>,
+    >,
     K: Eq + Hash,
-    V: Semigroup,
 {
-    fn empty() -> Self {
+    fn empty() -> HashMap<K, Out> {
         HashMap::new()
     }
 }
@@ -327,7 +342,7 @@ mod tests {
 
     #[test]
     fn test_combine_all_hashmap() {
-        let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
+        let vec_of_no_hashmaps: Vec<HashMap<i32, &str>> = Vec::new();
         assert_eq!(
             combine_all(vec_of_no_hashmaps),
             <HashMap<i32, String> as Monoid>::empty()
@@ -347,6 +362,24 @@ mod tests {
         h_expected.insert(2, String::from("Goodbye"));
         h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
         assert_eq!(combine_all(vec_of_hashes), h_expected);
+    }
+    #[test]
+    fn test_combine_all_hashmap_2() {
+        let mut h1: HashMap<i32, &str> = HashMap::new();
+        h1.insert(1, "Hello"); // h1 is HashMap( 1 -> "Hello")
+        let mut h2: HashMap<i32, &str> = HashMap::new();
+        h2.insert(1, " World");
+        h2.insert(2, "Goodbye"); // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+        let mut h3 = HashMap::new();
+        h3.insert(3, "Cruel World");
+        let vec_of_hashes = vec![h1, h2, h3];
+
+        let mut h_expected: HashMap<i32, String> = HashMap::new();
+        h_expected.insert(1, "Hello World".to_string());
+        h_expected.insert(2, "Goodbye".to_string());
+        h_expected.insert(3, "Cruel World".to_string()); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+        let result: HashMap<i32, String> = combine_all(vec_of_hashes);
+        assert_eq!(result, h_expected);
     }
 
     #[test]

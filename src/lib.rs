@@ -35,9 +35,9 @@
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
 //!
-//! let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
-//! let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
-//! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_owned()];
+//! let h1 = hlist![Some(1), 3.3, 53i64, "hello"];
+//! let h2 = hlist![Some(2), 1.2, 1i64, " world"];
+//! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_string()];
 //! assert_eq!(h1.combine(h2), h3);
 //!
 //! // Generic and LabelledGeneric-based programming

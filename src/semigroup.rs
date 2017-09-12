@@ -10,10 +10,10 @@
 //! # use frunk_core::hlist::*; fn main() {
 //! use frunk_core::hlist::*;
 //! use frunk::semigroup::*;
-//! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
-//! let t2 = (1, 2.5f32, String::from(" world"), None);
+//! let t1 = (1, 2.5f32, "hi", Some(3));
+//! let t2 = (1, 2.5f32, " world", None);
 //!
-//! let expected = (2, 5.0f32, String::from("hi world"), Some(3));
+//! let expected = (2, 5.0f32, "hi world".to_string(), Some(3));
 //!
 //! assert_eq!(t1.combine(t2), expected);
 //!
@@ -99,12 +99,12 @@ impl Semigroup for HNil {
     }
 }
 
-impl<T, TO> Semigroup<Option<TO>> for Option<T>
+impl<T, TO, RHS> Semigroup<Option<TO>, Option<RHS>> for Option<T>
 where
-    T: Semigroup<TO>,
-    TO: From<T>,
+    T: Semigroup<TO, RHS>,
+    TO: From<T> + From<RHS>,
 {
-    fn combine(self, other: Self) -> Option<TO> {
+    fn combine(self, other: Option<RHS>) -> Option<TO> {
         if let Some(s) = self {
             if let Some(o) = other {
                 Some(s.combine(o))
@@ -118,16 +118,21 @@ where
 }
 
 /// Return this combined with itself `n` times.
-pub fn combine_n<T>(o: T, times: usize) -> T
+pub fn combine_n<T, Out>(o: T, times: usize) -> Out
 where
-    T: Semigroup + Clone,
+    T: Semigroup<Out, T> + Clone,
+    Out: Semigroup<Out, T> + From<T>,
 {
     // note: range is non-inclusive in the upper bound
-    let mut x = o.clone();
-    for _ in 1..times {
-        x = x.combine(o.clone());
+    let mut r = Out::from(o.clone());
+    if times == 0 {
+        r
+    } else {
+        for _ in 1..times {
+            r = r.combine(o.clone());
+        }
+        r
     }
-    x
 }
 
 /// Given a sequence of `xs`, combine them and return the total
@@ -339,27 +344,28 @@ where
     }
 }
 
-impl<K, V> Semigroup for HashMap<K, V>
+impl<K, V, Out, RHS> Semigroup<HashMap<K, Out>, HashMap<K, RHS>> for HashMap<K, V>
 where
     K: Eq + Hash,
-    V: Semigroup,
+    V: Semigroup<Out, RHS>,
+    Out: From<V> + From<RHS> + Semigroup<Out, RHS>,
 {
-    fn combine(self, other: Self) -> Self {
-        let mut h: HashMap<K, V> = HashMap::new();
+    fn combine(self, other: HashMap<K, RHS>) -> HashMap<K, Out> {
+        let mut h: HashMap<K, Out> = HashMap::new();
         for (k, v) in self {
-            h.insert(k, v);
+            h.insert(k, Out::from(v));
         }
         let mut combined = vec![];
         for (k, v) in other {
             match h.entry(k) {
                 Entry::Occupied(o) => {
-                    // Store and insert later
+// Store and insert later
                     let (k, existing) = o.remove_entry();
                     let comb = existing.combine(v);
                     combined.push((k, comb));
                 }
                 Entry::Vacant(o) => {
-                    o.insert(v);
+                    o.insert(Out::from(v));
                 }
             }
         }
@@ -374,25 +380,25 @@ where
 macro_rules! tuple_impls {
     () => {}; // no more
 
-    (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+    (($idx:tt => $typ:ident => $typOut:ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident), )*) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
 //
-        tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
-        tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
+        tuple_impls!([($idx, $typ, $typOut);] $( ($nidx => $ntyp => $ntypOut), )*);
+        tuple_impls!($( ($nidx => $ntyp => $ntypOut), )*); // invoke macro on tail
     };
 
 // ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
 // + is empty (see next pattern)
 //
-    ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
-      tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
+    ([$(($accIdx: tt, $accTyp: ident, $accTypOut: ident);)+]  ($idx:tt => $typ:ident => $typOut: ident), $( ($nidx:tt => $ntyp:ident => $ntypeOut:ident), )*) => {
+      tuple_impls!([($idx, $typ, $typOut); $(($accIdx, $accTyp, $accTypOut); )*] $( ($nidx => $ntyp => $ntypeOut), ) *);
     };
 
 // Finally expand into our implementation
-    ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
-        impl<$typ: Semigroup, $( $ntyp: Semigroup),*> Semigroup for ($typ, $( $ntyp ),*) {
-            fn combine(self, other: Self) -> Self {
+    ([($idx:tt, $typ:ident, $typOut:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident); )*]) => {
+        impl<$typOut, $typ: Semigroup<$typOut>, $( $ntypOut, $ntyp: Semigroup<$ntypOut>),*> Semigroup<($typOut, $( $ntypOut), *)> for ($typ, $( $ntyp ),*) {
+            fn combine(self, other: Self) -> ($typOut, $( $ntypOut), *) {
                 (self.$idx.combine(other.$idx), $(self.$nidx.combine(other.$nidx), )*)
             }
         }
@@ -400,27 +406,27 @@ macro_rules! tuple_impls {
 }
 
 tuple_impls! {
-    (20 => U),
-    (19 => T),
-    (18 => S),
-    (17 => R),
-    (16 => Q),
-    (15 => P),
-    (14 => O),
-    (13 => N),
-    (12 => M),
-    (11 => L),
-    (10 => K),
-    (9 => J),
-    (8 => I),
-    (7 => H),
-    (6 => G),
-    (5 => F),
-    (4 => E),
-    (3 => D),
-    (2 => C),
-    (1 => B),
-    (0 => A),
+    (20 => U => UOut),
+    (19 => T => TOut),
+    (18 => S => SOut),
+    (17 => R => ROut),
+    (16 => Q => QOut),
+    (15 => P => POut),
+    (14 => O => OOut),
+    (13 => N => NOut),
+    (12 => M => MOut),
+    (11 => L => LOut),
+    (10 => K => KOut),
+    (9 => J => JOut),
+    (8 => I => IOut),
+    (7 => H => HOut),
+    (6 => G => GOut),
+    (5 => F => FOut),
+    (4 => E => EOut),
+    (3 => D => DOut),
+    (2 => C => COut),
+    (1 => B => BOut),
+    (0 => A => AOut),
 }
 
 #[cfg(test)]
@@ -451,9 +457,9 @@ mod tests {
         test_isize, 1.combine(2) => 3, isize
         test_f32, 1f32.combine(2f32) => 3f32, f32
         test_f64, 1f64.combine(2f64) => 3f64, f64
-        test_option_i16, Some(1).combine(Some(2)) => Some(3), Option<i16>
-        test_option_i16_none1, None.combine(Some(2)) => Some(2), Option<i16>
-        test_option_i16_none2, Some(2).combine(None) => Some(2), Option<i16>
+        test_option_i32, Some(1).combine(Some(2)) => Some(3), Option<i32>
+        test_option_i32_none1, None::<i32>.combine(Some(2)) => Some(2), Option<i32>
+        test_option_i32_none2, Some(2).combine(None::<i32>) => Some(2), Option<i32>
     }
 
     #[test]
