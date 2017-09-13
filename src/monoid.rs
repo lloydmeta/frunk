@@ -117,11 +117,11 @@ impl<'a, Str: Borrow<str>> Monoid<String, Str> for &'a str {
     }
 }
 
-impl<T, Out> Monoid<Vec<Out>, T> for Vec<T>
+impl<T> Monoid for Vec<T>
 where
-    Vec<T>: Semigroup<Vec<Out>, T>,
+    Vec<T>: Semigroup
 {
-    fn empty() -> Vec<Out> {
+    fn empty() -> Vec<T> {
         Vec::new()
     }
 }

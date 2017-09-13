@@ -33,7 +33,10 @@ use frunk::semigroup::*;
 /// quickcheck(associativity as fn(Vec<i8>, Vec<i8>, Vec<i8>) -> bool)
 /// # }
 /// ```
-pub fn associativity<A: Semigroup + Eq + Clone>(a: A, b: A, c: A) -> bool {
+pub fn associativity<A>(a: A, b: A, c: A) -> bool
+where
+    A: Semigroup + Eq + Clone,
+{
     a.clone().combine(b.clone()).combine(c.clone()) == a.combine(b.combine(c))
 }
 
@@ -52,7 +55,9 @@ mod tests {
 
     #[test]
     fn option_prop() {
-        quickcheck(associativity as fn(Option<String>, Option<String>, Option<String>) -> bool)
+        quickcheck(
+            associativity as fn(Option<String>, Option<String>, Option<String>) -> bool,
+        )
     }
 
     #[test]
@@ -62,40 +67,48 @@ mod tests {
 
     #[test]
     fn hashset_prop() {
-        quickcheck(associativity as fn(HashSet<i8>, HashSet<i8>, HashSet<i8>) -> bool)
+        quickcheck(
+            associativity as fn(HashSet<i8>, HashSet<i8>, HashSet<i8>) -> bool,
+        )
     }
 
     #[test]
     fn hashmap_prop() {
-        quickcheck(associativity as
-                   fn(HashMap<i8, String>,
-                      HashMap<i8, String>,
-                      HashMap<i8, String>)
-                      -> bool)
+        quickcheck(
+            associativity as
+                fn(HashMap<i8, String>,
+                   HashMap<i8, String>,
+                   HashMap<i8, String>)
+                   -> bool,
+        )
     }
 
     #[test]
     fn max_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Max<i8>>, Wrapper<Max<i8>>, Wrapper<Max<i8>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Max<i8>>, Wrapper<Max<i8>>, Wrapper<Max<i8>>) -> bool,
+        )
     }
 
     #[test]
     fn min_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Min<i8>>, Wrapper<Min<i8>>, Wrapper<Min<i8>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Min<i8>>, Wrapper<Min<i8>>, Wrapper<Min<i8>>) -> bool,
+        )
     }
 
     #[test]
     fn any_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Any<bool>>, Wrapper<Any<bool>>, Wrapper<Any<bool>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Any<bool>>, Wrapper<Any<bool>>, Wrapper<Any<bool>>) -> bool,
+        )
     }
 
     #[test]
     fn all_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<All<bool>>, Wrapper<All<bool>>, Wrapper<All<bool>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<All<bool>>, Wrapper<All<bool>>, Wrapper<All<bool>>) -> bool,
+        )
     }
 
 

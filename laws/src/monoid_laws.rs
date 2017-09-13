@@ -36,7 +36,10 @@ use frunk::monoid::*;
 /// quickcheck(left_identity as fn(String) -> bool);
 /// # }
 /// ```
-pub fn left_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
+pub fn left_identity<A>(a: A) -> bool
+where
+    A: Monoid + Eq + Clone,
+{
     <A as Monoid>::empty().combine(a.clone()) == a
 }
 
@@ -56,7 +59,10 @@ pub fn left_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
 /// quickcheck(right_identity as fn(String) -> bool);
 /// # }
 /// ```
-pub fn right_identity<A: Monoid + Eq + Clone>(a: A) -> bool {
+pub fn right_identity<A>(a: A) -> bool
+where
+    A: Monoid + Eq + Clone,
+{
     a.clone().combine(<A as Monoid>::empty()) == a
 }
 
