@@ -11,7 +11,7 @@
 //! use frunk_core::hlist::*;
 //! use frunk::semigroup::*;
 //! let t1 = (1, 2.5f32, "hi", Some(3));
-//! let t2 = (1, 2.5f32, " world", None);
+//! let t2 = (1, 2.5f32, " world", None::<i32>);
 //!
 //! let expected = (2, 5.0f32, "hi world".to_string(), Some(3));
 //!
@@ -388,25 +388,25 @@ where
 macro_rules! tuple_impls {
     () => {}; // no more
 
-    (($idx:tt => $typ:ident => $typOut:ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident), )*) => {
+    (($idx:tt => $typ:ident => $typOut:ident => $typRHS:ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident => $ntypRHS:ident), )*) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
 //
-        tuple_impls!([($idx, $typ, $typOut);] $( ($nidx => $ntyp => $ntypOut), )*);
-        tuple_impls!($( ($nidx => $ntyp => $ntypOut), )*); // invoke macro on tail
+        tuple_impls!([($idx, $typ, $typOut, $typRHS);] $( ($nidx => $ntyp => $ntypOut => $ntypRHS), )*);
+        tuple_impls!($( ($nidx => $ntyp => $ntypOut => $ntypRHS), )*); // invoke macro on tail
     };
 
 // ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
 // + is empty (see next pattern)
 //
-    ([$(($accIdx: tt, $accTyp: ident, $accTypOut: ident);)+]  ($idx:tt => $typ:ident => $typOut: ident), $( ($nidx:tt => $ntyp:ident => $ntypeOut:ident), )*) => {
-      tuple_impls!([($idx, $typ, $typOut); $(($accIdx, $accTyp, $accTypOut); )*] $( ($nidx => $ntyp => $ntypeOut), ) *);
+    ([$(($accIdx: tt, $accTyp: ident, $accTypOut: ident, $accTypRHS: ident);)+]  ($idx:tt => $typ:ident => $typOut: ident => $typRHS: ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident => $ntypRHS:ident), )*) => {
+      tuple_impls!([($idx, $typ, $typOut, $typRHS); $(($accIdx, $accTyp, $accTypOut, $accTypRHS); )*] $( ($nidx => $ntyp => $ntypOut => $ntypRHS), ) *);
     };
 
 // Finally expand into our implementation
-    ([($idx:tt, $typ:ident, $typOut:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident); )*]) => {
-        impl<$typOut, $typ: Semigroup<$typOut>, $( $ntypOut, $ntyp: Semigroup<$ntypOut>),*> Semigroup<($typOut, $( $ntypOut), *)> for ($typ, $( $ntyp ),*) {
-            fn combine(self, other: Self) -> ($typOut, $( $ntypOut), *) {
+    ([($idx:tt, $typ:ident, $typOut:ident, $typRHS:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident, $ntypRHS: ident); )*]) => {
+        impl<$typRHS, $typOut, $typ: Semigroup<$typOut,$typRHS>, $( $ntypRHS, $ntypOut, $ntyp: Semigroup<$ntypOut, $ntypRHS>),*> Semigroup<($typOut, $( $ntypOut), *), ($typRHS, $( $ntypRHS), *)> for ($typ, $( $ntyp ),*) {
+            fn combine(self, other: ($typRHS, $( $ntypRHS), *)) -> ($typOut, $( $ntypOut), *) {
                 (self.$idx.combine(other.$idx), $(self.$nidx.combine(other.$nidx), )*)
             }
         }
@@ -414,27 +414,32 @@ macro_rules! tuple_impls {
 }
 
 tuple_impls! {
-    (20 => U => UOut),
-    (19 => T => TOut),
-    (18 => S => SOut),
-    (17 => R => ROut),
-    (16 => Q => QOut),
-    (15 => P => POut),
-    (14 => O => OOut),
-    (13 => N => NOut),
-    (12 => M => MOut),
-    (11 => L => LOut),
-    (10 => K => KOut),
-    (9 => J => JOut),
-    (8 => I => IOut),
-    (7 => H => HOut),
-    (6 => G => GOut),
-    (5 => F => FOut),
-    (4 => E => EOut),
-    (3 => D => DOut),
-    (2 => C => COut),
-    (1 => B => BOut),
-    (0 => A => AOut),
+    (25 => Z => ZOut => ZRHS),
+    (24 => Y => YOut => YRHS),
+    (23 => X => XOut => XRHS),
+    (22 => W => WOut => WRHS),
+    (21 => V => VOut => VRHS),
+    (20 => U => UOut => URHS),
+    (19 => T => TOut => TRHS),
+    (18 => S => SOut => SRHS),
+    (17 => R => ROut => RRHS),
+    (16 => Q => QOut => QRHS),
+    (15 => P => POut => PRHS),
+    (14 => O => OOut => ORHS),
+    (13 => N => NOut => NRHS),
+    (12 => M => MOut => MRHS),
+    (11 => L => LOut => LRHS),
+    (10 => K => KOut => KRHS),
+    (9 => J => JOut => JRHS),
+    (8 => I => IOut => IRHS),
+    (7 => H => HOut => HRHS),
+    (6 => G => GOut => GRHS),
+    (5 => F => FOut => FRHS),
+    (4 => E => EOut => ERHS),
+    (3 => D => DOut => DRHS),
+    (2 => C => COut => CRHS),
+    (1 => B => BOut => BRHS),
+    (0 => A => AOut => ARHS),
 }
 
 #[cfg(test)]
