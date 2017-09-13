@@ -51,8 +51,8 @@ macro_rules! internal_tuple_impl_builder {
       internal_tuple_impl_builder!($toInvoke [($idx, $typ, $typOut, $typRHS); $(($accIdx, $accTyp, $accTypOut, $accTypRHS); )*] $( ($nidx => $ntyp => $ntypOut => $ntypRHS), ) * );
     };
 
-// Finally expand into our implementation
-    ($toInvoke:ident [($idx:tt, $typ:ident, $typOut:ident, $typRHS:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident, $ntypRHS: ident); )*] ) => {
-        $toInvoke![ [ ($idx, $typ, $typOut, $typRHS); $( ($nidx, $ntyp, $ntypOut, $ntypRHS ); )* ] ];
+// Finally expand into our implementation and invoke the macro
+    ($toInvoke:ident [ $( ($nidx:tt, $ntyp:ident, $ntypOut:ident, $ntypRHS: ident); )*] ) => {
+        $toInvoke![ [ $( ($nidx, $ntyp, $ntypOut, $ntypRHS ); )* ] ];
     }
 }
