@@ -40,7 +40,7 @@ pub fn left_identity<A, Out, RHS>(a: A) -> bool
 where
     A: Monoid<Out, RHS> + Clone,
     Out: Monoid<Out, RHS> + From<A> + Eq,
-    RHS: From<A>
+    RHS: From<A>,
 {
     <A as Monoid<Out, RHS>>::empty().combine(RHS::from(a.clone())) == Out::from(a)
 }
@@ -80,13 +80,18 @@ mod tests {
 
     #[test]
     fn string_id_prop() {
-        quickcheck(left_identity::<String, String, String> as fn(String) -> bool);
+        quickcheck(
+            left_identity::<String, String, String> as fn(String) -> bool,
+        );
         quickcheck(right_identity as fn(String) -> bool);
     }
 
     #[test]
     fn option_id_prop() {
-        quickcheck(left_identity::<Option<String>, Option<String>, Option<String>> as fn(Option<String>) -> bool);
+        quickcheck(
+            left_identity::<Option<String>, Option<String>, Option<String>> as
+                fn(Option<String>) -> bool,
+        );
         quickcheck(right_identity as fn(Option<String>) -> bool);
     }
 
