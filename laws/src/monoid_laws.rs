@@ -67,7 +67,9 @@ where
     Out: Monoid<Out, RHS> + From<A> + Eq,
     RHS: From<Out>,
 {
-    a.clone().combine(RHS::from(<A as Monoid<Out, RHS>>::empty())) == Out::from(a)
+    a.clone().combine(
+        RHS::from(<A as Monoid<Out, RHS>>::empty()),
+    ) == Out::from(a)
 }
 
 
@@ -85,7 +87,9 @@ mod tests {
         quickcheck(
             left_identity::<String, String, String> as fn(String) -> bool,
         );
-        quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
+        quickcheck(
+            right_identity::<String, String, String> as fn(String) -> bool,
+        );
     }
 
     #[test]
@@ -94,7 +98,10 @@ mod tests {
             left_identity::<Option<String>, Option<String>, Option<String>> as
                 fn(Option<String>) -> bool,
         );
-        quickcheck(right_identity::<Option<String>, Option<String>, Option<String>> as fn(Option<String>) -> bool);
+        quickcheck(
+            right_identity::<Option<String>, Option<String>, Option<String>> as
+                fn(Option<String>) -> bool,
+        );
     }
 
     #[test]
