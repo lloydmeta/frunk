@@ -33,11 +33,13 @@ use frunk::semigroup::*;
 /// quickcheck(associativity as fn(Vec<i8>, Vec<i8>, Vec<i8>) -> bool)
 /// # }
 /// ```
-pub fn associativity<A>(a: A, b: A, c: A) -> bool
+pub fn associativity<A, Out, Rhs>(a: A, b: A, c: A) -> bool
 where
-    A: Semigroup + Eq + Clone,
+    A: Semigroup<Out, Rhs>  + Clone,
+    Rhs: From<A> + From<Out>,
+    Out: From<A> + Semigroup<Out, Rhs> + Eq,
 {
-    a.clone().combine(b.clone()).combine(c.clone()) == a.combine(b.combine(c))
+    a.clone().combine(Rhs::from(b.clone())).combine(Rhs::from(c.clone())) == a.combine(Rhs::from(b.combine(Rhs::from(c))))
 }
 
 
@@ -50,13 +52,13 @@ mod tests {
 
     #[test]
     fn string_prop() {
-        quickcheck(associativity as fn(String, String, String) -> bool)
+        quickcheck(associativity::<String, String, String> as fn(String, String, String) -> bool)
     }
 
     #[test]
     fn option_prop() {
         quickcheck(
-            associativity as fn(Option<String>, Option<String>, Option<String>) -> bool,
+            associativity::<Option<String>, Option<String>, Option<String>> as fn(Option<String>, Option<String>, Option<String>) -> bool,
         )
     }
 
