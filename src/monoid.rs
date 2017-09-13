@@ -239,53 +239,61 @@ numeric_product_monoid_imps! {
 macro_rules! tuple_impls {
     () => {}; // no more
 
-    (($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
+    (($idx:tt => $typ:ident => $typOut:ident => $typRHS:ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident => $ntypRHS:ident), )*) => {
 // Invoke recursive reversal of list that ends in the macro expansion implementation
 // of the reversed list
 //
-        tuple_impls!([($idx, $typ);] $( ($nidx => $ntyp), )*);
-        tuple_impls!($( ($nidx => $ntyp), )*); // invoke macro on tail
+        tuple_impls!([($idx, $typ, $typOut, $typRHS);] $( ($nidx => $ntyp => $ntypOut => $ntypRHS), )*);
+        tuple_impls!($( ($nidx => $ntyp => $ntypOut => $ntypRHS), )*); // invoke macro on tail
     };
 
 // ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse
 // + is empty (see next pattern)
 //
-    ([$(($accIdx: tt, $accTyp: ident);)+]  ($idx:tt => $typ:ident), $( ($nidx:tt => $ntyp:ident), )*) => {
-      tuple_impls!([($idx, $typ); $(($accIdx, $accTyp); )*] $( ($nidx => $ntyp), ) *);
+    ([$(($accIdx: tt, $accTyp: ident, $accTypOut: ident, $accTypRHS: ident);)+]  ($idx:tt => $typ:ident => $typOut: ident => $typRHS: ident), $( ($nidx:tt => $ntyp:ident => $ntypOut:ident => $ntypRHS:ident), )*) => {
+      tuple_impls!([($idx, $typ, $typOut, $typRHS); $(($accIdx, $accTyp, $accTypOut, $accTypRHS); )*] $( ($nidx => $ntyp => $ntypOut => $ntypRHS), ) *);
     };
 
 // Finally expand into our implementation
-    ([($idx:tt, $typ:ident); $( ($nidx:tt, $ntyp:ident); )*]) => {
-        impl<$typ: Monoid, $( $ntyp: Monoid),*> Monoid for ($typ, $( $ntyp ),*) {
-            fn empty() -> Self {
-              (<$typ as Monoid>::empty(), $(<$ntyp as Monoid>::empty(), )*)
+    ([($idx:tt, $typ:ident, $typOut:ident, $typRHS:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident, $ntypRHS: ident); )*]) => {
+        impl<$typ, $typOut, $typRHS, $( $ntyp, $ntypOut, $ntypRHS),*> Monoid<($typOut, $( $ntypOut), *), ($typRHS, $( $ntypRHS), *)> for ($typ, $( $ntyp ),*)
+        where
+            $typ: Monoid<$typOut, $typRHS>,
+            $( $ntyp: Monoid<$ntypOut, $ntypRHS>),* {
+            fn empty() -> ($typOut, $( $ntypOut), *) {
+              (<$typ as Monoid<$typOut, $typRHS>>::empty(), $(<$ntyp as Monoid<$ntypOut, $ntypRHS>>::empty(), )*)
             }
         }
     }
 }
 
 tuple_impls! {
-    (20 => U),
-    (19 => T),
-    (18 => S),
-    (17 => R),
-    (16 => Q),
-    (15 => P),
-    (14 => O),
-    (13 => N),
-    (12 => M),
-    (11 => L),
-    (10 => K),
-    (9 => J),
-    (8 => I),
-    (7 => H),
-    (6 => G),
-    (5 => F),
-    (4 => E),
-    (3 => D),
-    (2 => C),
-    (1 => B),
-    (0 => A),
+    (25 => Z => ZOut => ZRHS),
+    (24 => Y => YOut => YRHS),
+    (23 => X => XOut => XRHS),
+    (22 => W => WOut => WRHS),
+    (21 => V => VOut => VRHS),
+    (20 => U => UOut => URHS),
+    (19 => T => TOut => TRHS),
+    (18 => S => SOut => SRHS),
+    (17 => R => ROut => RRHS),
+    (16 => Q => QOut => QRHS),
+    (15 => P => POut => PRHS),
+    (14 => O => OOut => ORHS),
+    (13 => N => NOut => NRHS),
+    (12 => M => MOut => MRHS),
+    (11 => L => LOut => LRHS),
+    (10 => K => KOut => KRHS),
+    (9 => J => JOut => JRHS),
+    (8 => I => IOut => IRHS),
+    (7 => H => HOut => HRHS),
+    (6 => G => GOut => GRHS),
+    (5 => F => FOut => FRHS),
+    (4 => E => EOut => ERHS),
+    (3 => D => DOut => DRHS),
+    (2 => C => COut => CRHS),
+    (1 => B => BOut => BRHS),
+    (0 => A => AOut => ARHS),
 }
 
 #[cfg(test)]
