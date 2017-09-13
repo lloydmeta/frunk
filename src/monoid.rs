@@ -15,16 +15,16 @@
 //! assert_eq!(combine_all(vec_of_no_hashmaps),
 //!                    <HashMap<i32, String> as Monoid>::empty());
 //!
-//! let mut h1: HashMap<i32, &str>  = HashMap::new();
+//! let mut h1  = HashMap::new();
 //! h1.insert(1, "Hello");  // h1 is HashMap( 1 -> "Hello")
-//! let mut h2: HashMap<i32, &str>  = HashMap::new();
+//! let mut h2  = HashMap::new();
 //! h2.insert(1, " World");
 //! h2.insert(2, "Goodbye");  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
 //! let mut h3 = HashMap::new();
 //! h3.insert(3, "Cruel World");
 //! let vec_of_hashes = vec![h1, h2, h3];
 //!
-//! let mut h_expected: HashMap<i32, String> = HashMap::new();
+//! let mut h_expected = HashMap::new();
 //! h_expected.insert(1, "Hello World".to_string());
 //! h_expected.insert(2, "Goodbye".to_string());
 //! h_expected.insert(3, "Cruel World".to_string()); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
@@ -310,38 +310,20 @@ mod tests {
             <HashMap<i32, String> as Monoid>::empty()
         );
 
-        let mut h1: HashMap<i32, String> = HashMap::new();
+        let mut h1 = HashMap::new();
         h1.insert(1, String::from("Hello")); // h1 is HashMap( 1 -> "Hello")
-        let mut h2: HashMap<i32, String> = HashMap::new();
+        let mut h2 = HashMap::new();
         h2.insert(1, String::from(" World"));
         h2.insert(2, String::from("Goodbye")); // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
-        let mut h3: HashMap<i32, String> = HashMap::new();
+        let mut h3 = HashMap::new();
         h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
         let vec_of_hashes = vec![h1, h2, h3];
 
-        let mut h_expected: HashMap<i32, String> = HashMap::new();
+        let mut h_expected = HashMap::new();
         h_expected.insert(1, String::from("Hello World"));
         h_expected.insert(2, String::from("Goodbye"));
         h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
         assert_eq!(combine_all(vec_of_hashes), h_expected);
-    }
-    #[test]
-    fn test_combine_all_hashmap_2() {
-        let mut h1: HashMap<i32, &str> = HashMap::new();
-        h1.insert(1, "Hello"); // h1 is HashMap( 1 -> "Hello")
-        let mut h2: HashMap<i32, &str> = HashMap::new();
-        h2.insert(1, " World");
-        h2.insert(2, "Goodbye"); // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
-        let mut h3 = HashMap::new();
-        h3.insert(3, "Cruel World");
-        let vec_of_hashes = vec![h1, h2, h3];
-
-        let mut h_expected: HashMap<i32, String> = HashMap::new();
-        h_expected.insert(1, "Hello World".to_string());
-        h_expected.insert(2, "Goodbye".to_string());
-        h_expected.insert(3, "Cruel World".to_string()); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
-        let result: HashMap<i32, String> = combine_all(vec_of_hashes);
-        assert_eq!(result, h_expected);
     }
 
     #[test]
