@@ -405,7 +405,11 @@ macro_rules! tuple_impls {
 
 // Finally expand into our implementation
     ([($idx:tt, $typ:ident, $typOut:ident, $typRHS:ident); $( ($nidx:tt, $ntyp:ident, $ntypOut:ident, $ntypRHS: ident); )*]) => {
-        impl<$typRHS, $typOut, $typ: Semigroup<$typOut,$typRHS>, $( $ntypRHS, $ntypOut, $ntyp: Semigroup<$ntypOut, $ntypRHS>),*> Semigroup<($typOut, $( $ntypOut), *), ($typRHS, $( $ntypRHS), *)> for ($typ, $( $ntyp ),*) {
+        impl<$typ, $typOut, $typRHS, $( $ntyp, $ntypOut, $ntypRHS),*> Semigroup<($typOut, $( $ntypOut), *), ($typRHS, $( $ntypRHS), *)> for ($typ, $( $ntyp ),*)
+         where
+            $typ: Semigroup<$typOut,$typRHS>,
+            $( $ntyp: Semigroup<$ntypOut, $ntypRHS>),*
+            {
             fn combine(self, other: ($typRHS, $( $ntypRHS), *)) -> ($typOut, $( $ntypOut), *) {
                 (self.$idx.combine(other.$idx), $(self.$nidx.combine(other.$nidx), )*)
             }
