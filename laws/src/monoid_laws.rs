@@ -14,7 +14,7 @@
 //! # fn main() {
 //! use frunk_laws::monoid_laws::*;
 //! quickcheck(left_identity::<String, String, String> as fn(String) -> bool);
-//! quickcheck(right_identity as fn(String) -> bool);
+//! quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
 //! # }
 //! ```
 use frunk::monoid::*;
@@ -58,14 +58,16 @@ where
 /// # use frunk::semigroup::*;
 /// # fn main() {
 /// use frunk_laws::monoid_laws::*;
-/// quickcheck(right_identity as fn(String) -> bool);
+/// quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
 /// # }
 /// ```
-pub fn right_identity<A>(a: A) -> bool
+pub fn right_identity<A, Out, RHS>(a: A) -> bool
 where
-    A: Monoid + Eq + Clone,
+    A: Monoid<Out, RHS> + Clone,
+    Out: Monoid<Out, RHS> + From<A> + Eq,
+    RHS: From<Out>,
 {
-    a.clone().combine(<A as Monoid>::empty()) == a
+    a.clone().combine(RHS::from(<A as Monoid<Out, RHS>>::empty())) == Out::from(a)
 }
 
 
@@ -83,7 +85,7 @@ mod tests {
         quickcheck(
             left_identity::<String, String, String> as fn(String) -> bool,
         );
-        quickcheck(right_identity as fn(String) -> bool);
+        quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
     }
 
     #[test]
@@ -92,7 +94,7 @@ mod tests {
             left_identity::<Option<String>, Option<String>, Option<String>> as
                 fn(Option<String>) -> bool,
         );
-        quickcheck(right_identity as fn(Option<String>) -> bool);
+        quickcheck(right_identity::<Option<String>, Option<String>, Option<String>> as fn(Option<String>) -> bool);
     }
 
     #[test]
