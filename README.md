@@ -406,8 +406,8 @@ Things that can be combined *and* have an empty/id value.
 ```rust
 use frunk::monoid::*;
 
-let t1 = (1, 2.5f32,         "hi", Some(3));
-let t2 = (1, 2.5f32,        " world", None);
+let t1 = (1, 2.5f32, "hi", Some(3));
+let t2 = (1, 2.5f32, " world", None);
 let t3 = (1, 2.5f32, ", goodbye", Some(10));
 let tuples = vec![t1, t2, t3];
 
