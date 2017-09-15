@@ -77,12 +77,12 @@ pub trait Semigroup<Output = Self, RHS = Self> {
 
 /// Allow the combination of any two HLists having the same structure
 /// if all of the sub-element types are also Semiups
-impl<H, HO, T, TO> Semigroup<HCons<HO, TO>> for HCons<H, T>
+impl<H, T, HO, TO, HR, TR,> Semigroup<HCons<HO, TO>, HCons<HR, TR>> for HCons<H, T>
 where
-    H: Semigroup<HO>,
-    T: HList + Semigroup<TO>,
+    H: Semigroup<HO, HR>,
+    T: HList + Semigroup<TO,TR>,
 {
-    fn combine(self, other: Self) -> HCons<HO, TO> {
+    fn combine(self, other: HCons<HR, TR>) -> HCons<HO, TO> {
         let tail_comb = self.tail.combine(other.tail);
         let h_comb = self.head.combine(other.head);
         HCons {
@@ -200,24 +200,13 @@ impl<'a, Str: Borrow<str>> Semigroup<String, Str> for &'a str {
     }
 }
 
-impl<T, TO> Semigroup<Box<TO>> for Box<T>
+impl<T, TO, TR> Semigroup<Box<TO>, Box<TR>> for Box<T>
 where
-    T: Semigroup<TO>,
+    T: Semigroup<TO, TR>,
 {
-    fn combine(self, other: Self) -> Box<TO> {
+    fn combine(self, other: Box<TR>) -> Box<TO> {
         let s = *self;
         let o = *other;
-        Box::new(s.combine(o))
-    }
-}
-
-impl<'a, T, TO> Semigroup<Box<TO>> for &'a Box<T>
-where
-    &'a T: Semigroup<TO>,
-{
-    fn combine(self, other: Self) -> Box<TO> {
-        let s = self.deref();
-        let o = other.deref();
         Box::new(s.combine(o))
     }
 }
@@ -307,21 +296,23 @@ macro_rules! numeric_product_semigroup_imps {
 
 numeric_product_semigroup_imps!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
 
-impl<T> Semigroup for Cell<T>
+impl<T, O, R> Semigroup<Cell<O>, Cell<R>> for Cell<T>
 where
-    T: Semigroup + Copy,
+    T: Semigroup<O, R> + Copy,
+    R: Copy,
 {
-    fn combine(self, other: Self) -> Self {
+    fn combine(self, other: Cell<R>) -> Cell<O> {
         Cell::new(self.get().combine((other.get())))
     }
 }
 
-impl<T, Out> Semigroup<RefCell<Out>> for RefCell<T>
+impl<T, Out, RHS> Semigroup<RefCell<Out>, RefCell<RHS>> for RefCell<T>
 where
     T: ToOwned,
-    <T as ToOwned>::Owned: Semigroup<Out>,
+    RHS: ToOwned,
+    <T as ToOwned>::Owned: Semigroup<Out, <RHS as ToOwned>::Owned>,
 {
-    fn combine(self, other: Self) -> RefCell<Out> {
+    fn combine(self, other: RefCell<RHS>) -> RefCell<Out> {
         let self_b = self.borrow().deref().to_owned();
         let other_b = other.borrow().to_owned();
         RefCell::new(self_b.combine(other_b))
