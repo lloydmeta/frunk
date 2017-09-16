@@ -191,6 +191,14 @@ macro_rules! numeric_monoid_imps {
       impl Monoid for $tr {
         fn empty() -> Self { $zero }
       }
+
+      impl <'a> Monoid<$tr, &'a $tr> for $tr {
+        fn empty() -> Self { $zero }
+      }
+
+      impl <'a> Monoid<$tr> for &'a $tr {
+        fn empty() -> $tr { $zero }
+      }
     )*
   }
 }
@@ -206,8 +214,8 @@ numeric_monoid_imps! {
     0; u64,
     0; isize,
     0; usize,
-    0f32; f32,
-    0f64; f64
+    0.; f32,
+    0.; f64
 }
 
 macro_rules! numeric_product_monoid_imps {
