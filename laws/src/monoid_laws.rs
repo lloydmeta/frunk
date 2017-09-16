@@ -140,8 +140,8 @@ mod tests {
         $(
             #[test]
             fn $id() {
-                quickcheck(left_identity as fn($tr) -> bool);
-                quickcheck(right_identity as fn($tr) -> bool);
+                quickcheck(left_identity::<$tr, $tr, $tr> as fn($tr) -> bool);
+                quickcheck(right_identity::<$tr, $tr, $tr> as fn($tr) -> bool);
             }
         )*
       }
