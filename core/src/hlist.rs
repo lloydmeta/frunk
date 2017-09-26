@@ -933,6 +933,63 @@ where
     }
 }
 
+/// Implementation for folding over an HList using a single function that
+/// can handle all cases
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// let h = hlist![1, 2, 3, 4, 5];
+///
+/// let r: isize = h.foldl(|acc, next| acc + next, 0);
+/// assert_eq!(r, 15);
+/// # }
+/// ```
+impl<
+    F,
+    H,
+    Tail,
+    Acc,
+    Index,
+> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<F, Acc, Index>,
+    F: Fn(Acc, H) -> Acc,
+{
+    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
+        let acc = folder(acc, self.head);
+        self.tail.foldl(folder, acc)
+    }
+}
+
+impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCons<H, Tail>
+    where
+        F: Fn(Acc, &'a H) -> Acc,
+        &'a Tail: HFoldLeftable<F, Acc, Index>,
+{
+    type Output = <&'a Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, f: F, acc: Acc) -> Self::Output {
+        let ref h = self.head;
+        let ref t = self.tail;
+        let result = f(acc, h);
+        t.foldl(f, result)
+    }
+}
+
+impl<'a, F, H, Acc> HFoldLeftable<F, Acc, Here> for &'a HCons<H, HNil>
+where
+    F: Fn(Acc, &'a H) -> Acc,
+{
+    type Output = Acc;
+
+    fn foldl(self, f: F, acc: Acc) -> Self::Output {
+        let ref h = self.head;
+        f(acc, h)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1117,5 +1174,19 @@ mod tests {
     #[test]
     fn test_len_const() {
         assert_eq!(<Hlist![usize, &str, f32] as HList>::LEN, 3);
+    }
+
+    #[test]
+    fn test_single_func_foldl_consuming() {
+        let h = hlist![1, 2, 3, 4, 5];
+        let r: isize = h.foldl(|acc, next| acc + next, 0);
+        assert_eq!(r, 15);
+    }
+
+    #[test]
+    fn test_single_func_foldl_non_consuming() {
+        let h = hlist![1, 2, 3, 4, 5];
+        let r: isize = h.as_ref().foldl(|acc, &next| acc + next, 0isize);
+        assert_eq!(r, 15);
     }
 }
