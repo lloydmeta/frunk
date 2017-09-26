@@ -651,6 +651,21 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
     }
 }
 
+impl<F, R, H, Tail> HMappable<F> for HCons<H, Tail>
+where
+    F: Fn(H) -> R,
+    Tail: HMappable<F>,
+{
+    type Output = HCons<R, <Tail as HMappable<F>>::Output>;
+    fn map(self, f: F) -> Self::Output {
+        let r = f(self.head);
+        HCons {
+            head: r,
+            tail: self.tail.map(f),
+        }
+    }
+}
+
 // TODO take a mapper by reference when https://github.com/rust-lang/rust/issues/39959 is fixed
 impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
     where F: FnOnce(&'a H) -> MapperHeadR,
@@ -1154,6 +1169,13 @@ mod tests {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_map_single_funcconsuming() {
+        let h = hlist![9000, 9001, 9002];
+        let mapped = h.map(|v| v + 1);
+        assert_eq!(mapped, hlist![9001, 9002, 9003]);
     }
 
     #[test]
