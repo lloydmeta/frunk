@@ -783,6 +783,28 @@ where
     }
 }
 
+
+impl<
+    'a,
+    F,
+    R,
+    H,
+    Tail,
+    Init,
+    Index,
+> HFoldRightable<&'a F, Init, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldRightable<&'a F, Init, Index>,
+    F: Fn(H, <Tail as HFoldRightable<&'a F, Init, Index>>::Output) -> R,
+{
+    type Output = R;
+
+    fn foldr(self, folder: &'a F, init: Init) -> Self::Output {
+        let folded_tail = self.tail.foldr(folder, init);
+        (folder)(self.head, folded_tail)
+    }
+}
+
 // TODO: enable this when the compiler stops smoking crack
 // Likely same as https://github.com/rust-lang/rust/issues/39959
 //
@@ -1156,6 +1178,17 @@ mod tests {
             1f32,
         );
         assert_eq!(folded, 9001)
+    }
+
+
+    #[test]
+    fn test_single_func_foldr_consuming() {
+        let h = hlist![1, 2, 3];
+        let folded = h.foldr(
+            &|i, acc| i * acc,
+            1,
+        );
+        assert_eq!(folded, 6)
     }
 
     // Todo enable when compiler is fixed
