@@ -250,9 +250,19 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Field<Name, Type> {
     name_type_holder: PhantomData<Name>,
+    pub name: &'static str,
+    pub value: Type,
+}
+
+/// A version of Field that doesn't have a type-level label, just a
+/// value-level one
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+pub struct ValueField<Type> {
     pub name: &'static str,
     pub value: Type,
 }
@@ -264,6 +274,16 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let v_debug = format!("{:?}", self.value);
         write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
+    }
+}
+
+impl<Type> fmt::Debug for ValueField<Type>
+where
+    Type: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let v_debug = format!("{:?}", self.value);
+        write!(f, "ValueField{{ name: {}, value: {} }}", self.name, v_debug)
     }
 }
 
@@ -413,6 +433,33 @@ macro_rules! field {
     }
 }
 
+/// A trait that strips type-level strings from the labels
+pub trait IntoValueLabelled {
+    type Output;
+    fn into_value_labelled(self) -> Self::Output;
+}
+
+impl IntoValueLabelled for HNil {
+    type Output = HNil;
+    fn into_value_labelled(self) -> Self::Output {
+        self
+    }
+}
+
+impl<Label, Value, Tail> IntoValueLabelled for HCons<Field<Label, Value>, Tail>
+where
+    Tail: IntoValueLabelled,
+{
+    type Output = HCons<ValueField<Value>, <Tail as IntoValueLabelled>::Output>;
+
+    fn into_value_labelled(self) -> Self::Output {
+        HCons {
+            head: ValueField { name: self.head.name, value: self.head.value },
+            tail: self.tail.into_value_labelled(),
+        }
+    }
+}
+
 
 
 #[cfg(test)]
@@ -464,6 +511,15 @@ mod tests {
         let labelled_hlist = hlist![field!(name, "joe"), field!((a, g, e), 3)];
         let unlabelled = labelled_hlist.into_unlabelled();
         assert_eq!(unlabelled, hlist!["joe", 3])
+    }
+
+    #[test]
+    fn test_value_labelling() {
+        let labelled_hlist = hlist![field!(name, "joe"), field!((a, g, e), 3)];
+        let value_labelled: Hlist![ValueField<&str>, ValueField<isize>] = labelled_hlist.into_value_labelled();
+        let hlist_pat!(f1, f2) = value_labelled;
+        assert_eq!(f1.name, "name");
+        assert_eq!(f2.name, "age");
     }
 
     #[test]
