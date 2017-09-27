@@ -1,6 +1,6 @@
 [package]
 name = "frunk_core"
-version = "0.0.19"
+version = "0.0.20"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList and Generic"
 license = "MIT"
@@ -20,4 +20,4 @@ with-serde = ["serde", "serde_derive"]
 
 [dev-dependencies.frunk_derives]
 path = "../derives"
-version = "0.0.20"
+version = "0.0.21"
