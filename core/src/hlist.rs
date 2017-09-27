@@ -1061,6 +1061,27 @@ impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCo
     }
 }
 
+impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
+where
+    Tail: Into<Vec<H>> + HList,
+{
+    fn into(self) -> Vec<H> {
+        let h = self.head;
+        let t = self.tail;
+        let mut v = Vec::with_capacity(<Self as HList>::LEN);
+        v.push(h);
+        let mut t_vec: Vec<H> = t.into();
+        v.append(&mut t_vec);
+        v
+    }
+}
+
+impl<T> Into<Vec<T>> for HNil {
+    fn into(self) -> Vec<T> {
+        Vec::with_capacity(0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1184,10 +1205,7 @@ mod tests {
     #[test]
     fn test_single_func_foldr_consuming() {
         let h = hlist![1, 2, 3];
-        let folded = h.foldr(
-            &|i, acc| i * acc,
-            1,
-        );
+        let folded = h.foldr(&|i, acc| i * acc, 1);
         assert_eq!(folded, 6)
     }
 
@@ -1275,7 +1293,8 @@ mod tests {
     #[test]
     fn test_single_func_foldl_consuming() {
         use std::collections::HashMap;
-        let h = hlist![
+        let h =
+            hlist![
             ("one", 1),
             ("two", 2),
             ("three", 3),
@@ -1311,5 +1330,12 @@ mod tests {
         let h = hlist![1, 2, 3, 4, 5];
         let r: isize = h.as_ref().foldl(|acc, &next| acc + next, 0isize);
         assert_eq!(r, 15);
+    }
+
+    #[test]
+    fn test_into_vec() {
+        let h = hlist![1, 2, 3, 4, 5];
+        let as_vec: Vec<_> = h.into();
+        assert_eq!(as_vec, vec![1, 2, 3, 4, 5])
     }
 }
