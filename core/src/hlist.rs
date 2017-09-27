@@ -575,7 +575,7 @@ where
 ///
 /// It might be a good idea to try to re-write these using the foldr variants, but it's a
 /// wee-bit more complicated.
-pub trait HMappable<Mapper> {
+pub trait HMappable<Mapper, Index> {
     type Output;
 
 
@@ -613,7 +613,7 @@ pub trait HMappable<Mapper> {
     fn map(self, folder: Mapper) -> Self::Output;
 }
 
-impl<F> HMappable<F> for HNil {
+impl<F> HMappable<F, Here> for HNil {
     type Output = HNil;
 
     fn map(self, _: F) -> Self::Output {
@@ -621,7 +621,7 @@ impl<F> HMappable<F> for HNil {
     }
 }
 
-impl<'a, F, R, H> HMappable<HCons<F, HNil>> for &'a HCons<H, HNil>
+impl<'a, F, R, H> HMappable<HCons<F, HNil>, Here> for &'a HCons<H, HNil>
 where
     F: FnOnce(&'a H) -> R,
 {
@@ -637,11 +637,29 @@ where
     }
 }
 
-impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
-    where F: FnOnce(H) -> MapperHeadR,
-          Tail: HMappable<MapperTail>
+
+impl<'a, F, R, H> HMappable<F, Here> for &'a HCons<H, HNil>
+where
+    F: Fn(&'a H) -> R,
 {
-    type Output = HCons<MapperHeadR, <Tail as HMappable<MapperTail>>::Output>;
+    type Output = HCons<R, HNil>;
+
+    fn map(self, f: F) -> Self::Output {
+        let ref h = self.head;
+        HCons {
+            head: f(h),
+            tail: HNil,
+        }
+    }
+}
+
+impl<F, MapperHeadR, MapperTail, H, Tail, Index> HMappable<HCons<F, MapperTail>, There<Index>>
+    for HCons<H, Tail>
+where
+    F: FnOnce(H) -> MapperHeadR,
+    Tail: HMappable<MapperTail, Index>,
+{
+    type Output = HCons<MapperHeadR, <Tail as HMappable<MapperTail, Index>>::Output>;
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let f = mapper.head;
         HCons {
@@ -651,12 +669,28 @@ impl<F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HC
     }
 }
 
-// TODO take a mapper by reference when https://github.com/rust-lang/rust/issues/39959 is fixed
-impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
-    where F: FnOnce(&'a H) -> MapperHeadR,
-          &'a Tail: HMappable<MapperTail>
+impl<F, R, H, Tail, Index> HMappable<F, There<Index>> for HCons<H, Tail>
+where
+    F: Fn(H) -> R,
+    Tail: HMappable<F, Index>,
 {
-    type Output = HCons<MapperHeadR, <&'a Tail as HMappable<MapperTail>>::Output>;
+    type Output = HCons<R, <Tail as HMappable<F, Index>>::Output>;
+    fn map(self, f: F) -> Self::Output {
+        let r = f(self.head);
+        HCons {
+            head: r,
+            tail: self.tail.map(f),
+        }
+    }
+}
+
+impl<'a, F, MapperHeadR, MapperTail, H, Tail, Index> HMappable<HCons<F, MapperTail>, There<Index>>
+    for &'a HCons<H, Tail>
+where
+    F: FnOnce(&'a H) -> MapperHeadR,
+    &'a Tail: HMappable<MapperTail, Index>,
+{
+    type Output = HCons<MapperHeadR, <&'a Tail as HMappable<MapperTail, Index>>::Output>;
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let f = mapper.head;
         let mapper_tail = mapper.tail;
@@ -665,6 +699,21 @@ impl<'a, F, MapperHeadR, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> fo
         HCons {
             head: f(self_head),
             tail: self_tail.map(mapper_tail),
+        }
+    }
+}
+
+impl<'a, F, R, H, Tail, Index> HMappable<F, There<Index>> for &'a HCons<H, Tail>
+    where F: Fn(&'a H) -> R,
+          &'a Tail: HMappable<F, Index>
+{
+    type Output = HCons<R, <&'a Tail as HMappable<F, Index>>::Output>;
+    fn map(self, f: F) -> Self::Output {
+        let ref self_head = self.head;
+        let ref self_tail = self.tail;
+        HCons {
+            head: f(self_head),
+            tail: self_tail.map(f),
         }
     }
 }
@@ -731,6 +780,28 @@ where
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
         let folded_tail = self.tail.foldr(folder.tail, init);
         (folder.head)(self.head, folded_tail)
+    }
+}
+
+
+impl<
+    'a,
+    F,
+    R,
+    H,
+    Tail,
+    Init,
+    Index,
+> HFoldRightable<&'a F, Init, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldRightable<&'a F, Init, Index>,
+    F: Fn(H, <Tail as HFoldRightable<&'a F, Init, Index>>::Output) -> R,
+{
+    type Output = R;
+
+    fn foldr(self, folder: &'a F, init: Init) -> Self::Output {
+        let folded_tail = self.tail.foldr(folder, init);
+        (folder)(self.head, folded_tail)
     }
 }
 
@@ -827,7 +898,8 @@ impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
 }
 
 impl<'a, F, R, H, Acc> HFoldLeftable<F, Acc, Here> for &'a HCons<H, HNil>
-    where F: FnOnce(Acc, &'a H) -> R
+where
+    F: FnOnce(Acc, &'a H) -> R,
 {
     type Output = R;
 
@@ -866,25 +938,6 @@ where
 
     fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
         self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
-    }
-}
-
-impl<
-    F,
-    H,
-    Tail,
-    Acc,
-    Index,
-> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
-where
-    Tail: HFoldLeftable<F, Acc, Index>,
-    F: Fn(Acc, H) -> Acc,
-{
-    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
-
-    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
-        let acc = folder(acc, self.head);
-        self.tail.foldl(folder, acc)
     }
 }
 
@@ -960,6 +1013,51 @@ where
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
+    }
+}
+
+/// Implementation for folding over an HList using a single function that
+/// can handle all cases
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// let h = hlist![1, 2, 3, 4, 5];
+///
+/// let r: isize = h.foldl(|acc, next| acc + next, 0);
+/// assert_eq!(r, 15);
+/// # }
+/// ```
+impl<
+    F,
+    H,
+    Tail,
+    Acc,
+    Index,
+> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<F, Acc, Index>,
+    F: Fn(Acc, H) -> Acc,
+{
+    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
+        let acc = folder(acc, self.head);
+        self.tail.foldl(folder, acc)
+    }
+}
+
+impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCons<H, Tail>
+    where
+        F: Fn(Acc, &'a H) -> Acc,
+        &'a Tail: HFoldLeftable<F, Acc, Index>,
+{
+    type Output = <&'a Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, f: F, acc: Acc) -> Self::Output {
+        let ref h = self.head;
+        let ref t = self.tail;
+        let result = f(acc, h);
+        t.foldl(f, result)
     }
 }
 
@@ -1082,6 +1180,17 @@ mod tests {
         assert_eq!(folded, 9001)
     }
 
+
+    #[test]
+    fn test_single_func_foldr_consuming() {
+        let h = hlist![1, 2, 3];
+        let folded = h.foldr(
+            &|i, acc| i * acc,
+            1,
+        );
+        assert_eq!(folded, 6)
+    }
+
     // Todo enable when compiler is fixed
     //    #[test]
     //    fn test_foldr_non_consuming() {
@@ -1130,6 +1239,20 @@ mod tests {
     }
 
     #[test]
+    fn test_map_single_func_consuming() {
+        let h = hlist![9000, 9001, 9002];
+        let mapped = h.map(|v| v + 1);
+        assert_eq!(mapped, hlist![9001, 9002, 9003]);
+    }
+
+    #[test]
+    fn test_map_single_func_non_consuming() {
+        let h = hlist![9000, 9001, 9002];
+        let mapped = h.as_ref().map(|v| v + 1);
+        assert_eq!(mapped, hlist![9001, 9002, 9003]);
+    }
+
+    #[test]
     fn test_map_non_consuming() {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.as_ref().map(hlist![|&n| n + 1, |&s| s, |&f| f + 1f32]);
@@ -1147,5 +1270,46 @@ mod tests {
     #[test]
     fn test_len_const() {
         assert_eq!(<Hlist![usize, &str, f32] as HList>::LEN, 3);
+    }
+
+    #[test]
+    fn test_single_func_foldl_consuming() {
+        use std::collections::HashMap;
+        let h = hlist![
+            ("one", 1),
+            ("two", 2),
+            ("three", 3),
+            ("four", 4),
+            ("five", 5),
+        ];
+        let r = h.foldl(
+            |mut acc: HashMap<&'static str, isize>, (k, v)| {
+                acc.insert(k, v);
+                acc
+            },
+            HashMap::with_capacity(5),
+        );
+        let expected = {
+            let mut m = HashMap::with_capacity(5);
+            let vec = vec![
+                ("one", 1),
+                ("two", 2),
+                ("three", 3),
+                ("four", 4),
+                ("five", 5),
+            ];
+            for (k, v) in vec {
+                m.insert(k, v);
+            }
+            m
+        };
+        assert_eq!(r, expected);
+    }
+
+    #[test]
+    fn test_single_func_foldl_non_consuming() {
+        let h = hlist![1, 2, 3, 4, 5];
+        let r: isize = h.as_ref().foldl(|acc, &next| acc + next, 0isize);
+        assert_eq!(r, 15);
     }
 }
