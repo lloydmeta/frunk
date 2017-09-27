@@ -826,6 +826,17 @@ impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
     }
 }
 
+impl<'a, F, R, H, Acc> HFoldLeftable<F, Acc, Here> for &'a HCons<H, HNil>
+    where F: FnOnce(Acc, &'a H) -> R
+{
+    type Output = R;
+
+    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
+        let ref h = self.head;
+        folder(acc, h)
+    }
+}
+
 impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil>
     where F: FnOnce(Acc, &'a H) -> R
 {
@@ -855,6 +866,25 @@ where
 
     fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
         self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
+    }
+}
+
+impl<
+    F,
+    H,
+    Tail,
+    Acc,
+    Index,
+> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<F, Acc, Index>,
+    F: Fn(Acc, H) -> Acc,
+{
+    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
+        let acc = folder(acc, self.head);
+        self.tail.foldl(folder, acc)
     }
 }
 
