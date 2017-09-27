@@ -1199,9 +1199,21 @@ mod tests {
 
     #[test]
     fn test_single_func_foldl_consuming() {
-        let h = hlist![1, 2, 3, 4, 5];
-        let r: isize = h.foldl(|acc, next| acc + next, 0);
-        assert_eq!(r, 15);
+        use std::collections::HashMap;
+        let h = hlist![("one", 1), ("two", 2), ("three", 3), ("four", 4), ("five", 5)];
+        let r = h.foldl(|mut acc: HashMap<&'static str, isize>, (k, v)| {
+            acc.insert(k, v);
+            acc
+        }, HashMap::with_capacity(5));
+        let expected = {
+            let mut m = HashMap::with_capacity(5);
+            let vec = vec![("one", 1), ("two", 2), ("three", 3), ("four", 4), ("five", 5)];
+            for (k, v) in vec {
+                m.insert(k, v);
+            }
+            m
+        };
+        assert_eq!(r, expected);
     }
 
     #[test]
