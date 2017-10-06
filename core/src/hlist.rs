@@ -1416,7 +1416,7 @@ mod tests {
     }
 
     #[test]
-    fn test_partial() {
+    fn test_lift() {
         type H = Hlist![(), usize, f64, (), bool];
 
         // Ensure type inference works as expected first:
