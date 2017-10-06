@@ -61,6 +61,7 @@
 pub mod hlist;
 pub mod generic;
 pub mod labelled;
+mod tuples;
 
 #[cfg(feature = "with_serde")]
 #[macro_use]
