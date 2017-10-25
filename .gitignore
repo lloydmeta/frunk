@@ -5,3 +5,7 @@ Cargo.lock
 *.iml
 benches-control
 benches-variable
+
+# VSCode:
+
+.vscode/

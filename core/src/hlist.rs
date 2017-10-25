@@ -358,7 +358,7 @@ where
 ///
 /// Users should normally allow type inference to create this type
 #[allow(dead_code)]
-pub enum Here {}
+pub struct Here;
 
 /// Used as an index into an `HList`.
 ///
@@ -1082,6 +1082,82 @@ impl<T> Into<Vec<T>> for HNil {
     }
 }
 
+impl Default for HNil {
+    fn default() -> Self { HNil }
+}
+
+impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
+    fn default() -> Self {
+        h_cons(T::default(), Tail::default())
+    }
+}
+
+/// Indexed type conversions of `T -> Self` with index `I`.
+/// This is a generalized version of `From` which for example allows the caller
+/// to use default values for parts of `Self` and thus "fill in the blanks".
+///
+/// `LiftFrom` is the reciprocal of `LiftInto`.
+pub trait LiftFrom<T, I> {
+    /// Performs the indexed conversion.
+    fn lift_from(part: T) -> Self;
+}
+
+/// Free function version of `LiftFrom::lift_from`.
+pub fn lift_from<I, T, PF: LiftFrom<T, I>>(part: T) -> PF {
+    PF::lift_from(part)
+}
+
+/// An indexed conversion that consumes `self`, and produces a `T`. To produce
+/// `T`, the index `I` may be used to for example "fill in the blanks".
+/// `LiftInto` is the reciprocal of `LiftFrom`.
+pub trait LiftInto<T, I> {
+    /// Performs the indexed conversion.
+    fn lift_into(self) -> T;
+}
+
+impl<T, U, I> LiftInto<U, I> for T
+where
+    U: LiftFrom<T, I>
+{
+    fn lift_into(self) -> U {
+        LiftFrom::lift_from(self)
+    }
+}
+
+impl<T, Tail> LiftFrom<T, Here> for HCons<T, Tail>
+where
+    Tail: Default + HList
+{
+    fn lift_from(part: T) -> Self {
+        h_cons(part.into(), Tail::default())
+    }
+}
+
+impl<Head, Tail, ValAtIx, TailIx> LiftFrom<ValAtIx, There<TailIx>>
+for HCons<Head, Tail>
+where
+    Head: Default,
+    Tail: HList + LiftFrom<ValAtIx, TailIx>,
+{
+    fn lift_from(part: ValAtIx) -> Self {
+        h_cons(Head::default(), Tail::lift_from(part))
+    }
+}
+
+/// An index denoting that `Suffix` is just that.
+struct Suffixed<Suffix>(PhantomData<Suffix>);
+
+impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>>
+for <Prefix as Add<Suffix>>::Output
+where
+    Prefix: HList + Add<Suffix>,
+    Suffix: Default,
+{
+    fn lift_from(part: Prefix) -> Self {
+        part + Suffix::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1337,5 +1413,33 @@ mod tests {
         let h = hlist![1, 2, 3, 4, 5];
         let as_vec: Vec<_> = h.into();
         assert_eq!(as_vec, vec![1, 2, 3, 4, 5])
+    }
+
+    #[test]
+    fn test_lift() {
+        type H = Hlist![(), usize, f64, (), bool];
+
+        // Ensure type inference works as expected first:
+        let x: H = 1337.lift_into();
+        assert_eq!(x, hlist![(), 1337, 0.0, (), false]);
+
+        let x = H::lift_from(42.0);
+        assert_eq!(x, hlist![(), 0, 42.0, (), false]);
+
+        let x: H = lift_from(true);
+        assert_eq!(x, hlist![(), 0, 0.0, (), true]);
+
+        // Sublists:
+        let x: H = hlist![(), true].lift_into();
+        assert_eq!(x, hlist![(), 0, 0.0, (), true]);
+
+        let x: H = hlist![3.0, ()].lift_into();
+        assert_eq!(x, hlist![(), 0, 3.0, (), false]);
+
+        let x: H = hlist![(), 1337].lift_into();
+        assert_eq!(x, hlist![(), 1337, 0.0, (), false]);
+
+        let x: H = hlist![(), 1337, 42.0, (), true].lift_into();
+        assert_eq!(x, hlist![(), 1337, 42.0, (), true]);
     }
 }
