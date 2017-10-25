@@ -1099,6 +1099,18 @@ impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
 /// to use default values for parts of `Self` and thus "fill in the blanks".
 ///
 /// `LiftFrom` is the reciprocal of `LiftInto`.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// type H = Hlist![(), usize, f64, (), bool];
+///
+/// let x = H::lift_from(42.0);
+/// assert_eq!(x, hlist![(), 0, 42.0, (), false]);
+///
+/// let x: H = lift_from(true);
+/// assert_eq!(x, hlist![(), 0, 0.0, (), true]);
+/// # }
+/// ```
 pub trait LiftFrom<T, I> {
     /// Performs the indexed conversion.
     fn lift_from(part: T) -> Self;
@@ -1112,6 +1124,29 @@ pub fn lift_from<I, T, PF: LiftFrom<T, I>>(part: T) -> PF {
 /// An indexed conversion that consumes `self`, and produces a `T`. To produce
 /// `T`, the index `I` may be used to for example "fill in the blanks".
 /// `LiftInto` is the reciprocal of `LiftFrom`.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// type H = Hlist![(), usize, f64, (), bool];
+///
+/// // Type inference works as expected:
+/// let x: H = 1337.lift_into();
+/// assert_eq!(x, hlist![(), 1337, 0.0, (), false]);
+///
+/// // Sublists:
+/// let x: H = hlist![(), true].lift_into();
+/// assert_eq!(x, hlist![(), 0, 0.0, (), true]);
+///
+/// let x: H = hlist![3.0, ()].lift_into();
+/// assert_eq!(x, hlist![(), 0, 3.0, (), false]);
+///
+/// let x: H = hlist![(), 1337].lift_into();
+/// assert_eq!(x, hlist![(), 1337, 0.0, (), false]);
+///
+/// let x: H = hlist![(), 1337, 42.0, (), true].lift_into();
+/// assert_eq!(x, hlist![(), 1337, 42.0, (), true]);
+/// # }
+/// ```
 pub trait LiftInto<T, I> {
     /// Performs the indexed conversion.
     fn lift_into(self) -> T;
@@ -1147,7 +1182,7 @@ where
 }
 
 /// An index denoting that `Suffix` is just that.
-struct Suffixed<Suffix>(PhantomData<Suffix>);
+pub struct Suffixed<Suffix>(PhantomData<Suffix>);
 
 impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>>
 for <Prefix as Add<Suffix>>::Output
