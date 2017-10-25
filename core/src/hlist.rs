@@ -358,7 +358,7 @@ where
 ///
 /// Users should normally allow type inference to create this type
 #[allow(dead_code)]
-pub struct Here;
+pub enum Here {}
 
 /// Used as an index into an `HList`.
 ///
@@ -1083,7 +1083,9 @@ impl<T> Into<Vec<T>> for HNil {
 }
 
 impl Default for HNil {
-    fn default() -> Self { HNil }
+    fn default() -> Self {
+        HNil
+    }
 }
 
 impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
@@ -1117,7 +1119,7 @@ pub trait LiftInto<T, I> {
 
 impl<T, U, I> LiftInto<U, I> for T
 where
-    U: LiftFrom<T, I>
+    U: LiftFrom<T, I>,
 {
     fn lift_into(self) -> U {
         LiftFrom::lift_from(self)
@@ -1126,7 +1128,7 @@ where
 
 impl<T, Tail> LiftFrom<T, Here> for HCons<T, Tail>
 where
-    Tail: Default + HList
+    Tail: Default + HList,
 {
     fn lift_from(part: T) -> Self {
         h_cons(part.into(), Tail::default())

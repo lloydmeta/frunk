@@ -80,8 +80,12 @@ macro_rules! tup_iso {
 
 impl Generic for () {
     type Repr = Hlist![];
-    fn into(self) -> Self::Repr { hlist![] }
-    fn from(_: Self::Repr) -> Self { () }
+    fn into(self) -> Self::Repr {
+        hlist![]
+    }
+    fn from(_: Self::Repr) -> Self {
+        ()
+    }
 }
 
 impl From<()> for Hlist![] {
