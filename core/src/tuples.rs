@@ -7,6 +7,10 @@
 //! let h = hlist![ 42f32, true, "hello" ];
 //! let t: (f32, bool, &str) = h.into();
 //! assert_eq!(t, (42f32, true, "hello"));
+//!
+//! let t2 = (999, false, "world");
+//! let h2: Hlist![ isize, bool, &str ] = t2.into();
+//! assert_eq!(h2, hlist![ 999, false, "world" ]);
 //! # }
 //! ```
 
