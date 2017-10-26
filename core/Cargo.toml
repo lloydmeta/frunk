@@ -20,4 +20,4 @@ with-serde = ["serde", "serde_derive"]
 
 [dev-dependencies.frunk_derives]
 path = "../derives"
-version = "0.0.21"
+version = "0.0.22"
