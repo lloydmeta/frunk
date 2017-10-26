@@ -61,6 +61,15 @@ let h = hlist![1];
 // HLists have a head and tail
 assert_eq!(hlist![1].head, 1);
 assert_eq!(hlist![1].tail, HNil);
+
+// You can convert a tuple to an HList and vice-versa
+let h2 = hlist![ 42f32, true, "hello" ];
+let t: (f32, bool, &str) = h2.into();
+assert_eq!(t, (42f32, true, "hello"));
+
+let t3 = (999, false, "world");
+let h3: Hlist![ isize, bool, &str ] = t3.into();
+assert_eq!(h3, hlist![ 999, false, "world" ]);
 ```
 
 HLists have a `hlist_pat!` macro for pattern matching;
