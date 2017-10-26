@@ -1,6 +1,14 @@
 //! This module is held separate to put generated variadic generics for tuples
 //! at the end of the documentation so as to not disturb the reader when reading
 //! documentation.
+//!
+//! ```
+//! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+//! let h = hlist![ 42f32, true, "hello" ];
+//! let t: (f32, bool, &str) = h.into();
+//! assert_eq!(t, (42f32, true, "hello"));
+//! # }
+//! ```
 
 use generic::Generic;
 
