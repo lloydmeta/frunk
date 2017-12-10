@@ -292,9 +292,9 @@ want a sum type to do this, but there is a light-weight way of doing it through 
 use frunk::coproduct::*;
 
 // Declare the types we want in our Coproduct
-type I32Bool = Coprod!(i32, f32, bool);
+type I32F32Bool = Coprod!(i32, f32, bool);
 
-let co1 = I32Bool::inject(3);
+let co1 = I32F32Bool::inject(3);
 let get_from_1a: Option<&i32> = co1.get();
 let get_from_1b: Option<&bool> = co1.get();
 
@@ -306,7 +306,7 @@ assert_eq!(get_from_1b, None);
 let nope_get_from_1b: Option<&i8> = co1.get(); // <-- will fail
 // It's also impossible to inject something into a coproduct that is of the wrong type
 // (not contained in the coproduct type)
-let nope_co = I32Bool::inject(42f32); // <-- will fail
+let nope_co = I32F32Bool::inject(42f64); // <-- will fail
 
 // We can fold our Coproduct into a single value by handling all types in it
 assert_eq!(
