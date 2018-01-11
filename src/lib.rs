@@ -26,7 +26,7 @@
 //!
 //! // Combining Monoids
 //! let v = vec![Some(1), Some(3)];
-//! assert_eq!(combine_all(&v), Some(4));
+//! assert_eq!(combine_all(v), Some(4));
 //!
 //! // HLists
 //! let h = hlist![1, "hi"];
@@ -35,10 +35,10 @@
 //! assert_eq!(a, 1);
 //! assert_eq!(b, "hi");
 //!
-//! let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
-//! let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
-//! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_owned()];
-//! assert_eq!(h1.combine(&h2), h3);
+//! let h1 = hlist![Some(1), 3.3, 53i64, "hello"];
+//! let h2 = hlist![Some(2), 1.2, 1i64, " world"];
+//! let h3 = hlist![Some(3), 4.5, 54, "hello world".to_string()];
+//! assert_eq!(h1.combine(h2), h3);
 //!
 //! // Generic and LabelledGeneric-based programming
 //! // Allows Structs to play well easily with HLists
@@ -109,6 +109,9 @@ extern crate frunk_core;
 #[allow(unused_imports)]
 #[macro_use]
 extern crate frunk_derives;
+
+#[macro_use]
+mod internal_macros;
 
 pub mod semigroup;
 pub mod monoid;

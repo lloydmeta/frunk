@@ -11,16 +11,16 @@ The general idea is to make things easier by providing FP tools in Rust to allow
 use frunk::monoid::*;
 
 let v = vec![Some(1), Some(3)];
-assert_eq!(combine_all(&v), Some(4));
+assert_eq!(combine_all(v), Some(4));
 
 // Slightly more magical
-let t1 =       (1, 2.5f32,                String::from("hi"),  Some(3));
-let t2 =       (1, 2.5f32,            String::from(" world"),     None);
-let t3 =       (1, 2.5f32,         String::from(", goodbye"), Some(10));
+let t1 =       (1, 2.5f32,                "hi",   Some(3));
+let t2 =       (1, 2.5f32,            " world",      None);
+let t3 =       (1, 2.5f32,         ", goodbye",  Some(10));
 let tuples = vec![t1, t2, t3];
 
-let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
-assert_eq!(combine_all(&tuples), expected);
+let expected = (3, 7.5f32, "hi world, goodbye".to_string(), Some(13));
+assert_eq!(combine_all(tuples), expected);
 ```
 
 For a deep dive, RustDocs are available for:
@@ -402,10 +402,10 @@ Things that can be combined.
 ```rust
 use frunk::semigroup::*;
 
-assert_eq!(Some(1).combine(&Some(2)), Some(3));
+assert_eq!(Some(1).combine(Some(2)), Some(3));
 
-assert_eq!(All(3).combine(&All(5)), All(1)); // bit-wise &&
-assert_eq!(All(true).combine(&All(false)), All(false));
+assert_eq!(All(3).combine(All(5)), All(1)); // bit-wise &&
+assert_eq!(All(true).combine(All(false)), All(false));
 ```
 
 ### Monoid
@@ -415,16 +415,16 @@ Things that can be combined *and* have an empty/id value.
 ```rust
 use frunk::monoid::*;
 
-let t1 = (1, 2.5f32, String::from("hi"), Some(3));
-let t2 = (1, 2.5f32, String::from(" world"), None);
-let t3 = (1, 2.5f32, String::from(", goodbye"), Some(10));
+let t1 = (1, 2.5f32, "hi", Some(3));
+let t2 = (1, 2.5f32, " world", None);
+let t3 = (1, 2.5f32, ", goodbye", Some(10));
 let tuples = vec![t1, t2, t3];
 
 let expected = (3, 7.5f32, String::from("hi world, goodbye"), Some(13));
-assert_eq!(combine_all(&tuples), expected)
+assert_eq!(combine_all(tuples), expected)
 
 let product_nums = vec![Product(2), Product(3), Product(4)];
-assert_eq!(combine_all(&product_nums), Product(24))
+assert_eq!(combine_all(product_nums), Product(24))
 ```
 
 ## Todo

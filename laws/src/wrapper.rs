@@ -44,8 +44,8 @@ impl<A: Arbitrary> Arbitrary for Wrapper<Product<A>> {
 }
 
 impl<A: Semigroup> Semigroup for Wrapper<A> {
-    fn combine(&self, other: &Self) -> Self {
-        Wrapper(self.0.combine(&other.0))
+    fn combine(self, other: Self) -> Self {
+        Wrapper(self.0.combine(other.0))
     }
 }
 

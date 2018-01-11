@@ -50,6 +50,7 @@ use std::ops::Add;
 /// A Validated is either an Ok holding an HList or an Err, holding a vector
 /// of collected errors.
 #[derive(PartialEq, Debug, Eq, Clone, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
 pub enum Validated<T, E>
 where
     T: HList,

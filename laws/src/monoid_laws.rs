@@ -13,8 +13,8 @@
 //! # use frunk::semigroup::*;
 //! # fn main() {
 //! use frunk_laws::monoid_laws::*;
-//! quickcheck(left_identity as fn(String) -> bool);
-//! quickcheck(right_identity as fn(String) -> bool);
+//! quickcheck(left_identity::<String, String, String> as fn(String) -> bool);
+//! quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
 //! # }
 //! ```
 use frunk::monoid::*;
@@ -33,11 +33,16 @@ use frunk::monoid::*;
 /// # use frunk::semigroup::*;
 /// # fn main() {
 /// use frunk_laws::monoid_laws::*;
-/// quickcheck(left_identity as fn(String) -> bool);
+/// quickcheck(left_identity::<String, String, String> as fn(String) -> bool);
 /// # }
 /// ```
-pub fn left_identity<A: Monoid + Eq>(a: A) -> bool {
-    <A as Monoid>::empty().combine(&a) == a
+pub fn left_identity<A, Out, RHS>(a: A) -> bool
+where
+    A: Monoid<Out, RHS> + Clone,
+    Out: Monoid<Out, RHS> + From<A> + Eq,
+    RHS: From<A>,
+{
+    <A as Monoid<Out, RHS>>::empty().combine(RHS::from(a.clone())) == Out::from(a)
 }
 
 /// Right identity law
@@ -53,11 +58,18 @@ pub fn left_identity<A: Monoid + Eq>(a: A) -> bool {
 /// # use frunk::semigroup::*;
 /// # fn main() {
 /// use frunk_laws::monoid_laws::*;
-/// quickcheck(right_identity as fn(String) -> bool);
+/// quickcheck(right_identity::<String, String, String> as fn(String) -> bool);
 /// # }
 /// ```
-pub fn right_identity<A: Monoid + Eq>(a: A) -> bool {
-    a.combine(&<A as Monoid>::empty()) == a
+pub fn right_identity<A, Out, RHS>(a: A) -> bool
+where
+    A: Monoid<Out, RHS> + Clone,
+    Out: Monoid<Out, RHS> + From<A> + Eq,
+    RHS: From<Out>,
+{
+    a.clone().combine(
+        RHS::from(<A as Monoid<Out, RHS>>::empty()),
+    ) == Out::from(a)
 }
 
 
@@ -72,14 +84,24 @@ mod tests {
 
     #[test]
     fn string_id_prop() {
-        quickcheck(left_identity as fn(String) -> bool);
-        quickcheck(right_identity as fn(String) -> bool);
+        quickcheck(
+            left_identity::<String, String, String> as fn(String) -> bool,
+        );
+        quickcheck(
+            right_identity::<String, String, String> as fn(String) -> bool,
+        );
     }
 
     #[test]
     fn option_id_prop() {
-        quickcheck(left_identity as fn(Option<String>) -> bool);
-        quickcheck(right_identity as fn(Option<String>) -> bool);
+        quickcheck(
+            left_identity::<Option<String>, Option<String>, Option<String>> as
+                fn(Option<String>) -> bool,
+        );
+        quickcheck(
+            right_identity::<Option<String>, Option<String>, Option<String>> as
+                fn(Option<String>) -> bool,
+        );
     }
 
     #[test]
@@ -118,8 +140,8 @@ mod tests {
         $(
             #[test]
             fn $id() {
-                quickcheck(left_identity as fn($tr) -> bool);
-                quickcheck(right_identity as fn($tr) -> bool);
+                quickcheck(left_identity::<$tr, $tr, $tr> as fn($tr) -> bool);
+                quickcheck(right_identity::<$tr, $tr, $tr> as fn($tr) -> bool);
             }
         )*
       }
