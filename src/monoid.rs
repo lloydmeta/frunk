@@ -21,7 +21,7 @@
 //! h2.insert(1, String::from(" World"));
 //! h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
 //! let mut h3: HashMap<i32, String> = HashMap::new();
-//! h3.insert(3, String::from("Cruel World"));
+//! h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
 //! let vec_of_hashes = vec![h1, h2, h3];
 //!
 //! let mut h_expected: HashMap<i32, String> = HashMap::new();
