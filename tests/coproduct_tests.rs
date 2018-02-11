@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate frunk;
-#[macro_use]
-extern crate frunk_core; // for hlist macro
+
 use frunk::coproduct::*;
 
 #[test]
