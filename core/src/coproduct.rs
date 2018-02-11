@@ -3,7 +3,9 @@
 //! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
-//! # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+//! # #[macro_use] extern crate frunk_core;
+//! # use frunk_core::coproduct::*;
+//! # fn main() {
 //! // For simplicity, assign our Coproduct type to a type alias
 //! // This is purely optional.
 //! type I32Bool = Coprod!(i32, bool);
@@ -31,10 +33,10 @@
 //! Or, if you want to "fold" over all possible values of a coproduct
 //!
 //! ```
-//! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
-//! # use frunk::hlist::*;
-//! # use frunk::coproduct::*; fn main() {
+//! # use frunk_core::hlist::*;
+//! # use frunk_core::coproduct::*;
+//! # fn main() {
 //! # type I32Bool = Coprod!(i32, bool);
 //! # let co1 = I32Bool::inject(3);
 //! # let co2 = I32Bool::inject(true);
@@ -69,7 +71,9 @@ use hlist::*;
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -100,7 +104,9 @@ pub enum CNil {}
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 /// # }
@@ -133,7 +139,9 @@ macro_rules! Coprod {
 /// Trait for injecting something into a coproduct
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
 /// type I32Bool = Coprod!(i32, f32);
 /// let co1 = I32Bool::inject(42f32);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -170,7 +178,9 @@ impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct
 /// # Example
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
 /// type I32Bool = Coprod!(i32, f32);
 ///
 /// let co1 = I32Bool::inject(42f32);
@@ -216,7 +226,9 @@ where
 /// # Example
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; use frunk::coproduct::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
 /// type I32Bool = Coprod!(i32, f32);
 ///
 /// let co1 = I32Bool::inject(42f32);
@@ -263,9 +275,10 @@ where
 /// # Example
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
-/// # use frunk::coproduct::*;
-/// # use frunk::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
 /// type I32F32StrBool = Coprod!(i32, f32, bool);
 ///
 /// let co1 = I32F32StrBool::inject(3);
