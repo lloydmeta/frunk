@@ -1,6 +1,6 @@
 use quote::Tokens;
 use common::{build_hcons_constr, to_ast};
-use syn::{Ident, Data, Fields, Field, Type};
+use syn::{Ident, Data, Fields, Type};
 use proc_macro::TokenStream;
 
 /// Given an AST, returns an implementation of Generic using HList

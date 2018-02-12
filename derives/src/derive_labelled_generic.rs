@@ -1,6 +1,6 @@
 use quote::Tokens;
 use common::{build_hcons_constr, to_ast};
-use syn::{Ident, Data, Fields, FieldsNamed, Field, Type};
+use syn::{Ident, Data, Fields, FieldsNamed, Field};
 use proc_macro::TokenStream;
 
 /// These are assumed to exist as enums in frunk_core::labelled
