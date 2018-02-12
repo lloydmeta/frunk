@@ -1,6 +1,6 @@
 [package]
 name = "frunk_laws"
-version = "0.0.13"
+version = "0.0.12"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_laws contains laws for algebras declared in Frunk."
 license = "MIT"
