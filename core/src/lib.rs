@@ -59,6 +59,7 @@
 
 #[macro_use]
 pub mod hlist;
+pub mod coproduct;
 pub mod generic;
 pub mod labelled;
 mod tuples;
