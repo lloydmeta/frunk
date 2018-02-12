@@ -2,11 +2,11 @@
 name = "frunk_core"
 version = "0.0.22"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
-description = "Frunk core provides developers with HList and Generic"
+description = "Frunk core provides developers with HList, Coproduct, LabelledGeneric and Generic"
 license = "MIT"
 documentation = "https://docs.rs/frunk_core"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = ["Frunk", "HList", "Generic", "LabelledGeneric"]
+keywords = ["Frunk", "HList", "Generic", "Coproduct", "LabelledGeneric"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
