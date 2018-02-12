@@ -30,7 +30,7 @@
 //! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
 //! assert_eq!(combine_all(&vec_of_hashes), h_expected);
 //! ```
-use super::semigroup::{Semigroup, Product, All, Any};
+use super::semigroup::{All, Any, Product, Semigroup};
 use std::collections::*;
 use std::hash::Hash;
 
@@ -87,9 +87,10 @@ pub fn combine_all<T>(xs: &Vec<T>) -> T
 where
     T: Monoid + Semigroup + Clone,
 {
-    xs.iter().fold(<T as Monoid>::empty(), |acc, next| {
-        acc.combine(&next)
-    })
+    xs.iter()
+        .fold(<T as Monoid>::empty(), |acc, next| {
+            acc.combine(&next)
+        })
 }
 
 impl<T> Monoid for Option<T>
@@ -140,7 +141,6 @@ impl Monoid for All<bool> {
         All(true)
     }
 }
-
 
 impl Monoid for Any<bool> {
     fn empty() -> Self {
@@ -222,7 +222,6 @@ numeric_product_monoid_imps! {
     1f64; f64
 }
 
-
 macro_rules! tuple_impls {
     () => {}; // no more
 
@@ -278,7 +277,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::semigroup::{Product, All, Any};
+    use super::super::semigroup::{All, Any, Product};
 
     #[test]
     fn test_combine_n() {

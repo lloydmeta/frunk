@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate test;
 extern crate frunk;
+extern crate test;
 
 use frunk::monoid::*;
 use test::Bencher;

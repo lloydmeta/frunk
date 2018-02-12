@@ -14,8 +14,7 @@ use self::time::*;
 
 #[test]
 fn test_struct_from_labelled_generic() {
-    let h =
-        hlist![
+    let h = hlist![
         field!((f, i, r, s, t, __, n, a, m, e), "Humpty"),
         field!((l, a, s, t, __, n, a, m, e), "Drumpty"),
         field!((a, g, e), 3),
@@ -111,9 +110,10 @@ type CreatedAt = (c, r, e, a, t, e, d, __, a, t);
 /// O stands for Output
 /// Indices is for the indices used for sculpting I with created_at Field into O's generic representation
 fn to_audited<I, O, Indices>(o: I) -> O
-    where I: LabelledGeneric,
-          O: LabelledGeneric,
-          HCons<Field<CreatedAt, Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>
+where
+    I: LabelledGeneric,
+    O: LabelledGeneric,
+    HCons<Field<CreatedAt, Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>,
 {
     // Add created_at field to LabelledGeneric repr of I
     let i_with_time = HCons {

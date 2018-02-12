@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate test;
 extern crate frunk;
+extern crate test;
 
 use frunk::semigroup::*;
 use test::Bencher;
@@ -35,8 +35,6 @@ fn std_add_option_string(b: &mut Bencher) {
         // cloning is required otherwise we get `cannot move out of captured outer variable in an `FnMut` closure` errors
         let a = x.clone();
         let b = y.clone();
-        a.and_then(|first| {
-            b.map(|second| first + &second )
-        })
+        a.and_then(|first| b.map(|second| first + &second))
     })
 }

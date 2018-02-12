@@ -60,8 +60,6 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     }
 }
 
-
-
 fn build_repr(field_types: &Vec<Type>) -> Tokens {
     match field_types.len() {
         0 => quote! { ::frunk_core::hlist::HNil },

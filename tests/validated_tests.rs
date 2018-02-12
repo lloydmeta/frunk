@@ -7,7 +7,6 @@ use frunk::validated::*;
 mod common;
 use common::*;
 
-
 // Working with Validated
 
 #[derive(PartialEq, Eq, Debug)]
