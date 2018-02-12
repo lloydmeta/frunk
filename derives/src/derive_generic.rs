@@ -1,24 +1,25 @@
 use quote::Tokens;
 use common::{build_hcons_constr, to_ast};
-use syn::{Ident, Body, VariantData, Field, Ty};
+use syn::{Ident, Data, Fields, Field, Type};
 use proc_macro::TokenStream;
 
 /// Given an AST, returns an implementation of Generic using HList
 ///
 /// Only works with Structs and Tuple Structs
 pub fn impl_generic(input: TokenStream) -> Tokens {
-    let ast = to_ast(&input);
+    let ast = to_ast(input);
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let fields: &Vec<Field> = match ast.body {
-        Body::Struct(VariantData::Struct(ref fields)) => fields,
-        Body::Struct(VariantData::Tuple(ref fields)) => fields,
+    let fields: &Fields = match ast.data {
+        Data::Struct(ref data) => &data.fields,
         _ => panic!("Only structs are supported")
     };
-    let field_types: Vec<Ty> = fields.iter()
+    let field_types: Vec<Type> = fields.iter()
         .map(|f| f.ty.clone()).collect();
     let repr_type = build_repr(&field_types);
+
+
     let maybe_fnames: Vec<Option<Ident>> = fields
         .iter()
         .map(|f| f.ident.clone())
@@ -28,7 +29,7 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     let fnames: Vec<Ident> = fields
         .iter()
         .enumerate()
-        .map(|(i, f)| f.ident.clone().unwrap_or(Ident::new(format!("_{}", i))))
+        .map(|(i, f)| f.ident.clone().unwrap_or(format!("_{}", i).into()))
         .collect();
     let hcons_constr = build_hcons_constr(&fnames);
     let hcons_pat = build_hcons_constr(&fnames);
@@ -59,7 +60,9 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     }
 }
 
-fn build_repr(field_types: &Vec<Ty>) -> Tokens {
+
+
+fn build_repr(field_types: &Vec<Type>) -> Tokens {
     match field_types.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {

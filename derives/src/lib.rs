@@ -31,7 +31,7 @@ pub fn generic(input: TokenStream) -> TokenStream {
     let gen = impl_generic(input);
     //    println!("{}", gen);
     // Return the generated impl
-    gen.parse().unwrap()
+    gen.into()
 }
 
 /// Derives a Generic instance based on Field + HList for
@@ -47,5 +47,5 @@ pub fn labelled_generic(input: TokenStream) -> TokenStream {
     let gen = impl_labelled_generic(input);
     //    println!("{}", gen);
     // Return the generated impl
-    gen.parse().unwrap()
+    gen.into()
 }

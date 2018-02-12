@@ -1,6 +1,6 @@
 use quote::Tokens;
 use common::{build_hcons_constr, to_ast};
-use syn::{Ident, Body, VariantData, Field};
+use syn::{Ident, Data, Fields, FieldsNamed, Field, Type};
 use proc_macro::TokenStream;
 
 /// These are assumed to exist as enums in frunk_core::labelled
@@ -14,15 +14,21 @@ const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '
 ///
 /// Only works with Structs and Tuple Structs
 pub fn impl_labelled_generic(input: TokenStream) -> Tokens {
-    let ast = to_ast(&input);
+    let ast = to_ast(input);
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let fields: &Vec<Field> = match ast.body {
-        Body::Struct(VariantData::Struct(ref fields)) => fields,
+    let fields_named: &FieldsNamed = match ast.data {
+        Data::Struct(ref data) => {
+            match data.fields {
+                Fields::Named(ref fields_named) => fields_named,
+                _ => panic!("Only Structs are supported. Tuple structs cannot be turned into Labelled Generics.")
+            }
+        },
         _ => panic!("Only Structs are supported. Tuple structs cannot be turned into Labelled Generics.")
     };
-    let repr_type = build_labelled_repr(fields);
+    let fields: Vec<Field> = fields_named.named.iter().map(|f| f.clone()).collect();
+    let repr_type = build_labelled_repr(&fields);
 
     let fnames: Vec<Ident> = fields
         .iter()
@@ -104,9 +110,9 @@ fn build_type_level_name_for(ident: &Ident) -> Tokens {
 /// This method assumes that _uc and uc_ are in frunk_core::labelled as enums
 fn encode_as_ident(c: &char) -> Vec<Ident> {
     if ALPHA_CHARS.contains(c) {
-        vec![Ident::new(c.to_string())]
+        vec![c.to_string().into()]
     } else if UNDERSCORE_CHARS.contains(c) {
-        vec![Ident::new(format!("_{}", c))]
+        vec![format!("_{}", c).into()]
     } else {
         // UTF escape and get the hexcode
         let as_unicode = c.escape_unicode();
@@ -116,9 +122,9 @@ fn encode_as_ident(c: &char) -> Vec<Ident> {
         let delimited_hex = as_unicode.filter(|c| c.is_alphanumeric());
         let mut hex_idents: Vec<Ident> = delimited_hex.flat_map(|c| encode_as_ident(&c)).collect();
         // sandwich between _uc and uc_
-        let mut book_ended: Vec<Ident> = vec![Ident::new("_uc")];
+        let mut book_ended: Vec<Ident> = vec!["_uc".into()];
         book_ended.append(&mut hex_idents);
-        book_ended.push(Ident::new("uc_"));
+        book_ended.push("uc_".into());
         book_ended
     }
 }
