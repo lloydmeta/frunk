@@ -111,7 +111,6 @@ extern crate frunk_core;
 #[macro_use]
 extern crate frunk_derives;
 
-pub mod aunion;
 pub mod semigroup;
 pub mod monoid;
 pub mod validated;

@@ -161,7 +161,8 @@ impl<I, Tail> CoprodInjector<I, Here> for Coproduct<I, Tail> {
 }
 
 impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct<Head, Tail>
-    where Tail: CoprodInjector<I, TailIndex>
+where
+    Tail: CoprodInjector<I, TailIndex>,
 {
     fn inject(to_insert: I) -> Self {
         let tail_inserted = <Tail as CoprodInjector<I, TailIndex>>::inject(to_insert);
@@ -297,8 +298,9 @@ pub trait CoproductFoldable<Folder, Output> {
 }
 
 impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
-    where F: FnOnce(CH) -> R,
-          CTail: CoproductFoldable<FTail, R>
+where
+    F: FnOnce(CH) -> R,
+    CTail: CoproductFoldable<FTail, R>,
 {
     fn fold(self, f: HCons<F, FTail>) -> R {
         use self::Coproduct::*;
@@ -312,8 +314,9 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
 }
 
 impl<'a, F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for &'a Coproduct<CH, CTail>
-    where F: FnOnce(&'a CH) -> R,
-          &'a CTail: CoproductFoldable<FTail, R>
+where
+    F: FnOnce(&'a CH) -> R,
+    &'a CTail: CoproductFoldable<FTail, R>,
 {
     fn fold(self, f: HCons<F, FTail>) -> R {
         use self::Coproduct::*;
@@ -345,6 +348,33 @@ impl<'a, F, R> CoproductFoldable<F, R> for &'a CNil {
 impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
     fn as_ref(&self) -> &Coproduct<CH, CTail> {
         self
+    }
+}
+
+/// A trait for anonymous unions.
+pub trait CoProdUninjector<T, U, Idx>: CoprodInjector<T, Idx> {
+    /// Attempts to get a value from the union.
+    fn uninject(self) -> Result<T, U>;
+}
+
+impl<Hd, Tl> CoProdUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
+    fn uninject(self) -> Result<Hd, Tl> {
+        match self {
+            Coproduct::Inl(h) => Ok(h),
+            Coproduct::Inr(t) => Err(t),
+        }
+    }
+}
+
+impl<Hd, Tl, T, U, N> CoProdUninjector<T, Coproduct<Hd, U>, There<N>> for Coproduct<Hd, Tl>
+where
+    Tl: CoProdUninjector<T, U, N>,
+{
+    fn uninject(self) -> Result<T, Coproduct<Hd, U>> {
+        match self {
+            Coproduct::Inl(h) => Err(Coproduct::Inl(h)),
+            Coproduct::Inr(t) => t.uninject().map_err(Coproduct::Inr),
+        }
     }
 }
 
