@@ -162,12 +162,10 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E> {
         match self {
             Result::Err(e) => Validated::Err(vec![e]),
-            Result::Ok(v) => {
-                Validated::Ok(HCons {
-                    head: v,
-                    tail: HNil,
-                })
-            }
+            Result::Ok(v) => Validated::Ok(HCons {
+                head: v,
+                tail: HNil,
+            }),
         }
     }
 }
@@ -318,8 +316,8 @@ mod tests {
 
     #[test]
     fn test_to_result_ok() {
-        let v = get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) +
-            get_email(YahNah::Yah);
+        let v =
+            get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) + get_email(YahNah::Yah);
         let person = v.into_result().map(|hlist_pat!(name, age, email)| {
             Person {
                 name: name,
@@ -340,8 +338,8 @@ mod tests {
 
     #[test]
     fn test_to_result_all_faulty() {
-        let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) +
-            get_email(YahNah::Nah);
+        let v =
+            get_name(YahNah::Nah).into_validated() + get_age(YahNah::Nah) + get_email(YahNah::Nah);
         let person = v.into_result().map(|_| unimplemented!());
 
         assert_eq!(
@@ -352,8 +350,8 @@ mod tests {
 
     #[test]
     fn test_to_result_one_faulty() {
-        let v = get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) +
-            get_email(YahNah::Nah);
+        let v =
+            get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) + get_email(YahNah::Nah);
         let person = v.into_result().map(|_| unimplemented!());
 
         assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);

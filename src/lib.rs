@@ -10,6 +10,7 @@
 //!   4. Validated (accumulator for Result)
 //!   5. Semigroup
 //!   6. Monoid
+//!   7. AUnions (anonymous and extensible unions)
 //!
 //! Here is a small taste of what Frunk has to offer:
 //!
@@ -110,6 +111,7 @@ extern crate frunk_core;
 #[macro_use]
 extern crate frunk_derives;
 
+pub mod aunion;
 pub mod semigroup;
 pub mod monoid;
 pub mod validated;
