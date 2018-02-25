@@ -1,6 +1,6 @@
 [package]
 name = "frunk_core"
-version = "0.0.22"
+version = "0.0.23"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList, Coproduct, LabelledGeneric and Generic"
 license = "MIT"
