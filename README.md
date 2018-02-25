@@ -208,12 +208,12 @@ struct DomainPerson<'a> {
     age: usize,
 }
 
-let a_person = ApiPersion {
-                   first_name: "Joe",
-                   last_name: "Blow",
-                   age: 30,
+let a_person = ApiPerson {
+                   FirstName: "Joe",
+                   LastName: "Blow",
+                   Age: 30,
 };
-let d_person: DomainPersion = convert_from(a_person); // done
+let d_person: DomainPerson = convert_from(a_person); // done
 ```
 
 #### LabelledGeneric

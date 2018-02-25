@@ -29,9 +29,9 @@
 
 use std::cell::*;
 use std::hash::Hash;
-use std::ops::{Deref, BitAnd, BitOr};
+use std::ops::{BitAnd, BitOr, Deref};
 use std::cmp::Ordering;
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::Entry;
 use frunk_core::hlist::*;
 
@@ -72,9 +72,9 @@ pub trait Semigroup {
 /// if all of the sub-element types are also Semiups
 impl<H: Semigroup, T: HList + Semigroup> Semigroup for HCons<H, T> {
     fn combine(&self, other: &Self) -> Self {
-        self.tail.combine(&other.tail).prepend(
-            self.head.combine(&other.head),
-        )
+        self.tail
+            .combine(&other.tail)
+            .prepend(self.head.combine(&other.head))
     }
 }
 
@@ -164,12 +164,10 @@ where
 {
     fn combine(&self, other: &Self) -> Self {
         match *self {
-            Some(ref v) => {
-                match *other {
-                    Some(ref v_other) => Some(v.combine(v_other)),
-                    _ => self.clone(),
-                }
-            }
+            Some(ref v) => match *other {
+                Some(ref v_other) => Some(v.combine(v_other)),
+                _ => self.clone(),
+            },
             _ => other.clone(),
         }
     }
