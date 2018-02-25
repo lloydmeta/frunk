@@ -39,6 +39,7 @@ For a deep dive, RustDocs are available for:
 7. [Todo](#todo)
 8. [Contributing](#contributing)
 9. [Inspirations](#inspirations)
+10. [Maintainers](#maintainers)
 
 ## Examples
 
@@ -469,3 +470,10 @@ The following are considered important, in keeping with the spirit of Rust and f
 ## Inspirations
 
 Scalaz, Shapeless, Cats, Haskell, the usual suspects ;)
+
+## Maintainers
+
+A.k.a. people whom you can bug/tag/@ on Gitter :D
+
+1. [lloydmeta](https://github.com/lloydmeta)
+2. [Centrl](https://github.com/centril)
