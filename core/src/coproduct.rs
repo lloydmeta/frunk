@@ -433,11 +433,11 @@ mod tests {
 
     #[test]
     fn test_coproduct_fold_non_consuming() {
-        type I32StrBool = Coprod!(i32, f32, bool);
+        type I32F32Bool = Coprod!(i32, f32, bool);
 
-        let co1 = I32StrBool::inject(3);
-        let co2 = I32StrBool::inject(true);
-        let co3 = I32StrBool::inject(42f32);
+        let co1 = I32F32Bool::inject(3);
+        let co2 = I32F32Bool::inject(true);
+        let co3 = I32F32Bool::inject(42f32);
 
         assert_eq!(
             co1.as_ref().fold(hlist![
@@ -463,5 +463,35 @@ mod tests {
             ]),
             "float 42".to_string()
         );
+    }
+
+    #[test]
+    fn test_coproduct_uninject() {
+        type I32StrBool = Coprod!(i32, &'static str, bool);
+
+        let co1 = I32StrBool::inject(3);
+        let co2 = I32StrBool::inject("hello");
+        let co3 = I32StrBool::inject(false);
+
+        let uninject_i32_co1: Result<i32, _> = co1.uninject();
+        let uninject_str_co1: Result<&'static str, _> = co1.uninject();
+        let uninject_bool_co1: Result<bool, _> = co1.uninject();
+        assert_eq!(uninject_i32_co1, Ok(3));
+        assert!(uninject_str_co1.is_err());
+        assert!(uninject_bool_co1.is_err());
+
+        let uninject_i32_co2: Result<i32, _> = co2.uninject();
+        let uninject_str_co2: Result<&'static str, _> = co2.uninject();
+        let uninject_bool_co2: Result<bool, _> = co2.uninject();
+        assert!(uninject_i32_co2.is_err());
+        assert_eq!(uninject_str_co2, Ok("hello"));
+        assert!(uninject_bool_co2.is_err());
+
+        let uninject_i32_co3: Result<i32, _> = co3.uninject();
+        let uninject_str_co3: Result<&'static str, _> = co3.uninject();
+        let uninject_bool_co3: Result<bool, _> = co3.uninject();
+        assert!(uninject_i32_co2.is_err());
+        assert!(uninject_str_co3.is_err());
+        assert_eq!(uninject_bool_co3, Ok(false));
     }
 }
