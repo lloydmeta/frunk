@@ -27,6 +27,12 @@
 //! // *Taking* stuff (by value)
 //! let take_from_1a: Option<i32> = co1.take();
 //! assert_eq!(take_from_1a, Some(3));
+//!
+//! // Or with a Result
+//! let uninject_from_1a: Result<i32, _> = co1.uninject();
+//! let uninject_from_1b: Result<bool, _> = co1.uninject();
+//! assert_eq!(uninject_from_1a, Ok(3));
+//! assert!(uninject_from_1b.is_err());
 //! # }
 //! ```
 //!
@@ -142,8 +148,8 @@ macro_rules! Coprod {
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
-/// let co1 = I32Bool::inject(42f32);
+/// type I32F32 = Coprod!(i32, f32);
+/// let co1 = I32F32::inject(42f32);
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
 /// assert_eq!(get_from_1a, None);
@@ -161,7 +167,8 @@ impl<I, Tail> CoprodInjector<I, Here> for Coproduct<I, Tail> {
 }
 
 impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct<Head, Tail>
-    where Tail: CoprodInjector<I, TailIndex>
+where
+    Tail: CoprodInjector<I, TailIndex>,
 {
     fn inject(to_insert: I) -> Self {
         let tail_inserted = <Tail as CoprodInjector<I, TailIndex>>::inject(to_insert);
@@ -181,9 +188,9 @@ impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
+/// type I32F32 = Coprod!(i32, f32);
 ///
-/// let co1 = I32Bool::inject(42f32);
+/// let co1 = I32F32::inject(42f32);
 ///
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
@@ -229,9 +236,9 @@ where
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
+/// type I32F32 = Coprod!(i32, f32);
 ///
-/// let co1 = I32Bool::inject(42f32);
+/// let co1 = I32F32::inject(42f32);
 ///
 /// let get_from_1a: Option<i32> = co1.take();
 /// let get_from_1b: Option<f32> = co1.take();
@@ -297,8 +304,9 @@ pub trait CoproductFoldable<Folder, Output> {
 }
 
 impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
-    where F: FnOnce(CH) -> R,
-          CTail: CoproductFoldable<FTail, R>
+where
+    F: FnOnce(CH) -> R,
+    CTail: CoproductFoldable<FTail, R>,
 {
     fn fold(self, f: HCons<F, FTail>) -> R {
         use self::Coproduct::*;
@@ -312,8 +320,9 @@ impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct
 }
 
 impl<'a, F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for &'a Coproduct<CH, CTail>
-    where F: FnOnce(&'a CH) -> R,
-          &'a CTail: CoproductFoldable<FTail, R>
+where
+    F: FnOnce(&'a CH) -> R,
+    &'a CTail: CoproductFoldable<FTail, R>,
 {
     fn fold(self, f: HCons<F, FTail>) -> R {
         use self::Coproduct::*;
@@ -348,6 +357,48 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
     }
 }
 
+/// Trait for extracting a value from a coproduct in an exhaustive way.
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32F32 = Coprod!(i32, f32);
+/// let co1 = I32F32::inject(42f32);
+/// let get_from_1a: Result<i32, _> = co1.uninject();
+/// let get_from_1b: Result<f32, _> = co1.uninject();
+/// assert!(get_from_1a.is_err());
+/// assert_eq!(get_from_1b, Ok(42f32));
+/// # }
+/// ```
+pub trait CoprodUninjector<T, U, Idx>: CoprodInjector<T, Idx> {
+    /// Attempts to get a value from the union.
+    fn uninject(self) -> Result<T, U>;
+}
+
+impl<Hd, Tl> CoprodUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
+    fn uninject(self) -> Result<Hd, Tl> {
+        match self {
+            Coproduct::Inl(h) => Ok(h),
+            Coproduct::Inr(t) => Err(t),
+        }
+    }
+}
+
+impl<Hd, Tl, T, U, N> CoprodUninjector<T, Coproduct<Hd, U>, There<N>> for Coproduct<Hd, Tl>
+where
+    Tl: CoprodUninjector<T, U, N>,
+{
+    fn uninject(self) -> Result<T, Coproduct<Hd, U>> {
+        match self {
+            Coproduct::Inl(h) => Err(Coproduct::Inl(h)),
+            Coproduct::Inr(t) => t.uninject().map_err(Coproduct::Inr),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -363,7 +414,6 @@ mod tests {
         let get_from_1b: Option<&bool> = co1.get();
         assert_eq!(get_from_1a, Some(&3));
         assert_eq!(get_from_1b, None);
-
 
         let co2 = I32StrBool::inject(false);
         assert_eq!(co2, Inr(Inr(Inl(false))));
@@ -389,11 +439,11 @@ mod tests {
 
     #[test]
     fn test_coproduct_fold_non_consuming() {
-        type I32StrBool = Coprod!(i32, f32, bool);
+        type I32F32Bool = Coprod!(i32, f32, bool);
 
-        let co1 = I32StrBool::inject(3);
-        let co2 = I32StrBool::inject(true);
-        let co3 = I32StrBool::inject(42f32);
+        let co1 = I32F32Bool::inject(3);
+        let co2 = I32F32Bool::inject(true);
+        let co3 = I32F32Bool::inject(42f32);
 
         assert_eq!(
             co1.as_ref().fold(hlist![
@@ -419,5 +469,35 @@ mod tests {
             ]),
             "float 42".to_string()
         );
+    }
+
+    #[test]
+    fn test_coproduct_uninject() {
+        type I32StrBool = Coprod!(i32, &'static str, bool);
+
+        let co1 = I32StrBool::inject(3);
+        let co2 = I32StrBool::inject("hello");
+        let co3 = I32StrBool::inject(false);
+
+        let uninject_i32_co1: Result<i32, _> = co1.uninject();
+        let uninject_str_co1: Result<&'static str, _> = co1.uninject();
+        let uninject_bool_co1: Result<bool, _> = co1.uninject();
+        assert_eq!(uninject_i32_co1, Ok(3));
+        assert!(uninject_str_co1.is_err());
+        assert!(uninject_bool_co1.is_err());
+
+        let uninject_i32_co2: Result<i32, _> = co2.uninject();
+        let uninject_str_co2: Result<&'static str, _> = co2.uninject();
+        let uninject_bool_co2: Result<bool, _> = co2.uninject();
+        assert!(uninject_i32_co2.is_err());
+        assert_eq!(uninject_str_co2, Ok("hello"));
+        assert!(uninject_bool_co2.is_err());
+
+        let uninject_i32_co3: Result<i32, _> = co3.uninject();
+        let uninject_str_co3: Result<&'static str, _> = co3.uninject();
+        let uninject_bool_co3: Result<bool, _> = co3.uninject();
+        assert!(uninject_i32_co2.is_err());
+        assert!(uninject_str_co3.is_err());
+        assert_eq!(uninject_bool_co3, Ok(false));
     }
 }
