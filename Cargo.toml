@@ -25,7 +25,7 @@ version = "0.0.24"
 
 [dev-dependencies.frunk_laws]
 path = "laws"
-version = "0.0.13"
+version = "0.0.14"
 
 [dependencies]
 serde = { version = "^1.0", optional = true, default-features = false }
