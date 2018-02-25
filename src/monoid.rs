@@ -88,7 +88,9 @@ where
     T: Monoid + Semigroup + Clone,
 {
     xs.iter()
-        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
+        .fold(<T as Monoid>::empty(), |acc, next| {
+            acc.combine(&next)
+        })
 }
 
 impl<T> Monoid for Option<T>
@@ -139,7 +141,6 @@ impl Monoid for All<bool> {
         All(true)
     }
 }
-
 
 impl Monoid for Any<bool> {
     fn empty() -> Self {
@@ -220,7 +221,6 @@ numeric_product_monoid_imps! {
     1f32; f32,
     1f64; f64
 }
-
 
 macro_rules! tuple_impls {
     () => {}; // no more

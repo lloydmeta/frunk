@@ -10,7 +10,6 @@
 //!   4. Validated (accumulator for Result)
 //!   5. Semigroup
 //!   6. Monoid
-//!   7. AUnions (anonymous and extensible unions)
 //!
 //! Here is a small taste of what Frunk has to offer:
 //!

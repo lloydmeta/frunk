@@ -142,8 +142,8 @@ macro_rules! Coprod {
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
-/// let co1 = I32Bool::inject(42f32);
+/// type I32F32 = Coprod!(i32, f32);
+/// let co1 = I32F32::inject(42f32);
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
 /// assert_eq!(get_from_1a, None);
@@ -182,9 +182,9 @@ where
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
+/// type I32F32 = Coprod!(i32, f32);
 ///
-/// let co1 = I32Bool::inject(42f32);
+/// let co1 = I32F32::inject(42f32);
 ///
 /// let get_from_1a: Option<&i32> = co1.get();
 /// let get_from_1b: Option<&f32> = co1.get();
@@ -230,9 +230,9 @@ where
 /// # #[macro_use] extern crate frunk_core;
 /// # use frunk_core::coproduct::*;
 /// # fn main() {
-/// type I32Bool = Coprod!(i32, f32);
+/// type I32F32 = Coprod!(i32, f32);
 ///
-/// let co1 = I32Bool::inject(42f32);
+/// let co1 = I32F32::inject(42f32);
 ///
 /// let get_from_1a: Option<i32> = co1.take();
 /// let get_from_1b: Option<f32> = co1.take();
@@ -351,13 +351,28 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
     }
 }
 
-/// A trait for anonymous unions.
-pub trait CoProdUninjector<T, U, Idx>: CoprodInjector<T, Idx> {
+/// Trait for extracting a value from a coproduct in an exhaustive way.
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32F32 = Coprod!(i32, f32);
+/// let co1 = I32F32::inject(42f32);
+/// let get_from_1a: Result<i32, _> = co1.uninject();
+/// let get_from_1b: Result<f32, _> = co1.uninject();
+/// assert!(get_from_1a.is_err());
+/// assert_eq!(get_from_1b, Ok(42f32));
+/// # }
+/// ```
+pub trait CoprodUninjector<T, U, Idx>: CoprodInjector<T, Idx> {
     /// Attempts to get a value from the union.
     fn uninject(self) -> Result<T, U>;
 }
 
-impl<Hd, Tl> CoProdUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
+impl<Hd, Tl> CoprodUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
     fn uninject(self) -> Result<Hd, Tl> {
         match self {
             Coproduct::Inl(h) => Ok(h),
@@ -366,9 +381,9 @@ impl<Hd, Tl> CoProdUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
     }
 }
 
-impl<Hd, Tl, T, U, N> CoProdUninjector<T, Coproduct<Hd, U>, There<N>> for Coproduct<Hd, Tl>
+impl<Hd, Tl, T, U, N> CoprodUninjector<T, Coproduct<Hd, U>, There<N>> for Coproduct<Hd, Tl>
 where
-    Tl: CoProdUninjector<T, U, N>,
+    Tl: CoprodUninjector<T, U, N>,
 {
     fn uninject(self) -> Result<T, Coproduct<Hd, U>> {
         match self {
@@ -393,7 +408,6 @@ mod tests {
         let get_from_1b: Option<&bool> = co1.get();
         assert_eq!(get_from_1a, Some(&3));
         assert_eq!(get_from_1b, None);
-
 
         let co2 = I32StrBool::inject(false);
         assert_eq!(co2, Inr(Inr(Inl(false))));
