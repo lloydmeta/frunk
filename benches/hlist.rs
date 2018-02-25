@@ -32,7 +32,6 @@ fn hlist_into_tuple2_match(b: &mut Bencher) {
     })
 }
 
-
 #[bench]
 fn hlist_into_hlist_pat_match(b: &mut Bencher) {
     let h = hlist![1, 2, 3.3f32, "hi2", true];

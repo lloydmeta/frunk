@@ -25,7 +25,6 @@ struct DeletedUser<'a> {
 }
 
 fn main() {
-
     let n_user = NewUser {
         first_name: "Joe",
         last_name: "Blow",

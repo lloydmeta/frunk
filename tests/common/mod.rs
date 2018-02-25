@@ -56,8 +56,6 @@ pub struct SuperLongField {
 #[derive(Generic, Debug, PartialEq)]
 pub struct TupleStruct<'a>(pub &'a str, pub i32);
 
-
-
 #[derive(LabelledGeneric)]
 pub struct NormalUser<'a> {
     pub first_name: &'a str,

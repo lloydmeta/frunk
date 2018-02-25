@@ -1,16 +1,14 @@
 use quote;
 use syn;
-use syn::{Ident, MacroInput};
+use syn::{Ident, DeriveInput};
 use proc_macro::TokenStream;
 
 /// Parses a TokenStream (usually received as input into a
 /// custom derive function), into a syn MacroInput AST,
 /// which is nice.
-pub fn to_ast(input: &TokenStream) -> MacroInput {
-    // Construct a string representation of the type definition
-    let s = input.to_string();
+pub fn to_ast(input: TokenStream) -> DeriveInput {
     // Parse the string representation
-    syn::parse_macro_input(&s).unwrap()
+    syn::parse(input).unwrap()
 }
 
 /// Given a identifiers, creates an AST for building an HList (HCons)
