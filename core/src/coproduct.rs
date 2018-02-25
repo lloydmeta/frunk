@@ -27,6 +27,12 @@
 //! // *Taking* stuff (by value)
 //! let take_from_1a: Option<i32> = co1.take();
 //! assert_eq!(take_from_1a, Some(3));
+//!
+//! // Or with a Result
+//! let uninject_from_1a: Result<i32, _> = co1.uninject();
+//! let uninject_from_1b: Result<bool, _> = co1.uninject();
+//! assert_eq!(uninject_from_1a, Ok(3));
+//! assert!(uninject_from_1b.is_err());
 //! # }
 //! ```
 //!
