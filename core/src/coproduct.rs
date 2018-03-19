@@ -373,12 +373,16 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 /// assert_eq!(get_from_1b, Ok(42f32));
 /// # }
 /// ```
-pub trait CoprodUninjector<T, U, Idx>: CoprodInjector<T, Idx> {
+pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
+    type Remainder;
+
     /// Attempts to get a value from the union.
-    fn uninject(self) -> Result<T, U>;
+    fn uninject(self) -> Result<T, Self::Remainder>;
 }
 
-impl<Hd, Tl> CoprodUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
+impl<Hd, Tl> CoprodUninjector<Hd, Here> for Coproduct<Hd, Tl> {
+    type Remainder = Tl;
+
     fn uninject(self) -> Result<Hd, Tl> {
         match self {
             Coproduct::Inl(h) => Ok(h),
@@ -387,11 +391,13 @@ impl<Hd, Tl> CoprodUninjector<Hd, Tl, Here> for Coproduct<Hd, Tl> {
     }
 }
 
-impl<Hd, Tl, T, U, N> CoprodUninjector<T, Coproduct<Hd, U>, There<N>> for Coproduct<Hd, Tl>
+impl<Hd, Tl, T, N> CoprodUninjector<T, There<N>> for Coproduct<Hd, Tl>
 where
-    Tl: CoprodUninjector<T, U, N>,
+    Tl: CoprodUninjector<T, N>,
 {
-    fn uninject(self) -> Result<T, Coproduct<Hd, U>> {
+    type Remainder = Coproduct<Hd, Tl::Remainder>;
+
+    fn uninject(self) -> Result<T, Self::Remainder> {
         match self {
             Coproduct::Inl(h) => Err(Coproduct::Inl(h)),
             Coproduct::Inr(t) => t.uninject().map_err(Coproduct::Inr),
@@ -496,7 +502,7 @@ mod tests {
         let uninject_i32_co3: Result<i32, _> = co3.uninject();
         let uninject_str_co3: Result<&'static str, _> = co3.uninject();
         let uninject_bool_co3: Result<bool, _> = co3.uninject();
-        assert!(uninject_i32_co2.is_err());
+        assert!(uninject_i32_co3.is_err());
         assert!(uninject_str_co3.is_err());
         assert_eq!(uninject_bool_co3, Ok(false));
     }
