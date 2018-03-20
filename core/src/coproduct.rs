@@ -385,7 +385,7 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 /// # fn main() {
 /// type I32F32 = Coprod!(i32, f32);
 ///
-/// // be aware that this particular example could be
+/// // Be aware that this particular example could be
 /// // written far more succinctly using `fold`.
 /// fn handle_i32_f32(co: I32F32) -> f32 {
 ///     // Remove i32 from the coproduct
@@ -402,7 +402,7 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 ///         Err(co) => co
 ///     };
 ///
-///     // now co is empty;
+///     // Now co is empty;
 ///     match co { /* unreachable */ }
 /// }
 ///
@@ -499,13 +499,13 @@ where
 ///         Err(co) => co,
 ///     };
 ///
-///     // now co is Coprod!(u32)
+///     // Now co is Coprod!(u32).
 ///     let co = match co.subset().map(handle_countly_things) {
 ///         Ok(s) => return s,
 ///         Err(co) => co,
 ///     };
 ///
-///     // now co is empty;
+///     // Now co is empty.
 ///     match co { /* unreachable */ }
 /// }
 ///
