@@ -359,7 +359,9 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 
 /// Trait for extracting a value from a coproduct in an exhaustive way.
 ///
-/// # Example
+/// # Examples
+///
+/// Basic usage:
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
@@ -367,12 +369,46 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 /// # fn main() {
 /// type I32F32 = Coprod!(i32, f32);
 /// let co1 = I32F32::inject(42f32);
-/// let get_from_1a: Result<i32, _> = co1.uninject();
-/// let get_from_1b: Result<f32, _> = co1.uninject();
-/// assert!(get_from_1a.is_err());
-/// assert_eq!(get_from_1b, Ok(42f32));
+///
+/// let uninject_1a: Result<i32, _> = co1.uninject();
+/// let uninject_1b: Result<f32, _> = co1.uninject();
+/// assert!(uninject_1a.is_err());
+/// assert_eq!(uninject_1b, Ok(42f32));
 /// # }
 /// ```
+///
+/// Chaining calls for an exhaustive match:
+///
+/// ```rust
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32F32 = Coprod!(i32, f32);
+///
+/// // Be aware that this particular example could be
+/// // written far more succinctly using `fold`.
+/// fn handle_i32_f32(co: I32F32) -> f32 {
+///     // Remove i32 from the coproduct
+///     let res: Result<i32, _> = co.uninject();
+///     let co = match res {
+///         Ok(x) => return (2 * x) as f32,
+///         Err(co) => co,
+///     };
+///
+///     // Remove f32 from the coproduct
+///     let res: Result<f32, _> = co.uninject();
+///     let co = match res {
+///         Ok(x) => return 2.0 * x,
+///         Err(co) => co
+///     };
+///
+///     // Now co is empty;
+///     match co { /* unreachable */ }
+/// }
+///
+/// assert_eq!(handle_i32_f32(I32F32::inject(3)), 6.0);
+/// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), 6.0);
+/// # }
 pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
     type Remainder;
 
@@ -403,6 +439,112 @@ where
             Coproduct::Inr(t) => t.uninject().map_err(Coproduct::Inr),
         }
     }
+}
+
+/// Trait for extracting a subset of the possible types in a coproduct.
+///
+/// This is basically [`uninject`] on steroids.  It lets you remove a number
+/// of types from a coproduct at once, leaving behind the remainder in an `Err`.
+/// For instance, one can extract `Coprod!(C, A)` from `Coprod!(A, B, C, D)`
+/// to produce `Result<Coprod!(C, A), Coprod!(B, D)>`.
+///
+/// Each type in the extracted subset is required to be part of the input coproduct.
+///
+/// [`uninject`]: ../traits.CoprodUninjector.html
+///
+/// # Example
+///
+/// Basic usage:
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32BoolF32 = Coprod!(i32, bool, f32);
+///
+/// let co: Result<Coprod!(i32, f32), _> = I32BoolF32::inject(42_f32).subset();
+/// assert!(co.is_ok());
+///
+/// let co: Result<Coprod!(i32, f32), _> = I32BoolF32::inject(true).subset();
+/// assert!(co.is_err());
+/// # }
+/// ```
+///
+/// Like `uninject`, `subset` can be used for exhaustive matching,
+/// with the advantage that it can remove more than one type at a time:
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
+///     co.fold(hlist![
+///         |s| format!("&str {}", s),
+///         |s| format!("String {}", s),
+///     ])
+/// }
+///
+/// fn handle_countly_things(co: Coprod!(u32)) -> String {
+///     co.fold(hlist![
+///         |n| vec!["."; n as usize].concat(),
+///     ])
+/// }
+///
+/// type Anything = Coprod!(String, u32, &'static str);
+/// fn handle_anything(co: Anything) -> String {
+///
+///     // co is currently Coprod!(String, u32, &'static str)
+///     let co = match co.subset().map(handle_stringly_things) {
+///         Ok(s) => return s,
+///         Err(co) => co,
+///     };
+///
+///     // Now co is Coprod!(u32).
+///     let co = match co.subset().map(handle_countly_things) {
+///         Ok(s) => return s,
+///         Err(co) => co,
+///     };
+///
+///     // Now co is empty.
+///     match co { /* unreachable */ }
+/// }
+///
+/// assert_eq!(handle_anything(Anything::inject("hello")), "&str hello");
+/// assert_eq!(handle_anything(Anything::inject(String::from("World!"))), "String World!");
+/// assert_eq!(handle_anything(Anything::inject(4)), "....");
+/// # }
+/// ```
+pub trait CoproductSubsetter<Targets, Indices>: Sized {
+    type Remainder;
+
+    fn subset(self) -> Result<Targets, Self::Remainder>;
+}
+
+impl<Choices, THead, TTail, NHead, NTail, Rem>
+    CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
+where
+    Self: CoprodUninjector<THead, NHead, Remainder=Rem>,
+    Rem: CoproductSubsetter<TTail, NTail>,
+{
+    type Remainder = <Rem as CoproductSubsetter<TTail, NTail>>::Remainder;
+
+    /// Attempt to extract a value from a subset of the types.
+    fn subset(self) -> Result<Coproduct<THead, TTail>, Self::Remainder>
+    { match self.uninject() {
+        Ok(good) => Ok(Coproduct::Inl(good)),
+        Err(bads) => match bads.subset() {
+            Ok(goods) => Ok(Coproduct::Inr(goods)),
+            Err(bads) => Err(bads),
+        }
+    }}
+}
+
+impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
+    type Remainder = Self;
+
+    #[inline(always)]
+    fn subset(self) -> Result<CNil, Self::Remainder>
+    { Err(self) }
 }
 
 #[cfg(test)]
@@ -505,5 +647,35 @@ mod tests {
         assert!(uninject_i32_co3.is_err());
         assert!(uninject_str_co3.is_err());
         assert_eq!(uninject_bool_co3, Ok(false));
+    }
+
+
+    #[test]
+    fn test_coproduct_subset() {
+        type I32StrBool = Coprod!(i32, &'static str, bool);
+
+        // CNil can be extracted from anything.
+        let res: Result<CNil, _> = I32StrBool::inject(3).subset();
+        assert!(res.is_err());
+
+        if false {
+            #[allow(unreachable_code)] {
+                // ...including CNil.
+                #[allow(unused)]
+                let cnil: CNil = panic!();
+                let res: Result<CNil, _> = cnil.subset();
+                let _ = res;
+            }
+        }
+
+        { // Order does not matter.
+            let co = I32StrBool::inject(3);
+            let res: Result<Coprod!(bool, i32), _> = co.subset();
+            assert_eq!(res, Ok(Coproduct::Inr(Coproduct::Inl(3))));
+
+            let co = I32StrBool::inject("4");
+            let res: Result<Coprod!(bool, i32), _> = co.subset();
+            assert_eq!(res, Err(Coproduct::Inl("4")));
+        }
     }
 }
