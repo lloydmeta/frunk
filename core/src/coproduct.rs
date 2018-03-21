@@ -142,7 +142,14 @@ macro_rules! Coprod {
     // Forward trailing comma variants -->
 }
 
-/// Trait for injecting something into a coproduct
+/// Trait for instantiating a coproduct
+///
+/// This is the preferred method for constructing a coproduct.
+/// In standard usage, the index type parameter can be ignored,
+/// as it will typically be solved for using type inference.
+///
+/// If the type does not appear in the coproduct, the conversion is forbidden.
+/// If the type appears multiple times in the coproduct, type inference will fail.
 ///
 /// ```
 /// # #[macro_use] extern crate frunk_core;
@@ -180,7 +187,7 @@ where
 
 /// Trait for retrieving a coproduct element reference by type.
 ///
-/// Returns an Option<&YourType> (notice that the inside of the option is a reference)
+/// Returns an `Option<&YourType>` (notice that the inside of the option is a reference)
 ///
 /// # Example
 ///
@@ -228,7 +235,7 @@ where
 
 /// Trait for retrieving a coproduct element by type.
 ///
-/// Returns an Option<YourType> (notice that the inside of the option is a value)
+/// Returns an `Option<YourType>` (notice that the inside of the option is a value)
 ///
 /// # Example
 ///
@@ -336,7 +343,6 @@ where
 }
 
 /// This is literally impossible; CNil is not instantiable
-#[doc(hidden)]
 impl<F, R> CoproductFoldable<F, R> for CNil {
     fn fold(self, _: F) -> R {
         unreachable!()
@@ -344,7 +350,6 @@ impl<F, R> CoproductFoldable<F, R> for CNil {
 }
 
 /// This is literally impossible; &CNil is not instantiable
-#[doc(hidden)]
 impl<'a, F, R> CoproductFoldable<F, R> for &'a CNil {
     fn fold(self, _: F) -> R {
         unreachable!()
@@ -547,6 +552,75 @@ impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
     { Err(self) }
 }
 
+/// Trait for upcasting a coproduct into another that can hold its variants.
+///
+/// This converts a coproduct into another one which is capable of holding each
+/// of its types. The most well-supported use-cases (i.e. those where type inference
+/// is capable of solving for the indices) are:
+///
+/// * Reordering variants: `Coprod!(C, A, B) -> Coprod!(A, B, C)`
+/// * Embedding into a superset: `Coprod!(B, D) -> Coprod!(A, B, C, D, E)`
+/// * Coalescing duplicate inputs: `Coprod!(B, B, B, B) -> Coprod!(A, B, C)`
+///
+/// and of course any combination thereof.
+///
+/// If any type in the input does not appear in the output, the conversion is forbidden.
+/// If any type in the input appears multiple times in the output, type inference will fail.
+/// All of these rules fall naturally out of its fairly simple definition,
+/// which is equivalent to:
+///
+/// ```text
+/// coprod.fold(hlist![|x| Out::inject(x), |x| Out::inject(x), ..., |x| Out::inject(x)])
+/// ```
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32BoolF32 = Coprod!(i32, bool, f32);
+/// type BoolI32 = Coprod!(bool, i32);
+///
+/// let co = BoolI32::inject(true);
+/// let embedded: I32BoolF32 = co.embed();
+/// assert_eq!(embedded, Coproduct::Inr(Coproduct::Inl(true)));
+/// # }
+/// ```
+pub trait CoproductEmbedder<Out, Indices> {
+    fn embed(self) -> Out;
+}
+
+impl CoproductEmbedder<CNil, HNil> for CNil {
+    fn embed(self) -> CNil
+    { match self {
+        // impossible!
+    }}
+}
+
+impl<Head, Tail> CoproductEmbedder<Coproduct<Head, Tail>, HNil> for CNil
+where CNil: CoproductEmbedder<Tail, HNil>,
+{
+    fn embed(self) -> Coproduct<Head, Tail>
+    { match self {
+        // impossible!
+    }}
+}
+
+impl<Head, Tail, Out, NHead, NTail>
+    CoproductEmbedder<Out, HCons<NHead, NTail>>
+    for Coproduct<Head, Tail>
+where
+    Out: CoprodInjector<Head, NHead>,
+    Tail: CoproductEmbedder<Out, NTail>,
+{
+    fn embed(self) -> Out
+    { match self {
+        Coproduct::Inl(this) => Out::inject(this),
+        Coproduct::Inr(those) => those.embed(),
+    }}
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -676,6 +750,50 @@ mod tests {
             let co = I32StrBool::inject("4");
             let res: Result<Coprod!(bool, i32), _> = co.subset();
             assert_eq!(res, Err(Coproduct::Inl("4")));
+        }
+    }
+
+    #[test]
+    fn test_coproduct_embed() {
+        // CNil can be embedded into any coproduct.
+        if false {
+            #[allow(unreachable_code)] {
+                #[allow(unused)]
+                let cnil: CNil = panic!();
+                let _: CNil = cnil.embed();
+
+                #[allow(unused)]
+                let cnil: CNil = panic!();
+                let _: Coprod!(i32, bool) = cnil.embed();
+            }
+        }
+
+        #[derive(Debug, PartialEq)] struct A;
+        #[derive(Debug, PartialEq)] struct B;
+        #[derive(Debug, PartialEq)] struct C;
+
+        { // Order does not matter.
+            let co_a = <Coprod!(C, A, B)>::inject(A);
+            let co_b = <Coprod!(C, A, B)>::inject(B);
+            let co_c = <Coprod!(C, A, B)>::inject(C);
+            let out_a: Coprod!(A, B, C) = co_a.embed();
+            let out_b: Coprod!(A, B, C) = co_b.embed();
+            let out_c: Coprod!(A, B, C) = co_c.embed();
+            assert_eq!(out_a, Coproduct::Inl(A));
+            assert_eq!(out_b, Coproduct::Inr(Coproduct::Inl(B)));
+            assert_eq!(out_c, Coproduct::Inr(Coproduct::Inr(Coproduct::Inl(C))));
+        }
+
+        { // Multiple variants can resolve to the same output w/o type annotations
+            type ABC = Coprod!(A, B, C);
+            type BBB = Coprod!(B, B, B);
+
+            let b1 = <BBB as CoprodInjector<B, Here>>::inject(B);
+            let b2 = <BBB as CoprodInjector<B, There<Here>>>::inject(B);
+            let out1: ABC = b1.embed();
+            let out2: ABC = b2.embed();
+            assert_eq!(out1, Coproduct::Inr(Coproduct::Inl(B)));
+            assert_eq!(out2, Coproduct::Inr(Coproduct::Inl(B)));
         }
     }
 }
