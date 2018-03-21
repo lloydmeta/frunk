@@ -552,7 +552,7 @@ impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
     { Err(self) }
 }
 
-/// Trait for upcasting a coproduct into another that can hold its variants.
+/// Trait for converting a coproduct into another that can hold its variants.
 ///
 /// This converts a coproduct into another one which is capable of holding each
 /// of its types. The most well-supported use-cases (i.e. those where type inference
