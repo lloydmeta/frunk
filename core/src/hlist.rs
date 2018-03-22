@@ -52,6 +52,164 @@
 use std::ops::Add;
 use std::marker::PhantomData;
 
+macro_rules! gen_inherent_methods {
+    (impl<$($TyPar:ident),*> $Struct:ty { ... })
+    => {
+        impl<$($TyPar),*> $Struct {
+            /// Returns the length of a given HList
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let h = hlist![1, "hi"];
+            /// assert_eq!(h.len(), 2);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn len(&self) -> usize
+            where Self: HList,
+            {
+                HList::len(self)
+            }
+
+            /// Prepends an item to the current HList
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let h1 = hlist![1, "hi"];
+            /// let h2 = h1.prepend(true);
+            /// let (a, (b, c)) = h2.into_tuple2();
+            /// assert_eq!(a, true);
+            /// assert_eq!(b, 1);
+            /// assert_eq!(c, "hi");
+            /// # }
+            #[inline(always)]
+            pub fn prepend<H>(self, h: H) -> HCons<H, Self>
+            where Self: HList,
+            {
+                HList::prepend(self, h)
+            }
+
+            /// Allows you to retrieve a unique type from an HList
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let h = hlist![1, "hello", true, 42f32];
+            ///
+            /// let f: &f32 = h.get();
+            /// let b: &bool = h.get();
+            /// assert_eq!(*f, 42f32);
+            /// assert!(b)
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn get<T, Index>(&self) -> &T
+            where Self: Selector<T, Index>,
+            {
+                Selector::get(self)
+            }
+
+            /// Returns the target with the remainder of the list in a pair
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let h = hlist![1, "hello", true, 42f32];
+            /// let (t, r): (bool, _) = h.pluck();
+            /// assert!(t);
+            /// assert_eq!(r, hlist![1, "hello", 42f32])
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn pluck<T, Index>(self) -> (T, <Self as Plucker<T, Index>>::Remainder)
+            where Self: Plucker<T, Index>
+            {
+                Plucker::pluck(self)
+            }
+
+            /// Consumes the current HList and returns an HList with the requested shape.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let h = hlist![9000, "joe", 41f32, true];
+            /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+            /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
+            /// assert_eq!(remainder, hlist![true]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn sculpt<Ts, Indices>(self) -> (Ts, <Self as Sculptor<Ts, Indices>>::Remainder)
+            where Self: Sculptor<Ts, Indices>,
+            {
+                Sculptor::sculpt(self)
+            }
+
+            /// Reverses a given data structure.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let nil = HNil;
+            ///
+            /// assert_eq!(nil.into_reverse(), nil);
+            ///
+            /// let h = hlist![1, "hello", true, 42f32];
+            /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn into_reverse(self) -> <Self as IntoReverse>::Output
+            where Self: IntoReverse,
+            {
+                IntoReverse::into_reverse(self)
+            }
+        }
+    };
+}
+
+gen_inherent_methods!{
+    impl<> HNil { ... }
+}
+gen_inherent_methods!{
+    impl<Head, Tail> HCons<Head, Tail> { ... }
+}
+
+impl<Head, Tail> HCons<Head, Tail> {
+    /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
+    /// and have a nicer type signature.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// let h = hlist![1, "hello", true, 42f32];
+    ///
+    /// // We now have a much nicer pattern matching experience
+    /// let (first,(second,(third, fourth))) = h.into_tuple2();
+    ///
+    /// assert_eq!(first ,       1);
+    /// assert_eq!(second, "hello");
+    /// assert_eq!(third ,    true);
+    /// assert_eq!(fourth,   42f32);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn into_tuple2(self) -> (<Self as IntoTuple2>::HeadType, <Self as IntoTuple2>::TailOutput)
+    where Self: IntoTuple2,
+    {
+        IntoTuple2::into_tuple2(self)
+    }
+}
+
 /// Typeclass for HList-y behaviour
 ///
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
@@ -369,21 +527,12 @@ pub enum Here {}
 pub struct There<T>(PhantomData<T>);
 
 /// Trait for retrieving an HList element by type
+///
+/// @@@@@@@@@@@@@@@@@@@@@@@@@@@
 pub trait Selector<S, I> {
     /// Allows you to retrieve a unique type from an HList
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let h = hlist![1, "hello", true, 42f32];
-    ///
-    /// let f: &f32 = h.get();
-    /// let b: &bool = h.get();
-    /// assert_eq!(*f, 42f32);
-    /// assert!(b)
-    /// # }
-    /// ```
+    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn get(&self) -> &S;
 }
 
@@ -405,22 +554,13 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 ///
 /// Similar to Selector, but returns the target and the remainder of the list (w/o target)
 /// in a pair.
+///
+/// @@@@@@@@@@@@@@@@@@@@@@@@@@
 pub trait Plucker<Target, Index> {
     /// What is left after you pluck the target from the Self
     type Remainder;
 
-    /// Returns the target with the remainder of the list in a pair
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let h = hlist![1, "hello", true, 42f32];
-    /// let (t, r): (bool, _) = h.pluck();
-    /// assert!(t);
-    /// assert_eq!(r, hlist![1, "hello", 42f32])
-    /// # }
-    /// ```
+    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn pluck(self) -> (Target, Self::Remainder);
 }
 
@@ -456,21 +596,14 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
 ///
 /// The "Indices" type parameter allows the compiler to figure out that the Target and Self
 /// can be morphed into each other
+///
+/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@
 pub trait Sculptor<Target, Indices> {
     type Remainder;
 
     /// Consumes the current HList and returns an HList with the requested shape.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let h = hlist![9000, "joe", 41f32, true];
-    /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
-    /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
-    /// assert_eq!(remainder, hlist![true]);
-    /// # }
-    /// ```
+    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn sculpt(self) -> (Target, Self::Remainder);
 }
 
@@ -527,23 +660,14 @@ where
 /// Trait that allows for reversing a given data structure.
 ///
 /// Implemented for HCons and HNil.
+///
+/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 pub trait IntoReverse {
     type Output;
 
     /// Reverses a given data structure.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
-    ///
-    /// assert_eq!(nil.into_reverse(), nil);
-    ///
-    /// let h = hlist![1, "hello", true, 42f32];
-    /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
-    /// # }
-    /// ```
+    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn into_reverse(self) -> Self::Output;
 }
 
@@ -967,6 +1091,8 @@ where
 }
 
 /// Trait for things that can be turned into a Tuple 2 (pair)
+///
+/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 pub trait IntoTuple2 {
     /// The 0 element in the output tuple
     type HeadType;
@@ -977,21 +1103,7 @@ pub trait IntoTuple2 {
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
     /// and have a nicer type signature.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let h = hlist![1, "hello", true, 42f32];
-    ///
-    /// // We now have a much nicer pattern matching experience
-    /// let (first,(second,(third, fourth))) = h.into_tuple2();
-    ///
-    /// assert_eq!(first ,       1);
-    /// assert_eq!(second, "hello");
-    /// assert_eq!(third ,    true);
-    /// assert_eq!(fourth,   42f32);
-    /// # }
-    /// ```
+    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 
