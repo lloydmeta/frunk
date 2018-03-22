@@ -36,10 +36,11 @@ For a deep dive, RustDocs are available for:
 4. [Validated](#validated)
 5. [Semigroup](#semigroup)
 6. [Monoid](#monoid)
-7. [Todo](#todo)
-8. [Contributing](#contributing)
-9. [Inspirations](#inspirations)
-10. [Maintainers](#maintainers)
+7. [Features](#features)
+8. [Todo](#todo)
+9. [Contributing](#contributing)
+10. [Inspirations](#inspirations)
+11. [Maintainers](#maintainers)
 
 ## Examples
 
@@ -426,6 +427,26 @@ assert_eq!(combine_all(&tuples), expected)
 
 let product_nums = vec![Product(2), Product(3), Product(4)];
 assert_eq!(combine_all(&product_nums), Product(24))
+```
+
+### Features
+
+Frunk comes with support for deriving [serde](https://github.com/serde-rs/serde) serializer/deserializers for its core 
+data structures. This can be enabled by adding the `serde` feature flag.
+
+For example, if you'd like to use just `frunk-core` with serde
+
+```toml
+[dependencies]
+frunk-core = { version = "$version", features = ["serde"] }
+```
+
+Or, if you'd like to use `frunk` with serde, you need to explicitly include `frunk-core` as well
+
+```toml
+[dependencies]
+frunk = { version = "$version", features = ["serde"] }
+frunk-core = { version = "$version", features = ["serde"] }
 ```
 
 ## Todo
