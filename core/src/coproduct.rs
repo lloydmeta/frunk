@@ -89,6 +89,7 @@ use hlist::*;
 /// # }
 /// ```
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Coproduct<H, T> {
     /// Coproduct is either H or T, in this case, it is H
     Inl(H),
@@ -100,6 +101,7 @@ pub enum Coproduct<H, T> {
 ///
 /// Used by the macro to terminate the Coproduct type signature
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CNil {}
 
 /// Returns a type signature for a Coproduct of the provided types
