@@ -64,6 +64,6 @@ pub mod generic;
 pub mod labelled;
 mod tuples;
 
-#[cfg(feature = "with_serde")]
+#[cfg(feature = "serde")]
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;

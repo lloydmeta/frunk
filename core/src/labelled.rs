@@ -250,7 +250,7 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
-#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct Field<Name, Type> {
     name_type_holder: PhantomData<Name>,
@@ -260,7 +260,7 @@ pub struct Field<Name, Type> {
 
 /// A version of Field that doesn't have a type-level label, just a
 /// value-level one
-#[cfg_attr(feature = "with_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 pub struct ValueField<Type> {
     pub name: &'static str,
