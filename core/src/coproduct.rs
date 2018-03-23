@@ -144,28 +144,112 @@ macro_rules! Coprod {
     // Forward trailing comma variants -->
 }
 
-/// Trait for instantiating a coproduct
+// Inherent methods
+impl<Head, Tail> Coproduct<Head, Tail> {
+    /// Instantiate a coproduct from an element.
+    ///
+    /// This is generally much nicer than nested usage of `Coproduct::{Inl,Inr}`.
+    /// It uses a trick with type inference to automatically build the correct variant
+    /// according to the input type.
+    ///
+    /// In standard usage, the Index type parameter can be ignored,
+    /// as it will typically be solved for using type inference.
+    ///
+    /// # Type inference
+    ///
+    /// If the type does not appear in the coproduct, the conversion is forbidden.
+    /// If the type appears multiple times in the coproduct, type inference will fail.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// use frunk_core::coproduct::Coproduct;
+    ///
+    /// type I32F32 = Coprod!(i32, f32);
+    ///
+    /// // Constructing coproducts using inject:
+    /// let co1_nice: I32F32 = Coproduct::inject(1i32);
+    /// let co2_nice: I32F32 = Coproduct::inject(42f32);
+    ///
+    /// // Compare this to the "hard way":
+    /// let co1_ugly: I32F32 = Coproduct::Inl(1i32);
+    /// let co2_ugly: I32F32 = Coproduct::Inr(Coproduct::Inl(42f32));
+    ///
+    /// assert_eq!(co1_nice, co1_ugly);
+    /// assert_eq!(co2_nice, co2_ugly);
+    ///
+    /// // Feel free to use `inject` on a type alias, or even directly on the
+    /// // `Coprod!` macro. (the latter requires wrapping the type in `<>`)
+    /// let _ = I32F32::inject(42f32);
+    /// let _ = <Coprod!(i32, f32)>::inject(42f32);
+    ///
+    /// // You can also use a turbofish to specify the type of the input when
+    /// // it is ambiguous (e.g. an empty `vec![]`).
+    /// // The Index parameter should be left as `_`.
+    /// type Vi32Vf32 = Coprod!(Vec<i32>, Vec<f32>);
+    /// let _: Vi32Vf32 = Coproduct::inject::<Vec<i32>, _>(vec![]);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn inject<T, Index>(to_insert: T) -> Self
+    where Self: CoprodInjector<T, Index>,
+    {
+        CoprodInjector::inject(to_insert)
+    }
+
+    /// Borrow an element from a coproduct by type.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// type I32F32 = Coprod!(i32, f32);
+    ///
+    /// // You can let type inference find the desired type:
+    /// let co1 = I32F32::inject(42f32);
+    /// let get_from_1a: Option<&i32> = co1.get();
+    /// let get_from_1b: Option<&f32> = co1.get();
+    /// assert_eq!(get_from_1a, None);
+    /// assert_eq!(get_from_1b, Some(&42f32));
+    ///
+    /// // You can also use turbofish syntax to specify the type.
+    /// // The Index parameter should be left as `_`.
+    /// let co2 = I32F32::inject(1i32);
+    /// assert_eq!(co2.get::<i32, _>(), Some(&1));
+    /// assert_eq!(co2.get::<f32, _>(), None);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn get<S, Index>(&self) -> Option<&S>
+    where Self: CoproductSelector<S, Index>,
+    {
+        CoproductSelector::get(self)
+    }
+}
+
+/// Trait for instantiating a coproduct from an element
 ///
-/// This is the preferred method for constructing a coproduct.
-/// In standard usage, the index type parameter can be ignored,
-/// as it will typically be solved for using type inference.
+/// This trait is part of the implementation of the inherent static method
+/// [`Coproduct::inject`]. Please see that method for more information.
 ///
-/// If the type does not appear in the coproduct, the conversion is forbidden.
-/// If the type appears multiple times in the coproduct, type inference will fail.
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. In most code, `Coproduct::inject` will
+/// "just work," with or without this trait.
 ///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32F32 = Coprod!(i32, f32);
-/// let co1 = I32F32::inject(42f32);
-/// let get_from_1a: Option<&i32> = co1.get();
-/// let get_from_1b: Option<&f32> = co1.get();
-/// assert_eq!(get_from_1a, None);
-/// assert_eq!(get_from_1b, Some(&42f32));
-/// # }
-/// ```
+/// [`Coproduct::inject`]: ../enum.Coproduct.html#method.inject
 pub trait CoprodInjector<InjectType, Index> {
+    /// Instantiate a coproduct from an element.
+    ///
+    /// Please see the [inherent static method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent static method]: ../enum.Coproduct.html#method.inject
     fn inject(to_insert: InjectType) -> Self;
 }
 
@@ -187,27 +271,26 @@ where
 
 // For turning something into a Coproduct -->
 
-/// Trait for retrieving a coproduct element reference by type.
+/// Trait for borrowing a coproduct element by type
 ///
-/// Returns an `Option<&YourType>` (notice that the inside of the option is a reference)
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::get`]. Please see that method for more information.
 ///
-/// # Example
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have an Coproduct of known type,
+/// then `co.get()` should "just work" even without the trait.
 ///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32F32 = Coprod!(i32, f32);
-///
-/// let co1 = I32F32::inject(42f32);
-///
-/// let get_from_1a: Option<&i32> = co1.get();
-/// let get_from_1b: Option<&f32> = co1.get();
-/// assert_eq!(get_from_1a, None);
-/// assert_eq!(get_from_1b, Some(&42f32));
-/// # }
-/// ```
+/// [`Coproduct::get`]: ../enum.Coproduct.html#method.get
 pub trait CoproductSelector<S, I> {
+    /// Borrow an element from a coproduct by type.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../enum.Coproduct.html#method.get
     fn get(&self) -> Option<&S>;
 }
 
