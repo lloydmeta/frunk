@@ -52,6 +52,7 @@
 use std::ops::Add;
 use std::marker::PhantomData;
 
+// Inherent methods shared by HNil and HCons.
 macro_rules! gen_inherent_methods {
     (impl<$($TyPar:ident),*> $Struct:ty { ... })
     => {
@@ -91,66 +92,6 @@ macro_rules! gen_inherent_methods {
             where Self: HList,
             {
                 HList::prepend(self, h)
-            }
-
-            /// Borrow an element by type from an HList.
-            ///
-            /// # Examples
-            ///
-            /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
-            /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
-            ///
-            /// // Often, type inference can figure out the type you want.
-            /// // You can help guide type inference when necessary by
-            /// // using type annotations.
-            /// let b: &bool = h.get();
-            /// if !b { panic!("no way!") };
-            ///
-            /// // If space is tight, you can also use turbofish syntax.
-            /// // The Index is still left to type inference by using `_`.
-            /// match *h.get::<u32, _>() {
-            ///     2 => { },
-            ///     _ => panic!("it can't be!!"),
-            /// }
-            /// # }
-            /// ```
-            #[inline(always)]
-            pub fn get<T, Index>(&self) -> &T
-            where Self: Selector<T, Index>,
-            {
-                Selector::get(self)
-            }
-
-            /// Remove an element by type from an HList.
-            ///
-            /// The remaining elements are returned along with it.
-            ///
-            /// # Examples
-            ///
-            /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
-            /// let list = hlist![1, "hello", true, 42f32];
-            ///
-            /// // Often, type inference can figure out the target type.
-            /// // This extracts the bool element due to our use of assert!.
-            /// let (b, list): (bool, _) = list.pluck();
-            /// assert!(b);
-            ///
-            /// // When type inference will not suffice, you can use a turbofish.
-            /// // The Index is still left to type inference by using `_`.
-            /// let (s, list) = list.pluck::<i32, _>();
-            ///
-            /// // Each time we plucked, we got back a remainder.
-            /// // Let's check what's left:
-            /// assert_eq!(list, hlist!["hello", 42.0])
-            /// # }
-            /// ```
-            #[inline(always)]
-            pub fn pluck<T, Index>(self) -> (T, <Self as Plucker<T, Index>>::Remainder)
-            where Self: Plucker<T, Index>
-            {
-                Plucker::pluck(self)
             }
 
             /// Consume the current HList and return an HList with the requested shape.
@@ -209,7 +150,68 @@ gen_inherent_methods!{
     impl<Head, Tail> HCons<Head, Tail> { ... }
 }
 
+// HCons-only inherent methods.
 impl<Head, Tail> HCons<Head, Tail> {
+    /// Borrow an element by type from an HList.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
+    ///
+    /// // Often, type inference can figure out the type you want.
+    /// // You can help guide type inference when necessary by
+    /// // using type annotations.
+    /// let b: &bool = h.get();
+    /// if !b { panic!("no way!") };
+    ///
+    /// // If space is tight, you can also use turbofish syntax.
+    /// // The Index is still left to type inference by using `_`.
+    /// match *h.get::<u32, _>() {
+    ///     2 => { },
+    ///     _ => panic!("it can't be!!"),
+    /// }
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn get<T, Index>(&self) -> &T
+    where Self: Selector<T, Index>,
+    {
+        Selector::get(self)
+    }
+
+    /// Remove an element by type from an HList.
+    ///
+    /// The remaining elements are returned along with it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// let list = hlist![1, "hello", true, 42f32];
+    ///
+    /// // Often, type inference can figure out the target type.
+    /// // This extracts the bool element due to our use of assert!.
+    /// let (b, list): (bool, _) = list.pluck();
+    /// assert!(b);
+    ///
+    /// // When type inference will not suffice, you can use a turbofish.
+    /// // The Index is still left to type inference by using `_`.
+    /// let (s, list) = list.pluck::<i32, _>();
+    ///
+    /// // Each time we plucked, we got back a remainder.
+    /// // Let's check what's left:
+    /// assert_eq!(list, hlist!["hello", 42.0])
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn pluck<T, Index>(self) -> (T, <Self as Plucker<T, Index>>::Remainder)
+    where Self: Plucker<T, Index>
+    {
+        Plucker::pluck(self)
+    }
+
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
     /// and have a nicer type signature.
     ///
