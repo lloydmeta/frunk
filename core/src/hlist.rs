@@ -61,7 +61,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// # #[macro_use] extern crate frunk_core; fn main() {
             /// let h = hlist![1, "hi"];
             /// assert_eq!(h.len(), 2);
             /// # }
@@ -73,12 +73,12 @@ macro_rules! gen_inherent_methods {
                 HList::len(self)
             }
 
-            /// Prepends an item to the current HList
+            /// Prepend an item to the current HList
             ///
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// # #[macro_use] extern crate frunk_core; fn main() {
             /// let h1 = hlist![1, "hi"];
             /// let h2 = h1.prepend(true);
             /// let (a, (b, c)) = h2.into_tuple2();
@@ -93,18 +93,26 @@ macro_rules! gen_inherent_methods {
                 HList::prepend(self, h)
             }
 
-            /// Allows you to retrieve a unique type from an HList
+            /// Borrow an element by type from an HList.
             ///
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let h = hlist![1, "hello", true, 42f32];
+            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
             ///
-            /// let f: &f32 = h.get();
+            /// // Often, type inference can figure out the type you want.
+            /// // You can help guide type inference when necessary by
+            /// // using type annotations.
             /// let b: &bool = h.get();
-            /// assert_eq!(*f, 42f32);
-            /// assert!(b)
+            /// if !b { panic!("no way!") };
+            ///
+            /// // If space is tight, you can also use turbofish syntax.
+            /// // The Index is still left to type inference by using `_`.
+            /// match *h.get::<u32, _>() {
+            ///     2 => { },
+            ///     _ => panic!("it can't be!!"),
+            /// }
             /// # }
             /// ```
             #[inline(always)]
@@ -114,16 +122,28 @@ macro_rules! gen_inherent_methods {
                 Selector::get(self)
             }
 
-            /// Returns the target with the remainder of the list in a pair
+            /// Remove an element by type from an HList.
+            ///
+            /// The remaining elements are returned along with it.
             ///
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let h = hlist![1, "hello", true, 42f32];
-            /// let (t, r): (bool, _) = h.pluck();
-            /// assert!(t);
-            /// assert_eq!(r, hlist![1, "hello", 42f32])
+            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// let list = hlist![1, "hello", true, 42f32];
+            ///
+            /// // Often, type inference can figure out the target type.
+            /// // This extracts the bool element due to our use of assert!.
+            /// let (b, list): (bool, _) = list.pluck();
+            /// assert!(b);
+            ///
+            /// // When type inference will not suffice, you can use a turbofish.
+            /// // The Index is still left to type inference by using `_`.
+            /// let (s, list) = list.pluck::<i32, _>();
+            ///
+            /// // Each time we plucked, we got back a remainder.
+            /// // Let's check what's left:
+            /// assert_eq!(list, hlist!["hello", 42.0])
             /// # }
             /// ```
             #[inline(always)]
@@ -133,12 +153,18 @@ macro_rules! gen_inherent_methods {
                 Plucker::pluck(self)
             }
 
-            /// Consumes the current HList and returns an HList with the requested shape.
+            /// Consume the current HList and return an HList with the requested shape.
+            ///
+            /// `sculpt` allows us to extract/reshape/scult the current HList into another shape,
+            /// provided that the requested shape's types are are contained within the current HList.
+            ///
+            /// The "Indices" type parameter allows the compiler to figure out that the Target
+            /// and Self can be morphed into each other.
             ///
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// # #[macro_use] extern crate frunk_core; fn main() {
             /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
             /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
@@ -152,18 +178,18 @@ macro_rules! gen_inherent_methods {
                 Sculptor::sculpt(self)
             }
 
-            /// Reverses a given data structure.
+            /// Reverse the HList.
             ///
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let nil = HNil;
+            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// assert_eq!(hlist![].into_reverse(), hlist![]);
             ///
-            /// assert_eq!(nil.into_reverse(), nil);
-            ///
-            /// let h = hlist![1, "hello", true, 42f32];
-            /// assert_eq!(h.into_reverse(), hlist![42f32, true, "hello", 1])
+            /// assert_eq!(
+            ///     hlist![1, "hello", true, 42f32].into_reverse(),
+            ///     hlist![42f32, true, "hello", 1],
+            /// )
             /// # }
             /// ```
             #[inline(always)]
@@ -190,7 +216,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience
@@ -220,7 +246,7 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
     /// assert_eq!(<Hlist![i32, bool, f32] as HList>::LEN, 3);
     /// # }
     /// ```
@@ -236,7 +262,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; fn main() {
     /// let h = hlist![1, "hi"];
     /// assert_eq!(h.len(), 2);
     /// # }
@@ -251,7 +277,7 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
     /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
     /// # }
     /// ```
@@ -264,7 +290,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; fn main() {
     /// let h1 = hlist![1, "hi"];
     /// let h2 = h1.prepend(true);
     /// let (a, (b, c)) = h2.into_tuple2();
@@ -285,7 +311,7 @@ pub trait HList: Sized {
 /// # Examples
 ///
 /// ```
-/// # use frunk_core::hlist::*;
+/// # use frunk_core::hlist::{h_cons, HNil};
 ///
 /// let h = h_cons(1, HNil);
 /// let h = h.head;
@@ -337,7 +363,7 @@ impl<H, T> HCons<H, T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HNil; fn main() {
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
@@ -377,7 +403,7 @@ pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk_core; fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -425,7 +451,7 @@ macro_rules! hlist {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk_core; fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![h1, h2, h3] = h;
 /// assert_eq!(h1, 13.5f32);
@@ -453,7 +479,7 @@ macro_rules! hlist_pat {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk_core; fn main() {
 /// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 /// # }
 /// ```
@@ -526,13 +552,26 @@ pub enum Here {}
 #[allow(dead_code)]
 pub struct There<T>(PhantomData<T>);
 
-/// Trait for retrieving an HList element by type
+/// Trait for borrowing an HList element by type
 ///
-/// @@@@@@@@@@@@@@@@@@@@@@@@@@@
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::get`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists of unknown type. If you have an HList of known type,
+/// then `list.get()` should "just work" even without the trait.
+///
+/// [`HCons::get`]: ../struct.HCons.html#method.get
 pub trait Selector<S, I> {
-    /// Allows you to retrieve a unique type from an HList
+    /// Borrow an element by type from an HList.
     ///
-    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../struct.HCons.html#method.get
     fn get(&self) -> &S;
 }
 
@@ -552,15 +591,27 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 
 /// Trait defining extraction from a given HList
 ///
-/// Similar to Selector, but returns the target and the remainder of the list (w/o target)
-/// in a pair.
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::pluck`]. Please see that method for more information.
 ///
-/// @@@@@@@@@@@@@@@@@@@@@@@@@@
+/// You only need to import this trait when working with generic
+/// HLists of unknown type. If you have an HList of known type,
+/// then `list.pluck()` should "just work" even without the trait.
+///
+/// [`HCons::pluck`]: ../struct.HCons.html#method.pluck
 pub trait Plucker<Target, Index> {
     /// What is left after you pluck the target from the Self
     type Remainder;
 
-    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@
+    /// Remove an element by type from an HList.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../struct.HCons.html#method.pluck
     fn pluck(self) -> (Target, Self::Remainder);
 }
 
@@ -591,19 +642,28 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
     }
 }
 
-/// An Sculptor trait, that allows us to extract/reshape/scult the current HList into another shape,
-/// provided that the requested shape's types are are contained within the current HList.
+/// Trait for pulling out some subset of an HList, using type inference.
 ///
-/// The "Indices" type parameter allows the compiler to figure out that the Target and Self
-/// can be morphed into each other
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::sculpt`]. Please see that method for more information.
 ///
-/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+/// You only need to import this trait when working with generic
+/// HLists of unknown type. If you have an HList of known type,
+/// then `list.sculpt()` should "just work" even without the trait.
+///
+/// [`HCons::sculpt`]: ../struct.HCons.html#method.sculpt
 pub trait Sculptor<Target, Indices> {
     type Remainder;
 
     /// Consumes the current HList and returns an HList with the requested shape.
     ///
-    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../struct.HCons.html#method.sculpt
     fn sculpt(self) -> (Target, Self::Remainder);
 }
 
@@ -659,15 +719,16 @@ where
 
 /// Trait that allows for reversing a given data structure.
 ///
-/// Implemented for HCons and HNil.
+/// Implemented for HLists.
 ///
-/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+/// This functionality is also provided as an [inherent method].
+/// However, you may find this trait useful in generic contexts.
+///
+/// [inherent method]: ../struct.HCons.html#method.into_reverse
 pub trait IntoReverse {
     type Output;
 
     /// Reverses a given data structure.
-    ///
-    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     fn into_reverse(self) -> Self::Output;
 }
 
@@ -1090,9 +1151,17 @@ where
     }
 }
 
-/// Trait for things that can be turned into a Tuple 2 (pair)
+/// Trait for transforming an HList into a nested tuple.
 ///
-/// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::into_tuple2`]. Please see that method for more information.
+///
+/// This operation is not useful in generic contexts, so it is unlikely
+/// that you should ever need to import this trait. Do not worry;
+/// if you have an HList of known type, then `list.into_tuple2()`
+/// should "just work," even without the trait.
+///
+/// [`HCons::into_tuple2`]: ../struct.HCons.html#method.into_tuple2
 pub trait IntoTuple2 {
     /// The 0 element in the output tuple
     type HeadType;
@@ -1103,7 +1172,9 @@ pub trait IntoTuple2 {
     /// Turns an HList into nested Tuple2s, which are less troublesome to pattern match
     /// and have a nicer type signature.
     ///
-    /// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    /// Please see the [inherent method] for more information.
+    ///
+    /// [inherent method]: ../struct.HCons.html#method.into_tuple2
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 
