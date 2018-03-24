@@ -71,7 +71,7 @@ use hlist::*;
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
 ///
-/// To consctruct a Coproduct, you would typically declare a type using the `Coprod!` type
+/// To construct a Coproduct, you would typically declare a type using the `Coprod!` type
 /// macro and then use the `inject` method.
 ///
 /// # Examples
@@ -158,6 +158,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Rules
     ///
     /// If the type does not appear in the coproduct, the conversion is forbidden.
+    ///
     /// If the type appears multiple times in the coproduct, type inference will fail.
     ///
     /// # Example
@@ -437,7 +438,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Rules
     ///
     /// If any type in the input does not appear in the output, the conversion is forbidden.
+    ///
     /// If any type in the input appears multiple times in the output, type inference will fail.
+    ///
     /// All of these rules fall naturally out of its fairly simple definition,
     /// which is equivalent to:
     ///
