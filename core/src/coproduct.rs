@@ -155,7 +155,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// In standard usage, the Index type parameter can be ignored,
     /// as it will typically be solved for using type inference.
     ///
-    /// # Type inference
+    /// # Rules
     ///
     /// If the type does not appear in the coproduct, the conversion is forbidden.
     /// If the type appears multiple times in the coproduct, type inference will fail.
@@ -210,10 +210,10 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     ///
     /// // You can let type inference find the desired type:
     /// let co1 = I32F32::inject(42f32);
-    /// let get_from_1a: Option<&i32> = co1.get();
-    /// let get_from_1b: Option<&f32> = co1.get();
-    /// assert_eq!(get_from_1a, None);
-    /// assert_eq!(get_from_1b, Some(&42f32));
+    /// let co1_as_i32: Option<&i32> = co1.get();
+    /// let co1_as_f32: Option<&f32> = co1.get();
+    /// assert_eq!(co1_as_i32, None);
+    /// assert_eq!(co1_as_f32, Some(&42f32));
     ///
     /// // You can also use turbofish syntax to specify the type.
     /// // The Index parameter should be left as `_`.
@@ -227,6 +227,254 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     where Self: CoproductSelector<S, Index>,
     {
         CoproductSelector::get(self)
+    }
+
+    /// Retrieve an element from a coproduct by type, ignoring all others.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// type I32F32 = Coprod!(i32, f32);
+    ///
+    /// // You can let type inference find the desired type:
+    /// let co1 = I32F32::inject(42f32);
+    /// let co1_as_i32: Option<i32> = co1.take();
+    /// let co1_as_f32: Option<f32> = co1.take();
+    /// assert_eq!(co1_as_i32, None);
+    /// assert_eq!(co1_as_f32, Some(42f32));
+    ///
+    /// // You can also use turbofish syntax to specify the type.
+    /// // The Index parameter should be left as `_`.
+    /// let co2 = I32F32::inject(1i32);
+    /// assert_eq!(co2.take::<i32, _>(), Some(1));
+    /// assert_eq!(co2.take::<f32, _>(), None);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn take<T, Index>(self) -> Option<T>
+    where Self: CoproductTaker<T, Index>,
+    {
+        CoproductTaker::take(self)
+    }
+
+    /// Attempt to extract a value from a coproduct (or get the remaining possibilities).
+    ///
+    /// By chaining calls to this, one can exhaustively match all variants of a coproduct.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// type I32F32 = Coprod!(i32, f32);
+    /// type I32 = Coprod!(i32); // remainder after uninjecting f32
+    /// type F32 = Coprod!(f32); // remainder after uninjecting i32
+    ///
+    /// let co1 = I32F32::inject(42f32);
+    ///
+    /// // You can let type inference find the desired type.
+    /// let co1 = I32F32::inject(42f32);
+    /// let co1_as_i32: Result<i32, F32> = co1.uninject();
+    /// let co1_as_f32: Result<f32, I32> = co1.uninject();
+    /// assert_eq!(co1_as_i32, Err(F32::inject(42f32)));
+    /// assert_eq!(co1_as_f32, Ok(42f32));
+    ///
+    /// // It is not necessary to annotate the type of the remainder:
+    /// let res: Result<i32, _> = co1.uninject();
+    /// assert!(res.is_err());
+    ///
+    /// // You can also use turbofish syntax to specify the type.
+    /// // The Index parameter should be left as `_`.
+    /// let co2 = I32F32::inject(1i32);
+    /// assert_eq!(co2.uninject::<i32, _>(), Ok(1));
+    /// assert_eq!(co2.uninject::<f32, _>(), Err(I32::inject(1)));
+    /// # }
+    /// ```
+    ///
+    /// Chaining calls for an exhaustive match:
+    ///
+    /// ```rust
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// type I32F32 = Coprod!(i32, f32);
+    ///
+    /// // Be aware that this particular example could be
+    /// // written far more succinctly using `fold`.
+    /// fn handle_i32_f32(co: I32F32) -> f32 {
+    ///     // Remove i32 from the coproduct
+    ///     let res: Result<i32, _> = co.uninject();
+    ///     let co = match res {
+    ///         Ok(x) => return (2 * x) as f32,
+    ///         Err(co) => co,
+    ///     };
+    ///
+    ///     // Remove f32 from the coproduct
+    ///     let res: Result<f32, _> = co.uninject();
+    ///     let co = match res {
+    ///         Ok(x) => return 2.0 * x,
+    ///         Err(co) => co,
+    ///     };
+    ///
+    ///     // Now co is empty
+    ///     match co { /* unreachable */ }
+    /// }
+    ///
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3)), 6.0);
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), 6.0);
+    /// # }
+    #[inline(always)]
+    pub fn uninject<T, Index>(self)
+    -> Result<T, <Self as CoprodUninjector<T, Index>>::Remainder>
+    where Self: CoprodUninjector<T, Index>,
+    {
+        CoprodUninjector::uninject(self)
+    }
+
+    /// Extract a subset of the possible types in a coproduct (or get the remaining possibilities)
+    ///
+    /// This is basically [`uninject`] on steroids.  It lets you remove a number
+    /// of types from a coproduct at once, leaving behind the remainder in an `Err`.
+    /// For instance, one can extract `Coprod!(C, A)` from `Coprod!(A, B, C, D)`
+    /// to produce `Result<Coprod!(C, A), Coprod!(B, D)>`.
+    ///
+    /// Each type in the extracted subset is required to be part of the input coproduct.
+    ///
+    /// [`uninject`]: #method.uninject
+    ///
+    /// # Example
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # use ::frunk_core::coproduct::Coproduct;
+    /// # fn main() {
+    /// type I32BoolF32 = Coprod!(i32, bool, f32);
+    /// type I32F32 = Coprod!(i32, f32);
+    ///
+    /// let co1 = I32BoolF32::inject(42_f32);
+    /// let co2 = I32BoolF32::inject(true);
+    ///
+    /// let sub1: Result<Coprod!(i32, f32), _> = co1.subset();
+    /// let sub2: Result<Coprod!(i32, f32), _> = co2.subset();
+    /// assert!(sub1.is_ok());
+    /// assert!(sub2.is_err());
+    ///
+    /// // Turbofish syntax for specifying the target subset is also supported.
+    /// // The Indices parameter should be left to type inference using `_`.
+    /// assert!(co1.subset::<Coprod!(i32, f32), _>().is_ok());
+    /// assert!(co2.subset::<Coprod!(i32, f32), _>().is_err());
+    ///
+    /// // Order doesn't matter.
+    /// assert!(co1.subset::<Coprod!(f32, i32), _>().is_ok());
+    /// # }
+    /// ```
+    ///
+    /// Like `uninject`, `subset` can be used for exhaustive matching,
+    /// with the advantage that it can remove more than one type at a time:
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # use frunk_core::coproduct::*;
+    /// # fn main() {
+    /// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
+    ///     co.fold(hlist![
+    ///         |s| format!("&str {}", s),
+    ///         |s| format!("String {}", s),
+    ///     ])
+    /// }
+    ///
+    /// fn handle_countly_things(co: Coprod!(u32)) -> String {
+    ///     co.fold(hlist![
+    ///         |n| vec!["."; n as usize].concat(),
+    ///     ])
+    /// }
+    ///
+    /// fn handle_all(co: Coprod!(String, u32, &'static str)) -> String {
+    ///     // co is currently Coprod!(String, u32, &'static str)
+    ///     let co = match co.subset().map(handle_stringly_things) {
+    ///         Ok(s) => return s,
+    ///         Err(co) => co,
+    ///     };
+    ///
+    ///     // Now co is Coprod!(u32).
+    ///     let co = match co.subset().map(handle_countly_things) {
+    ///         Ok(s) => return s,
+    ///         Err(co) => co,
+    ///     };
+    ///
+    ///     // Now co is empty.
+    ///     match co { /* unreachable */ }
+    /// }
+    ///
+    /// assert_eq!(handle_all(Coproduct::inject("hello")), "&str hello");
+    /// assert_eq!(handle_all(Coproduct::inject(String::from("World!"))), "String World!");
+    /// assert_eq!(handle_all(Coproduct::inject(4)), "....");
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn subset<Targets, Indices>(self)
+    -> Result<Targets, <Self as CoproductSubsetter<Targets, Indices>>::Remainder>
+    where Self: CoproductSubsetter<Targets, Indices>,
+    {
+        CoproductSubsetter::subset(self)
+    }
+
+    /// Convert a coproduct into another that can hold its variants.
+    ///
+    /// This converts a coproduct into another one which is capable of holding each
+    /// of its types. The most well-supported use-cases (i.e. those where type inference
+    /// is capable of solving for the indices) are:
+    ///
+    /// * Reordering variants: `Coprod!(C, A, B) -> Coprod!(A, B, C)`
+    /// * Embedding into a superset: `Coprod!(B, D) -> Coprod!(A, B, C, D, E)`
+    /// * Coalescing duplicate inputs: `Coprod!(B, B, B, B) -> Coprod!(A, B, C)`
+    ///
+    /// and of course any combination thereof.
+    ///
+    /// # Rules
+    ///
+    /// If any type in the input does not appear in the output, the conversion is forbidden.
+    /// If any type in the input appears multiple times in the output, type inference will fail.
+    /// All of these rules fall naturally out of its fairly simple definition,
+    /// which is equivalent to:
+    ///
+    /// ```text
+    /// coprod.fold(hlist![
+    ///     |x| Coproduct::inject(x),
+    ///     |x| Coproduct::inject(x),
+    ///             ...
+    ///     |x| Coproduct::inject(x),
+    /// ])
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core;
+    /// # fn main() {
+    /// type I32BoolF32 = Coprod!(i32, bool, f32);
+    /// type BoolI32 = Coprod!(bool, i32);
+    ///
+    /// let co = BoolI32::inject(true);
+    /// let embedded: I32BoolF32 = co.embed();
+    /// assert_eq!(embedded, I32BoolF32::inject(true));
+    ///
+    /// // Turbofish syntax for specifying the output type is also supported.
+    /// // The Indices parameter should be left to type inference using `_`.
+    /// let embedded = co.embed::<I32BoolF32, _>();
+    /// assert_eq!(embedded, I32BoolF32::inject(true));
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn embed<Targets, Indices>(self) -> Targets
+    where Self: CoproductEmbedder<Targets, Indices>,
+    {
+        CoproductEmbedder::embed(self)
     }
 }
 
@@ -277,7 +525,7 @@ where
 /// [`Coproduct::get`]. Please see that method for more information.
 ///
 /// You only need to import this trait when working with generic
-/// Coproducts of unknown type. If you have an Coproduct of known type,
+/// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.get()` should "just work" even without the trait.
 ///
 /// [`Coproduct::get`]: ../enum.Coproduct.html#method.get
@@ -318,27 +566,26 @@ where
     }
 }
 
-/// Trait for retrieving a coproduct element by type.
+/// Trait for retrieving a coproduct element by type
 ///
-/// Returns an `Option<YourType>` (notice that the inside of the option is a value)
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::take`]. Please see that method for more information.
 ///
-/// # Example
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have a Coproduct of known type,
+/// then `co.take()` should "just work" even without the trait.
 ///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32F32 = Coprod!(i32, f32);
-///
-/// let co1 = I32F32::inject(42f32);
-///
-/// let get_from_1a: Option<i32> = co1.take();
-/// let get_from_1b: Option<f32> = co1.take();
-/// assert_eq!(get_from_1a, None);
-/// assert_eq!(get_from_1b, Some(42f32));
-/// # }
-/// ```
+/// [`Coproduct::take`]: ../enum.Coproduct.html#method.take
 pub trait CoproductTaker<S, I> {
+    /// Retrieve an element from a coproduct by type, ignoring all others.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../enum.Coproduct.html#method.take
     fn take(self) -> Option<S>;
 }
 
@@ -449,60 +696,26 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 
 /// Trait for extracting a value from a coproduct in an exhaustive way.
 ///
-/// # Examples
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::uninject`]. Please see that method for more information.
 ///
-/// Basic usage:
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have a Coproduct of known type,
+/// then `co.uninject()` should "just work" even without the trait.
 ///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32F32 = Coprod!(i32, f32);
-/// let co1 = I32F32::inject(42f32);
-///
-/// let uninject_1a: Result<i32, _> = co1.uninject();
-/// let uninject_1b: Result<f32, _> = co1.uninject();
-/// assert!(uninject_1a.is_err());
-/// assert_eq!(uninject_1b, Ok(42f32));
-/// # }
-/// ```
-///
-/// Chaining calls for an exhaustive match:
-///
-/// ```rust
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32F32 = Coprod!(i32, f32);
-///
-/// // Be aware that this particular example could be
-/// // written far more succinctly using `fold`.
-/// fn handle_i32_f32(co: I32F32) -> f32 {
-///     // Remove i32 from the coproduct
-///     let res: Result<i32, _> = co.uninject();
-///     let co = match res {
-///         Ok(x) => return (2 * x) as f32,
-///         Err(co) => co,
-///     };
-///
-///     // Remove f32 from the coproduct
-///     let res: Result<f32, _> = co.uninject();
-///     let co = match res {
-///         Ok(x) => return 2.0 * x,
-///         Err(co) => co
-///     };
-///
-///     // Now co is empty;
-///     match co { /* unreachable */ }
-/// }
-///
-/// assert_eq!(handle_i32_f32(I32F32::inject(3)), 6.0);
-/// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), 6.0);
-/// # }
+/// [`Coproduct::uninject`]: ../enum.Coproduct.html#method.uninject
 pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
     type Remainder;
 
-    /// Attempts to get a value from the union.
+    /// Attempt to extract a value from a coproduct (or get the remaining possibilities).
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../enum.Coproduct.html#method.uninject
     fn uninject(self) -> Result<T, Self::Remainder>;
 }
 
@@ -533,80 +746,26 @@ where
 
 /// Trait for extracting a subset of the possible types in a coproduct.
 ///
-/// This is basically [`uninject`] on steroids.  It lets you remove a number
-/// of types from a coproduct at once, leaving behind the remainder in an `Err`.
-/// For instance, one can extract `Coprod!(C, A)` from `Coprod!(A, B, C, D)`
-/// to produce `Result<Coprod!(C, A), Coprod!(B, D)>`.
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::subset`]. Please see that method for more information.
 ///
-/// Each type in the extracted subset is required to be part of the input coproduct.
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have a Coproduct of known type,
+/// then `co.subset()` should "just work" even without the trait.
 ///
-/// [`uninject`]: ../traits.CoprodUninjector.html
-///
-/// # Example
-///
-/// Basic usage:
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32BoolF32 = Coprod!(i32, bool, f32);
-///
-/// let co: Result<Coprod!(i32, f32), _> = I32BoolF32::inject(42_f32).subset();
-/// assert!(co.is_ok());
-///
-/// let co: Result<Coprod!(i32, f32), _> = I32BoolF32::inject(true).subset();
-/// assert!(co.is_err());
-/// # }
-/// ```
-///
-/// Like `uninject`, `subset` can be used for exhaustive matching,
-/// with the advantage that it can remove more than one type at a time:
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
-///     co.fold(hlist![
-///         |s| format!("&str {}", s),
-///         |s| format!("String {}", s),
-///     ])
-/// }
-///
-/// fn handle_countly_things(co: Coprod!(u32)) -> String {
-///     co.fold(hlist![
-///         |n| vec!["."; n as usize].concat(),
-///     ])
-/// }
-///
-/// type Anything = Coprod!(String, u32, &'static str);
-/// fn handle_anything(co: Anything) -> String {
-///
-///     // co is currently Coprod!(String, u32, &'static str)
-///     let co = match co.subset().map(handle_stringly_things) {
-///         Ok(s) => return s,
-///         Err(co) => co,
-///     };
-///
-///     // Now co is Coprod!(u32).
-///     let co = match co.subset().map(handle_countly_things) {
-///         Ok(s) => return s,
-///         Err(co) => co,
-///     };
-///
-///     // Now co is empty.
-///     match co { /* unreachable */ }
-/// }
-///
-/// assert_eq!(handle_anything(Anything::inject("hello")), "&str hello");
-/// assert_eq!(handle_anything(Anything::inject(String::from("World!"))), "String World!");
-/// assert_eq!(handle_anything(Anything::inject(4)), "....");
-/// # }
-/// ```
+/// [`Coproduct::subset`]: ../enum.Coproduct.html#method.subset
 pub trait CoproductSubsetter<Targets, Indices>: Sized {
     type Remainder;
 
+    /// Extract a subset of the possible types in a coproduct (or get the remaining possibilities)
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../enum.Coproduct.html#method.subset
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
@@ -639,40 +798,24 @@ impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
 
 /// Trait for converting a coproduct into another that can hold its variants.
 ///
-/// This converts a coproduct into another one which is capable of holding each
-/// of its types. The most well-supported use-cases (i.e. those where type inference
-/// is capable of solving for the indices) are:
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::embed`]. Please see that method for more information.
 ///
-/// * Reordering variants: `Coprod!(C, A, B) -> Coprod!(A, B, C)`
-/// * Embedding into a superset: `Coprod!(B, D) -> Coprod!(A, B, C, D, E)`
-/// * Coalescing duplicate inputs: `Coprod!(B, B, B, B) -> Coprod!(A, B, C)`
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have a Coproduct of known type,
+/// then `co.embed()` should "just work" even without the trait.
 ///
-/// and of course any combination thereof.
-///
-/// If any type in the input does not appear in the output, the conversion is forbidden.
-/// If any type in the input appears multiple times in the output, type inference will fail.
-/// All of these rules fall naturally out of its fairly simple definition,
-/// which is equivalent to:
-///
-/// ```text
-/// coprod.fold(hlist![|x| Out::inject(x), |x| Out::inject(x), ..., |x| Out::inject(x)])
-/// ```
-///
-/// # Example
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32BoolF32 = Coprod!(i32, bool, f32);
-/// type BoolI32 = Coprod!(bool, i32);
-///
-/// let co = BoolI32::inject(true);
-/// let embedded: I32BoolF32 = co.embed();
-/// assert_eq!(embedded, Coproduct::Inr(Coproduct::Inl(true)));
-/// # }
-/// ```
+/// [`Coproduct::embed`]: ../enum.Coproduct.html#method.embed
 pub trait CoproductEmbedder<Out, Indices> {
+    /// Convert a coproduct into another that can hold its variants.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: ../enum.Coproduct.html#method.embed
     fn embed(self) -> Out;
 }
 
