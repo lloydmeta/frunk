@@ -128,7 +128,6 @@ pub trait HList: Sized {
 ///
 /// ```
 /// # use frunk_core::hlist::{h_cons, HNil};
-///
 /// let h = h_cons(1, HNil);
 /// let h = h.head;
 /// assert_eq!(h, 1);
