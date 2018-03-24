@@ -258,8 +258,8 @@ macro_rules! gen_inherent_methods {
             /// `sculpt` allows us to extract/reshape/scult the current HList into another shape,
             /// provided that the requested shape's types are are contained within the current HList.
             ///
-            /// The "Indices" type parameter allows the compiler to figure out that the Target
-            /// and Self can be morphed into each other.
+            /// The `Indices` type parameter allows the compiler to figure out that `Ts`
+            /// and `Self` can be morphed into each other.
             ///
             /// # Examples
             ///

@@ -148,11 +148,11 @@ macro_rules! Coprod {
 impl<Head, Tail> Coproduct<Head, Tail> {
     /// Instantiate a coproduct from an element.
     ///
-    /// This is generally much nicer than nested usage of `Coproduct::{Inl,Inr}`.
-    /// It uses a trick with type inference to automatically build the correct variant
+    /// This is generally much nicer than nested usage of `Coproduct::{Inl, Inr}`.
+    /// The method uses a trick with type inference to automatically build the correct variant
     /// according to the input type.
     ///
-    /// In standard usage, the Index type parameter can be ignored,
+    /// In standard usage, the `Index` type parameter can be ignored,
     /// as it will typically be solved for using type inference.
     ///
     /// # Rules
