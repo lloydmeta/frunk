@@ -52,6 +52,166 @@
 use std::ops::Add;
 use std::marker::PhantomData;
 
+/// Typeclass for HList-y behaviour
+///
+/// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
+/// it is just an arbitrarily-nested Tuple2.
+pub trait HList: Sized {
+    /// Returns the length of a given HList type without making use of any references, or
+    /// in fact, any values at all.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
+    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::LEN, 3);
+    /// # }
+    /// ```
+    const LEN: usize;
+
+    #[deprecated(since = "0.1.30", note = "Please use len() or static_len() instead.")]
+    fn length(&self) -> u32 {
+        Self::LEN as u32
+    }
+
+    /// Returns the length of a given HList
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// let h = hlist![1, "hi"];
+    /// assert_eq!(h.len(), 2);
+    /// # }
+    /// ```
+    #[inline]
+    fn len(&self) -> usize {
+        Self::LEN
+    }
+
+    /// Returns the length of a given HList type without making use of any references, or
+    /// in fact, any values at all.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
+    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
+    /// # }
+    /// ```
+    #[inline]
+    #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
+    fn static_len() -> usize;
+
+    /// Prepends an item to the current HList
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// let h1 = hlist![1, "hi"];
+    /// let h2 = h1.prepend(true);
+    /// let (a, (b, c)) = h2.into_tuple2();
+    /// assert_eq!(a, true);
+    /// assert_eq!(b, 1);
+    /// assert_eq!(c, "hi");
+    /// # }
+    fn prepend<H>(self, h: H) -> HCons<H, Self> {
+        HCons {
+            head: h,
+            tail: self,
+        }
+    }
+}
+
+/// Represents the right-most end of a heterogeneous list
+///
+/// # Examples
+///
+/// ```
+/// # use frunk_core::hlist::{h_cons, HNil};
+///
+/// let h = h_cons(1, HNil);
+/// let h = h.head;
+/// assert_eq!(h, 1);
+/// ```
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct HNil;
+
+impl HList for HNil {
+    const LEN: usize = 0;
+    fn static_len() -> usize {
+        Self::LEN
+    }
+}
+
+impl AsRef<HNil> for HNil {
+    fn as_ref(&self) -> &HNil {
+        self
+    }
+}
+
+/// Represents the most basic non-empty HList. Its value is held in `head`
+/// while its tail is another HList.
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct HCons<H, T> {
+    pub head: H,
+    pub tail: T,
+}
+
+impl<H, T: HList> HList for HCons<H, T> {
+    const LEN: usize = 1 + <T as HList>::LEN;
+    fn static_len() -> usize {
+        Self::LEN
+    }
+}
+
+impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
+    fn as_ref(&self) -> &HCons<H, T> {
+        self
+    }
+}
+
+impl<H, T> HCons<H, T> {
+    /// Returns the head of the list and the tail of the list as a tuple2.
+    /// The original list is consumed
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HNil; fn main() {
+    /// let h = hlist!("hi");
+    /// let (h, tail) = h.pop();
+    /// assert_eq!(h, "hi");
+    /// assert_eq!(tail, HNil);
+    /// # }
+    /// ```
+    pub fn pop(self) -> (H, T) {
+        (self.head, self.tail)
+    }
+}
+
+
+/// Takes an element and an Hlist and returns another one with
+/// the element prepended to the original list. The original list
+/// is consumed
+///
+/// # Examples
+///
+/// ```
+/// # use frunk_core::hlist::*;
+/// let h_list = h_cons("what", h_cons(1.23f32, HNil));
+/// let (h1, h2) = h_list.into_tuple2();
+/// assert_eq!(h1, "what");
+/// assert_eq!(h2, 1.23f32);
+/// ```
+pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
+    HCons {
+        head: h,
+        tail: tail,
+    }
+}
+
 // Inherent methods shared by HNil and HCons.
 macro_rules! gen_inherent_methods {
     (impl<$($TyPar:ident),*> $Struct:ty { ... })
@@ -235,166 +395,6 @@ impl<Head, Tail> HCons<Head, Tail> {
     where Self: IntoTuple2,
     {
         IntoTuple2::into_tuple2(self)
-    }
-}
-
-/// Typeclass for HList-y behaviour
-///
-/// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
-/// it is just an arbitrarily-nested Tuple2.
-pub trait HList: Sized {
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
-    ///
-    /// # Examples
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::LEN, 3);
-    /// # }
-    /// ```
-    const LEN: usize;
-
-    #[deprecated(since = "0.1.30", note = "Please use len() or static_len() instead.")]
-    fn length(&self) -> u32 {
-        Self::LEN as u32
-    }
-
-    /// Returns the length of a given HList
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
-    /// let h = hlist![1, "hi"];
-    /// assert_eq!(h.len(), 2);
-    /// # }
-    /// ```
-    #[inline]
-    fn len(&self) -> usize {
-        Self::LEN
-    }
-
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
-    ///
-    /// # Examples
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
-    /// # }
-    /// ```
-    #[inline]
-    #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
-    fn static_len() -> usize;
-
-    /// Prepends an item to the current HList
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
-    /// let h1 = hlist![1, "hi"];
-    /// let h2 = h1.prepend(true);
-    /// let (a, (b, c)) = h2.into_tuple2();
-    /// assert_eq!(a, true);
-    /// assert_eq!(b, 1);
-    /// assert_eq!(c, "hi");
-    /// # }
-    fn prepend<H>(self, h: H) -> HCons<H, Self> {
-        HCons {
-            head: h,
-            tail: self,
-        }
-    }
-}
-
-/// Represents the right-most end of a heterogeneous list
-///
-/// # Examples
-///
-/// ```
-/// # use frunk_core::hlist::{h_cons, HNil};
-///
-/// let h = h_cons(1, HNil);
-/// let h = h.head;
-/// assert_eq!(h, 1);
-/// ```
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct HNil;
-
-impl HList for HNil {
-    const LEN: usize = 0;
-    fn static_len() -> usize {
-        Self::LEN
-    }
-}
-
-impl AsRef<HNil> for HNil {
-    fn as_ref(&self) -> &HNil {
-        self
-    }
-}
-
-/// Represents the most basic non-empty HList. Its value is held in `head`
-/// while its tail is another HList.
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct HCons<H, T> {
-    pub head: H,
-    pub tail: T,
-}
-
-impl<H, T: HList> HList for HCons<H, T> {
-    const LEN: usize = 1 + <T as HList>::LEN;
-    fn static_len() -> usize {
-        Self::LEN
-    }
-}
-
-impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
-    fn as_ref(&self) -> &HCons<H, T> {
-        self
-    }
-}
-
-impl<H, T> HCons<H, T> {
-    /// Returns the head of the list and the tail of the list as a tuple2.
-    /// The original list is consumed
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HNil; fn main() {
-    /// let h = hlist!("hi");
-    /// let (h, tail) = h.pop();
-    /// assert_eq!(h, "hi");
-    /// assert_eq!(tail, HNil);
-    /// # }
-    /// ```
-    pub fn pop(self) -> (H, T) {
-        (self.head, self.tail)
-    }
-}
-
-
-/// Takes an element and an Hlist and returns another one with
-/// the element prepended to the original list. The original list
-/// is consumed
-///
-/// # Examples
-///
-/// ```
-/// # use frunk_core::hlist::*;
-/// let h_list = h_cons("what", h_cons(1.23f32, HNil));
-/// let (h1, h2) = h_list.into_tuple2();
-/// assert_eq!(h1, "what");
-/// assert_eq!(h2, 1.23f32);
-/// ```
-pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    HCons {
-        head: h,
-        tail: tail,
     }
 }
 
