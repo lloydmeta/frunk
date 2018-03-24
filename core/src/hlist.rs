@@ -352,7 +352,6 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// let list = hlist![1, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the target type.
-    /// // This extracts the bool element due to our use of assert!.
     /// let (b, list): (bool, _) = list.pluck();
     /// assert!(b);
     ///
