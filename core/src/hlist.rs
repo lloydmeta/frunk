@@ -562,7 +562,7 @@ pub struct There<T>(PhantomData<T>);
 /// HLists of unknown type. If you have an HList of known type,
 /// then `list.get()` should "just work" even without the trait.
 ///
-/// [`HCons::get`]: ../struct.HCons.html#method.get
+/// [`HCons::get`]: struct.HCons.html#method.get
 pub trait Selector<S, I> {
     /// Borrow an element by type from an HList.
     ///
@@ -572,7 +572,7 @@ pub trait Selector<S, I> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../struct.HCons.html#method.get
+    /// [inherent method]: struct.HCons.html#method.get
     fn get(&self) -> &S;
 }
 
@@ -599,7 +599,7 @@ impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for H
 /// HLists of unknown type. If you have an HList of known type,
 /// then `list.pluck()` should "just work" even without the trait.
 ///
-/// [`HCons::pluck`]: ../struct.HCons.html#method.pluck
+/// [`HCons::pluck`]: struct.HCons.html#method.pluck
 pub trait Plucker<Target, Index> {
     /// What is left after you pluck the target from the Self
     type Remainder;
@@ -612,7 +612,7 @@ pub trait Plucker<Target, Index> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../struct.HCons.html#method.pluck
+    /// [inherent method]: struct.HCons.html#method.pluck
     fn pluck(self) -> (Target, Self::Remainder);
 }
 
@@ -652,7 +652,7 @@ impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HC
 /// HLists of unknown type. If you have an HList of known type,
 /// then `list.sculpt()` should "just work" even without the trait.
 ///
-/// [`HCons::sculpt`]: ../struct.HCons.html#method.sculpt
+/// [`HCons::sculpt`]: struct.HCons.html#method.sculpt
 pub trait Sculptor<Target, Indices> {
     type Remainder;
 
@@ -664,7 +664,7 @@ pub trait Sculptor<Target, Indices> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../struct.HCons.html#method.sculpt
+    /// [inherent method]: struct.HCons.html#method.sculpt
     fn sculpt(self) -> (Target, Self::Remainder);
 }
 
@@ -725,7 +725,7 @@ where
 /// This functionality is also provided as an [inherent method].
 /// However, you may find this trait useful in generic contexts.
 ///
-/// [inherent method]: ../struct.HCons.html#method.into_reverse
+/// [inherent method]: struct.HCons.html#method.into_reverse
 pub trait IntoReverse {
     type Output;
 
@@ -1162,7 +1162,7 @@ where
 /// if you have an HList of known type, then `list.into_tuple2()`
 /// should "just work," even without the trait.
 ///
-/// [`HCons::into_tuple2`]: ../struct.HCons.html#method.into_tuple2
+/// [`HCons::into_tuple2`]: struct.HCons.html#method.into_tuple2
 pub trait IntoTuple2 {
     /// The 0 element in the output tuple
     type HeadType;
@@ -1175,7 +1175,7 @@ pub trait IntoTuple2 {
     ///
     /// Please see the [inherent method] for more information.
     ///
-    /// [inherent method]: ../struct.HCons.html#method.into_tuple2
+    /// [inherent method]: struct.HCons.html#method.into_tuple2
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput);
 }
 

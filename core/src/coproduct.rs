@@ -485,7 +485,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
 /// Coproducts of unknown type. In most code, `Coproduct::inject` will
 /// "just work," with or without this trait.
 ///
-/// [`Coproduct::inject`]: ../enum.Coproduct.html#method.inject
+/// [`Coproduct::inject`]: enum.Coproduct.html#method.inject
 pub trait CoprodInjector<InjectType, Index> {
     /// Instantiate a coproduct from an element.
     ///
@@ -495,7 +495,7 @@ pub trait CoprodInjector<InjectType, Index> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent static method]: ../enum.Coproduct.html#method.inject
+    /// [inherent static method]: enum.Coproduct.html#method.inject
     fn inject(to_insert: InjectType) -> Self;
 }
 
@@ -526,7 +526,7 @@ where
 /// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.get()` should "just work" even without the trait.
 ///
-/// [`Coproduct::get`]: ../enum.Coproduct.html#method.get
+/// [`Coproduct::get`]: enum.Coproduct.html#method.get
 pub trait CoproductSelector<S, I> {
     /// Borrow an element from a coproduct by type.
     ///
@@ -536,7 +536,7 @@ pub trait CoproductSelector<S, I> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../enum.Coproduct.html#method.get
+    /// [inherent method]: enum.Coproduct.html#method.get
     fn get(&self) -> Option<&S>;
 }
 
@@ -573,7 +573,7 @@ where
 /// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.take()` should "just work" even without the trait.
 ///
-/// [`Coproduct::take`]: ../enum.Coproduct.html#method.take
+/// [`Coproduct::take`]: enum.Coproduct.html#method.take
 pub trait CoproductTaker<S, I> {
     /// Retrieve an element from a coproduct by type, ignoring all others.
     ///
@@ -583,7 +583,7 @@ pub trait CoproductTaker<S, I> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../enum.Coproduct.html#method.take
+    /// [inherent method]: enum.Coproduct.html#method.take
     fn take(self) -> Option<S>;
 }
 
@@ -701,7 +701,7 @@ impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
 /// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.uninject()` should "just work" even without the trait.
 ///
-/// [`Coproduct::uninject`]: ../enum.Coproduct.html#method.uninject
+/// [`Coproduct::uninject`]: enum.Coproduct.html#method.uninject
 pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
     type Remainder;
 
@@ -713,7 +713,7 @@ pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../enum.Coproduct.html#method.uninject
+    /// [inherent method]: enum.Coproduct.html#method.uninject
     fn uninject(self) -> Result<T, Self::Remainder>;
 }
 
@@ -751,7 +751,7 @@ where
 /// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.subset()` should "just work" even without the trait.
 ///
-/// [`Coproduct::subset`]: ../enum.Coproduct.html#method.subset
+/// [`Coproduct::subset`]: enum.Coproduct.html#method.subset
 pub trait CoproductSubsetter<Targets, Indices>: Sized {
     type Remainder;
 
@@ -763,7 +763,7 @@ pub trait CoproductSubsetter<Targets, Indices>: Sized {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../enum.Coproduct.html#method.subset
+    /// [inherent method]: enum.Coproduct.html#method.subset
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
@@ -803,7 +803,7 @@ impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
 /// Coproducts of unknown type. If you have a Coproduct of known type,
 /// then `co.embed()` should "just work" even without the trait.
 ///
-/// [`Coproduct::embed`]: ../enum.Coproduct.html#method.embed
+/// [`Coproduct::embed`]: enum.Coproduct.html#method.embed
 pub trait CoproductEmbedder<Out, Indices> {
     /// Convert a coproduct into another that can hold its variants.
     ///
@@ -813,7 +813,7 @@ pub trait CoproductEmbedder<Out, Indices> {
     /// trait method is the location of the type parameters.
     /// (here, they are on the trait rather than the method)
     ///
-    /// [inherent method]: ../enum.Coproduct.html#method.embed
+    /// [inherent method]: enum.Coproduct.html#method.embed
     fn embed(self) -> Out;
 }
 
