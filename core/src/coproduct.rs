@@ -306,15 +306,13 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// // written far more succinctly using `fold`.
     /// fn handle_i32_f32(co: I32F32) -> f32 {
     ///     // Remove i32 from the coproduct
-    ///     let res: Result<i32, _> = co.uninject();
-    ///     let co = match res {
+    ///     let co = match co.uninject::<i32, _>() {
     ///         Ok(x) => return (2 * x) as f32,
     ///         Err(co) => co,
     ///     };
     ///
     ///     // Remove f32 from the coproduct
-    ///     let res: Result<f32, _> = co.uninject();
-    ///     let co = match res {
+    ///     let co = match co.uninject::<f32, _>() {
     ///         Ok(x) => return 2.0 * x,
     ///         Err(co) => co,
     ///     };
@@ -1016,8 +1014,8 @@ mod tests {
             type ABC = Coprod!(A, B, C);
             type BBB = Coprod!(B, B, B);
 
-            let b1 = <BBB as CoprodInjector<B, Here>>::inject(B);
-            let b2 = <BBB as CoprodInjector<B, There<Here>>>::inject(B);
+            let b1 = BBB::inject::<_, Here>(B);
+            let b2 = BBB::inject::<_, There<Here>>(B);
             let out1: ABC = b1.embed();
             let out2: ABC = b2.embed();
             assert_eq!(out1, Coproduct::Inr(Coproduct::Inl(B)));
