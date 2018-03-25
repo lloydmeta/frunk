@@ -8,7 +8,7 @@
 The general idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
 ```rust
-use frunk::monoid::*;
+use frunk::monoid::combine_all;
 
 let v = vec![Some(1), Some(3)];
 assert_eq!(combine_all(&v), Some(4));
@@ -164,7 +164,6 @@ Here are some examples:
 #[macro_use] // for the hlist macro
 extern crate frunk;
 extern crate frunk_core;
-use frunk::generic::*; // for the Generic trait and HList
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -174,7 +173,7 @@ struct Person<'a> {
 }
 
 let h = hlist!("Joe", "Blow", 30);
-let p: Person = from_generic(h);
+let p: Person = frunk::from_generic(h);
 assert_eq!(p,
            Person {
                first_name: "Joe",
@@ -215,7 +214,7 @@ let a_person = ApiPerson {
                    LastName: "Blow",
                    Age: 30,
 };
-let d_person: DomainPerson = convert_from(a_person); // done
+let d_person: DomainPerson = frunk::convert_from(a_person); // done
 ```
 
 #### LabelledGeneric
@@ -257,7 +256,7 @@ let n_user = NewUser {
 //
 // Also note that we're using a helper method to avoid having to use universal
 // function call syntax
-let s_user: SavedUser = labelled_convert_from(n_user);
+let s_user: SavedUser = frunk::labelled_convert_from(n_user);
 
 assert_eq!(s_user.first_name, "Joe");
 assert_eq!(s_user.last_name, "Blow");
@@ -276,7 +275,7 @@ let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.
-let d_user: DeletedUser = transform_from(s_user);
+let d_user: DeletedUser = frunk::transform_from(s_user);
 ```
 
 For more information how Generic and Field work, check out their respective Rustdocs:
@@ -291,7 +290,7 @@ want a sum type to do this, but there is a light-weight way of doing it through 
 
 ```rust
 #[macro_use] extern crate frunk; // for the Coprod! type macro
-use frunk::coproduct::*;
+use frunk::prelude::*; // for the fold method
 
 // Declare the types we want in our Coproduct
 type I32F32Bool = Coprod!(i32, f32, bool);
@@ -334,8 +333,7 @@ best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)).
 To use `Validated`, first:
 ```rust
 #[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk_core::hlist::*;
-use frunk::validated::*;
+use frunk::prelude::*; // for Result::into_validated
 ```
 
 Assuming we have a `Person` struct defined
@@ -402,7 +400,7 @@ assert_eq!(try_person2.unwrap_err(),
 Things that can be combined.
 
 ```rust
-use frunk::semigroup::*;
+use frunk::Semigroup;
 
 assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
@@ -415,7 +413,7 @@ assert_eq!(All(true).combine(&All(false)), All(false));
 Things that can be combined *and* have an empty/id value.
 
 ```rust
-use frunk::monoid::*;
+use frunk::monoid::combine_all;
 
 let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 let t2 = (1, 2.5f32, String::from(" world"), None);

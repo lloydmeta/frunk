@@ -16,17 +16,13 @@
 //! ```
 //! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*; fn main() {
-//! use frunk::hlist::*;
-//! use frunk::generic::*;
-//! use frunk::labelled::*;
-//! use frunk::monoid::*;
-//! use frunk::semigroup::*;
-//! use frunk::validated::*;
+//! # fn main() {
+//! use frunk::prelude::*;
+//! use frunk::{self, monoid, Semigroup, Generic};
 //!
 //! // Combining Monoids
 //! let v = vec![Some(1), Some(3)];
-//! assert_eq!(combine_all(&v), Some(4));
+//! assert_eq!(monoid::combine_all(&v), Some(4));
 //!
 //! // HLists
 //! let h = hlist![1, "hi"];
@@ -65,10 +61,10 @@
 //! }
 //!
 //! // Instantiate a struct from an HList. Note that you can go the other way too.
-//! let a_user: ApiUser = from_generic(hlist!["Joe", "Blow", 30]);
+//! let a_user: ApiUser = frunk::from_generic(hlist!["Joe", "Blow", 30]);
 //!
 //! // Convert using Generic
-//! let n_user = <NewUser as Generic>::convert_from(a_user); // done
+//! let n_user: NewUser = Generic::convert_from(a_user); // done
 //!
 //! // Convert using LabelledGeneric
 //! //
@@ -77,7 +73,7 @@
 //! //
 //! // Also note that we're using a helper method to avoid having to use universal
 //! // function call syntax
-//! let s_user: SavedUser = labelled_convert_from(n_user);
+//! let s_user: SavedUser = frunk::labelled_convert_from(n_user);
 //!
 //! assert_eq!(s_user.first_name, "Joe");
 //! assert_eq!(s_user.last_name, "Blow");
@@ -94,7 +90,7 @@
 //!
 //! // This will, however, work, because we make use of the Sculptor type-class
 //! // to type-safely reshape the representations to align/match each other.
-//! let d_user: DeletedUser = transform_from(s_user);
+//! let d_user: DeletedUser = frunk::transform_from(s_user);
 //! assert_eq!(d_user.first_name, "Joe");
 //! # }
 //! ```
@@ -116,3 +112,60 @@ pub mod validated;
 
 pub use frunk_core::*;
 pub use frunk_derives::*;
+
+// Root-level reexports so that users don't need to guess where things are located.
+//
+// Things to re-export:
+//
+// * Datatypes and free functions intended for human consumption.
+//   * **Exception:** things that benefit from being namespaced,
+//     like `frunk::semigroup::Any`
+//
+// * Traits that users ought to care enough about to `use` it **by name:**
+//   * ...because users might want to `impl` it for their own types
+//   * ...because it shows up in lots of `where` bounds
+//   * NOT simply because it extends existing types with useful methods
+//     (that's what the prelude is for!)
+
+pub use hlist::HNil;
+pub use hlist::HCons;
+pub use coproduct::Coproduct;
+pub use hlist::h_cons;
+
+pub use hlist::LiftFrom;
+pub use hlist::LiftInto;
+pub use hlist::lift_from;
+
+pub use generic::Generic;
+pub use labelled::LabelledGeneric;
+pub use generic::from_generic;
+pub use generic::into_generic;
+pub use generic::convert_from;
+pub use labelled::from_labelled_generic;
+pub use labelled::into_labelled_generic;
+pub use labelled::labelled_convert_from;
+pub use labelled::transform_from;
+
+pub use semigroup::Semigroup;
+
+pub use monoid::Monoid;
+
+pub use validated::Validated;
+
+pub mod prelude {
+    //! Traits that need to be imported for the complete `frunk` experience.
+    //!
+    //! The intent here is that `use frunk_core::prelude::*;`
+    //! (or `use frunk::prelude::*`) is enough to provide access to any
+    //! missing methods advertised in frunk's documentation.
+
+    // Methods on frunk's own types that have no inherent method wrappers.
+    pub use hlist::HList; // for LEN
+    pub use hlist::HMappable;
+    pub use hlist::HFoldRightable;
+    pub use hlist::HFoldLeftable;
+    pub use coproduct::CoproductFoldable;
+
+    // Extension traits on types external to frunk
+    pub use validated::IntoValidated;
+}
