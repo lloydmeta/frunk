@@ -130,6 +130,79 @@ macro_rules! Coprod {
     };
 }
 
+/// Used for creating a Field
+///
+/// There are 3 forms of this macro:
+///
+/// * Create an instance of the `Field` struct with a tuple name type
+///   and any given value. The runtime-retrievable static name
+///   field will be set to the the concatenation of the types passed in the
+///   tuple type used as the first argument.
+///
+/// # Examples
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// let labelled = field![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "joe")
+/// # }
+/// ```
+///
+/// * Create an instance of the `Field` struct with a custom, non-tuple
+///   name type and a value. The runtime-retrievable static name field
+///   will be set to the stringified version of the type provided.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// enum first_name {}
+/// let labelled = field![first_name, "Joe"];
+/// assert_eq!(labelled.name, "first_name");
+/// assert_eq!(labelled.value, "Joe");
+/// # }
+/// ```
+///
+/// * Create an instance of the `Field` struct with any name type and value,
+///   _and_ a custom name, passed as the last argument in the macro
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::labelled::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// // useful aliasing of our type-level string
+/// type age = (a, g, e);
+/// let labelled = field![age, 30, "Age"];
+/// assert_eq!(labelled.name, "Age");
+/// assert_eq!(labelled.value, 30);
+/// # }
+/// ```
+#[macro_export]
+macro_rules! field {
+    // No name provided and type is a tuple
+    (($($repeated: ty),*), $value: expr) => {
+        field!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
+    };
+    // No name provided and type is a tuple, but with trailing commas
+    (($($repeated: ty,)*), $value: expr) => {
+        field!( ($($repeated),*), $value )
+    };
+    // We are provided any type, with no stable name
+    ($name_type: ty, $value: expr) => {
+        field!( $name_type, $value, stringify!($name_type) )
+    };
+    // We are provided any type, with a stable name
+    ($name_type: ty, $value: expr, $name: expr) => {
+        $crate::labelled::field_with_name::<$name_type,_>($name, $value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
