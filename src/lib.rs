@@ -127,45 +127,48 @@ pub use frunk_derives::*;
 //   * NOT simply because it extends existing types with useful methods
 //     (that's what the prelude is for!)
 
-pub use hlist::HNil;
-pub use hlist::HCons;
-pub use coproduct::Coproduct;
-pub use hlist::h_cons;
+// NOTE: without `#[doc(no_inline)]`, rustdoc will generate two separate pages for
+//       each item (one in `frunk::` and another in `frunk_core::module::`).
+//       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.
 
-pub use hlist::LiftFrom;
-pub use hlist::LiftInto;
-pub use hlist::lift_from;
+#[doc(no_inline)] pub use hlist::HNil;
+#[doc(no_inline)] pub use hlist::HCons;
+#[doc(no_inline)] pub use coproduct::Coproduct;
+#[doc(no_inline)] pub use hlist::h_cons;
 
-pub use generic::Generic;
-pub use labelled::LabelledGeneric;
-pub use generic::from_generic;
-pub use generic::into_generic;
-pub use generic::convert_from;
-pub use labelled::from_labelled_generic;
-pub use labelled::into_labelled_generic;
-pub use labelled::labelled_convert_from;
-pub use labelled::transform_from;
+#[doc(no_inline)] pub use hlist::LiftFrom;
+#[doc(no_inline)] pub use hlist::LiftInto;
+#[doc(no_inline)] pub use hlist::lift_from;
 
-pub use semigroup::Semigroup;
+#[doc(no_inline)] pub use generic::Generic;
+#[doc(no_inline)] pub use labelled::LabelledGeneric;
+#[doc(no_inline)] pub use generic::from_generic;
+#[doc(no_inline)] pub use generic::into_generic;
+#[doc(no_inline)] pub use generic::convert_from;
+#[doc(no_inline)] pub use labelled::from_labelled_generic;
+#[doc(no_inline)] pub use labelled::into_labelled_generic;
+#[doc(no_inline)] pub use labelled::labelled_convert_from;
+#[doc(no_inline)] pub use labelled::transform_from;
 
-pub use monoid::Monoid;
+#[doc(no_inline)] pub use semigroup::Semigroup;
 
-pub use validated::Validated;
+#[doc(no_inline)] pub use monoid::Monoid;
+
+#[doc(no_inline)] pub use validated::Validated;
 
 pub mod prelude {
     //! Traits that need to be imported for the complete `frunk` experience.
     //!
-    //! The intent here is that `use frunk_core::prelude::*;`
-    //! (or `use frunk::prelude::*`) is enough to provide access to any
-    //! missing methods advertised in frunk's documentation.
+    //! The intent here is that `use frunk::prelude::*` is enough to provide
+    //! access to any missing methods advertised in frunk's documentation.
 
     // Methods on frunk's own types that have no inherent method wrappers.
-    pub use hlist::HList; // for LEN
-    pub use hlist::HMappable;
-    pub use hlist::HFoldRightable;
-    pub use hlist::HFoldLeftable;
-    pub use coproduct::CoproductFoldable;
+    #[doc(no_inline)] pub use hlist::HList; // for LEN
+    #[doc(no_inline)] pub use hlist::HMappable;
+    #[doc(no_inline)] pub use hlist::HFoldRightable;
+    #[doc(no_inline)] pub use hlist::HFoldLeftable;
+    #[doc(no_inline)] pub use coproduct::CoproductFoldable;
 
     // Extension traits on types external to frunk
-    pub use validated::IntoValidated;
+    #[doc(no_inline)] pub use validated::IntoValidated;
 }
