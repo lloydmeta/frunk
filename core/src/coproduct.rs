@@ -305,16 +305,16 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     ///
     /// // Be aware that this particular example could be
     /// // written far more succinctly using `fold`.
-    /// fn handle_i32_f32(co: I32F32) -> f32 {
+    /// fn handle_i32_f32(co: I32F32) -> &'static str {
     ///     // Remove i32 from the coproduct
     ///     let co = match co.uninject::<i32, _>() {
-    ///         Ok(x) => return (2 * x) as f32,
+    ///         Ok(x) => return "integer!",
     ///         Err(co) => co,
     ///     };
     ///
     ///     // Remove f32 from the coproduct
     ///     let co = match co.uninject::<f32, _>() {
-    ///         Ok(x) => return 2.0 * x,
+    ///         Ok(x) => return "float!",
     ///         Err(co) => co,
     ///     };
     ///
@@ -322,8 +322,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     ///     match co { /* unreachable */ }
     /// }
     ///
-    /// assert_eq!(handle_i32_f32(I32F32::inject(3)), 6.0);
-    /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), 6.0);
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3)), "integer!");
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), "float!");
     /// # }
     #[inline(always)]
     pub fn uninject<T, Index>(self)
