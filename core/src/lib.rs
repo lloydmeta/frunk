@@ -58,11 +58,16 @@
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
 #[macro_use]
+mod macros;
+
 pub mod hlist;
 pub mod coproduct;
 pub mod generic;
 pub mod labelled;
 mod tuples;
+
+#[cfg(test)]
+mod test_structs;
 
 #[cfg(feature = "serde")]
 #[macro_use]
