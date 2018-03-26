@@ -133,16 +133,17 @@ pub use frunk_derives::*;
 
 #[doc(no_inline)] pub use hlist::HNil;
 #[doc(no_inline)] pub use hlist::HCons;
-#[doc(no_inline)] pub use coproduct::Coproduct;
 #[doc(no_inline)] pub use hlist::h_cons;
-
 #[doc(no_inline)] pub use hlist::lift_from;
 
+#[doc(no_inline)] pub use coproduct::Coproduct;
+
 #[doc(no_inline)] pub use generic::Generic;
-#[doc(no_inline)] pub use labelled::LabelledGeneric;
 #[doc(no_inline)] pub use generic::from_generic;
 #[doc(no_inline)] pub use generic::into_generic;
 #[doc(no_inline)] pub use generic::convert_from;
+
+#[doc(no_inline)] pub use labelled::LabelledGeneric;
 #[doc(no_inline)] pub use labelled::from_labelled_generic;
 #[doc(no_inline)] pub use labelled::into_labelled_generic;
 #[doc(no_inline)] pub use labelled::labelled_convert_from;
@@ -160,15 +161,14 @@ pub mod prelude {
     //! The intent here is that `use frunk::prelude::*` is enough to provide
     //! access to any missing methods advertised in frunk's documentation.
 
-    // Methods on frunk's own types that have no inherent method wrappers.
     #[doc(no_inline)] pub use hlist::HList; // for LEN
     #[doc(no_inline)] pub use hlist::HMappable;
     #[doc(no_inline)] pub use hlist::HFoldRightable;
     #[doc(no_inline)] pub use hlist::HFoldLeftable;
     #[doc(no_inline)] pub use hlist::LiftFrom;
     #[doc(no_inline)] pub use hlist::LiftInto;
+
     #[doc(no_inline)] pub use coproduct::CoproductFoldable;
 
-    // Extension traits on types external to frunk
     #[doc(no_inline)] pub use validated::IntoValidated;
 }
