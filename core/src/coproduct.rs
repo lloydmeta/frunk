@@ -104,46 +104,6 @@ pub enum Coproduct<H, T> {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CNil {}
 
-/// Returns a type signature for a Coproduct of the provided types
-///
-/// This is a type macro (introduced in Rust 1.13) that makes it easier
-/// to write nested type signatures.
-///
-/// # Examples
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
-/// # fn main() {
-/// type I32Bool = Coprod!(i32, bool);
-/// let co1 = I32Bool::inject(3);
-/// # }
-/// ```
-#[macro_export]
-macro_rules! Coprod {
-    // Nothing
-    () => { $crate::coproduct::CNil };
-
-    // Just a single item
-    ($single: ty) => {
-        $crate::coproduct::Coproduct<$single, $crate::coproduct::CNil>
-    };
-
-    ($first: ty, $( $repeated: ty ), +) => {
-        $crate::coproduct::Coproduct<$first, Coprod!($($repeated), *)>
-    };
-
-    // <-- Forward trailing comma variants
-    ($single: ty,) => {
-        Coprod![$single]
-    };
-
-    ($first: ty, $( $repeated: ty, ) +) => {
-        Coprod![$first, $($repeated),*]
-    };
-    // Forward trailing comma variants -->
-}
-
 // Inherent methods
 impl<Head, Tail> Coproduct<Head, Tail> {
     /// Instantiate a coproduct from an element.
