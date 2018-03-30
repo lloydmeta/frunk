@@ -663,7 +663,43 @@ where
     }
 }
 
-/// Trail that allow for mapping over a data structure using mapping functions stored in another
+// Thin wrapper for discriminating against just F
+pub struct Poly<T>(pub T);
+
+// Special index type for Poly; essentially ignored
+pub enum PolyIndex {}
+
+// Essentially just Func
+pub trait Func<In> {
+    type Output;
+
+    fn call(i: In) -> Self::Output;
+}
+
+impl<P> HMappable<Poly<P>, PolyIndex> for HNil
+{
+    type Output = HNil;
+
+    fn map(self, _: Poly<P>) -> Self::Output {
+        HNil
+    }
+}
+
+impl<P, H, Tail> HMappable<Poly<P>, PolyIndex> for HCons<H, Tail>
+where
+    P: Func<H>,
+    Tail: HMappable<Poly<P>, PolyIndex>,
+{
+    type Output = HCons<<P as Func<H>>::Output, <Tail as HMappable<Poly<P>, PolyIndex>>::Output>;
+    fn map(self, poly: Poly<P>) -> Self::Output {
+        HCons {
+            head: P::call(self.head),
+            tail: self.tail.map(poly),
+        }
+    }
+}
+
+/// Trait that allow for mapping over a data structure using mapping functions stored in another
 /// data structure
 ///
 /// It might be a good idea to try to re-write these using the foldr variants, but it's a
@@ -1303,6 +1339,31 @@ mod tests {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_poly_map_consuming() {
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        impl Func<i32> for P {
+            type Output = bool;
+            fn call(args: i32) -> Self::Output {
+                args > 100
+            }
+        }
+        impl <'a> Func<&'a str> for P {
+            type Output = usize;
+            fn call(args: &'a str) -> Self::Output {
+                args.len()
+            }
+        }
+        impl Func<f32> for P {
+            type Output = String;
+            fn call(args: f32) -> Self::Output {
+                format!("{}", args)
+            }
+        }
+        struct P;
+        assert_eq!(h.map(Poly(P)), hlist![true, 3, "41".to_string(), 6, false]);
     }
 
     #[test]

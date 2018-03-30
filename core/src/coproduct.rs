@@ -609,6 +609,20 @@ pub trait CoproductFoldable<Folder, Output> {
     fn fold(self, f: Folder) -> Output;
 }
 
+impl <P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<CH, CTail>
+where
+  P: Func<CH, Output = R>,
+  CTail: CoproductFoldable<Poly<P>, R>,
+{
+    fn fold(self, f: Poly<P>) -> R {
+        use self::Coproduct::*;
+        match self {
+            Inl(r) => P::call(r),
+            Inr(rest) => rest.fold(f),
+        }
+    }
+}
+
 impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
 where
     F: FnOnce(CH) -> R,
@@ -863,6 +877,36 @@ mod tests {
         ]);
 
         assert_eq!(folded, "int 3".to_string());
+    }
+
+    #[test]
+    fn test_coproduct_poly_fold_consuming() {
+        type I32F32StrBool = Coprod!(i32, f32, bool);
+
+        impl Func<i32> for P {
+            type Output = bool;
+            fn call(args: i32) -> Self::Output {
+                args > 100
+            }
+        }
+        impl Func<bool> for P {
+            type Output = bool;
+            fn call(args: bool) -> Self::Output {
+                args
+            }
+        }
+        impl Func<f32> for P {
+            type Output = bool;
+            fn call(args: f32) -> Self::Output {
+                args > 9000f32
+            }
+        }
+        struct P;
+
+        let co1 = I32F32StrBool::inject(3);
+        let folded = co1.fold(Poly(P));
+
+        assert_eq!(folded, false);
     }
 
     #[test]

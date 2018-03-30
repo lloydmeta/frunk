@@ -203,6 +203,75 @@ macro_rules! field {
     }
 }
 
+#[macro_export]
+macro_rules! poly_fn {
+    // encountered first func w/ type params
+    ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+    )};
+    // encountered first func w/ type params, trailing comma on tparams
+    ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+    )};
+    // encountered first func w/o type params
+    (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, ~f $($rest)*
+    )};
+
+    // encountered non-first func w/ type params
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+    )};
+    // encountered non-first func w/ type params, trailing comma in tparams
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+    )};
+    // encountered non-first func w/o type params
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    => { poly_fn!(
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+    )};
+
+    // last w/ type params, for when there is no trailing comma on the funcs...
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+    )};
+    // last w/ type params, for when there is a trailing comma in tparams, but no trailing comma on the funcs..
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    => { poly_fn!(
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+    )};
+    // last w/o type params, for when there is no trailing comma on the funcs...
+    (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    => { poly_fn!(
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+    )};
+
+    // unroll
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, )* ~f) => {{
+        struct F;
+        $(
+            impl<$($pars,)*> $crate::hlist::Func<$p_arg_typ> for F {
+                type Output = $p_ret_typ;
+                fn call($p_args: $p_arg_typ) -> Self::Output { $p_body }
+            }
+        )*
+        $(
+            impl $crate::hlist::Func<$arg_typ> for F {
+                type Output = $ret_typ;
+                fn call($args: $arg_typ) -> Self::Output { $body }
+            }
+        )*
+        $crate::hlist::Poly(F)
+    }}
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -264,5 +333,45 @@ mod tests {
         let hlist_pat![...] = hlist![A, B, C, D, E];
         let hlist_pat![A, ...] = hlist![A, B, C, D, E];
         let hlist_pat![A, B, ...] = hlist![A, B, C, D, E];
+    }
+
+    #[test]
+    fn poly_fn_macro_test() {
+        use hlist::HMappable;
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        let h2 = h.map(poly_fn!(
+            |x: i32| -> bool { x > 100 },
+            |x: f32| -> String { format!("{}", x) },
+            ['a] |x: &'a str| -> usize { x.len() }
+        ));
+        assert_eq!(h2, hlist![true, 3, "41".to_string(), 6, false]);
+    }
+
+    #[test]
+    fn poly_fn_macro_coproduct_test() {
+        use coproduct::*;
+
+        type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
+
+        let co1 = I32F32StrBool::inject("lollerskates");
+        let folded = co1.fold(poly_fn!(
+            ['a] |x: &'a str| -> bool { x.len() > 3 },
+            |x: i32| -> bool { x > 100 },
+            |f: f32| -> bool { f > 42f32 },
+        ));
+        assert!(folded);
+
+    }
+
+    #[test]
+    fn poly_fn_macro_trailing_commas_test() {
+        use hlist::HMappable;
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        let h2 = h.map(poly_fn!(
+            |x: i32| -> bool { x > 100 },
+            |x: f32| -> String { format!("{}", x) },
+            ['a,] |x: &'a str| -> usize { x.len() },
+        ));
+        assert_eq!(h2, hlist![true, 3, "41".to_string(), 6, false]);
     }
 }
