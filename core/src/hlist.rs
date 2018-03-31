@@ -769,7 +769,7 @@ where
 }
 
 /// Foldr for HLists
-pub trait HFoldRightable<Folder, Init, Index> {
+pub trait HFoldRightable<Folder, Init> {
     type Output;
 
     /// foldr over a data structure
@@ -803,7 +803,7 @@ pub trait HFoldRightable<Folder, Init, Index> {
     fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
-impl<F, Init> HFoldRightable<F, Init, Here> for HNil {
+impl<F, Init> HFoldRightable<F, Init> for HNil {
     type Output = Init;
 
     fn foldr(self, _: F, i: Init) -> Self::Output {
@@ -811,19 +811,11 @@ impl<F, Init> HFoldRightable<F, Init, Here> for HNil {
     }
 }
 
-
-impl<
-    F,
-    FolderHeadR,
-    FolderTail,
-    H,
-    Tail,
-    Init,
-    Index,
-> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Init>
+    HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
 where
-    Tail: HFoldRightable<FolderTail, Init, Index>,
-    F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
+    Tail: HFoldRightable<FolderTail, Init>,
+    F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR,
 {
     type Output = FolderHeadR;
 
@@ -833,19 +825,11 @@ where
     }
 }
 
-
-impl<
-    'a,
-    F,
-    R,
-    H,
-    Tail,
-    Init,
-    Index,
-> HFoldRightable<&'a F, Init, There<Index>> for HCons<H, Tail>
+impl<'a, F, R, H, Tail, Init>
+    HFoldRightable<&'a F, Init> for HCons<H, Tail>
 where
-    Tail: HFoldRightable<&'a F, Init, Index>,
-    F: Fn(H, <Tail as HFoldRightable<&'a F, Init, Index>>::Output) -> R,
+    Tail: HFoldRightable<&'a F, Init>,
+    F: Fn(H, <Tail as HFoldRightable<&'a F, Init>>::Output) -> R,
 {
     type Output = R;
 
