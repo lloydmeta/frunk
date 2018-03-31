@@ -90,13 +90,20 @@ assert_eq!(is_admin, true);
 // You can also use into_tuple2() to turn the hlist into a nested pair
 ```
 
-You can also traverse HLists using `.pop()`
+To traverse or build lists, you can also prepend/or pop elements at the front:
 ```rust
-let h = hlist![true, "hello", Some(41)];
+let list = hlist![true, "hello", Some(41)];
 // h has a static type of: HCons<bool, HCons<&str, HCons<Option<{integer}>, HNil>>>
-let (h1, tail1) = h.pop();
-assert_eq!(h1, true);
+let (head1, tail1) = list.pop();
+assert_eq!(head1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
+let list1 = tail1.prepend(head1);
+assert_eq!(list, list1);
+
+// or using macro sugar:
+let hlist_pat![head2, ...tail2] = list; // equivalent to pop
+let list2 = hlist![head2, ...tail2];    // equivalent to prepend
+assert_eq!(list, list2);
 ```
 
 You can reverse, map, and fold over them too:
@@ -271,7 +278,7 @@ struct DeletedUser<'a> {
 }
 
 //  This would fail at compile time :)
-let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
+let d_user: DeletedUser = frunk::labelled_convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.

@@ -133,7 +133,6 @@ pub use frunk_derives::*;
 
 #[doc(no_inline)] pub use hlist::HNil;
 #[doc(no_inline)] pub use hlist::HCons;
-#[doc(no_inline)] pub use hlist::h_cons;
 #[doc(no_inline)] pub use hlist::lift_from;
 
 #[doc(no_inline)] pub use coproduct::Coproduct;
