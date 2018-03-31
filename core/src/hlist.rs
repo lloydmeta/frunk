@@ -648,7 +648,7 @@ where
 ///
 /// It might be a good idea to try to re-write these using the foldr variants, but it's a
 /// wee-bit more complicated.
-pub trait HMappable<Mapper, Index> {
+pub trait HMappable<Mapper> {
     type Output;
 
 
@@ -686,7 +686,7 @@ pub trait HMappable<Mapper, Index> {
     fn map(self, folder: Mapper) -> Self::Output;
 }
 
-impl<F> HMappable<F, Here> for HNil {
+impl<F> HMappable<F> for HNil {
     type Output = HNil;
 
     fn map(self, _: F) -> Self::Output {
@@ -694,7 +694,7 @@ impl<F> HMappable<F, Here> for HNil {
     }
 }
 
-impl<'a, F> HMappable<F, Here> for &'a HNil {
+impl<'a, F> HMappable<F> for &'a HNil {
     type Output = HNil;
 
     fn map(self, _: F) -> Self::Output {
@@ -702,68 +702,68 @@ impl<'a, F> HMappable<F, Here> for &'a HNil {
     }
 }
 
-impl<F, R, H, Tail, Index> HMappable<F, There<Index>> for HCons<H, Tail>
+impl<F, R, H, Tail> HMappable<F> for HCons<H, Tail>
 where
     F: Fn(H) -> R,
-    Tail: HMappable<F, Index>,
+    Tail: HMappable<F>,
 {
-    type Output = HCons<R, <Tail as HMappable<F, Index>>::Output>;
+    type Output = HCons<R, <Tail as HMappable<F>>::Output>;
+
     fn map(self, f: F) -> Self::Output {
-        let r = f(self.head);
+        let HCons { head, tail } = self;
         HCons {
-            head: r,
-            tail: self.tail.map(f),
+            head: f(head),
+            tail: tail.map(f),
         }
     }
 }
 
-impl<'a, F, R, H, Tail, Index> HMappable<F, There<Index>> for &'a HCons<H, Tail>
+impl<'a, F, R, H, Tail> HMappable<F> for &'a HCons<H, Tail>
 where
     F: Fn(&'a H) -> R,
-    &'a Tail: HMappable<F, Index>
+    &'a Tail: HMappable<F>
 {
-    type Output = HCons<R, <&'a Tail as HMappable<F, Index>>::Output>;
+    type Output = HCons<R, <&'a Tail as HMappable<F>>::Output>;
+
     fn map(self, f: F) -> Self::Output {
-        let ref self_head = self.head;
-        let ref self_tail = self.tail;
+        let HCons { ref head, ref tail } = *self;
         HCons {
-            head: f(self_head),
-            tail: self_tail.map(f),
+            head: f(head),
+            tail: tail.map(f),
         }
     }
 }
 
-impl<F, MapperHeadR, MapperTail, H, Tail, Index>
-    HMappable<HCons<F, MapperTail>, There<Index>> for HCons<H, Tail>
+impl<F, R, MapperTail, H, Tail>
+    HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
 where
-    F: FnOnce(H) -> MapperHeadR,
-    Tail: HMappable<MapperTail, Index>,
+    F: FnOnce(H) -> R,
+    Tail: HMappable<MapperTail>,
 {
-    type Output = HCons<MapperHeadR, <Tail as HMappable<MapperTail, Index>>::Output>;
+    type Output = HCons<R, <Tail as HMappable<MapperTail>>::Output>;
+
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
-        let f = mapper.head;
+        let HCons { head, tail } = self;
         HCons {
-            head: f(self.head),
-            tail: self.tail.map(mapper.tail),
+            head: (mapper.head)(head),
+            tail: tail.map(mapper.tail),
         }
     }
 }
 
-impl<'a, F, MapperHeadR, MapperTail, H, Tail, Index>
-    HMappable<HCons<F, MapperTail>, There<Index>> for &'a HCons<H, Tail>
+impl<'a, F, R, MapperTail, H, Tail>
+    HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
 where
-    F: FnOnce(&'a H) -> MapperHeadR,
-    &'a Tail: HMappable<MapperTail, Index>,
+    F: FnOnce(&'a H) -> R,
+    &'a Tail: HMappable<MapperTail>,
 {
-    type Output = HCons<MapperHeadR, <&'a Tail as HMappable<MapperTail, Index>>::Output>;
+    type Output = HCons<R, <&'a Tail as HMappable<MapperTail>>::Output>;
+
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
-        let f = mapper.head;
-        let mapper_tail = mapper.tail;
-        let ref self_head = self.head;
-        let ref self_tail = self.tail;
+        let HCons { ref head, ref tail } = *self;
         HCons {
-            head: f(self_head),
-            tail: self_tail.map(mapper_tail),
+            head: (mapper.head)(head),
+            tail: tail.map(mapper.tail),
         }
     }
 }
@@ -895,7 +895,7 @@ where
 //}
 
 /// Left fold for a given data structure
-pub trait HFoldLeftable<Folder, Init, Index> {
+pub trait HFoldLeftable<Folder, Acc> {
     type Output;
 
     /// foldl over a data structure
@@ -936,10 +936,10 @@ pub trait HFoldLeftable<Folder, Init, Index> {
     /// assert_eq!(9042f32, folded2)
     /// # }
     /// ```
-    fn foldl(self, folder: Folder, i: Init) -> Self::Output;
+    fn foldl(self, folder: Folder, acc: Acc) -> Self::Output;
 }
 
-impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
+impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
     type Output = Acc;
 
     fn foldl(self, _: F, acc: Acc) -> Self::Output {
@@ -947,11 +947,39 @@ impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
     }
 }
 
-impl<'a, F, Acc> HFoldLeftable<F, Acc, Here> for &'a HNil {
+impl<'a, F, Acc> HFoldLeftable<F, Acc> for &'a HNil {
     type Output = Acc;
 
     fn foldl(self, _: F, acc: Acc) -> Self::Output {
         acc
+    }
+}
+
+impl<F, R, FTail, H, Tail, Acc>
+    HFoldLeftable<HCons<F, FTail>, Acc> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<FTail, R>,
+    F: FnOnce(Acc, H) -> R,
+{
+    type Output = <Tail as HFoldLeftable<FTail, R>>::Output;
+
+    fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
+        let HCons { head, tail } = self;
+        tail.foldl(folder.tail, (folder.head)(acc, head))
+    }
+}
+
+impl<'a, F, R, FTail, H, Tail, Acc>
+    HFoldLeftable<HCons<F, FTail>, Acc> for &'a HCons<H, Tail>
+where
+    &'a Tail: HFoldLeftable<FTail, R>,
+    F: FnOnce(Acc, &'a H) -> R,
+{
+    type Output = <&'a Tail as HFoldLeftable<FTail, R>>::Output;
+
+    fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
+        let HCons { ref head, ref tail } = *self;
+        tail.foldl(folder.tail, (folder.head)(acc, head))
     }
 }
 
@@ -966,61 +994,31 @@ impl<'a, F, Acc> HFoldLeftable<F, Acc, Here> for &'a HNil {
 /// assert_eq!(r, 15);
 /// # }
 /// ```
-impl<F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
+impl<F, H, Tail, Acc> HFoldLeftable<F, Acc> for HCons<H, Tail>
 where
-    Tail: HFoldLeftable<F, Acc, Index>,
+    Tail: HFoldLeftable<F, Acc>,
     F: Fn(Acc, H) -> Acc,
 {
-    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
-
-    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
-        let acc = folder(acc, self.head);
-        self.tail.foldl(folder, acc)
-    }
-}
-
-impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCons<H, Tail>
-where
-    F: Fn(Acc, &'a H) -> Acc,
-    &'a Tail: HFoldLeftable<F, Acc, Index>,
-{
-    type Output = <&'a Tail as HFoldLeftable<F, Acc, Index>>::Output;
+    type Output = <Tail as HFoldLeftable<F, Acc>>::Output;
 
     fn foldl(self, f: F, acc: Acc) -> Self::Output {
-        let ref h = self.head;
-        let ref t = self.tail;
-        let result = f(acc, h);
-        t.foldl(f, result)
+        let HCons { head, tail } = self;
+        let acc = f(acc, head);
+        tail.foldl(f, acc)
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Acc, Index>
-    HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for HCons<H, Tail>
+impl<'a, F, H, Tail, Acc> HFoldLeftable<F, Acc> for &'a HCons<H, Tail>
 where
-    Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
-    F: FnOnce(Acc, H) -> FolderHeadR,
+    &'a Tail: HFoldLeftable<F, Acc>,
+    F: Fn(Acc, &'a H) -> Acc,
 {
-    type Output = <Tail as HFoldLeftable<FolderTail, FolderHeadR, Index>>::Output;
+    type Output = <&'a Tail as HFoldLeftable<F, Acc>>::Output;
 
-    fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
-        self.tail.foldl(folder.tail, (folder.head)(acc, self.head))
-    }
-}
-
-impl<'a, F, FolderHeadR, FolderTail, H, Tail, Acc, Index>
-    HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for &'a HCons<H, Tail>
-where
-    &'a Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
-    F: FnOnce(Acc, &'a H) -> FolderHeadR,
-{
-    type Output = <&'a Tail as HFoldLeftable<FolderTail, FolderHeadR, Index>>::Output;
-
-    fn foldl(self, folder: HCons<F, FolderTail>, acc: Acc) -> Self::Output {
-        let ref h = self.head;
-        let ref t = self.tail;
-        let f_head = folder.head;
-        let f_tail = folder.tail;
-        t.foldl(f_tail, (f_head)(acc, h))
+    fn foldl(self, f: F, acc: Acc) -> Self::Output {
+        let HCons { ref head, ref tail } = *self;
+        let acc = f(acc, head);
+        tail.foldl(f, acc)
     }
 }
 
