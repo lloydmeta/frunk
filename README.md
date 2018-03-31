@@ -8,7 +8,7 @@
 The general idea is to make things easier by providing FP tools in Rust to allow for stuff like this:
 
 ```rust
-use frunk::monoid::*;
+use frunk::monoid::combine_all;
 
 let v = vec![Some(1), Some(3)];
 assert_eq!(combine_all(&v), Some(4));
@@ -90,13 +90,20 @@ assert_eq!(is_admin, true);
 // You can also use into_tuple2() to turn the hlist into a nested pair
 ```
 
-You can also traverse HLists using `.pop()`
+To traverse or build lists, you can also prepend/or pop elements at the front:
 ```rust
-let h = hlist![true, "hello", Some(41)];
+let list = hlist![true, "hello", Some(41)];
 // h has a static type of: HCons<bool, HCons<&str, HCons<Option<{integer}>, HNil>>>
-let (h1, tail1) = h.pop();
-assert_eq!(h1, true);
+let (head1, tail1) = list.pop();
+assert_eq!(head1, true);
 assert_eq!(tail1, hlist!["hello", Some(41)]);
+let list1 = tail1.prepend(head1);
+assert_eq!(list, list1);
+
+// or using macro sugar:
+let hlist_pat![head2, ...tail2] = list; // equivalent to pop
+let list2 = hlist![head2, ...tail2];    // equivalent to prepend
+assert_eq!(list, list2);
 ```
 
 You can reverse, map, and fold over them too:
@@ -164,7 +171,6 @@ Here are some examples:
 #[macro_use] // for the hlist macro
 extern crate frunk;
 extern crate frunk_core;
-use frunk::generic::*; // for the Generic trait and HList
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -174,7 +180,7 @@ struct Person<'a> {
 }
 
 let h = hlist!("Joe", "Blow", 30);
-let p: Person = from_generic(h);
+let p: Person = frunk::from_generic(h);
 assert_eq!(p,
            Person {
                first_name: "Joe",
@@ -215,7 +221,7 @@ let a_person = ApiPerson {
                    LastName: "Blow",
                    Age: 30,
 };
-let d_person: DomainPerson = convert_from(a_person); // done
+let d_person: DomainPerson = frunk::convert_from(a_person); // done
 ```
 
 #### LabelledGeneric
@@ -257,7 +263,7 @@ let n_user = NewUser {
 //
 // Also note that we're using a helper method to avoid having to use universal
 // function call syntax
-let s_user: SavedUser = labelled_convert_from(n_user);
+let s_user: SavedUser = frunk::labelled_convert_from(n_user);
 
 assert_eq!(s_user.first_name, "Joe");
 assert_eq!(s_user.last_name, "Blow");
@@ -272,11 +278,11 @@ struct DeletedUser<'a> {
 }
 
 //  This would fail at compile time :)
-let d_user = <DeletedUser as LabelledGeneric>::convert_from(s_user);
+let d_user: DeletedUser = frunk::labelled_convert_from(s_user);
 
 // This will, however, work, because we make use of the Sculptor type-class
 // to type-safely reshape the representations to align/match each other.
-let d_user: DeletedUser = transform_from(s_user);
+let d_user: DeletedUser = frunk::transform_from(s_user);
 ```
 
 For more information how Generic and Field work, check out their respective Rustdocs:
@@ -291,7 +297,7 @@ want a sum type to do this, but there is a light-weight way of doing it through 
 
 ```rust
 #[macro_use] extern crate frunk; // for the Coprod! type macro
-use frunk::coproduct::*;
+use frunk::prelude::*; // for the fold method
 
 // Declare the types we want in our Coproduct
 type I32F32Bool = Coprod!(i32, f32, bool);
@@ -334,8 +340,7 @@ best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)).
 To use `Validated`, first:
 ```rust
 #[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk_core::hlist::*;
-use frunk::validated::*;
+use frunk::prelude::*; // for Result::into_validated
 ```
 
 Assuming we have a `Person` struct defined
@@ -402,7 +407,7 @@ assert_eq!(try_person2.unwrap_err(),
 Things that can be combined.
 
 ```rust
-use frunk::semigroup::*;
+use frunk::Semigroup;
 
 assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
@@ -415,7 +420,7 @@ assert_eq!(All(true).combine(&All(false)), All(false));
 Things that can be combined *and* have an empty/id value.
 
 ```rust
-use frunk::monoid::*;
+use frunk::monoid::combine_all;
 
 let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 let t2 = (1, 2.5f32, String::from(" world"), None);

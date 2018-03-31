@@ -16,17 +16,13 @@
 //! ```
 //! # #[macro_use] extern crate frunk;
 //! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*; fn main() {
-//! use frunk::hlist::*;
-//! use frunk::generic::*;
-//! use frunk::labelled::*;
-//! use frunk::monoid::*;
-//! use frunk::semigroup::*;
-//! use frunk::validated::*;
+//! # fn main() {
+//! use frunk::prelude::*;
+//! use frunk::{self, monoid, Semigroup, Generic};
 //!
 //! // Combining Monoids
 //! let v = vec![Some(1), Some(3)];
-//! assert_eq!(combine_all(&v), Some(4));
+//! assert_eq!(monoid::combine_all(&v), Some(4));
 //!
 //! // HLists
 //! let h = hlist![1, "hi"];
@@ -65,10 +61,10 @@
 //! }
 //!
 //! // Instantiate a struct from an HList. Note that you can go the other way too.
-//! let a_user: ApiUser = from_generic(hlist!["Joe", "Blow", 30]);
+//! let a_user: ApiUser = frunk::from_generic(hlist!["Joe", "Blow", 30]);
 //!
 //! // Convert using Generic
-//! let n_user = <NewUser as Generic>::convert_from(a_user); // done
+//! let n_user: NewUser = Generic::convert_from(a_user); // done
 //!
 //! // Convert using LabelledGeneric
 //! //
@@ -77,7 +73,7 @@
 //! //
 //! // Also note that we're using a helper method to avoid having to use universal
 //! // function call syntax
-//! let s_user: SavedUser = labelled_convert_from(n_user);
+//! let s_user: SavedUser = frunk::labelled_convert_from(n_user);
 //!
 //! assert_eq!(s_user.first_name, "Joe");
 //! assert_eq!(s_user.last_name, "Blow");
@@ -94,7 +90,7 @@
 //!
 //! // This will, however, work, because we make use of the Sculptor type-class
 //! // to type-safely reshape the representations to align/match each other.
-//! let d_user: DeletedUser = transform_from(s_user);
+//! let d_user: DeletedUser = frunk::transform_from(s_user);
 //! assert_eq!(d_user.first_name, "Joe");
 //! # }
 //! ```
@@ -116,3 +112,62 @@ pub mod validated;
 
 pub use frunk_core::*;
 pub use frunk_derives::*;
+
+// Root-level reexports so that users don't need to guess where things are located.
+//
+// Things to re-export:
+//
+// * Datatypes and free functions intended for human consumption.
+//   * **Exception:** things that benefit from being namespaced,
+//     like `frunk::semigroup::Any`
+//
+// * Traits that users ought to care enough about to `use` it **by name:**
+//   * ...because users might want to `impl` it for their own types
+//   * ...because it shows up in lots of `where` bounds
+//   * NOT simply because it extends existing types with useful methods
+//     (that's what the prelude is for!)
+
+// NOTE: without `#[doc(no_inline)]`, rustdoc will generate two separate pages for
+//       each item (one in `frunk::` and another in `frunk_core::module::`).
+//       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.
+
+#[doc(no_inline)] pub use hlist::HNil;
+#[doc(no_inline)] pub use hlist::HCons;
+#[doc(no_inline)] pub use hlist::lift_from;
+
+#[doc(no_inline)] pub use coproduct::Coproduct;
+
+#[doc(no_inline)] pub use generic::Generic;
+#[doc(no_inline)] pub use generic::from_generic;
+#[doc(no_inline)] pub use generic::into_generic;
+#[doc(no_inline)] pub use generic::convert_from;
+
+#[doc(no_inline)] pub use labelled::LabelledGeneric;
+#[doc(no_inline)] pub use labelled::from_labelled_generic;
+#[doc(no_inline)] pub use labelled::into_labelled_generic;
+#[doc(no_inline)] pub use labelled::labelled_convert_from;
+#[doc(no_inline)] pub use labelled::transform_from;
+
+#[doc(no_inline)] pub use semigroup::Semigroup;
+
+#[doc(no_inline)] pub use monoid::Monoid;
+
+#[doc(no_inline)] pub use validated::Validated;
+
+pub mod prelude {
+    //! Traits that need to be imported for the complete `frunk` experience.
+    //!
+    //! The intent here is that `use frunk::prelude::*` is enough to provide
+    //! access to any missing methods advertised in frunk's documentation.
+
+    #[doc(no_inline)] pub use hlist::HList; // for LEN
+    #[doc(no_inline)] pub use hlist::HMappable;
+    #[doc(no_inline)] pub use hlist::HFoldRightable;
+    #[doc(no_inline)] pub use hlist::HFoldLeftable;
+    #[doc(no_inline)] pub use hlist::LiftFrom;
+    #[doc(no_inline)] pub use hlist::LiftInto;
+
+    #[doc(no_inline)] pub use coproduct::CoproductFoldable;
+
+    #[doc(no_inline)] pub use validated::IntoValidated;
+}
