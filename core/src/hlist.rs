@@ -694,22 +694,20 @@ impl<F> HMappable<F, Here> for HNil {
     }
 }
 
-impl<'a, F, R, H> HMappable<HCons<F, HNil>, Here> for &'a HCons<H, HNil>
+impl<F, R, H, Tail, Index> HMappable<F, There<Index>> for HCons<H, Tail>
 where
-    F: FnOnce(&'a H) -> R,
+    F: Fn(H) -> R,
+    Tail: HMappable<F, Index>,
 {
-    type Output = HCons<R, HNil>;
-
-    fn map(self, f: HCons<F, HNil>) -> Self::Output {
-        let ref h = self.head;
-        let f = f.head;
+    type Output = HCons<R, <Tail as HMappable<F, Index>>::Output>;
+    fn map(self, f: F) -> Self::Output {
+        let r = f(self.head);
         HCons {
-            head: f(h),
-            tail: HNil,
+            head: r,
+            tail: self.tail.map(f),
         }
     }
 }
-
 
 impl<'a, F, R, H> HMappable<F, Here> for &'a HCons<H, HNil>
 where
@@ -726,8 +724,24 @@ where
     }
 }
 
-impl<F, MapperHeadR, MapperTail, H, Tail, Index> HMappable<HCons<F, MapperTail>, There<Index>>
-    for HCons<H, Tail>
+impl<'a, F, R, H, Tail, Index> HMappable<F, There<Index>> for &'a HCons<H, Tail>
+where
+    F: Fn(&'a H) -> R,
+    &'a Tail: HMappable<F, Index>
+{
+    type Output = HCons<R, <&'a Tail as HMappable<F, Index>>::Output>;
+    fn map(self, f: F) -> Self::Output {
+        let ref self_head = self.head;
+        let ref self_tail = self.tail;
+        HCons {
+            head: f(self_head),
+            tail: self_tail.map(f),
+        }
+    }
+}
+
+impl<F, MapperHeadR, MapperTail, H, Tail, Index>
+    HMappable<HCons<F, MapperTail>, There<Index>> for HCons<H, Tail>
 where
     F: FnOnce(H) -> MapperHeadR,
     Tail: HMappable<MapperTail, Index>,
@@ -742,23 +756,24 @@ where
     }
 }
 
-impl<F, R, H, Tail, Index> HMappable<F, There<Index>> for HCons<H, Tail>
+impl<'a, F, R, H> HMappable<HCons<F, HNil>, Here> for &'a HCons<H, HNil>
 where
-    F: Fn(H) -> R,
-    Tail: HMappable<F, Index>,
+    F: FnOnce(&'a H) -> R,
 {
-    type Output = HCons<R, <Tail as HMappable<F, Index>>::Output>;
-    fn map(self, f: F) -> Self::Output {
-        let r = f(self.head);
+    type Output = HCons<R, HNil>;
+
+    fn map(self, f: HCons<F, HNil>) -> Self::Output {
+        let ref h = self.head;
+        let f = f.head;
         HCons {
-            head: r,
-            tail: self.tail.map(f),
+            head: f(h),
+            tail: HNil,
         }
     }
 }
 
-impl<'a, F, MapperHeadR, MapperTail, H, Tail, Index> HMappable<HCons<F, MapperTail>, There<Index>>
-    for &'a HCons<H, Tail>
+impl<'a, F, MapperHeadR, MapperTail, H, Tail, Index>
+    HMappable<HCons<F, MapperTail>, There<Index>> for &'a HCons<H, Tail>
 where
     F: FnOnce(&'a H) -> MapperHeadR,
     &'a Tail: HMappable<MapperTail, Index>,
@@ -772,21 +787,6 @@ where
         HCons {
             head: f(self_head),
             tail: self_tail.map(mapper_tail),
-        }
-    }
-}
-
-impl<'a, F, R, H, Tail, Index> HMappable<F, There<Index>> for &'a HCons<H, Tail>
-    where F: Fn(&'a H) -> R,
-          &'a Tail: HMappable<F, Index>
-{
-    type Output = HCons<R, <&'a Tail as HMappable<F, Index>>::Output>;
-    fn map(self, f: F) -> Self::Output {
-        let ref self_head = self.head;
-        let ref self_tail = self.tail;
-        HCons {
-            head: f(self_head),
-            tail: self_tail.map(f),
         }
     }
 }
@@ -970,6 +970,30 @@ impl<F, Acc> HFoldLeftable<F, Acc, Here> for HNil {
     }
 }
 
+/// Implementation for folding over an HList using a single function that
+/// can handle all cases
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// let h = hlist![1, 2, 3, 4, 5];
+///
+/// let r: isize = h.foldl(|acc, next| acc + next, 0);
+/// assert_eq!(r, 15);
+/// # }
+/// ```
+impl<F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<F, Acc, Index>,
+    F: Fn(Acc, H) -> Acc,
+{
+    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
+
+    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
+        let acc = folder(acc, self.head);
+        self.tail.foldl(folder, acc)
+    }
+}
+
 impl<'a, F, R, H, Acc> HFoldLeftable<F, Acc, Here> for &'a HCons<H, HNil>
 where
     F: FnOnce(Acc, &'a H) -> R,
@@ -982,27 +1006,23 @@ where
     }
 }
 
-impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil>
-    where F: FnOnce(Acc, &'a H) -> R
+impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCons<H, Tail>
+where
+    F: Fn(Acc, &'a H) -> Acc,
+    &'a Tail: HFoldLeftable<F, Acc, Index>,
 {
-    type Output = R;
+    type Output = <&'a Tail as HFoldLeftable<F, Acc, Index>>::Output;
 
-    fn foldl(self, folder: HCons<F, HNil>, acc: Acc) -> Self::Output {
-        let f = folder.head;
+    fn foldl(self, f: F, acc: Acc) -> Self::Output {
         let ref h = self.head;
-        f(acc, h)
+        let ref t = self.tail;
+        let result = f(acc, h);
+        t.foldl(f, result)
     }
 }
 
-impl<
-    F,
-    FolderHeadR,
-    FolderTail,
-    H,
-    Tail,
-    Acc,
-    Index,
-> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Acc, Index>
+    HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for HCons<H, Tail>
 where
     Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
     F: FnOnce(Acc, H) -> FolderHeadR,
@@ -1014,16 +1034,20 @@ where
     }
 }
 
-impl<
-    'a,
-    F,
-    FolderHeadR,
-    FolderTail,
-    H,
-    Tail,
-    Acc,
-    Index,
-> HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for &'a HCons<H, Tail>
+impl<'a, F, R, H, Acc> HFoldLeftable<HCons<F, HNil>, Acc, Here> for &'a HCons<H, HNil>
+where F: FnOnce(Acc, &'a H) -> R
+{
+    type Output = R;
+
+    fn foldl(self, folder: HCons<F, HNil>, acc: Acc) -> Self::Output {
+        let f = folder.head;
+        let ref h = self.head;
+        f(acc, h)
+    }
+}
+
+impl<'a, F, FolderHeadR, FolderTail, H, Tail, Acc, Index>
+    HFoldLeftable<HCons<F, FolderTail>, Acc, There<Index>> for &'a HCons<H, Tail>
 where
     &'a Tail: HFoldLeftable<FolderTail, FolderHeadR, Index>,
     F: FnOnce(Acc, &'a H) -> FolderHeadR,
@@ -1084,51 +1108,6 @@ where
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
-    }
-}
-
-/// Implementation for folding over an HList using a single function that
-/// can handle all cases
-///
-/// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-/// let h = hlist![1, 2, 3, 4, 5];
-///
-/// let r: isize = h.foldl(|acc, next| acc + next, 0);
-/// assert_eq!(r, 15);
-/// # }
-/// ```
-impl<
-    F,
-    H,
-    Tail,
-    Acc,
-    Index,
-> HFoldLeftable<F, Acc, There<Index>> for HCons<H, Tail>
-where
-    Tail: HFoldLeftable<F, Acc, Index>,
-    F: Fn(Acc, H) -> Acc,
-{
-    type Output = <Tail as HFoldLeftable<F, Acc, Index>>::Output;
-
-    fn foldl(self, folder: F, acc: Acc) -> Self::Output {
-        let acc = folder(acc, self.head);
-        self.tail.foldl(folder, acc)
-    }
-}
-
-impl<'a, F, H, Tail, Acc, Index> HFoldLeftable<F, Acc, There<Index>> for &'a HCons<H, Tail>
-    where
-        F: Fn(Acc, &'a H) -> Acc,
-        &'a Tail: HFoldLeftable<F, Acc, Index>,
-{
-    type Output = <&'a Tail as HFoldLeftable<F, Acc, Index>>::Output;
-
-    fn foldl(self, f: F, acc: Acc) -> Self::Output {
-        let ref h = self.head;
-        let ref t = self.tail;
-        let result = f(acc, h);
-        t.foldl(f, result)
     }
 }
 
