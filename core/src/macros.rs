@@ -203,6 +203,31 @@ macro_rules! field {
     }
 }
 
+/// Returns a polymorphic function for use with mapping/folding heterogeneous
+/// types.
+///
+/// This macro is intended for use with simple scenarios, and doesn't handle
+/// trait implementation bounds or where clauses (it might in the future when
+/// procedural macros land). If it doesn't work for you, simply implement
+/// Func on your own.
+///
+/// # Examples
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # fn main() {
+/// type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
+///
+/// let co1 = I32F32StrBool::inject("lollerskates");
+/// let folded = co1.fold(poly_fn!(
+///   ['a] |x: &'a str| -> i8 { 1 },
+///   |x: i32| -> i8 { 2 },
+///   |f: f32| -> i8 { 3 },
+/// ));
+///
+/// assert_eq!(folded, 1);
+/// # }
 #[macro_export]
 macro_rules! poly_fn {
     // encountered first func w/ type params
@@ -259,12 +284,14 @@ macro_rules! poly_fn {
         $(
             impl<$($pars,)*> $crate::hlist::Func<$p_arg_typ> for F {
                 type Output = $p_ret_typ;
+                #[allow(unused)]
                 fn call($p_args: $p_arg_typ) -> Self::Output { $p_body }
             }
         )*
         $(
             impl $crate::hlist::Func<$arg_typ> for F {
                 type Output = $ret_typ;
+                #[allow(unused)]
                 fn call($args: $arg_typ) -> Self::Output { $body }
             }
         )*
@@ -355,12 +382,11 @@ mod tests {
 
         let co1 = I32F32StrBool::inject("lollerskates");
         let folded = co1.fold(poly_fn!(
-            ['a] |x: &'a str| -> bool { x.len() > 3 },
-            |x: i32| -> bool { x > 100 },
-            |f: f32| -> bool { f > 42f32 },
+            ['a] |x: &'a str| -> i8 { 1 },
+            |x: i32| -> i8 { 2 },
+            |f: f32| -> i8 { 3 },
         ));
-        assert!(folded);
-
+        assert_eq!(folded, 1);
     }
 
     #[test]

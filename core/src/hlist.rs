@@ -663,17 +663,26 @@ where
     }
 }
 
-// Thin wrapper for discriminating against just F
+/// This is a thin generic wrapper type that is used to differentiate
+/// between single-typed generic closure F that implements, say, Fn<i8> -> bool,
+/// and a Poly-typed F that implements multiple Function types, say
+/// Func<i8, bool>, Fun<bool, f32> etc.
+///
+/// This is needed because there are completely generic impls for many of the
+/// HList traits that take a simple unwrapped closure.
 pub struct Poly<T>(pub T);
 
 // Special index type for Poly; essentially ignored
 pub enum PolyIndex {}
 
-// Essentially just Func
-pub trait Func<In> {
+/// This is a simple, user-implementable version of Fn.
+///
+/// Might not be necessary if/when Fn(Once, Mut) traits are implementable
+/// in stable Rust
+pub trait Func<Input> {
     type Output;
 
-    fn call(i: In) -> Self::Output;
+    fn call(i: Input) -> Self::Output;
 }
 
 impl<P> HMappable<Poly<P>, PolyIndex> for HNil
