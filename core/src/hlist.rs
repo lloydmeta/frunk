@@ -672,9 +672,6 @@ where
 /// HList traits that take a simple unwrapped closure.
 pub struct Poly<T>(pub T);
 
-// Special index type for Poly; essentially ignored
-pub enum PolyIndex {}
-
 /// This is a simple, user-implementable version of Fn.
 ///
 /// Might not be necessary if/when Fn(Once, Mut) traits are implementable
@@ -685,21 +682,12 @@ pub trait Func<Input> {
     fn call(i: Input) -> Self::Output;
 }
 
-impl<P> HMappable<Poly<P>, PolyIndex> for HNil
-{
-    type Output = HNil;
-
-    fn map(self, _: Poly<P>) -> Self::Output {
-        HNil
-    }
-}
-
-impl<P, H, Tail> HMappable<Poly<P>, PolyIndex> for HCons<H, Tail>
+impl<P, H, Tail> HMappable<Poly<P>> for HCons<H, Tail>
 where
     P: Func<H>,
-    Tail: HMappable<Poly<P>, PolyIndex>,
+    Tail: HMappable<Poly<P>>,
 {
-    type Output = HCons<<P as Func<H>>::Output, <Tail as HMappable<Poly<P>, PolyIndex>>::Output>;
+    type Output = HCons<<P as Func<H>>::Output, <Tail as HMappable<Poly<P>>>::Output>;
     fn map(self, poly: Poly<P>) -> Self::Output {
         HCons {
             head: P::call(self.head),
