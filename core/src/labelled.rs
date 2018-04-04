@@ -416,13 +416,14 @@ where
 
     fn into_value_labelled(self) -> Self::Output {
         HCons {
-            head: ValueField { name: self.head.name, value: self.head.value },
+            head: ValueField {
+                name: self.head.name,
+                value: self.head.value,
+            },
             tail: self.tail.into_value_labelled(),
         }
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -478,7 +479,8 @@ mod tests {
     #[test]
     fn test_value_labelling() {
         let labelled_hlist = hlist![field!(name, "joe"), field!((a, g, e), 3)];
-        let value_labelled: Hlist![ValueField<&str>, ValueField<isize>] = labelled_hlist.into_value_labelled();
+        let value_labelled: Hlist![ValueField<&str>, ValueField<isize>] =
+            labelled_hlist.into_value_labelled();
         let hlist_pat!(f1, f2) = value_labelled;
         assert_eq!(f1.name, "name");
         assert_eq!(f2.name, "age");

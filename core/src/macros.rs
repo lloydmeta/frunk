@@ -207,37 +207,42 @@ macro_rules! field {
 mod tests {
     #[test]
     fn trailing_commas() {
-        use ::test_structs::unit_copy::{A, B};
+        use test_structs::unit_copy::{A, B};
 
-        let hlist_pat![]:      Hlist![]      = hlist![];
-        let hlist_pat![A]:     Hlist![A]     = hlist![A];
-        let hlist_pat![A,]:    Hlist![A,]    = hlist![A,];
-        let hlist_pat![A, B]:  Hlist![A, B]  = hlist![A, B];
+        let hlist_pat![]: Hlist![] = hlist![];
+        let hlist_pat![A]: Hlist![A] = hlist![A];
+        let hlist_pat![A,]: Hlist![A,] = hlist![A,];
+        let hlist_pat![A, B]: Hlist![A, B] = hlist![A, B];
         let hlist_pat![A, B,]: Hlist![A, B,] = hlist![A, B,];
 
         let falsum = || false;
-        if falsum() { let _: Coprod![]      = panic!(); }
-        if falsum() { let _: Coprod![A]     = panic!(); }
-        if falsum() { let _: Coprod![A,]    = panic!(); }
-        if falsum() { let _: Coprod![A, B]  = panic!(); }
-        if falsum() { let _: Coprod![A, B,] = panic!(); }
+        if falsum() {
+            let _: Coprod![] = panic!();
+        }
+        if falsum() {
+            let _: Coprod![A] = panic!();
+        }
+        if falsum() {
+            let _: Coprod![A,] = panic!();
+        }
+        if falsum() {
+            let _: Coprod![A, B] = panic!();
+        }
+        if falsum() {
+            let _: Coprod![A, B,] = panic!();
+        }
     }
 
     #[test]
     fn ellipsis_tail() {
-        use ::test_structs::unit_copy::{A, B, C};
-        use ::coproduct::*;
+        use test_structs::unit_copy::{A, B, C};
+        use coproduct::*;
 
         // hlist: accepted locations, and consistency between macros
-        let hlist_pat![...hlist_pat![C]]: Hlist![...Hlist![C]] = {
-            hlist![...hlist![C]]
-        };
-        let hlist_pat![A, ...hlist_pat![C]]: Hlist![A, ...Hlist![C]] = {
-            hlist![A, ...hlist![C]]
-        };
-        let hlist_pat![A, B, ...hlist_pat![C]]: Hlist![A, B, ...Hlist![C]] = {
-            hlist![A, B, ...hlist![C]]
-        };
+        let hlist_pat![...hlist_pat![C]]: Hlist![...Hlist![C]] = { hlist![...hlist![C]] };
+        let hlist_pat![A, ...hlist_pat![C]]: Hlist![A, ...Hlist![C]] = { hlist![A, ...hlist![C]] };
+        let hlist_pat![A, B, ...hlist_pat![C]]: Hlist![A, B, ...Hlist![C]] =
+            { hlist![A, B, ...hlist![C]] };
 
         // hlist: ellipsis semantics
         //   (by pairing an ellipsis call with a non-ellipsis call)
@@ -253,11 +258,11 @@ mod tests {
 
     #[test]
     fn ellipsis_ignore() {
-        use ::test_structs::unit_copy::{A, B, C, D, E};
+        use test_structs::unit_copy::{A, B, C, D, E};
 
         // '...' accepted locations
-        let hlist_pat![...]       = hlist![A, B, C, D, E];
-        let hlist_pat![A, ...]    = hlist![A, B, C, D, E];
+        let hlist_pat![...] = hlist![A, B, C, D, E];
+        let hlist_pat![A, ...] = hlist![A, B, C, D, E];
         let hlist_pat![A, B, ...] = hlist![A, B, C, D, E];
     }
 }
