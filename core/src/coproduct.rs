@@ -609,10 +609,10 @@ pub trait CoproductFoldable<Folder, Output> {
     fn fold(self, f: Folder) -> Output;
 }
 
-impl <P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<CH, CTail>
+impl<P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<CH, CTail>
 where
-  P: Func<CH, Output = R>,
-  CTail: CoproductFoldable<Poly<P>, R>,
+    P: Func<CH, Output = R>,
+    CTail: CoproductFoldable<Poly<P>, R>,
 {
     fn fold(self, f: Poly<P>) -> R {
         use self::Coproduct::*;
