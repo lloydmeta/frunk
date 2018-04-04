@@ -1364,6 +1364,31 @@ mod tests {
     }
 
     #[test]
+    fn test_poly_map_non_consuming() {
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        impl <'a> Func<&'a i32> for P {
+            type Output = bool;
+            fn call(args: &'a i32) -> Self::Output {
+                *args > 100
+            }
+        }
+        impl <'a> Func<&'a &'a str> for P {
+            type Output = usize;
+            fn call(args: &'a &'a str) -> Self::Output {
+                args.len()
+            }
+        }
+        impl <'a> Func<&'a f32> for P {
+            type Output = String;
+            fn call(args: &'a f32) -> Self::Output {
+                format!("{}", args)
+            }
+        }
+        struct P;
+        assert_eq!(h.to_ref().map(Poly(P)), hlist![true, 3, "41".to_string(), 6, false]);
+    }
+
+    #[test]
     fn test_map_single_func_consuming() {
         let h = hlist![9000, 9001, 9002];
         let mapped = h.map(|v| v + 1);
