@@ -286,6 +286,25 @@ macro_rules! gen_inherent_methods {
             {
                 IntoReverse::into_reverse(self)
             }
+
+            /// Return an HList where the contents are references to
+            /// the original HList on which this method was called.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// assert_eq!(hlist![].to_ref(), hlist![]);
+            ///
+            /// assert_eq!(hlist![1, true].to_ref(), hlist![&1, &true]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn to_ref<'a>(&'a self) -> <Self as ToRef<'a>>::Output
+                where Self: ToRef<'a>,
+            {
+                ToRef::to_ref(self)
+            }
         }
     };
 }
@@ -682,14 +701,6 @@ impl<F> HMappable<F> for HNil {
     }
 }
 
-impl<'a, F> HMappable<F> for &'a HNil {
-    type Output = HNil;
-
-    fn map(self, _: F) -> Self::Output {
-        HNil
-    }
-}
-
 impl<F, R, H, Tail> HMappable<F> for HCons<H, Tail>
 where
     F: Fn(H) -> R,
@@ -794,76 +805,46 @@ where
     }
 }
 
-/// An alternative to AsRef that lets us create implementations for our recursive
-/// traits that takes references, without having to deal with weird impl overflows
+/// An alternative to AsRef that does not force the reference type to be a pointer itself.
+///
+/// This lets us create implementations for our recursive traits that take the resulting
+/// Output reference type, without having to deal with strange, spurious overflows
+/// that sometimes occur when trying to implement a trait for &'a T (see this comment:
+/// https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198)
 ///
 /// This is essentially From, but the more specific nature of it means it's more ergonomic
-/// in actual usage
+/// in actual usage.
 pub trait ToRef<'a> {
     type Output;
+
+    #[inline(always)]
     fn to_ref(&'a self) -> Self::Output;
 }
 
-impl <'a>  ToRef<'a> for HNil {
-    type Output = &'a HNil;
-    fn to_ref(&'a self) -> Self::Output {
-        &HNil
-    }
+impl<'a> ToRef<'a> for HNil {
+    type Output = HNil;
 
+    #[inline(always)]
+    fn to_ref(&'a self) -> Self::Output {
+        HNil
+    }
 }
 
-impl <'a, H, Tail> ToRef<'a> for HCons<H, Tail>
-where
-    H: 'a,
-    Tail: ToRef<'a> {
+impl<'a, H, Tail> ToRef<'a> for HCons<H, Tail>
+    where
+        H: 'a,
+        Tail: ToRef<'a>,
+{
     type Output = HCons<&'a H, <Tail as ToRef<'a>>::Output>;
+
+    #[inline(always)]
     fn to_ref(&'a self) -> Self::Output {
         HCons {
             head: &self.head,
-            tail: (&self.tail).to_ref()
+            tail: (&self.tail).to_ref(),
         }
     }
-
 }
-
-// TODO: enable this when the compiler stops smoking crack
-// Likely same as https://github.com/rust-lang/rust/issues/39959
-//
-// At the moment, we get a diverging requirement evaluation a la
-// overflow evaluating the requirement `<_ as std::ops::FnOnce<(&_, _)>>::Output`
-//
-// or
-//
-// overflow evaluating the requirement `<&_ as hlist::HFoldRightable<_, _, _>>::Output`
-//
-// Depending on the exit-case implementation
-//
-//impl<'a, F, Init> HFoldRightable<F, Init, Here> for &'a HNil {
-//    type Output = Init;
-//
-//    fn foldr(self, _: F, i: Init) -> Self::Output {
-//        i
-//    }
-//}
-//
-//
-//impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for &'a HCons<H, Tail>
-//    where
-//        F: Fn(&'a H, <&'a Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
-//        &'a Tail: HFoldRightable<FolderTail, Init, Index>
-//
-//{
-//    type Output = FolderHeadR;
-//
-//    fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
-//        let f_h = folder.head;
-//        let f_tail = folder.tail;
-//        let ref h = self.head;
-//        let ref tail = self.tail;
-//        let folded_tail = tail.foldr(f_tail, init);
-//        (f_h)(h, folded_tail)
-//    }
-//}
 
 /// Left fold for a given data structure
 pub trait HFoldLeftable<Folder, Acc> {
@@ -911,14 +892,6 @@ pub trait HFoldLeftable<Folder, Acc> {
 }
 
 impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
-    type Output = Acc;
-
-    fn foldl(self, _: F, acc: Acc) -> Self::Output {
-        acc
-    }
-}
-
-impl<'a, F, Acc> HFoldLeftable<F, Acc> for &'a HNil {
     type Output = Acc;
 
     fn foldl(self, _: F, acc: Acc) -> Self::Output {
@@ -1274,17 +1247,17 @@ mod tests {
         assert_eq!(folded, 6)
     }
 
-    // Todo enable when compiler is fixed
-    //    #[test]
-    //    fn test_foldr_non_consuming() {
-    //        let h = hlist![1, false, 42f32];
-    //        let folder = hlist![|&i, acc| i + acc,
-    //                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-    //                                             |&f, acc| f + acc];
-    //        let folded = h.to_ref().foldr(folder,
-    //                                      1f32);
-    //        assert_eq!(folded, 9001)
-    //    }
+    #[test]
+    fn test_foldr_non_consuming() {
+        let h = hlist![1, false, 42f32];
+        let folder = hlist![
+            |&i, acc| i + acc,
+            |&_, acc| if acc > 42f32 { 9000 } else { 0 },
+            |&f, acc| f + acc];
+        let folded = h.to_ref().foldr(folder,
+                                      1f32);
+        assert_eq!(folded, 9001)
+    }
 
     #[test]
     fn test_foldl_consuming() {
