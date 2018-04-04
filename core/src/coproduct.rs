@@ -155,7 +155,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn inject<T, Index>(to_insert: T) -> Self
-    where Self: CoprodInjector<T, Index>,
+    where
+        Self: CoprodInjector<T, Index>,
     {
         CoprodInjector::inject(to_insert)
     }
@@ -185,7 +186,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn get<S, Index>(&self) -> Option<&S>
-    where Self: CoproductSelector<S, Index>,
+    where
+        Self: CoproductSelector<S, Index>,
     {
         CoproductSelector::get(self)
     }
@@ -215,7 +217,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn take<T, Index>(self) -> Option<T>
-    where Self: CoproductTaker<T, Index>,
+    where
+        Self: CoproductTaker<T, Index>,
     {
         CoproductTaker::take(self)
     }
@@ -286,9 +289,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), "float!");
     /// # }
     #[inline(always)]
-    pub fn uninject<T, Index>(self)
-    -> Result<T, <Self as CoprodUninjector<T, Index>>::Remainder>
-    where Self: CoprodUninjector<T, Index>,
+    pub fn uninject<T, Index>(self) -> Result<T, <Self as CoprodUninjector<T, Index>>::Remainder>
+    where
+        Self: CoprodUninjector<T, Index>,
     {
         CoprodUninjector::uninject(self)
     }
@@ -376,9 +379,11 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # }
     /// ```
     #[inline(always)]
-    pub fn subset<Targets, Indices>(self)
-    -> Result<Targets, <Self as CoproductSubsetter<Targets, Indices>>::Remainder>
-    where Self: CoproductSubsetter<Targets, Indices>,
+    pub fn subset<Targets, Indices>(
+        self,
+    ) -> Result<Targets, <Self as CoproductSubsetter<Targets, Indices>>::Remainder>
+    where
+        Self: CoproductSubsetter<Targets, Indices>,
     {
         CoproductSubsetter::subset(self)
     }
@@ -433,7 +438,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn embed<Targets, Indices>(self) -> Targets
-    where Self: CoproductEmbedder<Targets, Indices>,
+    where
+        Self: CoproductEmbedder<Targets, Indices>,
     {
         CoproductEmbedder::embed(self)
     }
@@ -730,31 +736,39 @@ pub trait CoproductSubsetter<Targets, Indices>: Sized {
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
-impl<Choices, THead, TTail, NHead, NTail, Rem>
-    CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
+impl<
+    Choices,
+    THead,
+    TTail,
+    NHead,
+    NTail,
+    Rem,
+> CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
 where
-    Self: CoprodUninjector<THead, NHead, Remainder=Rem>,
+    Self: CoprodUninjector<THead, NHead, Remainder = Rem>,
     Rem: CoproductSubsetter<TTail, NTail>,
 {
     type Remainder = <Rem as CoproductSubsetter<TTail, NTail>>::Remainder;
 
     /// Attempt to extract a value from a subset of the types.
-    fn subset(self) -> Result<Coproduct<THead, TTail>, Self::Remainder>
-    { match self.uninject() {
-        Ok(good) => Ok(Coproduct::Inl(good)),
-        Err(bads) => match bads.subset() {
-            Ok(goods) => Ok(Coproduct::Inr(goods)),
-            Err(bads) => Err(bads),
+    fn subset(self) -> Result<Coproduct<THead, TTail>, Self::Remainder> {
+        match self.uninject() {
+            Ok(good) => Ok(Coproduct::Inl(good)),
+            Err(bads) => match bads.subset() {
+                Ok(goods) => Ok(Coproduct::Inr(goods)),
+                Err(bads) => Err(bads),
+            },
         }
-    }}
+    }
 }
 
 impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
     type Remainder = Self;
 
     #[inline(always)]
-    fn subset(self) -> Result<CNil, Self::Remainder>
-    { Err(self) }
+    fn subset(self) -> Result<CNil, Self::Remainder> {
+        Err(self)
+    }
 }
 
 /// Trait for converting a coproduct into another that can hold its variants.
@@ -781,33 +795,36 @@ pub trait CoproductEmbedder<Out, Indices> {
 }
 
 impl CoproductEmbedder<CNil, HNil> for CNil {
-    fn embed(self) -> CNil
-    { match self {
+    fn embed(self) -> CNil {
+        match self {
         // impossible!
-    }}
+    }
+    }
 }
 
 impl<Head, Tail> CoproductEmbedder<Coproduct<Head, Tail>, HNil> for CNil
-where CNil: CoproductEmbedder<Tail, HNil>,
+where
+    CNil: CoproductEmbedder<Tail, HNil>,
 {
-    fn embed(self) -> Coproduct<Head, Tail>
-    { match self {
+    fn embed(self) -> Coproduct<Head, Tail> {
+        match self {
         // impossible!
-    }}
+    }
+    }
 }
 
-impl<Head, Tail, Out, NHead, NTail>
-    CoproductEmbedder<Out, HCons<NHead, NTail>>
+impl<Head, Tail, Out, NHead, NTail> CoproductEmbedder<Out, HCons<NHead, NTail>>
     for Coproduct<Head, Tail>
 where
     Out: CoprodInjector<Head, NHead>,
     Tail: CoproductEmbedder<Out, NTail>,
 {
-    fn embed(self) -> Out
-    { match self {
-        Coproduct::Inl(this) => Out::inject(this),
-        Coproduct::Inr(those) => those.embed(),
-    }}
+    fn embed(self) -> Out {
+        match self {
+            Coproduct::Inl(this) => Out::inject(this),
+            Coproduct::Inr(those) => those.embed(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -912,7 +929,6 @@ mod tests {
         assert_eq!(uninject_bool_co3, Ok(false));
     }
 
-
     #[test]
     fn test_coproduct_subset() {
         type I32StrBool = Coprod!(i32, &'static str, bool);
@@ -922,7 +938,8 @@ mod tests {
         assert!(res.is_err());
 
         if false {
-            #[allow(unreachable_code)] {
+            #[allow(unreachable_code)]
+            {
                 // ...including CNil.
                 #[allow(unused)]
                 let cnil: CNil = panic!();
@@ -931,7 +948,8 @@ mod tests {
             }
         }
 
-        { // Order does not matter.
+        {
+            // Order does not matter.
             let co = I32StrBool::inject(3);
             let res: Result<Coprod!(bool, i32), _> = co.subset();
             assert_eq!(res, Ok(Coproduct::Inr(Coproduct::Inl(3))));
@@ -946,7 +964,8 @@ mod tests {
     fn test_coproduct_embed() {
         // CNil can be embedded into any coproduct.
         if false {
-            #[allow(unreachable_code)] {
+            #[allow(unreachable_code)]
+            {
                 #[allow(unused)]
                 let cnil: CNil = panic!();
                 let _: CNil = cnil.embed();
@@ -957,11 +976,15 @@ mod tests {
             }
         }
 
-        #[derive(Debug, PartialEq)] struct A;
-        #[derive(Debug, PartialEq)] struct B;
-        #[derive(Debug, PartialEq)] struct C;
+        #[derive(Debug, PartialEq)]
+        struct A;
+        #[derive(Debug, PartialEq)]
+        struct B;
+        #[derive(Debug, PartialEq)]
+        struct C;
 
-        { // Order does not matter.
+        {
+            // Order does not matter.
             let co_a = <Coprod!(C, A, B)>::inject(A);
             let co_b = <Coprod!(C, A, B)>::inject(B);
             let co_c = <Coprod!(C, A, B)>::inject(C);
@@ -973,7 +996,8 @@ mod tests {
             assert_eq!(out_c, Coproduct::Inr(Coproduct::Inr(Coproduct::Inl(C))));
         }
 
-        { // Multiple variants can resolve to the same output w/o type annotations
+        {
+            // Multiple variants can resolve to the same output w/o type annotations
             type ABC = Coprod!(A, B, C);
             type BBB = Coprod!(B, B, B);
 

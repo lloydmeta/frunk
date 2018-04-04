@@ -178,7 +178,6 @@ impl<H, T> HCons<H, T> {
     }
 }
 
-
 /// Takes an element and an Hlist and returns another one with
 /// the element prepended to the original list. The original list
 /// is consumed
@@ -342,7 +341,8 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn get<T, Index>(&self) -> &T
-    where Self: Selector<T, Index>,
+    where
+        Self: Selector<T, Index>,
     {
         Selector::get(self)
     }
@@ -372,7 +372,8 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn pluck<T, Index>(self) -> (T, <Self as Plucker<T, Index>>::Remainder)
-    where Self: Plucker<T, Index>
+    where
+        Self: Plucker<T, Index>,
     {
         Plucker::pluck(self)
     }
@@ -396,8 +397,14 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # }
     /// ```
     #[inline(always)]
-    pub fn into_tuple2(self) -> (<Self as IntoTuple2>::HeadType, <Self as IntoTuple2>::TailOutput)
-    where Self: IntoTuple2,
+    pub fn into_tuple2(
+        self,
+    ) -> (
+        <Self as IntoTuple2>::HeadType,
+        <Self as IntoTuple2>::TailOutput,
+    )
+    where
+        Self: IntoTuple2,
     {
         IntoTuple2::into_tuple2(self)
     }
@@ -477,7 +484,8 @@ impl<T, Tail> Selector<T, Here> for HCons<T, Tail> {
 }
 
 impl<Head, Tail, FromTail, TailIndex> Selector<FromTail, There<TailIndex>> for HCons<Head, Tail>
-    where Tail: Selector<FromTail, TailIndex>
+where
+    Tail: Selector<FromTail, TailIndex>,
 {
     fn get(&self) -> &FromTail {
         self.tail.get()
@@ -521,19 +529,23 @@ impl<T, Tail> Plucker<T, Here> for HCons<T, Tail> {
 
 /// Implementation when the pluck target is in the tail
 impl<Head, Tail, FromTail, TailIndex> Plucker<FromTail, There<TailIndex>> for HCons<Head, Tail>
-    where Tail: Plucker<FromTail, TailIndex>
+where
+    Tail: Plucker<FromTail, TailIndex>,
 {
     type Remainder = HCons<Head, <Tail as Plucker<FromTail, TailIndex>>::Remainder>;
 
     fn pluck(self) -> (FromTail, Self::Remainder) {
-        let (target, tail_remainder): (FromTail,
-                                       <Tail as Plucker<FromTail, TailIndex>>::Remainder) =
-            <Tail as Plucker<FromTail, TailIndex>>::pluck(self.tail);
-        (target,
-         HCons {
-             head: self.head,
-             tail: tail_remainder,
-         })
+        let (target, tail_remainder): (
+            FromTail,
+            <Tail as Plucker<FromTail, TailIndex>>::Remainder,
+        ) = <Tail as Plucker<FromTail, TailIndex>>::pluck(self.tail);
+        (
+            target,
+            HCons {
+                head: self.head,
+                tail: tail_remainder,
+            },
+        )
     }
 }
 
@@ -591,15 +603,18 @@ where
     HCons<SHead, STail>: Plucker<THead, IndexHead>,
     <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail>,
 {
-    type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<TTail, IndexTail>>::Remainder;
+    type Remainder =
+        <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<
+            TTail,
+            IndexTail,
+        >>::Remainder;
 
     #[inline(always)]
     fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {
-        let (p, r): (THead,
-                     <HCons<SHead, STail> as Plucker<
+        let (p, r): (
             THead,
-            IndexHead,
-        >>::Remainder) = self.pluck();
+            <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder,
+        ) = self.pluck();
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
         (
             HCons {
@@ -610,7 +625,6 @@ where
         )
     }
 }
-
 
 /// Trait that allows for reversing a given data structure.
 ///
@@ -642,11 +656,10 @@ where
     type Output = <<Tail as IntoReverse>::Output as Add<HCons<H, HNil>>>::Output;
 
     fn into_reverse(self) -> Self::Output {
-        self.tail.into_reverse() +
-            HCons {
-                head: self.head,
-                tail: HNil,
-            }
+        self.tail.into_reverse() + HCons {
+            head: self.head,
+            tail: HNil,
+        }
     }
 }
 
@@ -657,7 +670,6 @@ where
 /// wee-bit more complicated.
 pub trait HMappable<Mapper> {
     type Output;
-
 
     /// Maps over the current data structure using functions stored in another
     /// data structure.
@@ -717,8 +729,7 @@ where
     }
 }
 
-impl<F, R, MapperTail, H, Tail>
-    HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
+impl<F, R, MapperTail, H, Tail> HMappable<HCons<F, MapperTail>> for HCons<H, Tail>
 where
     F: FnOnce(H) -> R,
     Tail: HMappable<MapperTail>,
@@ -777,8 +788,8 @@ impl<F, Init> HFoldRightable<F, Init> for HNil {
     }
 }
 
-impl<F, FolderHeadR, FolderTail, H, Tail, Init>
-    HFoldRightable<HCons<F, FolderTail>, Init> for HCons<H, Tail>
+impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
+    for HCons<H, Tail>
 where
     Tail: HFoldRightable<FolderTail, Init>,
     F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR,
@@ -791,8 +802,7 @@ where
     }
 }
 
-impl<'a, F, R, H, Tail, Init>
-    HFoldRightable<&'a F, Init> for HCons<H, Tail>
+impl<'a, F, R, H, Tail, Init> HFoldRightable<&'a F, Init> for HCons<H, Tail>
 where
     Tail: HFoldRightable<&'a F, Init>,
     F: Fn(H, <Tail as HFoldRightable<&'a F, Init>>::Output) -> R,
@@ -906,8 +916,7 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
     }
 }
 
-impl<F, R, FTail, H, Tail, Acc>
-    HFoldLeftable<HCons<F, FTail>, Acc> for HCons<H, Tail>
+impl<F, R, FTail, H, Tail, Acc> HFoldLeftable<HCons<F, FTail>, Acc> for HCons<H, Tail>
 where
     Tail: HFoldLeftable<FTail, R>,
     F: FnOnce(Acc, H) -> R,
@@ -986,7 +995,10 @@ where
     Tail: IntoTuple2,
 {
     type HeadType = T;
-    type TailOutput = (<Tail as IntoTuple2>::HeadType, <Tail as IntoTuple2>::TailOutput);
+    type TailOutput = (
+        <Tail as IntoTuple2>::HeadType,
+        <Tail as IntoTuple2>::TailOutput,
+    );
 
     fn into_tuple2(self) -> (Self::HeadType, Self::TailOutput) {
         (self.head, self.tail.into_tuple2())
@@ -1102,8 +1114,7 @@ where
     }
 }
 
-impl<Head, Tail, ValAtIx, TailIx> LiftFrom<ValAtIx, There<TailIx>>
-for HCons<Head, Tail>
+impl<Head, Tail, ValAtIx, TailIx> LiftFrom<ValAtIx, There<TailIx>> for HCons<Head, Tail>
 where
     Head: Default,
     Tail: HList + LiftFrom<ValAtIx, TailIx>,
@@ -1116,8 +1127,7 @@ where
 /// An index denoting that `Suffix` is just that.
 pub struct Suffixed<Suffix>(PhantomData<Suffix>);
 
-impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>>
-for <Prefix as Add<Suffix>>::Output
+impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>> for <Prefix as Add<Suffix>>::Output
 where
     Prefix: HList + Add<Suffix>,
     Suffix: Default,
@@ -1166,8 +1176,7 @@ mod tests {
     #[test]
     fn test_hlist_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist
-        !(i32, &str, i32) = hlist![1, "2", 3];
+        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
@@ -1179,18 +1188,13 @@ mod tests {
         assert_eq!(tail3, HNil);
     }
 
-
     #[test]
     #[allow(non_snake_case)]
     fn test_Hlist_macro() {
-        let h1: Hlist
-        !(i32, &str, i32) = hlist![1, "2", 3];
-        let h2: Hlist
-        !(i32, &str, i32, ) = hlist![1, "2", 3];
-        let h3: Hlist
-        !(i32) = hlist![1];
-        let h4: Hlist
-        !(i32, ) = hlist![1,];
+        let h1: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h2: Hlist!(i32, &str, i32,) = hlist![1, "2", 3];
+        let h3: Hlist!(i32) = hlist![1];
+        let h4: Hlist!(i32,) = hlist![1,];
         assert_eq!(h1, h2);
         assert_eq!(h3, h4);
     }
@@ -1246,7 +1250,6 @@ mod tests {
         assert_eq!(folded, 9001)
     }
 
-
     #[test]
     fn test_single_func_foldr_consuming() {
         let h = hlist![1, 2, 3];
@@ -1260,9 +1263,9 @@ mod tests {
         let folder = hlist![
             |&i, acc| i + acc,
             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-            |&f, acc| f + acc];
-        let folded = h.to_ref().foldr(folder,
-                                      1f32);
+            |&f, acc| f + acc
+        ];
+        let folded = h.to_ref().foldr(folder, 1f32);
         assert_eq!(folded, 9001)
     }
 
@@ -1339,8 +1342,7 @@ mod tests {
     #[test]
     fn test_single_func_foldl_consuming() {
         use std::collections::HashMap;
-        let h =
-            hlist![
+        let h = hlist![
             ("one", 1),
             ("two", 2),
             ("three", 3),

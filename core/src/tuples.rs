@@ -101,7 +101,9 @@ impl Generic for () {
 }
 
 impl From<()> for Hlist![] {
-    fn from(_: ()) -> Self { hlist![] }
+    fn from(_: ()) -> Self {
+        hlist![]
+    }
 }
 
 tup_def!( T0 ; F1, ; T1, );
