@@ -814,6 +814,13 @@ where
 ///
 /// This is essentially From, but the more specific nature of it means it's more ergonomic
 /// in actual usage.
+///
+/// Implemented for HLists.
+///
+/// This functionality is also provided as an [inherent method].
+/// However, you may find this trait useful in generic contexts.
+///
+/// [inherent method]: struct.HCons.html#method.to_ref
 pub trait ToRef<'a> {
     type Output;
 
@@ -831,9 +838,9 @@ impl<'a> ToRef<'a> for HNil {
 }
 
 impl<'a, H, Tail> ToRef<'a> for HCons<H, Tail>
-    where
-        H: 'a,
-        Tail: ToRef<'a>,
+where
+    H: 'a,
+    Tail: ToRef<'a>,
 {
     type Output = HCons<&'a H, <Tail as ToRef<'a>>::Output>;
 
