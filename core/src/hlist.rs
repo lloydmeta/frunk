@@ -799,23 +799,25 @@ where
 ///
 /// This is essentially From, but the more specific nature of it means it's more ergonomic
 /// in actual usage
-pub trait ToRef {
+pub trait ToRef<'a> {
     type Output;
-    fn to_ref(self) -> Self::Output;
+    fn to_ref(&'a self) -> Self::Output;
 }
 
-impl <'a> ToRef for &'a HNil {
+impl <'a>  ToRef<'a> for HNil {
     type Output = &'a HNil;
-    fn to_ref(self) -> Self::Output {
+    fn to_ref(&'a self) -> Self::Output {
         &HNil
     }
 
 }
 
-impl <'a, H, Tail> ToRef for &'a HCons<H, Tail>
-where &'a Tail: ToRef {
-    type Output = HCons<&'a H, <&'a Tail as ToRef>::Output>;
-    fn to_ref(self) -> Self::Output {
+impl <'a, H, Tail> ToRef<'a> for HCons<H, Tail>
+where
+    H: 'a,
+    Tail: ToRef<'a> {
+    type Output = HCons<&'a H, <Tail as ToRef<'a>>::Output>;
+    fn to_ref(&'a self) -> Self::Output {
         HCons {
             head: &self.head,
             tail: (&self.tail).to_ref()
