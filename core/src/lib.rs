@@ -34,7 +34,7 @@
 //!
 //! // Mapping over an HList
 //! let h3 = hlist![9000, "joe", 41f32];
-//! let mapped = (&h3).map(hlist![|&n| n + 1,
+//! let mapped = h3.to_ref().map(hlist![|&n| n + 1,
 //!                               |&s| s,
 //!                               |&f| f + 1f32]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);

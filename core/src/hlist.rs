@@ -28,9 +28,9 @@
 //! assert_eq!(folded, 9001);
 //!
 //! let h3 = hlist![9000, "joe", 41f32];
-//! // Mapping over an HList (we use as_ref() to map over the HList without consuming it,
+//! // Mapping over an HList (we use to_ref() to map over the HList without consuming it,
 //! // but you can use the value-consuming version by leaving it off.)
-//! let mapped = h3.as_ref().map(hlist![|&n| n + 1,
+//! let mapped = h3.to_ref().map(hlist![|&n| n + 1,
 //!                                     |&s| s,
 //!                                     |&f| f + 1f32]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
@@ -143,12 +143,6 @@ impl HList for HNil {
     }
 }
 
-impl AsRef<HNil> for HNil {
-    fn as_ref(&self) -> &HNil {
-        self
-    }
-}
-
 /// Represents the most basic non-empty HList. Its value is held in `head`
 /// while its tail is another HList.
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
@@ -162,12 +156,6 @@ impl<H, T: HList> HList for HCons<H, T> {
     const LEN: usize = 1 + <T as HList>::LEN;
     fn static_len() -> usize {
         Self::LEN
-    }
-}
-
-impl<H, T> AsRef<HCons<H, T>> for HCons<H, T> {
-    fn as_ref(&self) -> &HCons<H, T> {
-        self
     }
 }
 
@@ -297,6 +285,25 @@ macro_rules! gen_inherent_methods {
             where Self: IntoReverse,
             {
                 IntoReverse::into_reverse(self)
+            }
+
+            /// Return an HList where the contents are references to
+            /// the original HList on which this method was called.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// assert_eq!(hlist![].to_ref(), hlist![]);
+            ///
+            /// assert_eq!(hlist![1, true].to_ref(), hlist![&1, &true]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn to_ref<'a>(&'a self) -> <Self as ToRef<'a>>::Output
+                where Self: ToRef<'a>,
+            {
+                ToRef::to_ref(self)
             }
         }
     };
@@ -667,7 +674,7 @@ pub trait HMappable<Mapper> {
     ///
     /// // Sadly we need to help the compiler understand the bool type in our mapper
     ///
-    /// let mapped = h.as_ref().map(hlist![
+    /// let mapped = h.to_ref().map(hlist![
     ///     |&n| n + 1,
     ///     |b: &bool| !b,
     ///     |&f| f + 1f32]);
@@ -694,14 +701,6 @@ impl<F> HMappable<F> for HNil {
     }
 }
 
-impl<'a, F> HMappable<F> for &'a HNil {
-    type Output = HNil;
-
-    fn map(self, _: F) -> Self::Output {
-        HNil
-    }
-}
-
 impl<F, R, H, Tail> HMappable<F> for HCons<H, Tail>
 where
     F: Fn(H) -> R,
@@ -711,22 +710,6 @@ where
 
     fn map(self, f: F) -> Self::Output {
         let HCons { head, tail } = self;
-        HCons {
-            head: f(head),
-            tail: tail.map(f),
-        }
-    }
-}
-
-impl<'a, F, R, H, Tail> HMappable<F> for &'a HCons<H, Tail>
-where
-    F: Fn(&'a H) -> R,
-    &'a Tail: HMappable<F>
-{
-    type Output = HCons<R, <&'a Tail as HMappable<F>>::Output>;
-
-    fn map(self, f: F) -> Self::Output {
-        let HCons { ref head, ref tail } = *self;
         HCons {
             head: f(head),
             tail: tail.map(f),
@@ -744,23 +727,6 @@ where
 
     fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
         let HCons { head, tail } = self;
-        HCons {
-            head: (mapper.head)(head),
-            tail: tail.map(mapper.tail),
-        }
-    }
-}
-
-impl<'a, F, R, MapperTail, H, Tail>
-    HMappable<HCons<F, MapperTail>> for &'a HCons<H, Tail>
-where
-    F: FnOnce(&'a H) -> R,
-    &'a Tail: HMappable<MapperTail>,
-{
-    type Output = HCons<R, <&'a Tail as HMappable<MapperTail>>::Output>;
-
-    fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
-        let HCons { ref head, ref tail } = *self;
         HCons {
             head: (mapper.head)(head),
             tail: tail.map(mapper.tail),
@@ -839,44 +805,53 @@ where
     }
 }
 
-// TODO: enable this when the compiler stops smoking crack
-// Likely same as https://github.com/rust-lang/rust/issues/39959
-//
-// At the moment, we get a diverging requirement evaluation a la
-// overflow evaluating the requirement `<_ as std::ops::FnOnce<(&_, _)>>::Output`
-//
-// or
-//
-// overflow evaluating the requirement `<&_ as hlist::HFoldRightable<_, _, _>>::Output`
-//
-// Depending on the exit-case implementation
-//
-//impl<'a, F, Init> HFoldRightable<F, Init, Here> for &'a HNil {
-//    type Output = Init;
-//
-//    fn foldr(self, _: F, i: Init) -> Self::Output {
-//        i
-//    }
-//}
-//
-//
-//impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init, Index> HFoldRightable<HCons<F, FolderTail>, Init, There<Index>> for &'a HCons<H, Tail>
-//    where
-//        F: Fn(&'a H, <&'a Tail as HFoldRightable<FolderTail, Init, Index>>::Output) -> FolderHeadR,
-//        &'a Tail: HFoldRightable<FolderTail, Init, Index>
-//
-//{
-//    type Output = FolderHeadR;
-//
-//    fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
-//        let f_h = folder.head;
-//        let f_tail = folder.tail;
-//        let ref h = self.head;
-//        let ref tail = self.tail;
-//        let folded_tail = tail.foldr(f_tail, init);
-//        (f_h)(h, folded_tail)
-//    }
-//}
+/// An alternative to AsRef that does not force the reference type to be a pointer itself.
+///
+/// This lets us create implementations for our recursive traits that take the resulting
+/// Output reference type, without having to deal with strange, spurious overflows
+/// that sometimes occur when trying to implement a trait for &'a T (see this comment:
+/// https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198)
+///
+/// This is essentially From, but the more specific nature of it means it's more ergonomic
+/// in actual usage.
+///
+/// Implemented for HLists.
+///
+/// This functionality is also provided as an [inherent method].
+/// However, you may find this trait useful in generic contexts.
+///
+/// [inherent method]: struct.HCons.html#method.to_ref
+pub trait ToRef<'a> {
+    type Output;
+
+    #[inline(always)]
+    fn to_ref(&'a self) -> Self::Output;
+}
+
+impl<'a> ToRef<'a> for HNil {
+    type Output = HNil;
+
+    #[inline(always)]
+    fn to_ref(&'a self) -> Self::Output {
+        HNil
+    }
+}
+
+impl<'a, H, Tail> ToRef<'a> for HCons<H, Tail>
+where
+    H: 'a,
+    Tail: ToRef<'a>,
+{
+    type Output = HCons<&'a H, <Tail as ToRef<'a>>::Output>;
+
+    #[inline(always)]
+    fn to_ref(&'a self) -> Self::Output {
+        HCons {
+            head: &self.head,
+            tail: (&self.tail).to_ref(),
+        }
+    }
+}
 
 /// Left fold for a given data structure
 pub trait HFoldLeftable<Folder, Acc> {
@@ -894,7 +869,7 @@ pub trait HFoldLeftable<Folder, Acc> {
     ///
     /// let h = hlist![1, false, 42f32];
     ///
-    /// let folded = h.as_ref().foldl(
+    /// let folded = h.to_ref().foldl(
     ///     hlist![
     ///         |acc, &i| i + acc,
     ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
@@ -931,14 +906,6 @@ impl<F, Acc> HFoldLeftable<F, Acc> for HNil {
     }
 }
 
-impl<'a, F, Acc> HFoldLeftable<F, Acc> for &'a HNil {
-    type Output = Acc;
-
-    fn foldl(self, _: F, acc: Acc) -> Self::Output {
-        acc
-    }
-}
-
 impl<F, R, FTail, H, Tail, Acc>
     HFoldLeftable<HCons<F, FTail>, Acc> for HCons<H, Tail>
 where
@@ -949,20 +916,6 @@ where
 
     fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
         let HCons { head, tail } = self;
-        tail.foldl(folder.tail, (folder.head)(acc, head))
-    }
-}
-
-impl<'a, F, R, FTail, H, Tail, Acc>
-    HFoldLeftable<HCons<F, FTail>, Acc> for &'a HCons<H, Tail>
-where
-    &'a Tail: HFoldLeftable<FTail, R>,
-    F: FnOnce(Acc, &'a H) -> R,
-{
-    type Output = <&'a Tail as HFoldLeftable<FTail, R>>::Output;
-
-    fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
-        let HCons { ref head, ref tail } = *self;
         tail.foldl(folder.tail, (folder.head)(acc, head))
     }
 }
@@ -987,20 +940,6 @@ where
 
     fn foldl(self, f: F, acc: Acc) -> Self::Output {
         let HCons { head, tail } = self;
-        let acc = f(acc, head);
-        tail.foldl(f, acc)
-    }
-}
-
-impl<'a, F, H, Tail, Acc> HFoldLeftable<F, Acc> for &'a HCons<H, Tail>
-where
-    &'a Tail: HFoldLeftable<F, Acc>,
-    F: Fn(Acc, &'a H) -> Acc,
-{
-    type Output = <&'a Tail as HFoldLeftable<F, Acc>>::Output;
-
-    fn foldl(self, f: F, acc: Acc) -> Self::Output {
-        let HCons { ref head, ref tail } = *self;
         let acc = f(acc, head);
         tail.foldl(f, acc)
     }
@@ -1315,17 +1254,17 @@ mod tests {
         assert_eq!(folded, 6)
     }
 
-    // Todo enable when compiler is fixed
-    //    #[test]
-    //    fn test_foldr_non_consuming() {
-    //        let h = hlist![1, false, 42f32];
-    //        let folder = hlist![|&i, acc| i + acc,
-    //                                             |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-    //                                             |&f, acc| f + acc];
-    //        let folded = h.as_ref().foldr(folder,
-    //                                      1f32);
-    //        assert_eq!(folded, 9001)
-    //    }
+    #[test]
+    fn test_foldr_non_consuming() {
+        let h = hlist![1, false, 42f32];
+        let folder = hlist![
+            |&i, acc| i + acc,
+            |&_, acc| if acc > 42f32 { 9000 } else { 0 },
+            |&f, acc| f + acc];
+        let folded = h.to_ref().foldr(folder,
+                                      1f32);
+        assert_eq!(folded, 9001)
+    }
 
     #[test]
     fn test_foldl_consuming() {
@@ -1344,7 +1283,7 @@ mod tests {
     #[test]
     fn test_foldl_non_consuming() {
         let h = hlist![1, false, 42f32];
-        let folded = h.as_ref().foldl(
+        let folded = h.to_ref().foldl(
             hlist![
                 |acc, &i| i + acc,
                 |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
@@ -1352,7 +1291,8 @@ mod tests {
             ],
             1,
         );
-        assert_eq!(42f32, folded)
+        assert_eq!(42f32, folded);
+        assert_eq!((&h.head), &1);
     }
 
     #[test]
@@ -1372,14 +1312,14 @@ mod tests {
     #[test]
     fn test_map_single_func_non_consuming() {
         let h = hlist![9000, 9001, 9002];
-        let mapped = h.as_ref().map(|v| v + 1);
+        let mapped = h.to_ref().map(|v| v + 1);
         assert_eq!(mapped, hlist![9001, 9002, 9003]);
     }
 
     #[test]
     fn test_map_non_consuming() {
         let h = hlist![9000, "joe", 41f32];
-        let mapped = h.as_ref().map(hlist![|&n| n + 1, |&s| s, |&f| f + 1f32]);
+        let mapped = h.to_ref().map(hlist![|&n| n + 1, |&s| s, |&f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
     }
 
@@ -1434,7 +1374,7 @@ mod tests {
     #[test]
     fn test_single_func_foldl_non_consuming() {
         let h = hlist![1, 2, 3, 4, 5];
-        let r: isize = h.as_ref().foldl(|acc, &next| acc + next, 0isize);
+        let r: isize = h.to_ref().foldl(|acc, &next| acc + next, 0isize);
         assert_eq!(r, 15);
     }
 
