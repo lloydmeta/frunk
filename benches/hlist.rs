@@ -58,7 +58,7 @@ fn hlist_mapping_consuming(b: &mut Bencher) {
             |i| i + 3f32,
             |s| s,
             |b: bool| !b,
-        ]);
+        ])
     });
 }
 
@@ -72,6 +72,6 @@ fn hlist_mapping_non_consuming(b: &mut Bencher) {
             |&i| i + 3f32,
             |&s| s,
             |&b: &bool| !b,
-        ]);
+        ])
     });
 }
