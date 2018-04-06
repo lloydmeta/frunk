@@ -60,8 +60,14 @@
 //!
 //! // There is also a value consuming-variant of fold
 //!
-//! let folded = co1.fold(hlist![|i| format!("i32 {}", i),
-//!                              |b| String::from(if b { "t" } else { "f" })]);
+//! // Here, we use the poly_fn! macro to declare a polymorphic function to avoid caring
+//! // about the order in which declare handlers for the types in our coproduct
+//! let folded = co1.fold(
+//!       poly_fn![
+//!         |_b: bool| -> String { unimplemented!() }, /* we know this won't happen for co1 */
+//!         |i:  i32 | -> String { format!("i32 {}", i) },
+//!       ]
+//!      );
 //! assert_eq!(folded, "i32 3".to_string());
 //! # }
 //! ```
@@ -582,8 +588,9 @@ where
 
 /// Trait for implementing "folding" a Coproduct into a value.
 ///
-/// The Folder should be an HList of closures that correspond (in order, for now..) to the
-/// types used in declaring the Coproduct type.
+/// The Folder should be an HList of closures that correspond to the
+/// types used in declaring the Coproduct type, or a value of a type
+/// that implements Func for all the types in the Coproduct.
 ///
 /// # Example
 ///
@@ -603,6 +610,42 @@ where
 ///                     |&b| (if b { "t" } else { "f" }).to_string()];
 ///
 /// assert_eq!(co1.as_ref().fold(folder), "int 3".to_string());
+/// # }
+/// ```
+///
+/// Using a polymorphic function type has the advantage of not
+/// forcing you to care about the order in which you declare
+/// handlers for the types in your Coproduct.
+///
+/// ```
+/// # #[macro_use] extern crate frunk_core;
+/// # use frunk_core::coproduct::*;
+/// # use frunk_core::hlist::*;
+/// # fn main() {
+/// type I32F32StrBool = Coprod!(i32, f32, bool);
+///
+/// impl Func<i32> for P {
+///     type Output = bool;
+///     fn call(args: i32) -> Self::Output {
+///         args > 100
+///     }
+/// }
+/// impl Func<bool> for P {
+///     type Output = bool;
+///     fn call(args: bool) -> Self::Output {
+///         args
+///     }
+/// }
+/// impl Func<f32> for P {
+///     type Output = bool;
+///     fn call(args: f32) -> Self::Output {
+///         args > 9000f32
+///     }
+/// }
+/// struct P;
+///
+/// let co1 = I32F32StrBool::inject(3);
+/// let folded = co1.fold(Poly(P));
 /// # }
 /// ```
 pub trait CoproductFoldable<Folder, Output> {

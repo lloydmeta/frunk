@@ -28,11 +28,15 @@
 //! assert_eq!(folded, 9001);
 //!
 //! let h3 = hlist![9000, "joe", 41f32];
-//! // Mapping over an HList (we use to_ref() to map over the HList without consuming it,
-//! // but you can use the value-consuming version by leaving it off.)
-//! let mapped = h3.to_ref().map(hlist![|&n| n + 1,
-//!                                     |&s| s,
-//!                                     |&f| f + 1f32]);
+//! // Mapping over an HList with a polymorphic function,
+//! // declared using the poly_fn! macro (you can choose to impl
+//! // it manually)
+//! let mapped = h3.map(
+//!   poly_fn![
+//!     |f: f32|   -> f32 { f + 1f32 },
+//!     |i: isize| -> isize { i + 1 },
+//!     ['a] |s: &'a str| -> &'a str { s }
+//!   ]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 //!
 //! // Plucking a value out by type
