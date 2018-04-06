@@ -28,11 +28,15 @@
 //! assert_eq!(folded, 9001);
 //!
 //! let h3 = hlist![9000, "joe", 41f32];
-//! // Mapping over an HList (we use to_ref() to map over the HList without consuming it,
-//! // but you can use the value-consuming version by leaving it off.)
-//! let mapped = h3.to_ref().map(hlist![|&n| n + 1,
-//!                                     |&s| s,
-//!                                     |&f| f + 1f32]);
+//! // Mapping over an HList with a polymorphic function,
+//! // declared using the poly_fn! macro (you can choose to impl
+//! // it manually)
+//! let mapped = h3.map(
+//!   poly_fn![
+//!     |f: f32|   -> f32 { f + 1f32 },
+//!     |i: isize| -> isize { i + 1 },
+//!     ['a] |s: &'a str| -> &'a str { s }
+//!   ]);
 //! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 //!
 //! // Plucking a value out by type
@@ -663,7 +667,40 @@ where
     }
 }
 
-/// Trail that allow for mapping over a data structure using mapping functions stored in another
+/// This is a thin generic wrapper type that is used to differentiate
+/// between single-typed generic closure F that implements, say, Fn<i8> -> bool,
+/// and a Poly-typed F that implements multiple Function types, say
+/// Func<i8, bool>, Fun<bool, f32> etc.
+///
+/// This is needed because there are completely generic impls for many of the
+/// HList traits that take a simple unwrapped closure.
+pub struct Poly<T>(pub T);
+
+/// This is a simple, user-implementable version of Fn.
+///
+/// Might not be necessary if/when Fn(Once, Mut) traits are implementable
+/// in stable Rust
+pub trait Func<Input> {
+    type Output;
+
+    fn call(i: Input) -> Self::Output;
+}
+
+impl<P, H, Tail> HMappable<Poly<P>> for HCons<H, Tail>
+where
+    P: Func<H>,
+    Tail: HMappable<Poly<P>>,
+{
+    type Output = HCons<<P as Func<H>>::Output, <Tail as HMappable<Poly<P>>>::Output>;
+    fn map(self, poly: Poly<P>) -> Self::Output {
+        HCons {
+            head: P::call(self.head),
+            tail: self.tail.map(poly),
+        }
+    }
+}
+
+/// Trait that allow for mapping over a data structure using mapping functions stored in another
 /// data structure
 ///
 /// It might be a good idea to try to re-write these using the foldr variants, but it's a
@@ -1303,6 +1340,59 @@ mod tests {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.map(hlist![|n| n + 1, |s| s, |f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_poly_map_consuming() {
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        impl Func<i32> for P {
+            type Output = bool;
+            fn call(args: i32) -> Self::Output {
+                args > 100
+            }
+        }
+        impl<'a> Func<&'a str> for P {
+            type Output = usize;
+            fn call(args: &'a str) -> Self::Output {
+                args.len()
+            }
+        }
+        impl Func<f32> for P {
+            type Output = String;
+            fn call(args: f32) -> Self::Output {
+                format!("{}", args)
+            }
+        }
+        struct P;
+        assert_eq!(h.map(Poly(P)), hlist![true, 3, "41".to_string(), 6, false]);
+    }
+
+    #[test]
+    fn test_poly_map_non_consuming() {
+        let h = hlist![9000, "joe", 41f32, "schmoe", 50];
+        impl<'a> Func<&'a i32> for P {
+            type Output = bool;
+            fn call(args: &'a i32) -> Self::Output {
+                *args > 100
+            }
+        }
+        impl<'a> Func<&'a &'a str> for P {
+            type Output = usize;
+            fn call(args: &'a &'a str) -> Self::Output {
+                args.len()
+            }
+        }
+        impl<'a> Func<&'a f32> for P {
+            type Output = String;
+            fn call(args: &'a f32) -> Self::Output {
+                format!("{}", args)
+            }
+        }
+        struct P;
+        assert_eq!(
+            h.to_ref().map(Poly(P)),
+            hlist![true, 3, "41".to_string(), 6, false]
+        );
     }
 
     #[test]
