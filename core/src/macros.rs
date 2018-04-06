@@ -284,14 +284,14 @@ macro_rules! poly_fn {
         $(
             impl<$($pars,)*> $crate::hlist::Func<$p_arg_typ> for F {
                 type Output = $p_ret_typ;
-                #[allow(unused)]
+
                 fn call($p_args: $p_arg_typ) -> Self::Output { $p_body }
             }
         )*
         $(
             impl $crate::hlist::Func<$arg_typ> for F {
                 type Output = $ret_typ;
-                #[allow(unused)]
+
                 fn call($args: $arg_typ) -> Self::Output { $body }
             }
         )*
@@ -382,9 +382,9 @@ mod tests {
 
         let co1 = I32F32StrBool::inject("lollerskates");
         let folded = co1.fold(poly_fn!(
-            ['a] |x: &'a str| -> i8 { 1 },
-            |x: i32| -> i8 { 2 },
-            |f: f32| -> i8 { 3 },
+            ['a] |_x: &'a str| -> i8 { 1 },
+            |_x: i32| -> i8 { 2 },
+            |_f: f32| -> i8 { 3 },
         ));
         assert_eq!(folded, 1);
     }
