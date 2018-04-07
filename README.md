@@ -51,7 +51,7 @@ Statically typed heterogeneous lists.
 First, let's enable `hlist`:
 ```rust
 #[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk_core::hlist::*;
+use frunk::{HNil, HCons};
 ```
 
 Some basics:

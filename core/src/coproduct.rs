@@ -3,8 +3,9 @@
 //! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::coproduct::*;
+//! #[macro_use]
+//! extern crate frunk;
+//!
 //! # fn main() {
 //! // For simplicity, assign our Coproduct type to a type alias
 //! // This is purely optional.
@@ -39,32 +40,30 @@
 //! Or, if you want to "fold" over all possible values of a coproduct
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*;
-//! # use frunk_core::coproduct::*;
+//! # #[macro_use] extern crate frunk;
 //! # fn main() {
 //! # type I32Bool = Coprod!(i32, bool);
 //! # let co1 = I32Bool::inject(3);
 //! # let co2 = I32Bool::inject(true);
-//! // In the below, we use unimplemented!() to make it obvious hat we know what type of
+//! // In the below, we use unreachable!() to make it obvious hat we know what type of
 //! // item is inside our coproducts co1 and co2 but in real life, you should be writing
 //! // complete functions for all the cases when folding coproducts
+//! //
+//! // to_ref borrows every item so that we can fold without consuming the coproduct.
 //! assert_eq!(
 //!     co1.to_ref().fold(hlist![|&i| format!("i32 {}", i),
-//!                              |&b| unimplemented!() /* we know this won't happen for co1 */ ]),
+//!                              |&b| unreachable!() /* we know this won't happen for co1 */ ]),
 //!     "i32 3".to_string());
 //! assert_eq!(
-//!     co2.to_ref().fold(hlist![|&i| unimplemented!() /* we know this won't happen for co2 */,
+//!     co2.to_ref().fold(hlist![|&i| unreachable!() /* we know this won't happen for co2 */,
 //!                              |&b| String::from(if b { "t" } else { "f" })]),
 //!     "t".to_string());
-//!
-//! // There is also a value consuming-variant of fold
 //!
 //! // Here, we use the poly_fn! macro to declare a polymorphic function to avoid caring
 //! // about the order in which declare handlers for the types in our coproduct
 //! let folded = co1.fold(
 //!       poly_fn![
-//!         |_b: bool| -> String { unimplemented!() }, /* we know this won't happen for co1 */
+//!         |_b: bool| -> String { unreachable!() }, /* we know this won't happen for co1 */
 //!         |i:  i32 | -> String { format!("i32 {}", i) },
 //!       ]
 //!      );
@@ -83,8 +82,7 @@ use hlist::*;
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
+/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
@@ -130,9 +128,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
-    /// use frunk_core::coproduct::Coproduct;
+    /// use frunk::Coproduct;
     ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -172,7 +170,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -203,7 +201,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -238,7 +236,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32F32 = Coprod!(i32, f32);
     /// type I32 = Coprod!(i32); // remainder after uninjecting f32
@@ -268,7 +266,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Chaining calls for an exhaustive match:
     ///
     /// ```rust
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -318,8 +316,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use ::frunk_core::coproduct::Coproduct;
+    /// # #[macro_use] extern crate frunk;
+    /// use ::frunk::Coproduct;
+    ///
     /// # fn main() {
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type I32F32 = Coprod!(i32, f32);
@@ -346,8 +345,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// with the advantage that it can remove more than one type at a time:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::coproduct::*;
+    /// # #[macro_use] extern crate frunk;
+    /// use frunk::Coproduct;
+    ///
     /// # fn main() {
     /// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
     ///     co.fold(hlist![
@@ -427,7 +427,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type BoolI32 = Coprod!(bool, i32);
@@ -458,8 +458,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// consuming the coproduct:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
-    /// # use frunk_core::coproduct::Coproduct;
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::Coproduct;
     ///
     /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
@@ -486,9 +486,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::coproduct::*;
-    /// # use frunk_core::hlist::*;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// type I32F32StrBool = Coprod!(i32, f32, bool);
     ///
@@ -509,10 +507,10 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// handlers for the types in your Coproduct.
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::coproduct::*;
-    /// # use frunk_core::hlist::*;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk::{Poly, Func};
+    ///
     /// type I32F32StrBool = Coprod!(i32, f32, bool);
     ///
     /// impl Func<i32> for P {
