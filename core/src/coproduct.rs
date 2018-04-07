@@ -50,11 +50,11 @@
 //! // item is inside our coproducts co1 and co2 but in real life, you should be writing
 //! // complete functions for all the cases when folding coproducts
 //! assert_eq!(
-//!     co1.as_ref().fold(hlist![|&i| format!("i32 {}", i),
+//!     co1.to_ref().fold(hlist![|&i| format!("i32 {}", i),
 //!                              |&b| unimplemented!() /* we know this won't happen for co1 */ ]),
 //!     "i32 3".to_string());
 //! assert_eq!(
-//!     co2.as_ref().fold(hlist![|&i| unimplemented!() /* we know this won't happen for co2 */,
+//!     co2.to_ref().fold(hlist![|&i| unimplemented!() /* we know this won't happen for co2 */,
 //!                              |&b| String::from(if b { "t" } else { "f" })]),
 //!     "t".to_string());
 //!
@@ -450,6 +450,29 @@ impl<Head, Tail> Coproduct<Head, Tail> {
         CoproductEmbedder::embed(self)
     }
 
+    /// Borrow each variant of the Coproduct.
+    ///
+    /// # Example
+    ///
+    /// Composing with `subset` to match a subset of variants without
+    /// consuming the coproduct:
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # use frunk_core::coproduct::Coproduct;
+    ///
+    /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
+    ///
+    /// assert!(co.to_ref().subset::<Coprod!(&bool, &String), _>().is_ok());
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn to_ref<'a>(&'a self) -> <Self as ToRef<'a>>::Output
+    where Self: ToRef<'a>,
+    {
+        ToRef::to_ref(self)
+    }
+
     /// Use functions to transform a Coproduct into a single value.
     ///
     /// A variety of types are supported for the `Folder` argument:
@@ -477,7 +500,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     ///                     |&f| format!("float {}", f),
     ///                     |&b| (if b { "t" } else { "f" }).to_string()];
     ///
-    /// assert_eq!(co1.as_ref().fold(folder), "int 3".to_string());
+    /// assert_eq!(co1.to_ref().fold(folder), "int 3".to_string());
     /// # }
     /// ```
     ///
@@ -714,22 +737,6 @@ where
     }
 }
 
-impl<'a, F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for &'a Coproduct<CH, CTail>
-where
-    F: FnOnce(&'a CH) -> R,
-    &'a CTail: CoproductFoldable<FTail, R>,
-{
-    fn fold(self, f: HCons<F, FTail>) -> R {
-        use self::Coproduct::*;
-        let f_head = f.head;
-        let f_tail = f.tail;
-        match *self {
-            Inl(ref r) => (f_head)(r),
-            Inr(ref rest) => <&'a CTail as CoproductFoldable<FTail, R>>::fold(rest, f_tail),
-        }
-    }
-}
-
 /// This is literally impossible; CNil is not instantiable
 impl<F, R> CoproductFoldable<F, R> for CNil {
     fn fold(self, _: F) -> R {
@@ -737,16 +744,26 @@ impl<F, R> CoproductFoldable<F, R> for CNil {
     }
 }
 
-/// This is literally impossible; &CNil is not instantiable
-impl<'a, F, R> CoproductFoldable<F, R> for &'a CNil {
-    fn fold(self, _: F) -> R {
-        unreachable!()
+impl<'a, CH: 'a, CTail> ToRef<'a> for Coproduct<CH, CTail>
+where
+    CTail: ToRef<'a>,
+{
+    type Output = Coproduct<&'a CH, <CTail as ToRef<'a>>::Output>;
+
+    #[inline(always)]
+    fn to_ref(&'a self) -> Self::Output {
+        match *self {
+            Coproduct::Inl(ref r) => Coproduct::Inl(r),
+            Coproduct::Inr(ref rest) => Coproduct::Inr(rest.to_ref()),
+        }
     }
 }
 
-impl<CH, CTail> AsRef<Coproduct<CH, CTail>> for Coproduct<CH, CTail> {
-    fn as_ref(&self) -> &Coproduct<CH, CTail> {
-        self
+impl<'a> ToRef<'a> for CNil {
+    type Output = CNil;
+
+    fn to_ref(&'a self) -> CNil {
+        match *self { }
     }
 }
 
@@ -993,7 +1010,7 @@ mod tests {
         let co3 = I32F32Bool::inject(42f32);
 
         assert_eq!(
-            co1.as_ref().fold(hlist![
+            co1.to_ref().fold(hlist![
                 |&i| format!("int {}", i),
                 |&f| format!("float {}", f),
                 |&b| (if b { "t" } else { "f" }).to_string(),
@@ -1001,7 +1018,7 @@ mod tests {
             "int 3".to_string()
         );
         assert_eq!(
-            co2.as_ref().fold(hlist![
+            co2.to_ref().fold(hlist![
                 |&i| format!("int {}", i),
                 |&f| format!("float {}", f),
                 |&b| (if b { "t" } else { "f" }).to_string(),
@@ -1009,7 +1026,7 @@ mod tests {
             "t".to_string()
         );
         assert_eq!(
-            co3.as_ref().fold(hlist![
+            co3.to_ref().fold(hlist![
                 |&i| format!("int {}", i),
                 |&f| format!("float {}", f),
                 |&b| (if b { "t" } else { "f" }).to_string(),
