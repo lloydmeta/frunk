@@ -137,6 +137,12 @@ pub use hlist::HNil;
 pub use hlist::HCons;
 #[doc(no_inline)]
 pub use hlist::lift_from;
+#[doc(no_inline)]
+pub use hlist::Poly;
+#[doc(no_inline)]
+pub use hlist::Func;
+#[doc(no_inline)]
+pub use hlist::ToRef; // useful for where bounds
 
 #[doc(no_inline)]
 pub use coproduct::Coproduct;
