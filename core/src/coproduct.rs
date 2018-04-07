@@ -450,13 +450,15 @@ impl<Head, Tail> Coproduct<Head, Tail> {
         CoproductEmbedder::embed(self)
     }
 
-    /// (XXX from trait XXX)
+    /// Use functions to transform a Coproduct into a single value.
     ///
-    /// Trait for implementing "folding" a Coproduct into a value.
+    /// A variety of types are supported for the `Folder` argument:
     ///
-    /// The Folder should be an HList of closures that correspond to the
-    /// types used in declaring the Coproduct type, or a value of a type
-    /// that implements Func for all the types in the Coproduct.
+    /// * An `hlist![]` of closures (one for each type, in order).
+    /// * A single closure (for a Coproduct that is homogenous).
+    /// * A single [`Poly`].
+    ///
+    /// [`Poly`]: ../hlist/struct.Poly.html
     ///
     /// # Example
     ///
@@ -658,8 +660,27 @@ where
     }
 }
 
-// FIXME
+/// Trait for folding a coproduct into a single value.
+///
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::fold`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// Coproducts or Folders of unknown type. If the type of everything is known,
+/// then `co.fold(folder)` should "just work" even without the trait.
+///
+/// [`Coproduct::fold`]: enum.Coproduct.html#method.fold
 pub trait CoproductFoldable<Folder, Output> {
+
+    /// Use functions to fold a coproduct into a single value.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: enum.Coproduct.html#method.fold
     fn fold(self, f: Folder) -> Output;
 }
 

@@ -309,18 +309,17 @@ macro_rules! gen_inherent_methods {
                 ToRef::to_ref(self)
             }
 
-            /// (XXX from trait XXX)
+            /// Apply a function to each element of an HList.
             ///
-            /// Trait that allow for mapping over a data structure using mapping functions stored in another
-            /// data structure
+            /// This transforms some `Hlist![A, B, C, ..., E]` into some
+            /// `Hlist![T, U, V, ..., Z]`.  A variety of types are supported
+            /// for the folder argument:
             ///
-            /// It might be a good idea to try to re-write these using the foldr variants, but it's a
-            /// wee-bit more complicated.
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for mapping an HList that is homogenous).
+            /// * A single [`Poly`].
             ///
-            /// (XXX from method XXX)
-            ///
-            /// Maps over the current data structure using functions stored in another
-            /// data structure.
+            /// [`Poly`]: struct.Poly.html
             ///
             /// # Examples
             ///
@@ -357,11 +356,28 @@ macro_rules! gen_inherent_methods {
                 HMappable::map(self, mapper)
             }
 
-            /// (XXX from trait XXX)
-            /// Left fold for a given data structure
+            /// Perform a left fold over an HList.
             ///
-            /// (XXX from method XXX)
-            /// foldl over a data structure
+            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// value by visiting all of the elements in left-to-right order.
+            /// A variety of types are supported for the mapper argument:
+            ///
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for folding an HList that is homogenous).
+            ///
+            /// The accumulator can freely change type over the course of the call.
+            /// When called with a list of `N` functions, an expanded form of the
+            /// implementation with type annotations might look something like this:
+            ///
+            /// ```ignore
+            /// let acc: Acc0 = init_value;
+            /// let acc: Acc1 = f1(acc, x1);
+            /// let acc: Acc2 = f2(acc, x2);
+            /// let acc: Acc3 = f3(acc, x3);
+            /// ...
+            /// let acc: AccN = fN(acc, xN);
+            /// acc
+            /// ```
             ///
             /// # Examples
             ///
@@ -410,14 +426,45 @@ macro_rules! gen_inherent_methods {
                 HFoldLeftable::foldl(self, folder, acc)
             }
 
-            /// (XXX from trait XXX)
-            /// Foldr for HLists
+            /// Perform a right fold over an HList.
             ///
-            /// (XXX from method XXX)
-            /// foldr over a data structure
+            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// value by visiting all of the elements in reverse order.
+            /// A variety of types are supported for the mapper argument:
             ///
-            /// Sadly, due to a compiler quirk, only the value-consuming (the original hlist) variant
-            /// exists for foldr.
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for folding an HList that is homogenous),
+            ///   taken by reference.
+            ///
+            /// The accumulator can freely change type over the course of the call.
+            ///
+            /// # Comparison to `foldl`
+            ///
+            /// While the order of element traversal in `foldl` may seem more natural,
+            /// `foldr` does have its use cases, in particular when it is used to build
+            /// something that reflects the structure of the original HList (such as
+            /// folding an HList of `Option`s into an `Option` of an HList).
+            /// An implementation of such a function using `foldl` will tend to
+            /// reverse the list, while `foldr` will tend to preserve its order.
+            ///
+            /// The reason for this is because `foldr` performs what is known as
+            /// "structural induction;" it can be understood as follows:
+            ///
+            /// * Write out the HList in terms of [`h_cons`] and [`HNil`].
+            /// * Substitute each [`h_cons`] with a function,
+            ///   and substitute [`HNil`] with `init`
+            ///
+            /// ```ignore
+            /// the list:
+            ///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil))...)))
+            ///
+            /// becomes:
+            ///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init))...)))
+            /// ```
+            ///
+            /// [`Poly`]: struct.Poly.html
+            /// [`HNil`]: struct.HNil.html
+            /// [`h_cons`]: fn.h_cons.html
             ///
             /// # Examples
             ///
@@ -439,7 +486,6 @@ macro_rules! gen_inherent_methods {
             /// );
             ///
             /// assert_eq!(9001, folded)
-            ///
             /// # }
             /// ```
             #[inline(always)]
@@ -844,12 +890,29 @@ where
     }
 }
 
-// TODO
+/// Trait for mapping over an HList
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::map`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Mappers of unknown type. If the type of everything is known,
+/// then `list.map(f)` should "just work" even without the trait.
+///
+/// [`HCons::map`]: struct.HCons.html#method.map
 pub trait HMappable<Mapper> {
     type Output;
 
-    // TODO
-    fn map(self, folder: Mapper) -> Self::Output;
+    /// Apply a function to each element of an HList.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: struct.HCons.html#method.map
+    fn map(self, mapper: Mapper) -> Self::Output;
 }
 
 impl<F> HMappable<F> for HNil {
@@ -892,11 +955,28 @@ where
     }
 }
 
-// TODO
+/// Trait for performing a right fold over an HList
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::foldr`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Folders of unknown type. If the type of everything is known,
+/// then `list.foldr(f, init)` should "just work" even without the trait.
+///
+/// [`HCons::foldr`]: struct.HCons.html#method.foldr
 pub trait HFoldRightable<Folder, Init> {
     type Output;
 
-    // TODO
+    /// Perform a right fold over an HList.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: struct.HCons.html#method.foldr
     fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
@@ -983,11 +1063,28 @@ where
     }
 }
 
-// TODO
+/// Trait for performing a left fold over an HList
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::foldl`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Mappers of unknown type. If the type of everything is known,
+/// then `list.foldl(f, acc)` should "just work" even without the trait.
+///
+/// [`HCons::foldl`]: struct.HCons.html#method.foldl
 pub trait HFoldLeftable<Folder, Acc> {
     type Output;
 
-    // TODO
+    /// Perform a left fold over an HList.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: struct.HCons.html#method.foldl
     fn foldl(self, folder: Folder, acc: Acc) -> Self::Output;
 }
 
