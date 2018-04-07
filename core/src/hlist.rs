@@ -308,6 +308,150 @@ macro_rules! gen_inherent_methods {
             {
                 ToRef::to_ref(self)
             }
+
+            /// (XXX from trait XXX)
+            ///
+            /// Trait that allow for mapping over a data structure using mapping functions stored in another
+            /// data structure
+            ///
+            /// It might be a good idea to try to re-write these using the foldr variants, but it's a
+            /// wee-bit more complicated.
+            ///
+            /// (XXX from method XXX)
+            ///
+            /// Maps over the current data structure using functions stored in another
+            /// data structure.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let nil = HNil;
+            ///
+            /// assert_eq!(nil.map(HNil), HNil);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// // Sadly we need to help the compiler understand the bool type in our mapper
+            ///
+            /// let mapped = h.to_ref().map(hlist![
+            ///     |&n| n + 1,
+            ///     |b: &bool| !b,
+            ///     |&f| f + 1f32]);
+            /// assert_eq!(mapped, hlist![2, true, 43f32]);
+            ///
+            /// // There is also a value-consuming version that passes values to your functions
+            /// // instead of just references:
+            ///
+            /// let mapped2 = h.map(hlist![
+            ///     |n| n + 3,
+            ///     |b: bool| !b,
+            ///     |f| f + 8959f32]);
+            /// assert_eq!(mapped2, hlist![4, true, 9001f32]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn map<F>(self,mapper: F) -> <Self as HMappable<F>>::Output
+            where Self: HMappable<F>,
+            {
+                HMappable::map(self, mapper)
+            }
+
+            /// (XXX from trait XXX)
+            /// Left fold for a given data structure
+            ///
+            /// (XXX from method XXX)
+            /// foldl over a data structure
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let nil = HNil;
+            ///
+            /// assert_eq!(nil.foldl(HNil, 0), 0);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// let folded = h.to_ref().foldl(
+            ///     hlist![
+            ///         |acc, &i| i + acc,
+            ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+            ///         |acc, &f| f + acc
+            ///     ],
+            ///     1
+            /// );
+            ///
+            /// assert_eq!(42f32, folded);
+            ///
+            /// // There is also a value-consuming version that passes values to your folding
+            /// // functions instead of just references:
+            ///
+            /// let folded2 = h.foldl(
+            ///     hlist![
+            ///         |acc, i| i + acc,
+            ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+            ///         |acc, f| f + acc
+            ///     ],
+            ///     8918
+            /// );
+            ///
+            /// assert_eq!(9042f32, folded2)
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn foldl<Folder, Acc>(
+                self,
+                folder: Folder,
+                acc: Acc,
+            ) -> <Self as HFoldLeftable<Folder, Acc>>::Output
+            where Self: HFoldLeftable<Folder, Acc>,
+            {
+                HFoldLeftable::foldl(self, folder, acc)
+            }
+
+            /// (XXX from trait XXX)
+            /// Foldr for HLists
+            ///
+            /// (XXX from method XXX)
+            /// foldr over a data structure
+            ///
+            /// Sadly, due to a compiler quirk, only the value-consuming (the original hlist) variant
+            /// exists for foldr.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+            /// let nil = HNil;
+            ///
+            /// assert_eq!(nil.foldr(HNil, 0), 0);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// let folded = h.foldr(
+            ///     hlist![
+            ///         |i, acc| i + acc,
+            ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
+            ///         |f, acc| f + acc
+            ///     ],
+            ///     1f32
+            /// );
+            ///
+            /// assert_eq!(9001, folded)
+            ///
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn foldr<Folder, Init>(
+                self,
+                folder: Folder,
+                init: Init,
+            ) -> <Self as HFoldRightable<Folder, Init>>::Output
+            where Self: HFoldRightable<Folder, Init>,
+            {
+                HFoldRightable::foldr(self, folder, init)
+            }
         }
     };
 }
@@ -700,45 +844,11 @@ where
     }
 }
 
-/// Trait that allow for mapping over a data structure using mapping functions stored in another
-/// data structure
-///
-/// It might be a good idea to try to re-write these using the foldr variants, but it's a
-/// wee-bit more complicated.
+// TODO
 pub trait HMappable<Mapper> {
     type Output;
 
-    /// Maps over the current data structure using functions stored in another
-    /// data structure.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
-    ///
-    /// assert_eq!(nil.map(HNil), HNil);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// // Sadly we need to help the compiler understand the bool type in our mapper
-    ///
-    /// let mapped = h.to_ref().map(hlist![
-    ///     |&n| n + 1,
-    ///     |b: &bool| !b,
-    ///     |&f| f + 1f32]);
-    /// assert_eq!(mapped, hlist![2, true, 43f32]);
-    ///
-    /// // There is also a value-consuming version that passes values to your functions
-    /// // instead of just references:
-    ///
-    /// let mapped2 = h.map(hlist![
-    ///     |n| n + 3,
-    ///     |b: bool| !b,
-    ///     |f| f + 8959f32]);
-    /// assert_eq!(mapped2, hlist![4, true, 9001f32]);
-    /// # }
-    /// ```
+    // TODO
     fn map(self, folder: Mapper) -> Self::Output;
 }
 
@@ -782,38 +892,11 @@ where
     }
 }
 
-/// Foldr for HLists
+// TODO
 pub trait HFoldRightable<Folder, Init> {
     type Output;
 
-    /// foldr over a data structure
-    ///
-    /// Sadly, due to a compiler quirk, only the value-consuming (the original hlist) variant
-    /// exists for foldr.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
-    ///
-    /// assert_eq!(nil.foldr(HNil, 0), 0);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// let folded = h.foldr(
-    ///     hlist![
-    ///         |i, acc| i + acc,
-    ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
-    ///         |f, acc| f + acc
-    ///     ],
-    ///     1f32
-    /// );
-    ///
-    /// assert_eq!(9001, folded)
-    ///
-    /// # }
-    /// ```
+    // TODO
     fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
@@ -900,48 +983,11 @@ where
     }
 }
 
-/// Left fold for a given data structure
+// TODO
 pub trait HFoldLeftable<Folder, Acc> {
     type Output;
 
-    /// foldl over a data structure
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
-    ///
-    /// assert_eq!(nil.foldl(HNil, 0), 0);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// let folded = h.to_ref().foldl(
-    ///     hlist![
-    ///         |acc, &i| i + acc,
-    ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-    ///         |acc, &f| f + acc
-    ///     ],
-    ///     1
-    /// );
-    ///
-    /// assert_eq!(42f32, folded);
-    ///
-    /// // There is also a value-consuming version that passes values to your folding
-    /// // functions instead of just references:
-    ///
-    /// let folded2 = h.foldl(
-    ///     hlist![
-    ///         |acc, i| i + acc,
-    ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-    ///         |acc, f| f + acc
-    ///     ],
-    ///     8918
-    /// );
-    ///
-    /// assert_eq!(9042f32, folded2)
-    /// # }
-    /// ```
+    // TODO
     fn foldl(self, folder: Folder, acc: Acc) -> Self::Output;
 }
 
