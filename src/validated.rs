@@ -8,11 +8,13 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk;
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*;
-//! # use frunk::validated::*;
+//! #[macro_use]
+//! extern crate frunk;
+//!
 //! # fn main() {
+//! use frunk::Validated;
+//! use frunk::prelude::*; // for .into_validated()
+//!
 //! #[derive(PartialEq, Eq, Debug)]
 //! struct Person {
 //!     age: i32,
@@ -67,7 +69,9 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use frunk::validated::*;
+    /// use frunk::Validated;
+    /// use frunk::prelude::*;
+    ///
     /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
     /// let v = r1.into_validated();
     /// assert!(v.is_ok());
@@ -84,7 +88,8 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use frunk::validated::*;
+    /// use frunk::prelude::*;
+    ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
@@ -101,10 +106,11 @@ where
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::hlist::*;
-    /// # use frunk::validated::*;
+    /// #[macro_use] extern crate frunk;
+    ///
+    /// use frunk::Validated;
+    /// use frunk::prelude::*;
+    ///
     /// # fn main() {
     /// #[derive(PartialEq, Eq, Debug)]
     /// struct Person {
@@ -150,7 +156,8 @@ pub trait IntoValidated<T, E> {
     /// # Examples
     ///
     /// ```
-    /// # use frunk::validated::*;
+    /// use frunk::prelude::*; // IntoValidated is in the prelude
+    ///
     /// let r1: Result<String, i32> = Result::Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
@@ -176,10 +183,10 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 ///
 /// ```
 /// # #[macro_use] extern crate frunk;
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::hlist::*;
-/// # use frunk::validated::*;
 /// # fn main() {
+/// use frunk::Validated;
+/// use frunk::prelude::*;
+///
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
 /// let v = r1.into_validated() + r2;
@@ -206,10 +213,10 @@ where
 ///
 /// ```
 /// # #[macro_use] extern crate frunk;
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::hlist::*;
-/// # use frunk::validated::*;
 /// # fn main() {
+/// use frunk::Validated;
+/// use frunk::prelude::*;
+///
 /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
 /// let r2: Result<i32, String> = Result::Ok(1);
 /// let v1 = r1.into_validated();

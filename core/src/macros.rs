@@ -8,7 +8,7 @@
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use ::frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -46,7 +46,7 @@ macro_rules! hlist {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![a1, a2, a3] = h;
 /// assert_eq!(a1, 13.5f32);
@@ -85,7 +85,7 @@ macro_rules! hlist_pat {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
 /// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 ///
 /// // Use "...Tail" to append another HList type at the end.
@@ -110,8 +110,7 @@ macro_rules! Hlist {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
+/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
@@ -142,9 +141,9 @@ macro_rules! Coprod {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::labelled::*;
-/// # use frunk_core::hlist::*;
+/// # #[macro_use] extern crate frunk;
+/// use frunk::labelled::chars::*;
+
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -157,9 +156,7 @@ macro_rules! Coprod {
 ///   will be set to the stringified version of the type provided.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::labelled::*;
-/// # use frunk_core::hlist::*;
+/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// enum first_name {}
 /// let labelled = field![first_name, "Joe"];
@@ -172,9 +169,9 @@ macro_rules! Coprod {
 ///   _and_ a custom name, passed as the last argument in the macro
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::labelled::*;
-/// # use frunk_core::hlist::*;
+/// # #[macro_use] extern crate frunk;
+/// use frunk::labelled::chars::*;
+///
 /// # fn main() {
 /// // useful aliasing of our type-level string
 /// type age = (a, g, e);
@@ -214,8 +211,7 @@ macro_rules! field {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::coproduct::*;
+/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
 ///
@@ -331,8 +327,8 @@ mod tests {
 
     #[test]
     fn ellipsis_tail() {
+        use coproduct::Coproduct;
         use test_structs::unit_copy::{A, B, C};
-        use coproduct::*;
 
         // hlist: accepted locations, and consistency between macros
         let hlist_pat![...hlist_pat![C]]: Hlist![...Hlist![C]] = { hlist![...hlist![C]] };
@@ -364,7 +360,6 @@ mod tests {
 
     #[test]
     fn poly_fn_macro_test() {
-        use hlist::HMappable;
         let h = hlist![9000, "joe", 41f32, "schmoe", 50];
         let h2 = h.map(poly_fn!(
             |x: i32| -> bool { x > 100 },
@@ -376,8 +371,6 @@ mod tests {
 
     #[test]
     fn poly_fn_macro_coproduct_test() {
-        use coproduct::*;
-
         type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
 
         let co1 = I32F32StrBool::inject("lollerskates");
@@ -391,7 +384,6 @@ mod tests {
 
     #[test]
     fn poly_fn_macro_trailing_commas_test() {
-        use hlist::HMappable;
         let h = hlist![9000, "joe", 41f32, "schmoe", 50];
         let h2 = h.map(poly_fn!(
             |x: i32| -> bool { x > 100 },
