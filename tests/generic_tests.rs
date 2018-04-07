@@ -2,7 +2,7 @@ extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;
 
-use frunk::generic::*;
+use frunk::{from_generic, into_generic, convert_from};
 
 mod common;
 use common::*;
@@ -46,7 +46,7 @@ fn test_struct_conversion() {
         last_name: "Cannon",
         age: 3,
     };
-    let pres = <President as Generic>::convert_from(a);
+    let pres: President = frunk::convert_from(a);
     assert_eq!(
         pres,
         President {
@@ -65,8 +65,8 @@ fn test_struct_conversion_round_trip() {
         age: 3,
     };
     let before = a.clone();
-    let p: President = <President as Generic>::convert_from(a);
-    let a_again = <Strategist as Generic>::convert_from(p);
+    let p: President = convert_from(a);
+    let a_again: Strategist = convert_from(p);
     assert_eq!(a_again, before)
 }
 
@@ -83,8 +83,8 @@ fn test_mixed_conversions_round_trip() {
         age: 3,
     };
     let before = u.clone();
-    let au = <ApiUser as Generic>::convert_from(u);
+    let au: ApiUser = convert_from(u);
     // let au2 = <ApiUser as LabelledGeneric>::convert_from(u); <-- will fail at compile time
-    let u_again = <SavedUser as Generic>::convert_from(au);
+    let u_again: SavedUser = convert_from(au);
     assert_eq!(u_again, before)
 }

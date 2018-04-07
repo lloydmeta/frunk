@@ -5,11 +5,12 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk;
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*; fn main() {
-//! use frunk_core::hlist::*;
-//! use frunk::semigroup::*;
+//! #[macro_use]
+//! extern crate frunk;
+//!
+//! # fn main() {
+//! use frunk::Semigroup;
+//!
 //! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 //! let t2 = (1, 2.5f32, String::from(" world"), None);
 //!
@@ -62,7 +63,8 @@ pub trait Semigroup {
     /// # Examples
     ///
     /// ```
-    /// # use frunk::semigroup::*;
+    /// use frunk::Semigroup;
+    ///
     /// assert_eq!(Some(1).combine(&Some(2)), Some(3))
     /// ```
     fn combine(&self, other: &Self) -> Self;
@@ -105,7 +107,8 @@ where
 /// # Examples
 ///
 /// ```
-/// # use frunk::semigroup::*;
+/// use frunk::semigroup::combine_all_option;
+///
 /// let v1 = &vec![1, 2, 3];
 /// assert_eq!(combine_all_option(v1), Some(6));
 ///

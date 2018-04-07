@@ -9,11 +9,12 @@
 //! # Examples
 //!
 //! ```
-//! # use frunk::monoid::*;
-//! # use std::collections::*;
+//! use std::collections::HashMap;
+//! use frunk::{monoid, Monoid};
+//!
 //! let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
-//! assert_eq!(combine_all(&vec_of_no_hashmaps),
-//!                    <HashMap<i32, String> as Monoid>::empty());
+//! assert_eq!(monoid::combine_all(&vec_of_no_hashmaps),
+//!            <HashMap<i32, String> as Monoid>::empty());
 //!
 //! let mut h1: HashMap<i32, String> = HashMap::new();
 //! h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
@@ -27,8 +28,9 @@
 //! let mut h_expected: HashMap<i32, String> = HashMap::new();
 //! h_expected.insert(1, String::from("Hello World"));
 //! h_expected.insert(2, String::from("Goodbye"));
-//! h_expected.insert(3, String::from("Cruel World")); // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
-//! assert_eq!(combine_all(&vec_of_hashes), h_expected);
+//! h_expected.insert(3, String::from("Cruel World"));
+//! // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+//! assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
 //! ```
 use super::semigroup::{All, Any, Product, Semigroup};
 use std::collections::*;
@@ -41,7 +43,7 @@ pub trait Monoid: Semigroup {
     /// # Examples
     ///
     /// ```
-    /// # use frunk::monoid::*;
+    /// use frunk::Monoid;
     ///
     /// assert_eq!(<i16 as Monoid>::empty(), 0);
     /// ```
@@ -53,9 +55,9 @@ pub trait Monoid: Semigroup {
 /// # Examples
 ///
 /// ```
-/// # use frunk::monoid::*;
+/// use frunk::monoid;
 ///
-/// assert_eq!(combine_n(&Some(2), 4), Some(8));
+/// assert_eq!(monoid::combine_n(&Some(2), 4), Some(8));
 /// ```
 pub fn combine_n<T>(o: &T, times: u32) -> T
 where
@@ -73,7 +75,7 @@ where
 /// # Examples
 ///
 /// ```
-/// # use frunk::monoid::*;
+/// use frunk::monoid::combine_all;
 ///
 /// assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
 ///

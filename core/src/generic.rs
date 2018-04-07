@@ -6,12 +6,10 @@
 //! # Examples
 //!
 //! ```rust
-//! # #[allow(unused_imports)]
-//! # #[macro_use] extern crate frunk_derives;
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*; fn main() {
-//! # use frunk_core::hlist::*;
-//! # use frunk_core::generic::*;
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core;
+//!
+//! # fn main() {
 //! #[derive(Generic)]
 //! struct ApiPerson<'a> {
 //!     FirstName: &'a str,
@@ -31,7 +29,7 @@
 //!     LastName: "Blow",
 //!     Age: 30,
 //! };
-//! let d_person: DomainPerson = convert_from(a_person); // done
+//! let d_person: DomainPerson = frunk::convert_from(a_person); // done
 //! # }
 
 /// A trait that converts from a type to a generic representation
@@ -42,12 +40,10 @@
 /// # Examples
 ///
 /// ```rust
-/// # #[allow(unused_imports)]
-/// # #[macro_use] extern crate frunk_derives;
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::hlist::*; fn main() {
-/// use frunk_core::hlist::*;
-/// use frunk_core::generic::*;
+/// #[macro_use] extern crate frunk;
+/// #[macro_use] extern crate frunk_core;
+///
+/// # fn main() {
 /// #[derive(Generic)]
 /// struct ApiPerson<'a> {
 ///     FirstName: &'a str,
@@ -67,7 +63,7 @@
 ///     LastName: "Blow",
 ///     Age: 30,
 /// };
-/// let d_person: DomainPerson = convert_from(a_person); // done
+/// let d_person: DomainPerson = frunk::convert_from(a_person); // done
 /// # }
 /// ```
 pub trait Generic {

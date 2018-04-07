@@ -6,7 +6,10 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+//! #[macro_use]
+//! extern crate frunk;
+//!
+//! # fn main() {
 //! let h = hlist![1, "hi"];
 //! assert_eq!(h.len(), 2);
 //! let (a, b) = h.into_tuple2();
@@ -65,8 +68,10 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::LEN, 3);
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::prelude::*;
+    ///
+    /// assert_eq!(<Hlist![i32, bool, f32]>::LEN, 3);
     /// # }
     /// ```
     const LEN: usize;
@@ -81,7 +86,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1, "hi"];
     /// assert_eq!(h.len(), 2);
     /// # }
@@ -96,8 +101,10 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::prelude::*;
+    ///
+    /// assert_eq!(<Hlist![i32, bool, f32]>::static_len(), 3);
     /// # }
     /// ```
     #[inline]
@@ -109,7 +116,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h1 = hlist![1, "hi"];
     /// let h2 = h1.prepend(true);
     /// let (a, (b, c)) = h2.into_tuple2();
@@ -169,11 +176,11 @@ impl<H, T> HCons<H, T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HNil; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
-    /// assert_eq!(tail, HNil);
+    /// assert_eq!(tail, hlist![]);
     /// # }
     /// ```
     pub fn pop(self) -> (H, T) {
@@ -188,11 +195,14 @@ impl<H, T> HCons<H, T> {
 /// # Examples
 ///
 /// ```
-/// # use frunk_core::hlist::*;
+/// # extern crate frunk; fn main() {
+/// use frunk::hlist::{HNil, h_cons};
+///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
 /// assert_eq!(h1, "what");
 /// assert_eq!(h2, 1.23f32);
+/// # }
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
     HCons {
@@ -211,7 +221,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h = hlist![1, "hi"];
             /// assert_eq!(h.len(), 2);
             /// # }
@@ -228,7 +238,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h1 = hlist![1, "hi"];
             /// let h2 = h1.prepend(true);
             /// let (a, (b, c)) = h2.into_tuple2();
@@ -254,7 +264,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
             /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
@@ -273,7 +283,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// assert_eq!(hlist![].into_reverse(), hlist![]);
             ///
             /// assert_eq!(
@@ -295,7 +305,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// assert_eq!(hlist![].to_ref(), hlist![]);
             ///
             /// assert_eq!(hlist![1, true].to_ref(), hlist![&1, &true]);
@@ -323,10 +333,10 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let nil = HNil;
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// use ::frunk::HNil;
             ///
-            /// assert_eq!(nil.map(HNil), HNil);
+            /// assert_eq!(HNil.map(HNil), HNil);
             ///
             /// let h = hlist![1, false, 42f32];
             ///
@@ -381,10 +391,10 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let nil = HNil;
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// let nil = hlist![];
             ///
-            /// assert_eq!(nil.foldl(HNil, 0), 0);
+            /// assert_eq!(nil.foldl(hlist![], 0), 0);
             ///
             /// let h = hlist![1, false, 42f32];
             ///
@@ -468,10 +478,10 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-            /// let nil = HNil;
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// let nil = hlist![];
             ///
-            /// assert_eq!(nil.foldr(HNil, 0), 0);
+            /// assert_eq!(nil.foldr(hlist![], 0), 0);
             ///
             /// let h = hlist![1, false, 42f32];
             ///
@@ -515,7 +525,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the type you want.
@@ -547,7 +557,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let list = hlist![1, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the target type.
@@ -577,7 +587,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience
@@ -1107,7 +1117,7 @@ where
 /// can handle all cases
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
 /// let h = hlist![1, 2, 3, 4, 5];
 ///
 /// let r: isize = h.foldl(|acc, next| acc + next, 0);
@@ -1219,7 +1229,10 @@ impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
 /// `LiftFrom` is the reciprocal of `LiftInto`.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
+/// use frunk::lift_from;
+/// use frunk::prelude::*;
+///
 /// type H = Hlist![(), usize, f64, (), bool];
 ///
 /// let x = H::lift_from(42.0);
@@ -1244,7 +1257,9 @@ pub fn lift_from<I, T, PF: LiftFrom<T, I>>(part: T) -> PF {
 /// `LiftInto` is the reciprocal of `LiftFrom`.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
+/// use frunk::prelude::*;
+///
 /// type H = Hlist![(), usize, f64, (), bool];
 ///
 /// // Type inference works as expected:
