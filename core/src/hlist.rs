@@ -841,22 +841,32 @@ where
     }
 }
 
+/// Wrapper type around a function for polymorphic maps and folds.
+///
 /// This is a thin generic wrapper type that is used to differentiate
-/// between single-typed generic closure F that implements, say, Fn<i8> -> bool,
-/// and a Poly-typed F that implements multiple Function types, say
-/// Func<i8, bool>, Fun<bool, f32> etc.
+/// between single-typed generic closures `F` that implements, say, `Fn(i8) -> bool`,
+/// and a Poly-typed `F` that implements multiple Function types, say
+/// `Func<i8, Output=bool>`, `Func<bool, Output=f32>` etc.
 ///
 /// This is needed because there are completely generic impls for many of the
 /// HList traits that take a simple unwrapped closure.
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Poly<T>(pub T);
 
-/// This is a simple, user-implementable version of Fn.
+/// This is a simple, user-implementable alternative to `Fn`.
 ///
 /// Might not be necessary if/when Fn(Once, Mut) traits are implementable
 /// in stable Rust
 pub trait Func<Input> {
     type Output;
 
+    /// Call the `Func`.
+    ///
+    /// Notice that this does not take a self argument, which in turn means `Func`
+    /// cannot effectively close over a context. This decision trades power for convenience;
+    /// a three-trait `Fn` heirarchy like that in std provides a great deal of power in a
+    /// small fraction of use-cases, but it also comes at great expanse to the other 95% of
+    /// use cases.
     fn call(i: Input) -> Self::Output;
 }
 
