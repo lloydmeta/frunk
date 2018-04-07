@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate frunk;
 
-use frunk::coproduct::*;
-
 #[test]
 fn test_inject_coproduct() {
     type I32StrBool = Coprod!(i32, &'static str, bool);
@@ -35,7 +33,7 @@ fn test_coproduct_fold_non_consuming() {
     let co = I32StrBool::inject(true);
 
     assert_eq!(
-        co.as_ref().fold(hlist![
+        co.to_ref().fold(hlist![
             |&i| format!("int {}", i),
             |&f| format!("float {}", f),
             |&b| (if b { "t" } else { "f" }).to_string(),
