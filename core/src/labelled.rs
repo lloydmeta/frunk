@@ -219,19 +219,53 @@ where
     <B as LabelledGeneric>::transform_from(a)
 }
 
-// Create a bunch of enums that can be used to represent characters on the type level
-macro_rules! create_enums_for {
-    ($($i: ident)*) => {
-        $(
-            #[allow(non_snake_case, non_camel_case_types)]
-            #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-            pub enum $i {}
-        )*
+// FIXME kill this once examples have been fixed
+pub use self::chars::*;
+
+pub mod chars {
+    //! Types for building type-level labels from character sequences.
+    //!
+    //! This is designed to be glob-imported:
+    //!
+    // FIXME un-ignore this once examples have been fixed
+    //! ```rust,ignore
+    //! # extern crate frunk;
+    //! # fn main() {
+    //! # #[allow(unused)]
+    //! use frunk::labelled::chars::*;
+    //! # }
+    //! ```
+
+    macro_rules! create_enums_for {
+        ($($i: ident)*) => {
+            $(
+                #[allow(non_snake_case, non_camel_case_types)]
+                #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+                pub enum $i {}
+            )*
+        }
+    }
+
+    // Add more as needed.
+    create_enums_for! {
+        // all valid identifier characters
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+        A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+        _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 __
+    }
+
+    #[test]
+    fn simple_var_names_are_allowed() {
+        // Rust forbids variable bindings that shadow unit structs,
+        // so unit struct characters would cause a lot of trouble.
+        //
+        // Good thing I don't plan on adding reified labels. - Exp
+        let a = 3;
+        match a {
+            a => assert_eq!(a, 3),
+        }
     }
 }
-
-// Add more as needed.
-create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
 /// A Label contains a type-level Name, a runtime value, and
 /// a reference to a `&'static str` name.
