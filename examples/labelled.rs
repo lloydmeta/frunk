@@ -1,7 +1,6 @@
 #[macro_use] // for the hlist macro
 extern crate frunk;
 extern crate frunk_core;
-use frunk::labelled::*; // for the Generic trait and HList
 
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {
@@ -31,13 +30,13 @@ fn main() {
         age: 30,
     };
 
-    let s_user: SavedUser = labelled_convert_from(n_user);
+    let s_user: SavedUser = frunk::labelled_convert_from(n_user);
 
     assert_eq!(s_user.first_name, "Joe");
     assert_eq!(s_user.last_name, "Blow");
     assert_eq!(s_user.age, 30);
 
-    let d_user: DeletedUser = transform_from(s_user);
+    let d_user: DeletedUser = frunk::transform_from(s_user);
 
     assert_eq!(d_user.first_name, "Joe");
     println!("{}", d_user.last_name);

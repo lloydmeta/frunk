@@ -6,7 +6,10 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+//! #[macro_use]
+//! extern crate frunk;
+//!
+//! # fn main() {
 //! let h = hlist![1, "hi"];
 //! assert_eq!(h.len(), 2);
 //! let (a, b) = h.into_tuple2();
@@ -53,8 +56,9 @@
 //! # }
 //! ```
 
+use indices::{Here, There, Suffixed};
+
 use std::ops::Add;
-use std::marker::PhantomData;
 
 /// Typeclass for HList-y behaviour
 ///
@@ -66,8 +70,10 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::LEN, 3);
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::prelude::*;
+    ///
+    /// assert_eq!(<Hlist![i32, bool, f32]>::LEN, 3);
     /// # }
     /// ```
     const LEN: usize;
@@ -82,7 +88,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1, "hi"];
     /// assert_eq!(h.len(), 2);
     /// # }
@@ -97,8 +103,10 @@ pub trait HList: Sized {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HList; fn main() {
-    /// assert_eq!(<Hlist![i32, bool, f32] as HList>::static_len(), 3);
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::prelude::*;
+    ///
+    /// assert_eq!(<Hlist![i32, bool, f32]>::static_len(), 3);
     /// # }
     /// ```
     #[inline]
@@ -110,7 +118,7 @@ pub trait HList: Sized {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h1 = hlist![1, "hi"];
     /// let h2 = h1.prepend(true);
     /// let (a, (b, c)) = h2.into_tuple2();
@@ -170,11 +178,11 @@ impl<H, T> HCons<H, T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::HNil; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
     /// assert_eq!(h, "hi");
-    /// assert_eq!(tail, HNil);
+    /// assert_eq!(tail, hlist![]);
     /// # }
     /// ```
     pub fn pop(self) -> (H, T) {
@@ -189,11 +197,14 @@ impl<H, T> HCons<H, T> {
 /// # Examples
 ///
 /// ```
-/// # use frunk_core::hlist::*;
+/// # extern crate frunk; fn main() {
+/// use frunk::hlist::{HNil, h_cons};
+///
 /// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
 /// assert_eq!(h1, "what");
 /// assert_eq!(h2, 1.23f32);
+/// # }
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
     HCons {
@@ -212,7 +223,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h = hlist![1, "hi"];
             /// assert_eq!(h.len(), 2);
             /// # }
@@ -229,7 +240,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h1 = hlist![1, "hi"];
             /// let h2 = h1.prepend(true);
             /// let (a, (b, c)) = h2.into_tuple2();
@@ -255,7 +266,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
             /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
@@ -274,7 +285,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// assert_eq!(hlist![].into_reverse(), hlist![]);
             ///
             /// assert_eq!(
@@ -296,7 +307,7 @@ macro_rules! gen_inherent_methods {
             /// # Examples
             ///
             /// ```
-            /// # #[macro_use] extern crate frunk_core; fn main() {
+            /// # #[macro_use] extern crate frunk; fn main() {
             /// assert_eq!(hlist![].to_ref(), hlist![]);
             ///
             /// assert_eq!(hlist![1, true].to_ref(), hlist![&1, &true]);
@@ -307,6 +318,196 @@ macro_rules! gen_inherent_methods {
                 where Self: ToRef<'a>,
             {
                 ToRef::to_ref(self)
+            }
+
+            /// Apply a function to each element of an HList.
+            ///
+            /// This transforms some `Hlist![A, B, C, ..., E]` into some
+            /// `Hlist![T, U, V, ..., Z]`.  A variety of types are supported
+            /// for the folder argument:
+            ///
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for mapping an HList that is homogenous).
+            /// * A single [`Poly`].
+            ///
+            /// [`Poly`]: struct.Poly.html
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// use ::frunk::HNil;
+            ///
+            /// assert_eq!(HNil.map(HNil), HNil);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// // Sadly we need to help the compiler understand the bool type in our mapper
+            ///
+            /// let mapped = h.to_ref().map(hlist![
+            ///     |&n| n + 1,
+            ///     |b: &bool| !b,
+            ///     |&f| f + 1f32]);
+            /// assert_eq!(mapped, hlist![2, true, 43f32]);
+            ///
+            /// // There is also a value-consuming version that passes values to your functions
+            /// // instead of just references:
+            ///
+            /// let mapped2 = h.map(hlist![
+            ///     |n| n + 3,
+            ///     |b: bool| !b,
+            ///     |f| f + 8959f32]);
+            /// assert_eq!(mapped2, hlist![4, true, 9001f32]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn map<F>(self,mapper: F) -> <Self as HMappable<F>>::Output
+            where Self: HMappable<F>,
+            {
+                HMappable::map(self, mapper)
+            }
+
+            /// Perform a left fold over an HList.
+            ///
+            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// value by visiting all of the elements in left-to-right order.
+            /// A variety of types are supported for the mapper argument:
+            ///
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for folding an HList that is homogenous).
+            ///
+            /// The accumulator can freely change type over the course of the call.
+            /// When called with a list of `N` functions, an expanded form of the
+            /// implementation with type annotations might look something like this:
+            ///
+            /// ```ignore
+            /// let acc: Acc0 = init_value;
+            /// let acc: Acc1 = f1(acc, x1);
+            /// let acc: Acc2 = f2(acc, x2);
+            /// let acc: Acc3 = f3(acc, x3);
+            /// ...
+            /// let acc: AccN = fN(acc, xN);
+            /// acc
+            /// ```
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// let nil = hlist![];
+            ///
+            /// assert_eq!(nil.foldl(hlist![], 0), 0);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// let folded = h.to_ref().foldl(
+            ///     hlist![
+            ///         |acc, &i| i + acc,
+            ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+            ///         |acc, &f| f + acc
+            ///     ],
+            ///     1
+            /// );
+            ///
+            /// assert_eq!(42f32, folded);
+            ///
+            /// // There is also a value-consuming version that passes values to your folding
+            /// // functions instead of just references:
+            ///
+            /// let folded2 = h.foldl(
+            ///     hlist![
+            ///         |acc, i| i + acc,
+            ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+            ///         |acc, f| f + acc
+            ///     ],
+            ///     8918
+            /// );
+            ///
+            /// assert_eq!(9042f32, folded2)
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn foldl<Folder, Acc>(
+                self,
+                folder: Folder,
+                acc: Acc,
+            ) -> <Self as HFoldLeftable<Folder, Acc>>::Output
+            where Self: HFoldLeftable<Folder, Acc>,
+            {
+                HFoldLeftable::foldl(self, folder, acc)
+            }
+
+            /// Perform a right fold over an HList.
+            ///
+            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// value by visiting all of the elements in reverse order.
+            /// A variety of types are supported for the mapper argument:
+            ///
+            /// * An `hlist![]` of closures (one for each element).
+            /// * A single closure (for folding an HList that is homogenous),
+            ///   taken by reference.
+            ///
+            /// The accumulator can freely change type over the course of the call.
+            ///
+            /// # Comparison to `foldl`
+            ///
+            /// While the order of element traversal in `foldl` may seem more natural,
+            /// `foldr` does have its use cases, in particular when it is used to build
+            /// something that reflects the structure of the original HList (such as
+            /// folding an HList of `Option`s into an `Option` of an HList).
+            /// An implementation of such a function using `foldl` will tend to
+            /// reverse the list, while `foldr` will tend to preserve its order.
+            ///
+            /// The reason for this is because `foldr` performs what is known as
+            /// "structural induction;" it can be understood as follows:
+            ///
+            /// * Write out the HList in terms of [`h_cons`] and [`HNil`].
+            /// * Substitute each [`h_cons`] with a function,
+            ///   and substitute [`HNil`] with `init`
+            ///
+            /// ```ignore
+            /// the list:
+            ///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil))...)))
+            ///
+            /// becomes:
+            ///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init))...)))
+            /// ```
+            ///
+            /// [`Poly`]: struct.Poly.html
+            /// [`HNil`]: struct.HNil.html
+            /// [`h_cons`]: fn.h_cons.html
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// let nil = hlist![];
+            ///
+            /// assert_eq!(nil.foldr(hlist![], 0), 0);
+            ///
+            /// let h = hlist![1, false, 42f32];
+            ///
+            /// let folded = h.foldr(
+            ///     hlist![
+            ///         |i, acc| i + acc,
+            ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
+            ///         |f, acc| f + acc
+            ///     ],
+            ///     1f32
+            /// );
+            ///
+            /// assert_eq!(9001, folded)
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn foldr<Folder, Init>(
+                self,
+                folder: Folder,
+                init: Init,
+            ) -> <Self as HFoldRightable<Folder, Init>>::Output
+            where Self: HFoldRightable<Folder, Init>,
+            {
+                HFoldRightable::foldr(self, folder, init)
             }
         }
     };
@@ -326,7 +527,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the type you want.
@@ -358,7 +559,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let list = hlist![1, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the target type.
@@ -388,7 +589,7 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core; fn main() {
+    /// # #[macro_use] extern crate frunk; fn main() {
     /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience
@@ -439,24 +640,6 @@ where
         }
     }
 }
-
-/// Largely lifted from https://github.com/Sgeo/hlist/blob/master/src/lib.rs#L30
-
-/// Used as an index into an `HList`.
-///
-/// `Here` is 0, pointing to the head of the HList.
-///
-/// Users should normally allow type inference to create this type
-#[allow(dead_code)]
-pub enum Here {}
-
-/// Used as an index into an `HList`.
-///
-/// `There<T>` is 1 + `T`.
-///
-/// Users should normally allow type inference to create this type.
-#[allow(dead_code)]
-pub struct There<T>(PhantomData<T>);
 
 /// Trait for borrowing an HList element by type
 ///
@@ -667,22 +850,32 @@ where
     }
 }
 
+/// Wrapper type around a function for polymorphic maps and folds.
+///
 /// This is a thin generic wrapper type that is used to differentiate
-/// between single-typed generic closure F that implements, say, Fn<i8> -> bool,
-/// and a Poly-typed F that implements multiple Function types, say
-/// Func<i8, bool>, Fun<bool, f32> etc.
+/// between single-typed generic closures `F` that implements, say, `Fn(i8) -> bool`,
+/// and a Poly-typed `F` that implements multiple Function types, say
+/// `Func<i8, Output=bool>`, `Func<bool, Output=f32>` etc.
 ///
 /// This is needed because there are completely generic impls for many of the
 /// HList traits that take a simple unwrapped closure.
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Poly<T>(pub T);
 
-/// This is a simple, user-implementable version of Fn.
+/// This is a simple, user-implementable alternative to `Fn`.
 ///
 /// Might not be necessary if/when Fn(Once, Mut) traits are implementable
 /// in stable Rust
 pub trait Func<Input> {
     type Output;
 
+    /// Call the `Func`.
+    ///
+    /// Notice that this does not take a self argument, which in turn means `Func`
+    /// cannot effectively close over a context. This decision trades power for convenience;
+    /// a three-trait `Fn` heirarchy like that in std provides a great deal of power in a
+    /// small fraction of use-cases, but it also comes at great expanse to the other 95% of
+    /// use cases.
     fn call(i: Input) -> Self::Output;
 }
 
@@ -700,46 +893,29 @@ where
     }
 }
 
-/// Trait that allow for mapping over a data structure using mapping functions stored in another
-/// data structure
+/// Trait for mapping over an HList
 ///
-/// It might be a good idea to try to re-write these using the foldr variants, but it's a
-/// wee-bit more complicated.
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::map`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Mappers of unknown type. If the type of everything is known,
+/// then `list.map(f)` should "just work" even without the trait.
+///
+/// [`HCons::map`]: struct.HCons.html#method.map
 pub trait HMappable<Mapper> {
     type Output;
 
-    /// Maps over the current data structure using functions stored in another
-    /// data structure.
+    /// Apply a function to each element of an HList.
     ///
-    /// # Examples
+    /// Please see the [inherent method] for more information.
     ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
     ///
-    /// assert_eq!(nil.map(HNil), HNil);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// // Sadly we need to help the compiler understand the bool type in our mapper
-    ///
-    /// let mapped = h.to_ref().map(hlist![
-    ///     |&n| n + 1,
-    ///     |b: &bool| !b,
-    ///     |&f| f + 1f32]);
-    /// assert_eq!(mapped, hlist![2, true, 43f32]);
-    ///
-    /// // There is also a value-consuming version that passes values to your functions
-    /// // instead of just references:
-    ///
-    /// let mapped2 = h.map(hlist![
-    ///     |n| n + 3,
-    ///     |b: bool| !b,
-    ///     |f| f + 8959f32]);
-    /// assert_eq!(mapped2, hlist![4, true, 9001f32]);
-    /// # }
-    /// ```
-    fn map(self, folder: Mapper) -> Self::Output;
+    /// [inherent method]: struct.HCons.html#method.map
+    fn map(self, mapper: Mapper) -> Self::Output;
 }
 
 impl<F> HMappable<F> for HNil {
@@ -782,38 +958,28 @@ where
     }
 }
 
-/// Foldr for HLists
+/// Trait for performing a right fold over an HList
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::foldr`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Folders of unknown type. If the type of everything is known,
+/// then `list.foldr(f, init)` should "just work" even without the trait.
+///
+/// [`HCons::foldr`]: struct.HCons.html#method.foldr
 pub trait HFoldRightable<Folder, Init> {
     type Output;
 
-    /// foldr over a data structure
+    /// Perform a right fold over an HList.
     ///
-    /// Sadly, due to a compiler quirk, only the value-consuming (the original hlist) variant
-    /// exists for foldr.
+    /// Please see the [inherent method] for more information.
     ///
-    /// # Examples
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
     ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
-    ///
-    /// assert_eq!(nil.foldr(HNil, 0), 0);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// let folded = h.foldr(
-    ///     hlist![
-    ///         |i, acc| i + acc,
-    ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
-    ///         |f, acc| f + acc
-    ///     ],
-    ///     1f32
-    /// );
-    ///
-    /// assert_eq!(9001, folded)
-    ///
-    /// # }
-    /// ```
+    /// [inherent method]: struct.HCons.html#method.foldr
     fn foldr(self, folder: Folder, i: Init) -> Self::Output;
 }
 
@@ -900,48 +1066,28 @@ where
     }
 }
 
-/// Left fold for a given data structure
+/// Trait for performing a left fold over an HList
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::foldl`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists or Mappers of unknown type. If the type of everything is known,
+/// then `list.foldl(f, acc)` should "just work" even without the trait.
+///
+/// [`HCons::foldl`]: struct.HCons.html#method.foldl
 pub trait HFoldLeftable<Folder, Acc> {
     type Output;
 
-    /// foldl over a data structure
+    /// Perform a left fold over an HList.
     ///
-    /// # Examples
+    /// Please see the [inherent method] for more information.
     ///
-    /// ```
-    /// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
-    /// let nil = HNil;
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
     ///
-    /// assert_eq!(nil.foldl(HNil, 0), 0);
-    ///
-    /// let h = hlist![1, false, 42f32];
-    ///
-    /// let folded = h.to_ref().foldl(
-    ///     hlist![
-    ///         |acc, &i| i + acc,
-    ///         |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-    ///         |acc, &f| f + acc
-    ///     ],
-    ///     1
-    /// );
-    ///
-    /// assert_eq!(42f32, folded);
-    ///
-    /// // There is also a value-consuming version that passes values to your folding
-    /// // functions instead of just references:
-    ///
-    /// let folded2 = h.foldl(
-    ///     hlist![
-    ///         |acc, i| i + acc,
-    ///         |acc, b: bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-    ///         |acc, f| f + acc
-    ///     ],
-    ///     8918
-    /// );
-    ///
-    /// assert_eq!(9042f32, folded2)
-    /// # }
-    /// ```
+    /// [inherent method]: struct.HCons.html#method.foldl
     fn foldl(self, folder: Folder, acc: Acc) -> Self::Output;
 }
 
@@ -970,7 +1116,7 @@ where
 /// can handle all cases
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
 /// let h = hlist![1, 2, 3, 4, 5];
 ///
 /// let r: isize = h.foldl(|acc, next| acc + next, 0);
@@ -1082,7 +1228,10 @@ impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
 /// `LiftFrom` is the reciprocal of `LiftInto`.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
+/// use frunk::lift_from;
+/// use frunk::prelude::*;
+///
 /// type H = Hlist![(), usize, f64, (), bool];
 ///
 /// let x = H::lift_from(42.0);
@@ -1107,7 +1256,9 @@ pub fn lift_from<I, T, PF: LiftFrom<T, I>>(part: T) -> PF {
 /// `LiftInto` is the reciprocal of `LiftFrom`.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+/// # #[macro_use] extern crate frunk; fn main() {
+/// use frunk::prelude::*;
+///
 /// type H = Hlist![(), usize, f64, (), bool];
 ///
 /// // Type inference works as expected:
@@ -1160,9 +1311,6 @@ where
         h_cons(Head::default(), Tail::lift_from(part))
     }
 }
-
-/// An index denoting that `Suffix` is just that.
-pub struct Suffixed<Suffix>(PhantomData<Suffix>);
 
 impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>> for <Prefix as Add<Suffix>>::Output
 where

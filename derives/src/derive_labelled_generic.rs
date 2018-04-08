@@ -4,7 +4,12 @@ use syn::{Ident, Data, Fields, FieldsNamed, Field};
 use proc_macro::TokenStream;
 
 /// These are assumed to exist as enums in frunk_core::labelled
-const ALPHA_CHARS: &'static [char] = &['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+const ALPHA_CHARS: &'static [char] = &[
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+];
 
 /// These are assumed to exist as enums in frunk_core::labelled as underscore prepended enums
 const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -96,7 +101,7 @@ fn build_type_level_name_for(ident: &Ident) -> Tokens {
     let name = ident.as_ref();
     let name_as_idents: Vec<Ident> = name.chars().flat_map(|c| encode_as_ident(&c)).collect();
     let name_as_tokens: Vec<Tokens> = name_as_idents.iter().map(|ident| {
-        quote! { ::frunk_core::labelled::#ident }
+        quote! { ::frunk_core::labelled::chars::#ident }
     }).collect();
     quote! { (#(#name_as_tokens),*) }
 }

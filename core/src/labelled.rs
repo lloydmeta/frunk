@@ -4,7 +4,7 @@
 //! that the generic representation should contain information about field names.
 //!
 //! Having a separate trait for LabelledGenerics gives us the freedom to derive both
-//! lablled and non-labelled generic type class instances for our types.
+//! labelled and non-labelled generic type class instances for our types.
 //!
 //! Asides from the main LabelledGeneric trait, this module holds helper methods that allow
 //! users to use LabelledGeneric without using universal function call syntax.
@@ -14,10 +14,12 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::labelled::*;
-//! # use frunk_core::hlist::*;
+//! #[macro_use]
+//! extern crate frunk;
+//!
 //! # fn main() {
+//! use frunk::labelled::chars::*;
+//!
 //! // Optionally alias our tuple that represents our type-level string
 //! type name = (n,a,m,e);
 //! let labelled = field![name, "Lloyd"];
@@ -26,16 +28,14 @@
 //! # }
 //! ```
 //!
-//! A more common usage is to use LabelledGeneric to transform strucst that have mis-matched
-//! fields !
+//! A more common usage is to use LabelledGeneric to transform structs that have mismatched
+//! fields!
 //!
 //! ```
-//! # #[allow(unused_imports)]
-//! # #[macro_use] extern crate frunk_derives;
-//! # #[macro_use] extern crate frunk_core;
-//! # use frunk_core::hlist::*; fn main() {
-//! # use frunk_core::hlist::*;
-//! # use frunk_core::labelled::*;
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//!
+//! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
 //!     first_name: &'a str,
@@ -59,7 +59,7 @@
 //!
 //! // transform_from automagically sculpts the labelled generic
 //! // representation of the source object to that of the target type
-//! let s_user: ShortUser = transform_from(n_user); // done
+//! let s_user: ShortUser = frunk::transform_from(n_user); // done
 //! # }
 //! ```
 
@@ -78,12 +78,10 @@ use std::fmt;
 /// # Examples
 ///
 /// ```rust
-/// # #[allow(unused_imports)]
-/// # #[macro_use] extern crate frunk_derives;
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::hlist::*; fn main() {
-/// use frunk_core::hlist::*;
-/// use frunk_core::labelled::*;
+/// #[macro_use] extern crate frunk;
+/// #[macro_use] extern crate frunk_core;
+///
+/// # fn main() {
 /// #[derive(LabelledGeneric)]
 /// struct NewUser<'a> {
 ///     first_name: &'a str,
@@ -107,7 +105,7 @@ use std::fmt;
 ///
 /// // transform_from automagically sculpts the labelled generic
 /// // representation of the source object to that of the target type
-/// let s_user: SavedUser = transform_from(n_user); // done
+/// let s_user: SavedUser = frunk::transform_from(n_user); // done
 /// # }
 pub trait LabelledGeneric {
     /// The labelled generic representation type
@@ -219,19 +217,49 @@ where
     <B as LabelledGeneric>::transform_from(a)
 }
 
-// Create a bunch of enums that can be used to represent characters on the type level
-macro_rules! create_enums_for {
-    ($($i: ident)*) => {
-        $(
-            #[allow(non_snake_case, non_camel_case_types)]
-            #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-            pub enum $i {}
-        )*
+pub mod chars {
+    //! Types for building type-level labels from character sequences.
+    //!
+    //! This is designed to be glob-imported:
+    //!
+    //! ```rust
+    //! # extern crate frunk;
+    //! # fn main() {
+    //! # #[allow(unused)]
+    //! use frunk::labelled::chars::*;
+    //! # }
+    //! ```
+
+    macro_rules! create_enums_for {
+        ($($i: ident)*) => {
+            $(
+                #[allow(non_snake_case, non_camel_case_types)]
+                #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+                pub enum $i {}
+            )*
+        }
+    }
+
+    // Add more as needed.
+    create_enums_for! {
+        // all valid identifier characters
+        a b c d e f g h i j k l m n o p q r s t u v w x y z
+        A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+        _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 __
+    }
+
+    #[test]
+    fn simple_var_names_are_allowed() {
+        // Rust forbids variable bindings that shadow unit structs,
+        // so unit struct characters would cause a lot of trouble.
+        //
+        // Good thing I don't plan on adding reified labels. - Exp
+        let a = 3;
+        match a {
+            a => assert_eq!(a, 3),
+        }
     }
 }
-
-// Add more as needed.
-create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z __ _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 }
 
 /// A Label contains a type-level Name, a runtime value, and
 /// a reference to a `&'static str` name.
@@ -241,9 +269,9 @@ create_enums_for! { a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D 
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk_core;
-/// # use frunk_core::labelled::*;
-/// # use frunk_core::hlist::*;
+/// # #[macro_use] extern crate frunk;
+/// use frunk::labelled::chars::*;
+///
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -295,10 +323,14 @@ where
 /// # Examples
 ///
 /// ```
-/// # use frunk_core::labelled::*;
+/// #[macro_use] extern crate frunk; fn main() {
+/// use frunk::labelled::chars::*;
+/// use frunk::labelled::field_with_name;
+///
 /// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
 /// assert_eq!(l.value, "joe");
 /// assert_eq!(l.name, "name");
+/// # }
 /// ```
 pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
     Field {
@@ -319,10 +351,10 @@ pub trait IntoUnlabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::labelled::*;
-    /// # use frunk_core::hlist::*;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk::labelled::chars::*;
+    /// use frunk::labelled::IntoUnlabelled;
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -372,10 +404,10 @@ pub trait IntoValueLabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk_core;
-    /// # use frunk_core::labelled::*;
-    /// # use frunk_core::hlist::*;
+    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk::labelled::{ValueField, IntoValueLabelled};
+    /// use frunk::labelled::chars::*;
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -428,6 +460,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::chars::*;
 
     // Set up some aliases
     #[allow(non_camel_case_types)]

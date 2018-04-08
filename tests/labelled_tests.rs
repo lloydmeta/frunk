@@ -3,8 +3,11 @@ extern crate frunk;
 extern crate frunk_core;
 extern crate time; //Time library
 
-use frunk::hlist::*;
-use frunk::labelled::*;
+use frunk::{HCons, LabelledGeneric};
+use frunk::{into_labelled_generic, from_labelled_generic, transform_from};
+use frunk::hlist::Sculptor;
+use frunk::labelled::Field;
+use frunk::labelled::chars::*;
 
 mod common;
 

@@ -1,7 +1,6 @@
 #[macro_use] // for the hlist macro
 extern crate frunk;
 extern crate frunk_core;
-use frunk::generic::*; // for the Generic trait and HList
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
@@ -12,7 +11,7 @@ struct Person<'a> {
 
 fn main() {
     let h = hlist!("Joe", "Blow", 30);
-    let p: Person = from_generic(h);
+    let p: Person = frunk::from_generic(h);
     assert_eq!(
         p,
         Person {

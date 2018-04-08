@@ -137,6 +137,12 @@ pub use hlist::HNil;
 pub use hlist::HCons;
 #[doc(no_inline)]
 pub use hlist::lift_from;
+#[doc(no_inline)]
+pub use hlist::Poly;
+#[doc(no_inline)]
+pub use hlist::Func;
+#[doc(no_inline)]
+pub use hlist::ToRef; // useful for where bounds
 
 #[doc(no_inline)]
 pub use coproduct::Coproduct;
@@ -179,18 +185,9 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use hlist::HList; // for LEN
     #[doc(no_inline)]
-    pub use hlist::HMappable;
-    #[doc(no_inline)]
-    pub use hlist::HFoldRightable;
-    #[doc(no_inline)]
-    pub use hlist::HFoldLeftable;
-    #[doc(no_inline)]
     pub use hlist::LiftFrom;
     #[doc(no_inline)]
     pub use hlist::LiftInto;
-
-    #[doc(no_inline)]
-    pub use coproduct::CoproductFoldable;
 
     #[doc(no_inline)]
     pub use validated::IntoValidated;
