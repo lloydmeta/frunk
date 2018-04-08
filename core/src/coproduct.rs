@@ -72,6 +72,7 @@
 //! ```
 
 use hlist::*;
+use indices::{Here, There};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.

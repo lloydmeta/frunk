@@ -217,9 +217,6 @@ where
     <B as LabelledGeneric>::transform_from(a)
 }
 
-// FIXME kill this once examples have been fixed
-pub use self::chars::*;
-
 pub mod chars {
     //! Types for building type-level labels from character sequences.
     //!
