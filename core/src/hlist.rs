@@ -54,7 +54,6 @@
 //! ```
 
 use std::ops::Add;
-use std::marker::PhantomData;
 
 /// Typeclass for HList-y behaviour
 ///
@@ -630,23 +629,8 @@ where
     }
 }
 
-/// Largely lifted from https://github.com/Sgeo/hlist/blob/master/src/lib.rs#L30
-
-/// Used as an index into an `HList`.
-///
-/// `Here` is 0, pointing to the head of the HList.
-///
-/// Users should normally allow type inference to create this type
-#[allow(dead_code)]
-pub enum Here {}
-
-/// Used as an index into an `HList`.
-///
-/// `There<T>` is 1 + `T`.
-///
-/// Users should normally allow type inference to create this type.
-#[allow(dead_code)]
-pub struct There<T>(PhantomData<T>);
+// FIXME kill this one examples are updated
+pub use ::indices::{Here, There, Suffixed};
 
 /// Trait for borrowing an HList element by type
 ///
@@ -1303,9 +1287,6 @@ where
         h_cons(Head::default(), Tail::lift_from(part))
     }
 }
-
-/// An index denoting that `Suffix` is just that.
-pub struct Suffixed<Suffix>(PhantomData<Suffix>);
 
 impl<Prefix, Suffix> LiftFrom<Prefix, Suffixed<Suffix>> for <Prefix as Add<Suffix>>::Output
 where
