@@ -64,6 +64,7 @@ pub mod hlist;
 pub mod coproduct;
 pub mod generic;
 pub mod labelled;
+pub mod indices;
 mod tuples;
 
 #[cfg(test)]
