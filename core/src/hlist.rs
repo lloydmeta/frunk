@@ -56,6 +56,8 @@
 //! # }
 //! ```
 
+use indices::{Here, There, Suffixed};
+
 use std::ops::Add;
 
 /// Typeclass for HList-y behaviour
@@ -638,9 +640,6 @@ where
         }
     }
 }
-
-// FIXME kill this one examples are updated
-pub use ::indices::{Here, There, Suffixed};
 
 /// Trait for borrowing an HList element by type
 ///
