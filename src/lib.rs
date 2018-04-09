@@ -138,11 +138,11 @@ pub use hlist::HCons;
 #[doc(no_inline)]
 pub use hlist::lift_from;
 #[doc(no_inline)]
-pub use hlist::Poly;
+pub use traits::Poly;
 #[doc(no_inline)]
-pub use hlist::Func;
+pub use traits::Func;
 #[doc(no_inline)]
-pub use hlist::ToRef; // useful for where bounds
+pub use traits::ToRef; // useful for where bounds
 
 #[doc(no_inline)]
 pub use coproduct::Coproduct;
