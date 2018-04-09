@@ -278,20 +278,20 @@ macro_rules! poly_fn {
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, )* ~f) => {{
         struct F;
         $(
-            impl<$($pars,)*> $crate::hlist::Func<$p_arg_typ> for F {
+            impl<$($pars,)*> $crate::traits::Func<$p_arg_typ> for F {
                 type Output = $p_ret_typ;
 
                 fn call($p_args: $p_arg_typ) -> Self::Output { $p_body }
             }
         )*
         $(
-            impl $crate::hlist::Func<$arg_typ> for F {
+            impl $crate::traits::Func<$arg_typ> for F {
                 type Output = $ret_typ;
 
                 fn call($args: $arg_typ) -> Self::Output { $body }
             }
         )*
-        $crate::hlist::Poly(F)
+        $crate::traits::Poly(F)
     }}
 }
 

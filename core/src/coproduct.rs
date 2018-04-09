@@ -71,8 +71,9 @@
 //! # }
 //! ```
 
-use hlist::*;
+use hlist::{HNil, HCons};
 use indices::{Here, There};
+use traits::{Poly, Func, ToRef};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
