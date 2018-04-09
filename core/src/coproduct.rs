@@ -483,7 +483,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// * A single closure (for a Coproduct that is homogenous).
     /// * A single [`Poly`].
     ///
-    /// [`Poly`]: ../hlist/struct.Poly.html
+    /// [`Poly`]: ../traits/struct.Poly.html
     ///
     /// # Example
     ///
