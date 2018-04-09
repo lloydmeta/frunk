@@ -7,15 +7,11 @@
 /// that sometimes occur when trying to implement a trait for &'a T (see this comment:
 /// https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198)
 ///
-/// This is essentially From, but the more specific nature of it means it's more ergonomic
-/// in actual usage.
-///
-/// Implemented for HLists.
-///
-/// This functionality is also provided as an [inherent method].
+/// This functionality is also provided as an inherent method [on HLists] and [on Coproducts].
 /// However, you may find this trait useful in generic contexts.
 ///
-/// [inherent method]: struct.HCons.html#method.to_ref
+/// [on HLists]: ../hlist/struct.HCons.html#method.to_ref
+/// [on Coproducts]: ../coproduct/enum.Coproduct.html#method.to_ref
 pub trait ToRef<'a> {
     type Output;
 
@@ -29,7 +25,7 @@ pub trait ToRef<'a> {
 /// This functionality is also provided as an [inherent method].
 /// However, you may find this trait useful in generic contexts.
 ///
-/// [inherent method]: struct.HCons.html#method.into_reverse
+/// [inherent method]: ../hlist/struct.HCons.html#method.into_reverse
 pub trait IntoReverse {
     type Output;
 
@@ -41,11 +37,13 @@ pub trait IntoReverse {
 ///
 /// This is a thin generic wrapper type that is used to differentiate
 /// between single-typed generic closures `F` that implements, say, `Fn(i8) -> bool`,
-/// and a Poly-typed `F` that implements multiple Function types, say
-/// `Func<i8, Output=bool>`, `Func<bool, Output=f32>` etc.
+/// and a Poly-typed `F` that implements multiple Function types
+/// via the [`Func`] trait. (say, `Func<i8, Output=bool>` and `Func<bool, Output=f32>`)
 ///
 /// This is needed because there are completely generic impls for many of the
 /// HList traits that take a simple unwrapped closure.
+///
+/// [`Func`]: trait.Func.html
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Poly<T>(pub T);
 

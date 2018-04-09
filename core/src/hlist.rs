@@ -331,7 +331,7 @@ macro_rules! gen_inherent_methods {
             /// * A single closure (for mapping an HList that is homogenous).
             /// * A single [`Poly`].
             ///
-            /// [`Poly`]: struct.Poly.html
+            /// [`Poly`]: ../traits/struct.Poly.html
             ///
             /// # Examples
             ///
@@ -474,7 +474,6 @@ macro_rules! gen_inherent_methods {
             ///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init))...)))
             /// ```
             ///
-            /// [`Poly`]: struct.Poly.html
             /// [`HNil`]: struct.HNil.html
             /// [`h_cons`]: fn.h_cons.html
             ///
