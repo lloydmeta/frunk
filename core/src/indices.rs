@@ -20,14 +20,20 @@ use std::marker::PhantomData;
 /// `Here` is 0, pointing to the head of the HList.
 ///
 /// Users should normally allow type inference to create this type.
-pub struct Here(());
+pub struct Here {
+    _priv: (),
+}
 
 /// Used as an index into an `HList`.
 ///
 /// `There<T>` is 1 + `T`.
 ///
 /// Users should normally allow type inference to create this type.
-pub struct There<T>(PhantomData<T>);
+pub struct There<T> {
+    _marker: PhantomData<T>,
+}
 
 /// An index denoting that `Suffix` is just that.
-pub struct Suffixed<Suffix>(PhantomData<Suffix>);
+pub struct Suffixed<Suffix> {
+    _marker: PhantomData<Suffix>,
+}
