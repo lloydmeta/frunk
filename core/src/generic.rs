@@ -1,7 +1,7 @@
 //! This module holds the machinery behind Generic.
 //!
-//! It contains the Generic typeclass and some helper methods for using the Generic type class
-//! without having to use universal function call syntax.
+//! It contains the Generic trait and some helper methods for using the Generic
+//! trait without having to use universal function call syntax.
 //!
 //! # Examples
 //!
@@ -35,7 +35,17 @@
 /// A trait that converts from a type to a generic representation
 ///
 /// For the most part, you should be using the derivation that is available through
-/// frunk_derive to generate instances of this typeclass for your types.
+/// frunk_derive to generate instances of this trait for your types.
+///
+/// # Laws
+///
+/// Any implementation of `Generic` must satisfy the following two laws:
+///
+/// 1. `forall x : Self. x == Generic::from(Generic::into(x))`
+/// 2. `forall y : Repr. y == Generic::into(Generic::from(y))`
+///
+/// That is, `from` and `into` should make up an isomorphism between
+/// `Self` and the representation type `Repr`.
 ///
 /// # Examples
 ///
@@ -67,47 +77,71 @@
 /// # }
 /// ```
 pub trait Generic {
-    /// The generic representation type
+    /// The generic representation type.
     type Repr;
 
-    /// Go from something to Repr
+    /// Convert an object to its representation type `Repr`.
     fn into(self) -> Self::Repr;
 
-    /// Go from Repr to something
-    fn from(r: Self::Repr) -> Self;
+    /// Convert an object's representation type `Repr` to the object's type.
+    fn from(repr: Self::Repr) -> Self;
 
-    /// From one type to another using a type with a compatible generic representation
-    fn convert_from<A>(a: A) -> Self
+    /// Convert an object to a another type provided that they have
+    /// a compatible representation type.
+    fn convert_from<Src>(src: Src) -> Self
     where
-        A: Generic<Repr = Self::Repr>,
+        Src: Generic<Repr = Self::Repr>,
         Self: Sized,
     {
-        let repr = <A as Generic>::into(a);
+        let repr = <Src as Generic>::into(src);
         <Self as Generic>::from(repr)
+    }
+
+    /// Maps the given object of type `Self` by first transforming it to
+    /// the representation type, then applying a `mapper` function
+    /// on the representation type and finally transforming it back to
+    /// an object of type `Self`.
+    fn map_repr<Repr, Mapper>(self, mapper: Mapper) -> Self
+    where
+        Self: Generic<Repr = Repr> + Sized,
+        Mapper: FnOnce(Repr) -> Repr
+    {
+        Self::from(mapper(self.into()))
     }
 }
 
-/// Given a generic Representation of an A, returns A
-pub fn from_generic<A, Repr>(gen: Repr) -> A
+/// Given a generic representation `Repr` of a `Dst`, returns `Dst`.
+pub fn from_generic<Dst, Repr>(repr: Repr) -> Dst
 where
-    A: Generic<Repr = Repr>,
+    Dst: Generic<Repr = Repr>,
 {
-    <A as Generic>::from(gen)
+    <Dst as Generic>::from(repr)
 }
 
-/// Given an A, returns its generic Representation
-pub fn into_generic<A, Repr>(a: A) -> Repr
+/// Given a object of type `Src`, returns its generic representation `Repr`.
+pub fn into_generic<Src, Repr>(src: Src) -> Repr
 where
-    A: Generic<Repr = Repr>,
+    Src: Generic<Repr = Repr>,
 {
-    <A as Generic>::into(a)
+    <Src as Generic>::into(src)
 }
 
-/// Converts one type into another assuming they have the same generic Representation
-pub fn convert_from<A, B, Repr>(a: A) -> B
+/// Converts one type `Src` into another type `Dst` assuming they have the same
+/// generic representation.
+pub fn convert_from<Src, Dst, Repr>(src: Src) -> Dst
 where
-    A: Generic<Repr = Repr>,
-    B: Generic<Repr = Repr>,
+    Src: Generic<Repr = Repr>,
+    Dst: Generic<Repr = Repr>,
 {
-    <B as Generic>::convert_from(a)
+    <Dst as Generic>::convert_from(src)
+}
+
+/// Maps an object of the element type `Elt` using a function on the
+/// representation type `Repr` of `Elt`.
+pub fn map_repr<Elt, Repr, Mapper>(src: Elt, mapper: Mapper) -> Elt
+where
+    Elt: Generic<Repr = Repr>,
+    Mapper: FnOnce(Repr) -> Repr
+{
+    <Elt as Generic>::map_repr(src, mapper)
 }
