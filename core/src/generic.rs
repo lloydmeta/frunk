@@ -83,10 +83,10 @@ pub trait Generic {
     /// Convert a value to its representation type `Repr`.
     fn into(self) -> Self::Repr;
 
-    /// Convert a value's representation type `Repr` to the values's type.
+    /// Convert a value's representation type `Repr` to the value's type.
     fn from(repr: Self::Repr) -> Self;
 
-    /// Convert a value to an another type provided that they have
+    /// Convert a value to another type provided that they have
     /// the same representation type.
     fn convert_from<Src>(src: Src) -> Self
     where

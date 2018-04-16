@@ -7,7 +7,7 @@
 //! Having a separate trait for `LabelledGeneric`s gives us the freedom to
 //! derive both labelled and non-labelled generic trait instances for our types.
 //!
-//! Asides from the main `LabelledGeneric` trait, this module holds helper
+//! Aside from the main `LabelledGeneric` trait, this module holds helper
 //! methods that allow users to use `LabelledGeneric` without using universal
 //! function call syntax.
 //!
@@ -169,7 +169,7 @@ pub trait LabelledGeneric {
     }
 }
 
-/// Given a labelled generic representation of an `Dst`, returns `Dst`
+/// Given a labelled generic representation of a `Dst`, returns `Dst`
 pub fn from_labelled_generic<Dst, Repr>(repr: Repr) -> Dst
 where
     Dst: LabelledGeneric<Repr = Repr>,
