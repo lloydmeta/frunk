@@ -1287,6 +1287,12 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_generic_hlist() {
+        let _: HNil = generic::convert_from(HNil);
+        let _: Hlist![(), ((),)] = generic::convert_from(hlist![(), ((),)]);
+    }
+
+    #[test]
     fn test_hcons() {
         let hlist1 = h_cons(1, HNil);
         let (h, _) = hlist1.pop();
