@@ -157,6 +157,8 @@ pub use generic::into_generic;
 pub use generic::convert_from;
 #[doc(no_inline)]
 pub use generic::map_repr;
+#[doc(no_inline)]
+pub use generic::map_inter;
 
 #[doc(no_inline)]
 pub use labelled::LabelledGeneric;

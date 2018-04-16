@@ -90,8 +90,8 @@ pub trait Generic {
     /// the same representation type.
     fn convert_from<Src>(src: Src) -> Self
     where
-        Src: Generic<Repr = Self::Repr>,
         Self: Sized,
+        Src: Generic<Repr = Self::Repr>,
     {
         let repr = <Src as Generic>::into(src);
         <Self as Generic>::from(repr)
@@ -100,12 +100,25 @@ pub trait Generic {
     /// Maps the given value of type `Self` by first transforming it to
     /// the representation type `Repr`, then applying a `mapper` function
     /// on `Repr` and finally transforming it back to a value of type `Self`.
-    fn map_repr<Repr, Mapper>(self, mapper: Mapper) -> Self
+    fn map_repr<Mapper>(self, mapper: Mapper) -> Self
     where
-        Self: Generic<Repr = Repr> + Sized,
-        Mapper: FnOnce(Repr) -> Repr
+        Self: Sized,
+        Mapper: FnOnce(Self::Repr) -> Self::Repr
     {
         Self::from(mapper(self.into()))
+    }
+
+    /// Maps the given value of type `Self` by first transforming it
+    /// a type `Inter` that has the same representation type as `Self`,
+    /// then applying a `mapper` function on `Inter` and finally transforming
+    /// it back to a value of type `Self`.
+    fn map_inter<Inter, Mapper>(self, mapper: Mapper) -> Self
+    where
+        Self: Sized,
+        Inter: Generic<Repr = Self::Repr>,
+        Mapper: FnOnce(Inter) -> Inter
+    {
+        Self::convert_from(mapper(Inter::convert_from(self)))
     }
 }
 
@@ -135,12 +148,27 @@ where
     <Dst as Generic>::convert_from(src)
 }
 
-/// Maps a value of a given type `A` using a function on the
-/// representation type `Repr` of `A`.
-pub fn map_repr<A, Repr, Mapper>(val: A, mapper: Mapper) -> A
+/// Maps a value of a given type `Origin` using a function on
+/// the representation type `Repr` of `Origin`.
+pub fn map_repr<Origin, Mapper>(val: Origin, mapper: Mapper) -> Origin
 where
-    A: Generic<Repr = Repr>,
-    Mapper: FnOnce(Repr) -> Repr
+    Origin: Generic,
+    Mapper: FnOnce(Origin::Repr) -> Origin::Repr
 {
-    <A as Generic>::map_repr(val, mapper)
+    <Origin as Generic>::map_repr(val, mapper)
+}
+
+/// Maps a value of a given type `Origin` using a function on
+/// a type `Inter` which has the same representation type of `Origin`.
+///
+/// Note that the compiler will have a hard time inferring the type variable
+/// `Inter`. Thus, using `map_inter` is mostly effective if the type is
+/// constrained by the input function or by the body of a lambda.
+pub fn map_inter<Inter, Origin, Mapper>(val: Origin, mapper: Mapper) -> Origin
+where
+    Origin: Generic<Repr = Repr>,
+    Inter: Generic<Repr = Origin::Repr>,
+    Mapper: FnOnce(Inter) -> Inter
+{
+    <Origin as Generic>::map_inter(val, mapper)
 }
