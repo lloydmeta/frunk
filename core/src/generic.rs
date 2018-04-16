@@ -1,7 +1,7 @@
-//! This module holds the machinery behind Generic.
+//! This module holds the machinery behind `Generic`.
 //!
-//! It contains the Generic trait and some helper methods for using the Generic
-//! trait without having to use universal function call syntax.
+//! It contains the `Generic` trait and some helper methods for using the
+//! `Generic` trait without having to use universal function call syntax.
 //!
 //! # Examples
 //!
@@ -32,10 +32,10 @@
 //! let d_person: DomainPerson = frunk::convert_from(a_person); // done
 //! # }
 
-/// A trait that converts from a type to a generic representation
+/// A trait that converts from a type to a generic representation.
 ///
-/// For the most part, you should be using the derivation that is available through
-/// frunk_derive to generate instances of this trait for your types.
+/// For the most part, you should be using the derivation that is available
+/// through `frunk_derive` to generate instances of this trait for your types.
 ///
 /// # Laws
 ///
@@ -80,14 +80,14 @@ pub trait Generic {
     /// The generic representation type.
     type Repr;
 
-    /// Convert an object to its representation type `Repr`.
+    /// Convert a value to its representation type `Repr`.
     fn into(self) -> Self::Repr;
 
-    /// Convert an object's representation type `Repr` to the object's type.
+    /// Convert a value's representation type `Repr` to the values's type.
     fn from(repr: Self::Repr) -> Self;
 
-    /// Convert an object to a another type provided that they have
-    /// a compatible representation type.
+    /// Convert a value to an another type provided that they have
+    /// the same representation type.
     fn convert_from<Src>(src: Src) -> Self
     where
         Src: Generic<Repr = Self::Repr>,
@@ -97,10 +97,9 @@ pub trait Generic {
         <Self as Generic>::from(repr)
     }
 
-    /// Maps the given object of type `Self` by first transforming it to
-    /// the representation type, then applying a `mapper` function
-    /// on the representation type and finally transforming it back to
-    /// an object of type `Self`.
+    /// Maps the given value of type `Self` by first transforming it to
+    /// the representation type `Repr`, then applying a `mapper` function
+    /// on `Repr` and finally transforming it back to a value of type `Self`.
     fn map_repr<Repr, Mapper>(self, mapper: Mapper) -> Self
     where
         Self: Generic<Repr = Repr> + Sized,
@@ -118,7 +117,7 @@ where
     <Dst as Generic>::from(repr)
 }
 
-/// Given a object of type `Src`, returns its generic representation `Repr`.
+/// Given a value of type `Src`, returns its generic representation `Repr`.
 pub fn into_generic<Src, Repr>(src: Src) -> Repr
 where
     Src: Generic<Repr = Repr>,
@@ -127,7 +126,7 @@ where
 }
 
 /// Converts one type `Src` into another type `Dst` assuming they have the same
-/// generic representation.
+/// representation type `Repr`.
 pub fn convert_from<Src, Dst, Repr>(src: Src) -> Dst
 where
     Src: Generic<Repr = Repr>,
@@ -136,12 +135,12 @@ where
     <Dst as Generic>::convert_from(src)
 }
 
-/// Maps an object of the element type `Elt` using a function on the
-/// representation type `Repr` of `Elt`.
-pub fn map_repr<Elt, Repr, Mapper>(src: Elt, mapper: Mapper) -> Elt
+/// Maps a value of a given type `A` using a function on the
+/// representation type `Repr` of `A`.
+pub fn map_repr<A, Repr, Mapper>(val: A, mapper: Mapper) -> A
 where
-    Elt: Generic<Repr = Repr>,
+    A: Generic<Repr = Repr>,
     Mapper: FnOnce(Repr) -> Repr
 {
-    <Elt as Generic>::map_repr(src, mapper)
+    <A as Generic>::map_repr(val, mapper)
 }
