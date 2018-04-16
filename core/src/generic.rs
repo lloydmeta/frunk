@@ -166,7 +166,7 @@ where
 /// constrained by the input function or by the body of a lambda.
 pub fn map_inter<Inter, Origin, Mapper>(val: Origin, mapper: Mapper) -> Origin
 where
-    Origin: Generic<Repr = Repr>,
+    Origin: Generic,
     Inter: Generic<Repr = Origin::Repr>,
     Mapper: FnOnce(Inter) -> Inter
 {
