@@ -58,7 +58,6 @@
 
 use indices::{Here, There, Suffixed};
 use traits::{Poly, Func, ToRef, IntoReverse};
-use generic::{self, Generic};
 
 use std::ops::Add;
 
@@ -157,14 +156,6 @@ impl HList for HNil {
     }
 }
 
-impl Generic for HNil {
-    type Repr = Self;
-
-    fn into(self) -> Self::Repr { self }
-
-    fn from(repr: Self::Repr) -> Self { repr }
-}
-
 /// Represents the most basic non-empty HList. Its value is held in `head`
 /// while its tail is another HList.
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
@@ -197,24 +188,6 @@ impl<H, T> HCons<H, T> {
     /// ```
     pub fn pop(self) -> (H, T) {
         (self.head, self.tail)
-    }
-}
-
-impl<H: Generic, T: Generic> Generic for HCons<H, T> {
-    type Repr = HCons<H::Repr, T::Repr>;
-
-    fn into(self) -> Self::Repr {
-        HCons {
-            head: self.head.into(),
-            tail: self.tail.into()
-        }
-    }
-
-    fn from(repr: Self::Repr) -> Self {
-        HCons {
-            head: generic::from_generic(repr.head),
-            tail: generic::from_generic(repr.tail),
-        }
     }
 }
 
@@ -1285,12 +1258,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_generic_hlist() {
-        let _: HNil = generic::convert_from(HNil);
-        let _: Hlist![(), ((),)] = generic::convert_from(hlist![(), ((),)]);
-    }
 
     #[test]
     fn test_hcons() {
