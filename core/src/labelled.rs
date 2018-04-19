@@ -1,15 +1,18 @@
 //! This module holds the machinery behind LabelledGeneric.
 //!
-//! A LabelledGeneric instance is pretty much exactly the same as a Generic instance, except
-//! that the generic representation should contain information about field names.
+//! A `LabelledGeneric` instance is pretty much exactly the same as a `Generic`
+//! instance, except that the generic representation should contain information
+//! about field names.
 //!
-//! Having a separate trait for LabelledGenerics gives us the freedom to derive both
-//! labelled and non-labelled generic type class instances for our types.
+//! Having a separate trait for `LabelledGeneric`s gives us the freedom to
+//! derive both labelled and non-labelled generic trait instances for our types.
 //!
-//! Asides from the main LabelledGeneric trait, this module holds helper methods that allow
-//! users to use LabelledGeneric without using universal function call syntax.
+//! Aside from the main `LabelledGeneric` trait, this module holds helper
+//! methods that allow users to use `LabelledGeneric` without using universal
+//! function call syntax.
 //!
-//! In addition, this module holds macro-generated enums that map to letters in field names (identifiers).
+//! In addition, this module holds macro-generated enums that map to letters
+//! in field names (identifiers).
 //!
 //! # Examples
 //!
@@ -21,15 +24,15 @@
 //! use frunk::labelled::chars::*;
 //!
 //! // Optionally alias our tuple that represents our type-level string
-//! type name = (n,a,m,e);
+//! type name = (n, a, m, e);
 //! let labelled = field![name, "Lloyd"];
 //! assert_eq!(labelled.name, "name");
 //! assert_eq!(labelled.value, "Lloyd")
 //! # }
 //! ```
 //!
-//! A more common usage is to use LabelledGeneric to transform structs that have mismatched
-//! fields!
+//! A more common usage is to use `LabelledGeneric` to transform structs that
+//! have mismatched fields!
 //!
 //! ```
 //! #[macro_use] extern crate frunk;
@@ -67,13 +70,13 @@ use std::marker::PhantomData;
 use hlist::*;
 use std::fmt;
 
-/// A trait that converts from a type to a labelled generic representation
+/// A trait that converts from a type to a labelled generic representation.
 ///
-/// LabelledGenerics allow us to have completely type-safe, boilerplate free conversions
-/// between different structs.
+/// `LabelledGeneric`s allow us to have completely type-safe,
+/// boilerplate free conversions between different structs.
 ///
-/// For the most part, you should be using the derivation that is available through
-/// frunk_derive to generate instances of this typeclass for your types.
+/// For the most part, you should be using the derivation that is available
+/// through `frunk_derive` to generate instances of this trait for your types.
 ///
 /// # Examples
 ///
@@ -108,27 +111,29 @@ use std::fmt;
 /// let s_user: SavedUser = frunk::transform_from(n_user); // done
 /// # }
 pub trait LabelledGeneric {
-    /// The labelled generic representation type
+    /// The labelled generic representation type.
     type Repr;
 
-    /// Go from something to Repr
+    /// Convert a value to its representation type `Repr`.
     fn into(self) -> Self::Repr;
 
-    /// Go from labelled Repr to something
-    fn from(r: Self::Repr) -> Self;
+    /// Convert a value's labelled representation type `Repr`
+    /// to the values's type.
+    fn from(repr: Self::Repr) -> Self;
 
-    /// From one type to another using a type with a compatible labelled generic representation
-    fn convert_from<A>(a: A) -> Self
+    /// Convert from one type to another using a type with the same
+    /// labelled generic representation
+    fn convert_from<Src>(src: Src) -> Self
     where
-        A: LabelledGeneric<Repr = Self::Repr>,
+        Src: LabelledGeneric<Repr = Self::Repr>,
         Self: Sized,
     {
-        let repr = <A as LabelledGeneric>::into(a);
+        let repr = <Src as LabelledGeneric>::into(src);
         <Self as LabelledGeneric>::from(repr)
     }
 
-    /// Converts from another type A into Self assuming that A and Self have labelled generic representations
-    /// that can be sculpted into each other.
+    /// Converts from another type A into Self assuming that A and Self have
+    /// labelled generic representations that can be sculpted into each other.
     ///
     /// Note that this method tosses away the "remainder" of the sculpted representation. In other
     /// words, anything that is not needed from A gets tossed out.
@@ -143,48 +148,51 @@ pub trait LabelledGeneric {
         <Self as LabelledGeneric>::transform_from(a)
     }
 
-    /// Converts from another type A into Self assuming that A and Self have labelled generic representations
-    /// that can be sculpted into each other.
+    /// Converts from another type `Src` into `Self` assuming that `Src` and
+    /// `Self` have labelled generic representations that can be sculpted into
+    /// each other.
     ///
-    /// Note that this method tosses away the "remainder" of the sculpted representation. In other
-    /// words, anything that is not needed from A gets tossed out.
-    fn transform_from<A, Indices>(a: A) -> Self
+    /// Note that this method tosses away the "remainder" of the sculpted
+    /// representation. In other words, anything that is not needed from `Src`
+    /// gets tossed out.
+    fn transform_from<Src, Indices>(src: Src) -> Self
     where
-        A: LabelledGeneric,
+        Src: LabelledGeneric,
         Self: Sized,
-        // The labelled representation of A must be sculpt-able into the labelled representation of Self
-        <A as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>,
+        // The labelled representation of `Src` must be sculpt-able into the labelled representation of `Self`
+        <Src as LabelledGeneric>::Repr: Sculptor<<Self as LabelledGeneric>::Repr, Indices>,
     {
-        let a_gen = <A as LabelledGeneric>::into(a);
+        let src_gen = <Src as LabelledGeneric>::into(src);
         // We toss away the remainder.
-        let (self_gen, _): (<Self as LabelledGeneric>::Repr, _) = a_gen.sculpt();
+        let (self_gen, _): (<Self as LabelledGeneric>::Repr, _) = src_gen.sculpt();
         <Self as LabelledGeneric>::from(self_gen)
     }
 }
 
-/// Given a labelled generic Representation of an A, returns A
-pub fn from_labelled_generic<A, Repr>(gen: Repr) -> A
+/// Given a labelled generic representation of a `Dst`, returns `Dst`
+pub fn from_labelled_generic<Dst, Repr>(repr: Repr) -> Dst
 where
-    A: LabelledGeneric<Repr = Repr>,
+    Dst: LabelledGeneric<Repr = Repr>,
 {
-    <A as LabelledGeneric>::from(gen)
+    <Dst as LabelledGeneric>::from(repr)
 }
 
-/// Given an A, returns its labelled generic Representation
-pub fn into_labelled_generic<A, Repr>(a: A) -> Repr
+/// Given a `Src`, returns its labelled generic representation.
+pub fn into_labelled_generic<Src, Repr>(src: Src) -> Repr
 where
-    A: LabelledGeneric<Repr = Repr>,
+    Src: LabelledGeneric<Repr = Repr>,
 {
-    <A as LabelledGeneric>::into(a)
+    <Src as LabelledGeneric>::into(src)
 }
 
-/// Converts one type into another assuming they have the same labelled generic Representation
-pub fn labelled_convert_from<A, B, Repr>(a: A) -> B
+/// Converts one type into another assuming they have the same labelled generic
+/// representation.
+pub fn labelled_convert_from<Src, Dst, Repr>(src: Src) -> Dst
 where
-    A: LabelledGeneric<Repr = Repr>,
-    B: LabelledGeneric<Repr = Repr>,
+    Src: LabelledGeneric<Repr = Repr>,
+    Dst: LabelledGeneric<Repr = Repr>,
 {
-    <B as LabelledGeneric>::convert_from(a)
+    <Dst as LabelledGeneric>::convert_from(src)
 }
 
 /// Converts from one type into another assuming that their labelled generic representations
@@ -207,14 +215,14 @@ where
 ///
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
-pub fn transform_from<A, B, Indices>(a: A) -> B
+pub fn transform_from<Src, Dst, Indices>(src: Src) -> Dst
 where
-    A: LabelledGeneric,
-    B: LabelledGeneric,
-    // The labelled representation of A must be sculpt-able into the labelled representation of B
-    <A as LabelledGeneric>::Repr: Sculptor<<B as LabelledGeneric>::Repr, Indices>,
+    Src: LabelledGeneric,
+    Dst: LabelledGeneric,
+    // The labelled representation of Src must be sculpt-able into the labelled representation of Dst
+    <Src as LabelledGeneric>::Repr: Sculptor<<Dst as LabelledGeneric>::Repr, Indices>,
 {
-    <B as LabelledGeneric>::transform_from(a)
+    <Dst as LabelledGeneric>::transform_from(src)
 }
 
 pub mod chars {
