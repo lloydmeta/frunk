@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.0] - 2018-04-20
 ### Added
+- :confetti_ball: Forces joined with new collaborators [@Centril] and [@ExpHP]!
 - `frunk` now adheres to semantic versioning!
 - Inherent method wrappers for many trait methods on HList and Coproduct.
 - Re-exports for a variety of essential items at the root level of `frunk`.
@@ -41,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   orthogonally to many other features of HList and Coproduct, and relieves
   frunk from providing impls for `&HCons` that can be susceptible to the
   dreaded "Overflow evaluating `_: std::marker::Sized`" error.
+- *Lots* of documentation improvements!
 
 ### Removed
 - The identity `AsRef` impls on HList and Coproduct, which were only
@@ -66,7 +68,6 @@ The following list is a modest attempt to summarize the features of v0.1.36.
 
 A raw overview of older versions is available in the form of commit logs:
 
-
 * [0.1.36](https://github.com/lloydmeta/frunk/compare/v0.1.35...v0.1.36) - 2018-02-25
 * [0.1.35](https://github.com/lloydmeta/frunk/compare/v0.1.34...v0.1.35) - 2018-02-11
 * [0.1.34](https://github.com/lloydmeta/frunk/compare/v0.1.33...v0.1.34) - 2017-10-25
@@ -86,6 +87,11 @@ A raw overview of older versions is available in the form of commit logs:
 * [0.1.16](https://github.com/lloydmeta/frunk/compare/v0.1.11...v0.1.16) - 2017-03-04
 * [0.1.11](https://github.com/lloydmeta/frunk/compare/v0.1.10...v0.1.11) - 2017-03-01
 * [0.1.10](https://github.com/lloydmeta/frunk/compare/v0.1.9...v0.1.10) - 2017-03-01
+
+<!-- Misc links -->
+[@lloydmeta]: https://github.com/lloydmeta
+[@ExpHP]: https://github.com/ExpHP
+[@Centril]: https://github.com/Centril
 
 <!-- Here's the list of heading links.  Be sure to update with each release! -->
 [Unreleased]: https://github.com/lloydmeta/frunk/compare/v0.2.0...HEAD
