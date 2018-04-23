@@ -109,6 +109,9 @@ extern crate frunk_derives;
 pub mod semigroup;
 pub mod monoid;
 pub mod validated;
+pub mod kind;
+pub mod functor;
+pub mod applicative;
 
 pub use frunk_core::*;
 pub use frunk_derives::*;
