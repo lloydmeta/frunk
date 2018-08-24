@@ -56,8 +56,8 @@
 //! # }
 //! ```
 
-use indices::{Here, There, Suffixed};
-use traits::{Poly, Func, ToRef, IntoReverse};
+use indices::{Here, Suffixed, There};
+use traits::{Func, IntoReverse, Poly, ToRef};
 
 use std::ops::Add;
 
@@ -778,23 +778,16 @@ impl<Source> Sculptor<HNil, HNil> for Source {
 /// Indices is HCons<IndexHead, IndexTail> here because the compiler is being asked to figure out the
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
 /// Plucker's remainder induce.
-impl<
-    THead,
-    TTail,
-    SHead,
-    STail,
-    IndexHead,
-    IndexTail,
-> Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>> for HCons<SHead, STail>
+impl<THead, TTail, SHead, STail, IndexHead, IndexTail>
+    Sculptor<HCons<THead, TTail>, HCons<IndexHead, IndexTail>> for HCons<SHead, STail>
 where
     HCons<SHead, STail>: Plucker<THead, IndexHead>,
     <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder: Sculptor<TTail, IndexTail>,
 {
-    type Remainder =
-        <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<
-            TTail,
-            IndexTail,
-        >>::Remainder;
+    type Remainder = <<HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder as Sculptor<
+        TTail,
+        IndexTail,
+    >>::Remainder;
 
     #[inline(always)]
     fn sculpt(self) -> (HCons<THead, TTail>, Self::Remainder) {

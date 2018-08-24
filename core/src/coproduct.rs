@@ -71,9 +71,9 @@
 //! # }
 //! ```
 
-use hlist::{HNil, HCons};
+use hlist::{HCons, HNil};
 use indices::{Here, There};
-use traits::{Poly, Func, ToRef};
+use traits::{Func, Poly, ToRef};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -470,7 +470,8 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// ```
     #[inline(always)]
     pub fn to_ref<'a>(&'a self) -> <Self as ToRef<'a>>::Output
-    where Self: ToRef<'a>,
+    where
+        Self: ToRef<'a>,
     {
         ToRef::to_ref(self)
     }
@@ -694,7 +695,6 @@ where
 ///
 /// [`Coproduct::fold`]: enum.Coproduct.html#method.fold
 pub trait CoproductFoldable<Folder, Output> {
-
     /// Use functions to fold a coproduct into a single value.
     ///
     /// Please see the [inherent method] for more information.
@@ -763,7 +763,7 @@ impl<'a> ToRef<'a> for CNil {
     type Output = CNil;
 
     fn to_ref(&'a self) -> CNil {
-        match *self { }
+        match *self {}
     }
 }
 
@@ -842,14 +842,8 @@ pub trait CoproductSubsetter<Targets, Indices>: Sized {
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
-impl<
-    Choices,
-    THead,
-    TTail,
-    NHead,
-    NTail,
-    Rem,
-> CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
+impl<Choices, THead, TTail, NHead, NTail, Rem>
+    CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
 where
     Self: CoprodUninjector<THead, NHead, Remainder = Rem>,
     Rem: CoproductSubsetter<TTail, NTail>,
@@ -935,8 +929,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::Coproduct::*;
+    use super::*;
 
     #[test]
     fn test_coproduct_inject() {
