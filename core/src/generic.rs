@@ -103,7 +103,7 @@ pub trait Generic {
     fn map_repr<Mapper>(self, mapper: Mapper) -> Self
     where
         Self: Sized,
-        Mapper: FnOnce(Self::Repr) -> Self::Repr
+        Mapper: FnOnce(Self::Repr) -> Self::Repr,
     {
         Self::from(mapper(self.into()))
     }
@@ -116,7 +116,7 @@ pub trait Generic {
     where
         Self: Sized,
         Inter: Generic<Repr = Self::Repr>,
-        Mapper: FnOnce(Inter) -> Inter
+        Mapper: FnOnce(Inter) -> Inter,
     {
         Self::convert_from(mapper(Inter::convert_from(self)))
     }
@@ -153,7 +153,7 @@ where
 pub fn map_repr<Origin, Mapper>(val: Origin, mapper: Mapper) -> Origin
 where
     Origin: Generic,
-    Mapper: FnOnce(Origin::Repr) -> Origin::Repr
+    Mapper: FnOnce(Origin::Repr) -> Origin::Repr,
 {
     <Origin as Generic>::map_repr(val, mapper)
 }
@@ -168,7 +168,7 @@ pub fn map_inter<Inter, Origin, Mapper>(val: Origin, mapper: Mapper) -> Origin
 where
     Origin: Generic,
     Inter: Generic<Repr = Origin::Repr>,
-    Mapper: FnOnce(Inter) -> Inter
+    Mapper: FnOnce(Inter) -> Inter,
 {
     <Origin as Generic>::map_inter(val, mapper)
 }

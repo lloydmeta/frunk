@@ -60,11 +60,11 @@
 #[macro_use]
 mod macros;
 
-pub mod hlist;
 pub mod coproduct;
 pub mod generic;
-pub mod labelled;
+pub mod hlist;
 pub mod indices;
+pub mod labelled;
 pub mod traits;
 mod tuples;
 

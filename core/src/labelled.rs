@@ -66,9 +66,9 @@
 //! # }
 //! ```
 
-use std::marker::PhantomData;
 use hlist::*;
 use std::fmt;
+use std::marker::PhantomData;
 
 /// A trait that converts from a type to a labelled generic representation.
 ///
@@ -465,10 +465,25 @@ where
     }
 }
 
+/// Trait for getting the key types of a given implementation (at the type-level)
+trait Keys {
+    type Out;
+}
+
+/// HNil implementation; just returns HNil
+impl Keys for HNil {
+    type Out = HNil;
+}
+
+/// Labelled HList implementation
+impl<K, V, Tail: Keys> Keys for HCons<Field<K, V>, Tail> {
+    type Out = HCons<K, <Tail as Keys>::Out>;
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::chars::*;
+    use super::*;
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -531,5 +546,16 @@ mod tests {
     fn test_name() {
         let labelled = field!(name, "joe");
         assert_eq!(labelled.name, "name")
+    }
+
+    #[test]
+    fn test_keys() {
+        #[derive(PartialEq, Eq, Debug)]
+        struct Meh<T>(PhantomData<T>);
+        type ExpectedKeys = Hlist![name, age];
+        type ObservedKeys = <Hlist![Field<name, &'static str>, Field<age, isize>] as Keys>::Out;
+        let expected = Meh::<ExpectedKeys>(PhantomData);
+        let observed = Meh::<ObservedKeys>(PhantomData);
+        assert_eq!(expected, observed);
     }
 }
