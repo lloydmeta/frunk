@@ -67,6 +67,7 @@
 //! ```
 
 use hlist::*;
+use indices::{Here, There};
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -480,6 +481,47 @@ impl<K, V, Tail: Keys> Keys for HCons<Field<K, V>, Tail> {
     type Out = HCons<K, <Tail as Keys>::Out>;
 }
 
+// For Plucking things out by Key
+pub trait ByKeyPlucker<TargetKey, Index> {
+    type TargetValue;
+    type Remainder;
+
+    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder);
+}
+
+/// Implementation when the pluck target key is in head
+impl<K, V, Tail> ByKeyPlucker<K, Here> for HCons<Field<K, V>, Tail> {
+    type TargetValue = V;
+    type Remainder = Tail;
+
+    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
+        (self.head.value, self.tail)
+    }
+}
+
+/// Implementation when the pluck target key is in the tail
+impl<Head, Tail, K, TailIndex> ByKeyPlucker<K, There<TailIndex>> for HCons<Head, Tail>
+where
+    Tail: ByKeyPlucker<K, TailIndex>,
+{
+    type TargetValue = <Tail as ByKeyPlucker<K, TailIndex>>::TargetValue;
+    type Remainder = HCons<Head, <Tail as ByKeyPlucker<K, TailIndex>>::Remainder>;
+
+    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
+        let (target, tail_remainder): (
+            Self::TargetValue,
+            <Tail as ByKeyPlucker<K, TailIndex>>::Remainder,
+        ) = <Tail as ByKeyPlucker<K, TailIndex>>::pluck_by_key(self.tail);
+        (
+            target,
+            HCons {
+                head: self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::chars::*;
@@ -557,5 +599,14 @@ mod tests {
         let expected = Meh::<ExpectedKeys>(PhantomData);
         let observed = Meh::<ObservedKeys>(PhantomData);
         assert_eq!(expected, observed);
+    }
+
+    #[test]
+    fn test_pluck_by_key() {
+        type Record = Hlist![Field<name, &'static str>, Field<age, isize>];
+        let record: Record = hlist![field!(name, "joe"), field!((a, g, e), 3)];
+        let (value, remainder) = <Record as ByKeyPlucker<name, _>>::pluck_by_key(record);
+        assert_eq!(value, "joe");
+        assert_eq!(remainder, hlist![field!(age, 3)]);
     }
 }
