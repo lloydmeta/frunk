@@ -546,6 +546,7 @@ impl<Source> ByKeySculptor<HNil, HNil> for Source {
     }
 }
 
+/// Implementation for when we have a non-empty HCons target
 impl<TKeyHead, TKeyTail, SHead, STail, IndexHead, IndexTail>
     ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>> for HCons<SHead, STail>
 where
@@ -566,6 +567,7 @@ where
             IndexTail,
         >>::Remainder;
 
+    #[inline(always)]
 fn sculpt_by_key(self) -> (<Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::TargetValues, <Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::Remainder){
         let (p, r) = self.pluck_by_key();
         let (tail, tail_remainder) = r.sculpt_by_key();
