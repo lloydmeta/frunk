@@ -525,6 +525,7 @@ where
     }
 }
 
+/// Sculpts a given Labelled Record by type-level Keys, returning the remainder
 pub trait ByKeySculptor<TargetKeys, Indices> {
     type TargetValues;
     type Remainder;
@@ -568,7 +569,7 @@ where
         >>::Remainder;
 
     #[inline(always)]
-fn sculpt_by_key(self) -> (<Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::TargetValues, <Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::Remainder){
+    fn sculpt_by_key(self) -> (Self::TargetValues, Self::Remainder) {
         let (p, r) = self.pluck_by_key();
         let (tail, tail_remainder) = r.sculpt_by_key();
         (
@@ -578,6 +579,43 @@ fn sculpt_by_key(self) -> (<Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCo
             },
             tail_remainder,
         )
+    }
+}
+
+/// Zips a given value with type-level keys
+pub trait ZipWithKeys<Keys> {
+    type Out;
+
+    /// Returns the current values zipped with the given type-level keys in fields
+    fn zip_with_keys(self) -> Self::Out;
+}
+
+/// Implementation when both keys and values are empty
+impl ZipWithKeys<HNil> for HNil {
+    type Out = HNil;
+
+    #[inline(always)]
+    fn zip_with_keys(self) -> HNil {
+        HNil
+    }
+}
+
+const ZIPPED_FIELD: &'static str = "zipped-field";
+
+/// Implementation when both keys and values are non-empty Hlists
+impl<KHead, KTail, VHead, VTail> ZipWithKeys<HCons<KHead, KTail>> for HCons<VHead, VTail>
+where
+    VTail: ZipWithKeys<KTail>,
+{
+    type Out = HCons<Field<KHead, VHead>, <VTail as ZipWithKeys<KTail>>::Out>;
+
+    #[inline(always)]
+    fn zip_with_keys(self) -> Self::Out {
+        HCons {
+            // sadly, stringify!(KHead) is eager and turns name into ... KHead :p
+            head: field_with_name::<KHead, _>(ZIPPED_FIELD, self.head),
+            tail: self.tail.zip_with_keys(),
+        }
     }
 }
 
@@ -679,5 +717,20 @@ mod tests {
             <Record as ByKeySculptor<Hlist![is_admin, name], _>>::sculpt_by_key(record);
         assert_eq!(values, hlist![true, "joe"]);
         assert_eq!(remainder, hlist![field!(age, 3)]);
+    }
+
+    #[test]
+    fn test_zip_with_key() {
+        type HlistType = Hlist![&'static str, isize, bool];
+        let hlist: HlistType = hlist!["joe", 3, true];
+        let record = <HlistType as ZipWithKeys<Hlist![name, age, is_admin]>>::zip_with_keys(hlist);
+        assert_eq!(
+            record,
+            hlist![
+                field!(name, "joe", ZIPPED_FIELD),
+                field!(age, 3, ZIPPED_FIELD),
+                field!(is_admin, true, ZIPPED_FIELD)
+            ]
+        );
     }
 }
