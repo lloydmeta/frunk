@@ -481,11 +481,12 @@ impl<K, V, Tail: Keys> Keys for HCons<Field<K, V>, Tail> {
     type Out = HCons<K, <Tail as Keys>::Out>;
 }
 
-// For Plucking things out by Key
+/// Trait for plucking out a value from a Record by type-level Key
 pub trait ByKeyPlucker<TargetKey, Index> {
     type TargetValue;
     type Remainder;
 
+    /// Returns a pair consisting of the  value pointed to by the target key and the remainder
     fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder);
 }
 
@@ -494,6 +495,7 @@ impl<K, V, Tail> ByKeyPlucker<K, Here> for HCons<Field<K, V>, Tail> {
     type TargetValue = V;
     type Remainder = Tail;
 
+    #[inline(always)]
     fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
         (self.head.value, self.tail)
     }
@@ -507,6 +509,7 @@ where
     type TargetValue = <Tail as ByKeyPlucker<K, TailIndex>>::TargetValue;
     type Remainder = HCons<Head, <Tail as ByKeyPlucker<K, TailIndex>>::Remainder>;
 
+    #[inline(always)]
     fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
         let (target, tail_remainder): (
             Self::TargetValue,
@@ -518,6 +521,60 @@ where
                 head: self.head,
                 tail: tail_remainder,
             },
+        )
+    }
+}
+
+pub trait ByKeySculptor<TargetKeys, Indices> {
+    type TargetValues;
+    type Remainder;
+
+    /// Returns the values pointed to by the provided keys and the remainder
+    fn sculpt_by_key(self) -> (Self::TargetValues, Self::Remainder);
+}
+
+/// Implementation for when the target keys is an empty HList (HNil)
+///
+/// Index type is HNil because we don't need an index for finding HNil
+impl<Source> ByKeySculptor<HNil, HNil> for Source {
+    type TargetValues = HNil;
+    type Remainder = Source;
+
+    #[inline(always)]
+    fn sculpt_by_key(self) -> (Self::TargetValues, Self::Remainder) {
+        (HNil, self)
+    }
+}
+
+impl<TKeyHead, TKeyTail, SHead, STail, IndexHead, IndexTail>
+    ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>> for HCons<SHead, STail>
+where
+    HCons<SHead, STail>: ByKeyPlucker<TKeyHead, IndexHead>,
+    <HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder:
+        ByKeySculptor<TKeyTail, IndexTail>,
+{
+    type TargetValues = HCons<
+        <HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::TargetValue,
+        <<HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder as ByKeySculptor<
+            TKeyTail,
+            IndexTail,
+        >>::TargetValues,
+    >;
+    type Remainder =
+        <<HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder as ByKeySculptor<
+            TKeyTail,
+            IndexTail,
+        >>::Remainder;
+
+fn sculpt_by_key(self) -> (<Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::TargetValues, <Self as ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>>>::Remainder){
+        let (p, r) = self.pluck_by_key();
+        let (tail, tail_remainder) = r.sculpt_by_key();
+        (
+            HCons {
+                head: p,
+                tail: tail,
+            },
+            tail_remainder,
         )
     }
 }
@@ -534,6 +591,8 @@ mod tests {
     type name = (n, a, m, e);
     #[allow(non_camel_case_types)]
     type age = (a, g, e);
+    #[allow(non_camel_case_types)]
+    type is_admin = (i, s, __, a, d, m, i, n);
 
     #[test]
     fn test_label_new_building() {
@@ -607,6 +666,16 @@ mod tests {
         let record: Record = hlist![field!(name, "joe"), field!((a, g, e), 3)];
         let (value, remainder) = <Record as ByKeyPlucker<name, _>>::pluck_by_key(record);
         assert_eq!(value, "joe");
+        assert_eq!(remainder, hlist![field!(age, 3)]);
+    }
+
+    #[test]
+    fn test_sculpt_by_key() {
+        type Record = Hlist![Field<name, &'static str>, Field<age, isize>, Field<is_admin, bool>];
+        let record: Record = hlist![field!(name, "joe"), field!(age, 3), field!(is_admin, true)];
+        let (values, remainder) =
+            <Record as ByKeySculptor<Hlist![is_admin, name], _>>::sculpt_by_key(record);
+        assert_eq!(values, hlist![true, "joe"]);
         assert_eq!(remainder, hlist![field!(age, 3)]);
     }
 }
