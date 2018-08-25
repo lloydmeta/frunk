@@ -37,4 +37,3 @@ rpath = false
 lto = false
 debug-assertions = false
 codegen-units = 1
-panic = 'abort'
