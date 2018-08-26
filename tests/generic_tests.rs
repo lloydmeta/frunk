@@ -2,7 +2,7 @@ extern crate frunk;
 #[macro_use] // for the hlist macro
 extern crate frunk_core;
 
-use frunk::{from_generic, into_generic, convert_from};
+use frunk::{convert_from, from_generic, into_generic};
 
 mod common;
 use common::*;

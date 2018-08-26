@@ -620,26 +620,49 @@ where
 }
 
 /// Trait for transmogrifying a Source type into a Target type
-/// Indices is for differentiating things
-pub trait Transmogrifier<Target, Indices> {
+///
+/// * `TransMogIndices` is for holding indices that decide how to transmogrify the
+///    head element and tail elements
+///
+///
+/// * `SculptIndices` is for holding indices that decide how to Sculpt the
+///   head element and tail elements
+pub trait Transmogrifier<Target, TransMogIndices, SculptIndices> {
     fn transmogrify(self) -> Target;
 }
 
-// Identity Transmogrifier
-impl<Source> Transmogrifier<Source, Here> for Source {
+/// Identity Transmogrifier
+///
+/// * There is no need to transmogrify anything, so `TransMogIndices` is HNil
+/// * There is no need to sculpt anything, so `SculptIndices` is HNil
+impl<Source> Transmogrifier<Source, HNil, HNil> for Source {
     fn transmogrify(self) -> Source {
         self
     }
 }
 
-// HList Transmogrifier
-impl<SHead, STail, THead, TTail, HIndices, TIndices>
-Transmogrifier<HCons<THead, TTail>, HCons<HIndices, TIndices>> for HCons<SHead, STail>
+/// HList Transmogrifier
+///
+/// In this case:
+///
+/// * `TransMogIndices` is an HList of indices (indiceses?)
+///   * Head element is for Transmogrifying the head element (HE) of SourceHead into TargetHead
+///      * It could be HNil in the case where they are identity
+///      * It could be another HCons in the case where both are HLists themselves
+///      * TBD other cases
+///
+/// * `SculptIndices` is an HList of indices (indiceses?)
+///   * Head element is for Transmogrifying the head element (HE) of SourceHead into TargetHead
+///      * It could be HNil in the case where they are identity
+///      * It could be another HCons in the case where both are HLists themselves
+///      * TBD other cases
+impl<SourceHead, SourceTail, TargetHead, TargetTail, HeadTransMogIndices, TailTransMogIndices, HeadSculptIndices, TailSculptIndices>
+Transmogrifier<HCons<TargetHead, TargetTail>, HCons<HeadTransMogIndices, TailTransMogIndices>, HCons<HeadSculptIndices, TailSculptIndices>> for HCons<SourceHead, SourceTail>
     where
-        SHead: Transmogrifier<THead, HIndices>,
-        STail: Transmogrifier<TTail, TIndices>,
+        SourceHead: Transmogrifier<TargetHead, HeadTransMogIndices, HeadSculptIndices>,
+        SourceTail: Transmogrifier<TargetTail, TailTransMogIndices, TailSculptIndices>,
 {
-    fn transmogrify(self) -> HCons<THead, TTail> {
+    fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
         HCons {
             head: self.head.transmogrify(),
             tail: self.tail.transmogrify(),
@@ -678,37 +701,52 @@ Transmogrifier<HCons<THead, TTail>, HCons<HIndices, TIndices>> for HCons<SHead, 
 //    }
 //}
 
-
-impl<S, T, TransmorgIndicesCurrent, SculptIndicesCurrent, InnerIndices>
-    Transmogrifier<T, HCons<(TransmorgIndicesCurrent, SculptIndicesCurrent), InnerIndices>> for S
+/// Implementation of Transmogrifier for when Source and Target are LabelledGenerics
+///
+/// We need indieces for transmogrifying and for sculpting, but we need to wrap them in `There` to
+/// distinguish this implementation from the identity case where Source is Target
+impl<Source, Target, TransMogIndices, SculptIndices>
+    Transmogrifier<Target, There<TransMogIndices>, There<SculptIndices>> for Source
 where
-    S: LabelledGeneric,
-    T: LabelledGeneric,
-    <T as LabelledGeneric>::Repr: Keys, // Keys of Target type record
-    <T as LabelledGeneric>::Repr: IntoUnlabelled, // Values of Target type record
-    <S as LabelledGeneric>::Repr: ByKeySculptor<
-        <<T as LabelledGeneric>::Repr as Keys>::Out, // extract the values from Source record that correspond to the Keys in the target
-        SculptIndicesCurrent,
+    Source: LabelledGeneric,
+    Target: LabelledGeneric,
+    <Target as LabelledGeneric>::Repr: Keys, // Keys of Target type record
+    <Target as LabelledGeneric>::Repr: IntoUnlabelled, // Values of Target type record
+    <Source as LabelledGeneric>::Repr: ByKeySculptor<
+        <<Target as LabelledGeneric>::Repr as Keys>::Out, // extract the values from Source record that correspond to the Keys in the target
+        SculptIndices,
     >,
-    <<S as LabelledGeneric>::Repr as ByKeySculptor<
-        <<T as LabelledGeneric>::Repr as Keys>::Out,
-        SculptIndicesCurrent,
+    <<Source as LabelledGeneric>::Repr as ByKeySculptor<
+        <<Target as LabelledGeneric>::Repr as Keys>::Out,
+        SculptIndices,
     >>::TargetValues: Transmogrifier<
-        <<T as LabelledGeneric>::Repr as IntoUnlabelled>::Output,
-        TransmorgIndicesCurrent,
+        <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output,
+        TransMogIndices,
+        SculptIndices,
     >, // Transmogrify the extracted values into the un-labelled value types in the Target
 
-    <<T as LabelledGeneric>::Repr as IntoUnlabelled>::Output: ZipWithKeys<
-        <<T as LabelledGeneric>::Repr as Keys>::Out,
-        Out = <T as LabelledGeneric>::Repr,
+    <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output: ZipWithKeys<
+        <<Target as LabelledGeneric>::Repr as Keys>::Out,
+        Out = <Target as LabelledGeneric>::Repr,
     >, // Zip the transmogrified values with the keys, making sure the output is what the Target representation needs
 {
-    fn transmogrify(self) -> T {
+    fn transmogrify(self) -> Target {
+        // Get the LabelledGeneric Repr of Source
         let source_repr = self.into();
+        // Sculpt the Source Repr by keys of the Target into Values
         let (source_values_by_target_keys, _) = source_repr.sculpt_by_keys();
+        // Transmogrify the Value HList (these have no keys now)
+        // e.g. this is hlist![&str, InternalCredentials, &str];
+        // The compiler needs to be able to resolve this by using the
+        // "HList Transmogrifier"; and it does find it, but it can't seem to
+        //   *  use it
+        //   * Infer "TIndices"; the transmorg indices used for transmorgifying the tail
+        // Need a way of writing `CurrentIndices` on the Record-Transmogrifier impl (and is
+        // a one of, non-nesting thing (?) so that it works well with the HList impl, which
+        // has to go from left to right
         let transmogrified_source_values = source_values_by_target_keys.transmogrify();
         let zipped_with_target_keys = transmogrified_source_values.zip_with_keys();
-        <T as LabelledGeneric>::from(zipped_with_target_keys)
+        <Target as LabelledGeneric>::from(zipped_with_target_keys)
     }
 }
 

@@ -106,8 +106,8 @@ extern crate frunk_core;
 #[macro_use]
 extern crate frunk_derives;
 
-pub mod semigroup;
 pub mod monoid;
+pub mod semigroup;
 pub mod validated;
 
 pub use frunk_core::*;
@@ -132,15 +132,15 @@ pub use frunk_derives::*;
 //       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.
 
 #[doc(no_inline)]
-pub use hlist::HNil;
+pub use hlist::lift_from;
 #[doc(no_inline)]
 pub use hlist::HCons;
 #[doc(no_inline)]
-pub use hlist::lift_from;
-#[doc(no_inline)]
-pub use traits::Poly;
+pub use hlist::HNil;
 #[doc(no_inline)]
 pub use traits::Func;
+#[doc(no_inline)]
+pub use traits::Poly;
 #[doc(no_inline)]
 pub use traits::ToRef; // useful for where bounds
 
@@ -148,20 +148,18 @@ pub use traits::ToRef; // useful for where bounds
 pub use coproduct::Coproduct;
 
 #[doc(no_inline)]
-pub use generic::Generic;
+pub use generic::convert_from;
 #[doc(no_inline)]
 pub use generic::from_generic;
 #[doc(no_inline)]
 pub use generic::into_generic;
 #[doc(no_inline)]
-pub use generic::convert_from;
+pub use generic::map_inter;
 #[doc(no_inline)]
 pub use generic::map_repr;
 #[doc(no_inline)]
-pub use generic::map_inter;
+pub use generic::Generic;
 
-#[doc(no_inline)]
-pub use labelled::LabelledGeneric;
 #[doc(no_inline)]
 pub use labelled::from_labelled_generic;
 #[doc(no_inline)]
@@ -170,6 +168,8 @@ pub use labelled::into_labelled_generic;
 pub use labelled::labelled_convert_from;
 #[doc(no_inline)]
 pub use labelled::transform_from;
+#[doc(no_inline)]
+pub use labelled::LabelledGeneric;
 
 #[doc(no_inline)]
 pub use semigroup::Semigroup;
