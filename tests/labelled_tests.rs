@@ -3,11 +3,11 @@ extern crate frunk;
 extern crate frunk_core;
 extern crate time; //Time library
 
-use frunk::{HCons, LabelledGeneric};
-use frunk::{into_labelled_generic, from_labelled_generic, transform_from};
 use frunk::hlist::Sculptor;
-use frunk::labelled::Field;
 use frunk::labelled::chars::*;
+use frunk::labelled::Field;
+use frunk::{from_labelled_generic, into_labelled_generic, transform_from};
+use frunk::{HCons, LabelledGeneric};
 
 mod common;
 
@@ -116,7 +116,8 @@ fn to_audited<I, O, Indices>(o: I) -> O
 where
     I: LabelledGeneric,
     O: LabelledGeneric,
-    HCons<Field<CreatedAt, Tm>, <I as LabelledGeneric>::Repr>: Sculptor<<O as LabelledGeneric>::Repr, Indices>,
+    HCons<Field<CreatedAt, Tm>, <I as LabelledGeneric>::Repr>:
+        Sculptor<<O as LabelledGeneric>::Repr, Indices>,
 {
     // Add created_at field to LabelledGeneric repr of I
     let i_with_time = HCons {

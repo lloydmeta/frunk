@@ -7,8 +7,8 @@ extern crate frunk_core;
 extern crate test;
 
 use frunk::labelled::*;
-use test::Bencher;
 use std::convert::From;
+use test::Bencher;
 
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {

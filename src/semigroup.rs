@@ -28,13 +28,13 @@
 //! # }
 //! ```
 
+use frunk_core::hlist::*;
 use std::cell::*;
+use std::cmp::Ordering;
+use std::collections::hash_map::Entry;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::ops::{BitAnd, BitOr, Deref};
-use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
-use std::collections::hash_map::Entry;
-use frunk_core::hlist::*;
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]

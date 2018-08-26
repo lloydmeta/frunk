@@ -37,7 +37,7 @@ struct ExternalCredentials {
 struct InternalUser<'a> {
     first_name: &'a str,
     last_name: &'a str,
-    credentials: InternalCredentials
+    credentials: InternalCredentials,
 }
 
 #[derive(LabelledGeneric)]
@@ -70,10 +70,7 @@ fn main() {
     let inner_user = InternalUser {
         first_name: "Joe",
         last_name: "Joe",
-        credentials: InternalCredentials {
-            one: 1,
-            two: 2
-        }
+        credentials: InternalCredentials { one: 1, two: 2 },
     };
 
     let external_user: ExternalUser = inner_user.transmogrify();
