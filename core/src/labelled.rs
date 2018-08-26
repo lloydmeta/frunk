@@ -635,7 +635,7 @@ pub trait Transmogrifier<Target, TransMogIndices, SculptIndices> {
 ///
 /// * There is no need to transmogrify anything, so `TransMogIndices` is HNil
 /// * There is no need to sculpt anything, so `SculptIndices` is HNil
-impl<Source> Transmogrifier<Source, HNil, HNil> for Source {
+impl<Source, Sculpt> Transmogrifier<Source, HNil, Sculpt> for Source {
     fn transmogrify(self) -> Source {
         self
     }
@@ -722,7 +722,7 @@ where
     >>::TargetValues: Transmogrifier<
         <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output,
         TransMogIndices,
-        SculptIndices,
+        There<SculptIndices>,
     >, // Transmogrify the extracted values into the un-labelled value types in the Target
 
     <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output: ZipWithKeys<
