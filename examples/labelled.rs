@@ -26,7 +26,7 @@ struct DeletedUser<'a> {
 #[derive(LabelledGeneric)]
 struct InternalCredentials {
     one: isize,
-    two: isize,
+    two: usize,
 }
 #[derive(LabelledGeneric)]
 struct ExternalCredentials {
@@ -36,15 +36,15 @@ struct ExternalCredentials {
 #[derive(LabelledGeneric)]
 struct InternalUser<'a> {
     first_name: &'a str,
-    last_name: &'a str,
+    is_admin: bool,
     credentials: InternalCredentials,
 }
 
 #[derive(LabelledGeneric)]
 struct ExternalUser<'a> {
-    last_name: &'a str,
-    credentials: ExternalCredentials,
     first_name: &'a str,
+    credentials: ExternalCredentials,
+    is_admin: bool,
 }
 
 fn main() {
@@ -69,9 +69,9 @@ fn main() {
 
     let inner_user = InternalUser {
         first_name: "Joe",
-        last_name: "Joe",
+        is_admin: true,
         credentials: InternalCredentials { one: 1, two: 2 },
     };
 
-    let external_user: ExternalUser = inner_user.transmogrify();
+    let external_user: ExternalUser = <InternalUser as Transmogrifier<ExternalUser, _, _>>::transmogrify(inner_user);
 }
