@@ -621,132 +621,55 @@ where
 
 /// Trait for transmogrifying a Source type into a Target type
 ///
-/// * `TransMogIndices` is for holding indices that decide how to transmogrify the
-///    head element and tail elements
-///
-///
-/// * `SculptIndices` is for holding indices that decide how to Sculpt the
-///   head element and tail elements
-pub trait Transmogrifier<Target, TransMogIndices, SculptIndices> {
+pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     fn transmogrify(self) -> Target;
 }
 
-/// Identity Transmogrifier
-///
-/// * There is no need to transmogrify anything, so `TransMogIndices` is HNil
-/// * There is no need to sculpt anything, so `SculptIndices` is HNil
-impl<Source> Transmogrifier<Source, Here, Here> for Source {
+impl<Source> Transmogrifier<Source, Here> for Source {
     fn transmogrify(self) -> Source {
         self
     }
 }
 
-/// HList Transmogrifier
-///
-/// In this case:
-///
-/// * `TransMogIndices` is an HList of indices (indiceses?)
-///   * Head element is for Transmogrifying the head element (HE) of SourceHead into TargetHead
-///      * It could be HNil in the case where they are identity
-///      * It could be another HCons in the case where both are HLists themselves
-///      * TBD other cases
-///
-/// * `SculptIndices` is an HList of indices (indiceses?)
-///   * Head element is for Transmogrifying the head element (HE) of SourceHead into TargetHead
-///      * It could be HNil in the case where they are identity
-///      * It could be another HCons in the case where both are HLists themselves
-///      * TBD other cases
-impl<SourceHead, SourceTail, TargetHead, TargetTail, HeadTransMogIndices, TailTransMogIndices, HeadSculptIndices, TailSculptIndices>
-Transmogrifier<HCons<TargetHead, TargetTail>, HCons<HeadTransMogIndices, TailTransMogIndices>, HCons<HeadSculptIndices, TailSculptIndices>> for HCons<SourceHead, SourceTail>
-    where
-        SourceHead: Transmogrifier<TargetHead, HeadTransMogIndices, HeadSculptIndices>,
-        SourceTail: Transmogrifier<TargetTail, TailTransMogIndices, TailSculptIndices>,
-{
-    fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
-        HCons {
-            head: self.head.transmogrify(),
-            tail: self.tail.transmogrify(),
-        }
-    }
-}
-
-
-//impl LabelledGeneric for HNil {
-//    type Repr = HNil;
-//
-//    fn into(self) -> <Self as LabelledGeneric>::Repr {
-//        HNil
-//    }
-//
-//    fn from(_repr: <Self as LabelledGeneric>::Repr) -> Self {
-//        HNil
-//    }
-//}
-//
-//impl <K, V, Tail> LabelledGeneric for HCons<Field<K, V>, Tail> where Tail: LabelledGeneric {
-//    type Repr = HCons<Field<K, V>, <Tail as LabelledGeneric>::Repr>;
-//
-//    fn into(self) -> <Self as LabelledGeneric>::Repr {
-//        HCons {
-//            head: self.head,
-//            tail: self.tail.into()
-//        }
-//    }
-//
-//    fn from(repr: <Self as LabelledGeneric>::Repr) -> Self {
-//        HCons {
-//            head: repr.head,
-//            tail: <Tail as LabelledGeneric>::from(repr.tail)
-//        }
-//    }
-//}
-
-/// Implementation of Transmogrifier for when Source and Target are LabelledGenerics
-///
-/// We need indieces for transmogrifying and for sculpting, but we need to wrap them in `There` to
-/// distinguish this implementation from the identity case where Source is Target
-impl<Source, Target, TransMogIndices, SculptIndices, SculptIndicesInner>
-    Transmogrifier<Target, There<TransMogIndices>, There<HCons<SculptIndices, SculptIndicesInner>>> for Source
+impl<
+        SHead,
+        STail,
+        THead,
+        TTail,
+        SourceKeyToValueSculptingIndices,
+        SourceValueToTargetValueTransmogrIndices,
+    >
+    Transmogrifier<
+        HCons<THead, TTail>,
+        HCons<SourceKeyToValueSculptingIndices, SourceValueToTargetValueTransmogrIndices>,
+    > for HCons<SHead, STail>
 where
-    Source: LabelledGeneric,
-    Target: LabelledGeneric,
-    <Target as LabelledGeneric>::Repr: Keys, // Keys of Target type record
-    <Target as LabelledGeneric>::Repr: IntoUnlabelled, // Values of Target type record
-    <Source as LabelledGeneric>::Repr: ByKeySculptor<
-        <<Target as LabelledGeneric>::Repr as Keys>::Out, // extract the values from Source record that correspond to the Keys in the target
-        SculptIndices,
-    >,
-    <<Source as LabelledGeneric>::Repr as ByKeySculptor<
-        <<Target as LabelledGeneric>::Repr as Keys>::Out,
-        SculptIndices,
-    >>::TargetValues: Transmogrifier<
-        <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output,
-        TransMogIndices, //
-        SculptIndicesInner, // * THIS NEEDS TO BE INNER SCULPT INDICES FOR SCULPTING ??
-    >, // Transmogrify the extracted values into the un-labelled value types in the Target
+    // We can grab just the Key types of the Target type,
+    HCons<THead, TTail>: Keys,
 
-    <<Target as LabelledGeneric>::Repr as IntoUnlabelled>::Output: ZipWithKeys<
-        <<Target as LabelledGeneric>::Repr as Keys>::Out,
-        Out = <Target as LabelledGeneric>::Repr,
-    >, // Zip the transmogrified values with the keys, making sure the output is what the Target representation needs
+    HCons<THead, TTail>: IntoUnlabelled,
+
+    // We can find all the keys types of the Target Type in the SourceType
+    HCons<SHead, STail>:
+        ByKeySculptor<<HCons<THead, TTail> as Keys>::Out, SourceKeyToValueSculptingIndices>,
+
+    // We can take the values matching the keys, and each one can be transmogrified into the corresponding value types of the Target Type
+    <HCons<SHead, STail> as ByKeySculptor<
+        <HCons<THead, TTail> as Keys>::Out, // target keys
+        SourceKeyToValueSculptingIndices,
+    >>::TargetValues: Transmogrifier<
+        <HCons<THead, TTail> as IntoUnlabelled>::Output,
+        SourceValueToTargetValueTransmogrIndices,
+    >,
+
+    // We can take the transmogrified values and zip them into the target
+    <HCons<THead, TTail> as IntoUnlabelled>::Output:
+        ZipWithKeys<<HCons<THead, TTail> as Keys>::Out, Out = HCons<THead, TTail>>,
 {
-    fn transmogrify(self) -> Target {
-        // Get the LabelledGeneric Repr of Source
-        let source_repr = self.into();
-        // Sculpt the Source Repr by keys of the Target into Values
-        let (source_values_by_target_keys, _) = source_repr.sculpt_by_keys();
-        // Transmogrify the Value HList (these have no keys now)
-        // e.g. this is hlist![&str, InternalCredentials, &str];
-        // The compiler needs to be able to resolve this by using the
-        // "HList Transmogrifier"; and it does find it, but it can't seem to
-        //   *  use it
-        //   * Infer "TIndices"; the transmorg indices used for transmorgifying the tail
-        // Need a way of writing `CurrentIndices` on the Record-Transmogrifier impl (and is
-        // a one of, non-nesting thing (?) so that it works well with the HList impl, which
-        // has to go from left to right
-        let transmogrified_source_values = source_values_by_target_keys.transmogrify();
-        let zipped_with_target_keys = transmogrified_source_values.zip_with_keys();
-        <Target as LabelledGeneric>::from(zipped_with_target_keys)
+    fn transmogrify(self) -> HCons<THead, TTail> {
+        let (source_values_for_target_keys, _) = self.sculpt_by_keys();
+        let transmogrified_values = source_values_for_target_keys.transmogrify();
+        transmogrified_values.zip_with_keys()
     }
 }
 
@@ -868,51 +791,65 @@ mod tests {
     }
 
     #[test]
-    fn test_transmogrify_hlists() {
-
-        // Doesn't work because transmogrify is not implemented for Field
-
-
-//        type Record1 = Hlist![Field<name, &'static str>, Field<inner, Hlist![Field<age, isize>, Field<abc, isize>]>, Field<is_admin, bool>];
-//        type Record2 = Hlist![Field<inner, Hlist![Field<abc, isize>]>, Field<name, &'static str>];
-//
-//        let record_1: Record1 = hlist![
-//            field!(name, "joe"),
-//            field!(inner, hlist![field!(age, 10), field!(abc, 15)]),
-//            field!(is_admin, true)
-//        ];
-//        let record_2: Record2 = record_1.transmogrify();
-//        let expected = hlist![field!(inner, hlist![field!(abc, 15)]), field!(name, "joe")];
-//        assert_eq!(record_2, expected);
+    fn test_transmogrify_simple_identity() {
+        let one: i32 = 1;
+        let one_again: i32 = one.transmogrify();
+        assert_eq!(one, one_again);
     }
 
     #[test]
-    fn test_transmogrify_hlists_identity() {
-        type Hlist1 = Hlist![&'static str];
-        type Hlist2 = Hlist![&'static str];
-
-
-        let hlist_1: Hlist1 = hlist![
-            "joe"
-        ];
-        let hlist_2: Hlist2 = <Hlist1 as Transmogrifier<Hlist2, _, _>>::transmogrify(hlist_1);
-        let expected = hlist!["joe"];
-        assert_eq!(hlist_2, expected);
+    fn test_transmogrify_hnil_identity() {
+        let hnil_again: HNil = HNil.transmogrify();
+        assert_eq!(HNil, hnil_again);
+    }
+    #[test]
+    fn test_transmogrify_hcons_identity() {
+        let hcons = hlist!(1, 2f32, true);
+        let again: Hlist![isize, f32, bool] = hcons.transmogrify();
+        assert_eq!(again, hlist!(1, 2f32, true));
     }
 
     #[test]
-    fn test_transmogrify_hlists_2() {
-//        type Hlist1 = Hlist![&'static str, Hlist![isize, f32], bool];
-//        type Hlist2 = Hlist![Hlist![f32], &'static str];
-//
-//
-//        let hlist_1: Hlist1 = hlist![
-//            "joe",
-//            hlist![10, 15f32],
-//            true
-//        ];
-//        let hlist_2: Hlist2 = hlist_1.transmogrify();
-//        let expected = hlist![hlist![15f32], "joe"];
-//        assert_eq!(hlist_2, expected);
+    fn test_transmogrify_hcons_sculpting_required_simple() {
+        let hcons = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Hlist![Field<is_admin, bool>, Field<name, &str>, Field<age, isize>] =
+            hcons.transmogrify();
+        assert_eq!(
+            t_hcons,
+            hlist!(
+                field_with_name::<is_admin, bool>(ZIPPED_FIELD, true),
+                field_with_name::<name, &str>(ZIPPED_FIELD, "joe"),
+                field_with_name::<age, isize>(ZIPPED_FIELD, 3)
+            )
+        );
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_required_simple_recursive() {
+        let hcons = hlist!(
+            field!(name, "joe"),
+            field!(inner, hlist!(field!(age, 3), field!(is_admin, true)))
+        );
+        let t_hcons: Hlist![
+            Field<inner,
+                Hlist![
+                    Field<is_admin, bool>,
+                    Field<age, isize>
+                ]
+             >,
+             Field<name, &str>] = hcons.transmogrify();
+        assert_eq!(
+            t_hcons,
+            hlist!(
+                field_with_name::<inner, Hlist![Field<is_admin, bool>, Field<age, isize>]>(
+                    ZIPPED_FIELD,
+                    hlist!(
+                        field_with_name::<is_admin, bool>(ZIPPED_FIELD, true),
+                        field_with_name::<age, isize>(ZIPPED_FIELD, 3)
+                    ),
+                ),
+                field_with_name::<name, &str>(ZIPPED_FIELD, "joe")
+            )
+        );
     }
 }
