@@ -26,9 +26,17 @@ struct DeletedUser<'a> {
 }
 
 #[derive(LabelledGeneric)]
+struct InternalPhoneNumber {
+    emergency: Option<usize>,
+    main: usize,
+    secondary: Option<usize>,
+}
+
+#[derive(LabelledGeneric)]
 struct InternalAddress<'a> {
-    is_banned: bool,
+    is_whitelisted: bool,
     name: &'a str,
+    phone: InternalPhoneNumber,
 }
 
 #[derive(LabelledGeneric)]
@@ -36,11 +44,18 @@ struct InternalPerson<'a> {
     name: &'a str,
     age: usize,
     address: InternalAddress<'a>,
+    is_banned: bool,
+}
+
+#[derive(LabelledGeneric, Debug)]
+struct ExternalPhoneNumber {
+    main: usize,
 }
 
 #[derive(LabelledGeneric, Debug)]
 struct ExternalAddress<'a> {
     name: &'a str,
+    phone: ExternalPhoneNumber,
 }
 
 #[derive(LabelledGeneric, Debug)]
@@ -72,12 +87,17 @@ fn main() {
         name: "John",
         age: 10,
         address: InternalAddress {
-            is_banned: true,
+            is_whitelisted: true,
             name: "somewhere out there",
+            phone: InternalPhoneNumber {
+                main: 1234,
+                secondary: None,
+                emergency: Some(1234),
+            },
         },
+        is_banned: true,
     };
 
     let external_user: ExternalPerson = internal_user.transmogrify();
     println!("{:?}", external_user);
-
 }
