@@ -639,14 +639,15 @@ pub struct DoTransmog<PluckByKeyIndex, TransMogIndex> {
 
 /// Implementation of Transmogrifier for identity transforms; when
 /// Source is also Target
-impl<Source> Transmogrifier<Source, IdentityTransMog> for Source {
+impl<Source> Transmogrifier<Source, HNil> for Source {
     fn transmogrify(self) -> Source {
         self
     }
 }
 
 impl<
-        SourceHead,
+        SourceHeadName,
+        SourceHeadValue,
         SourceTail,
         TargetHeadName,
         TargetHeadValue,
@@ -661,22 +662,23 @@ impl<
             DoTransmog<PluckSourceHeadNameIndex, TransMogSourceHeadValueIndices>,
             TransMogTailIndices,
         >,
-    > for HCons<SourceHead, SourceTail>
+    > for HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail>
 where
-    HCons<SourceHead, SourceTail>: ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>, // pluck a value out of the Source by the Head Target Name
-    <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
+    HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail>: ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>, // pluck a value out of the Source by the Head Target Name
+    <HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail> as ByNameFieldPlucker<
         TargetHeadName,
         PluckSourceHeadNameIndex,
     >>::TargetValue: Transmogrifier<TargetHeadValue, TransMogSourceHeadValueIndices>, // the value we pluck out needs to be able to be transmogrified to the Head Target Value type
-    <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
+    <HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail> as ByNameFieldPlucker<
         TargetHeadName,
         PluckSourceHeadNameIndex,
     >>::Remainder: Transmogrifier<TargetTail, TransMogTailIndices>, // the remainder from plucking out the Head Target Name must be able to be transmogrified to the target tail, utilising the other remaining indices
 {
     fn transmogrify(self) -> HCons<Field<TargetHeadName, TargetHeadValue>, TargetTail> {
         let (source_field_for_head_target_name, remainder) = self.pluck_by_name();
-        let transmogrified_head_field = source_field_for_head_target_name.value.transmogrify();
-        let as_field = field_with_name(
+        let transmogrified_head_field: TargetHeadValue =
+            source_field_for_head_target_name.value.transmogrify();
+        let as_field: Field<TargetHeadName, TargetHeadValue> = field_with_name(
             source_field_for_head_target_name.name,
             transmogrified_head_field,
         );
@@ -791,6 +793,7 @@ mod tests {
         let hnil_again: HNil = HNil.transmogrify();
         assert_eq!(HNil, hnil_again);
     }
+
     #[test]
     fn test_transmogrify_hcons_identity() {
         let hcons = hlist!(1, 2f32, true);
@@ -800,16 +803,23 @@ mod tests {
 
     #[test]
     fn test_transmogrify_hcons_sculpting_required_simple() {
-        let hcons = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
-        let t_hcons: Hlist![Field<is_admin, bool>, Field<name, &str>, Field<age, i32>] =
-            hcons.transmogrify();
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>, Field<age, i32>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = <Source as Transmogrifier<
+            Target,
+            HCons<
+                DoTransmog<There<There<Here>>, HNil>,
+                HCons<
+                    DoTransmog<Here, HNil>,
+                    HCons<DoTransmog<Here, HNil>, HNil>,
+                >,
+            >,
+        >>::transmogrify(hcons);
+//        let t_hcons: Target = hcons.transmogrify();
         assert_eq!(
             t_hcons,
-            hlist!(
-                field!(is_admin, true),
-                field!(name, "joe"),
-                field!(age, 3)
-            )
+            hlist!(field!(is_admin, true), field!(name, "joe"), field!(age, 3))
         );
     }
 
