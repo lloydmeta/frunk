@@ -827,6 +827,36 @@ mod tests {
         assert_eq!(t_hcons, hlist!(field!(is_admin, true), field!(name, "joe")));
     }
 
+    #[test]
+    fn test_transmogrify_hcons_recursive_simple() {
+        type Source = Hlist![
+        Field<name,  Hlist![
+            Field<inner, f32>,
+            Field<is_admin, bool>,
+        ]>,
+        Field<age, i32>,
+        Field<is_admin, bool>];
+        type Target = Hlist![
+            Field<is_admin, bool>,
+            Field<name,  Hlist![
+                Field<is_admin, bool>,
+            ]>,
+        ];
+        let source: Source = hlist![
+            field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
+            field!(age, 32),
+            field!(is_admin, true)
+        ];
+        let target: Target = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![
+                field!(is_admin, true),
+                field!(name, hlist![field!(is_admin, true)]),
+            ]
+        )
+    }
+
     //    #[test]
     //    fn test_transmogrify_hcons_sculpting_required_simple() {
     //        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
