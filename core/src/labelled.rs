@@ -523,6 +523,96 @@ where
 }
 
 /// Trait for transmogrifying a Source type into a Target type
+///
+/// What is "transmogrifying"? In this context, it means to convert some data of type A
+/// into data of type B, in a typesafe, recursive way, as long as A and B are "similarly-shaped".
+/// In other words, as long as B's fields and their subfields are subsets of A's fields and
+/// their respective subfields, then A can be turned into B.
+///
+/// # Example
+///
+/// ```
+/// #[macro_use] extern crate frunk;
+/// #[macro_use] extern crate frunk_core; // required when using custom derives
+/// use frunk::labelled::Transmogrifier;
+/// #[derive(LabelledGeneric)]
+/// struct InternalPhoneNumber {
+///     emergency: Option<usize>,
+///     main: usize,
+///     secondary: Option<usize>,
+/// }
+///
+/// #[derive(LabelledGeneric)]
+/// struct InternalAddress<'a> {
+///     is_whitelisted: bool,
+///     name: &'a str,
+///     phone: InternalPhoneNumber,
+/// }
+///
+/// #[derive(LabelledGeneric)]
+/// struct InternalUser<'a> {
+///     name: &'a str,
+///     age: usize,
+///     address: InternalAddress<'a>,
+///     is_banned: bool,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalPhoneNumber {
+///     main: usize,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalAddress<'a> {
+///     name: &'a str,
+///     phone: ExternalPhoneNumber,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalUser<'a> {
+///     age: usize,
+///     address: ExternalAddress<'a>,
+///     name: &'a str,
+/// }
+///
+/// let internal_user = InternalUser {
+///     name: "John",
+///     age: 10,
+///     address: InternalAddress {
+///         is_whitelisted: true,
+///         name: "somewhere out there",
+///         phone: InternalPhoneNumber {
+///             main: 1234,
+///             secondary: None,
+///             emergency: Some(5678),
+///         },
+///     },
+///     is_banned: true,
+/// };
+///
+/// /// Boilerplate-free conversion of a top-level InternalUser into an
+/// /// ExternalUser, taking care of subfield conversions as well.
+/// let external_user: ExternalUser = internal_user.transmogrify();
+///
+/// println!("{:?}", external_user);
+///
+/// let expected_external_user = ExternalUser {
+///     name: "John",
+///     age: 10,
+///     address: ExternalAddress {
+///         name: "somewhere out there",
+///         phone: ExternalPhoneNumber {
+///             main: 1234,
+///         },
+///     }
+/// };
+///
+/// assert_eq!(external_user, expected_external_user);
+/// ```
+///
+/// Credit:
+/// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
+///
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     #[inline(always)]
     fn transmogrify(self) -> Target;
