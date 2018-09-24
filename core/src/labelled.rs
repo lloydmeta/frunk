@@ -37,7 +37,6 @@
 //! ```
 //! #[macro_use] extern crate frunk;
 //! #[macro_use] extern crate frunk_core; // required when using custom derives
-//!
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
@@ -63,6 +62,90 @@
 //! // transform_from automagically sculpts the labelled generic
 //! // representation of the source object to that of the target type
 //! let s_user: ShortUser = frunk::transform_from(n_user); // done
+//! # }
+//! ```
+//!
+//! If you have the need to transform types that are similarly-shaped recursively, then
+//! use the Transmogrifier trait
+//!
+//! ```
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! # fn main() {
+//! use frunk::labelled::Transmogrifier;
+//! #[derive(LabelledGeneric)]
+//! struct InternalPhoneNumber {
+//!     emergency: Option<usize>,
+//!     main: usize,
+//!     secondary: Option<usize>,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalAddress<'a> {
+//!     is_whitelisted: bool,
+//!     name: &'a str,
+//!     phone: InternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalUser<'a> {
+//!     name: &'a str,
+//!     age: usize,
+//!     address: InternalAddress<'a>,
+//!     is_banned: bool,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalPhoneNumber {
+//!     main: usize,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalAddress<'a> {
+//!     name: &'a str,
+//!     phone: ExternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalUser<'a> {
+//!     age: usize,
+//!     address: ExternalAddress<'a>,
+//!     name: &'a str,
+//! }
+//!
+//! let internal_user = InternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: InternalAddress {
+//!         is_whitelisted: true,
+//!         name: "somewhere out there",
+//!         phone: InternalPhoneNumber {
+//!             main: 1234,
+//!             secondary: None,
+//!             emergency: Some(5678),
+//!         },
+//!     },
+//!     is_banned: true,
+//! };
+//!
+//! /// Boilerplate-free conversion of a top-level InternalUser into an
+//! /// ExternalUser, taking care of subfield conversions as well.
+//! let external_user: ExternalUser = internal_user.transmogrify();
+//!
+//! println!("{:?}", external_user);
+//!
+//! let expected_external_user = ExternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: ExternalAddress {
+//!         name: "somewhere out there",
+//!         phone: ExternalPhoneNumber {
+//!             main: 1234,
+//!         },
+//!     }
+//! };
+//!
+//! assert_eq!(external_user, expected_external_user);
 //! # }
 //! ```
 
@@ -534,6 +617,7 @@ where
 /// ```
 /// #[macro_use] extern crate frunk;
 /// #[macro_use] extern crate frunk_core; // required when using custom derives
+/// # fn main() {
 /// use frunk::labelled::Transmogrifier;
 /// #[derive(LabelledGeneric)]
 /// struct InternalPhoneNumber {
@@ -608,12 +692,17 @@ where
 /// };
 ///
 /// assert_eq!(external_user, expected_external_user);
+/// # }
 /// ```
 ///
 /// Credit:
 /// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
 ///
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
+
+    /// Consume this current object and return an object of the Target type.
+    ///
+    /// Although similar to sculpting, transmogrifying does its job recursively.
     #[inline(always)]
     fn transmogrify(self) -> Target;
 }
