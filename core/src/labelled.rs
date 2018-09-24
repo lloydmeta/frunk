@@ -466,65 +466,6 @@ where
     }
 }
 
-/// Trait for getting the key types of a given implementation (at the type-level)
-pub trait Keys {
-    type Out;
-}
-
-/// HNil implementation; just returns HNil
-impl Keys for HNil {
-    type Out = HNil;
-}
-
-/// Labelled HList implementation
-impl<K, V, Tail: Keys> Keys for HCons<Field<K, V>, Tail> {
-    type Out = HCons<K, <Tail as Keys>::Out>;
-}
-
-/// Trait for plucking out a value from a Record by type-level Key
-pub trait ByKeyPlucker<TargetKey, Index> {
-    type TargetValue;
-    type Remainder;
-
-    /// Returns a pair consisting of the  value pointed to by the target key and the remainder
-    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder);
-}
-
-/// Implementation when the pluck target key is in head
-impl<K, V, Tail> ByKeyPlucker<K, Here> for HCons<Field<K, V>, Tail> {
-    type TargetValue = V;
-    type Remainder = Tail;
-
-    #[inline(always)]
-    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
-        (self.head.value, self.tail)
-    }
-}
-
-/// Implementation when the pluck target key is in the tail
-impl<Head, Tail, K, TailIndex> ByKeyPlucker<K, There<TailIndex>> for HCons<Head, Tail>
-where
-    Tail: ByKeyPlucker<K, TailIndex>,
-{
-    type TargetValue = <Tail as ByKeyPlucker<K, TailIndex>>::TargetValue;
-    type Remainder = HCons<Head, <Tail as ByKeyPlucker<K, TailIndex>>::Remainder>;
-
-    #[inline(always)]
-    fn pluck_by_key(self) -> (Self::TargetValue, Self::Remainder) {
-        let (target, tail_remainder): (
-            Self::TargetValue,
-            <Tail as ByKeyPlucker<K, TailIndex>>::Remainder,
-        ) = <Tail as ByKeyPlucker<K, TailIndex>>::pluck_by_key(self.tail);
-        (
-            target,
-            HCons {
-                head: self.head,
-                tail: tail_remainder,
-            },
-        )
-    }
-}
-
 /// Trait for plucking out a Field from a Record by type-level Key
 pub trait ByNameFieldPlucker<TargetKey, Index> {
     type TargetValue;
@@ -569,63 +510,6 @@ where
                 head: self.head,
                 tail: tail_remainder,
             },
-        )
-    }
-}
-
-/// Sculpts a given Labelled Record by type-level Keys, returning the remainder
-pub trait ByKeySculptor<TargetKeys, Indices> {
-    type TargetValues;
-    type Remainder;
-
-    /// Returns the values pointed to by the provided keys and the remainder
-    fn sculpt_by_keys(self) -> (Self::TargetValues, Self::Remainder);
-}
-
-/// Implementation for when the target keys is an empty HList (HNil)
-///
-/// Index type is HNil because we don't need an index for finding HNil
-impl<Source> ByKeySculptor<HNil, HNil> for Source {
-    type TargetValues = HNil;
-    type Remainder = Source;
-
-    #[inline(always)]
-    fn sculpt_by_keys(self) -> (Self::TargetValues, Self::Remainder) {
-        (HNil, self)
-    }
-}
-
-/// Implementation for when we have a non-empty HCons target
-impl<TKeyHead, TKeyTail, SHead, STail, IndexHead, IndexTail>
-    ByKeySculptor<HCons<TKeyHead, TKeyTail>, HCons<IndexHead, IndexTail>> for HCons<SHead, STail>
-where
-    HCons<SHead, STail>: ByKeyPlucker<TKeyHead, IndexHead>,
-    <HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder:
-        ByKeySculptor<TKeyTail, IndexTail>,
-{
-    type TargetValues = HCons<
-        <HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::TargetValue,
-        <<HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder as ByKeySculptor<
-            TKeyTail,
-            IndexTail,
-        >>::TargetValues,
-    >;
-    type Remainder =
-        <<HCons<SHead, STail> as ByKeyPlucker<TKeyHead, IndexHead>>::Remainder as ByKeySculptor<
-            TKeyTail,
-            IndexTail,
-        >>::Remainder;
-
-    #[inline(always)]
-    fn sculpt_by_keys(self) -> (Self::TargetValues, Self::Remainder) {
-        let (p, r) = self.pluck_by_key();
-        let (tail, tail_remainder) = r.sculpt_by_keys();
-        (
-            HCons {
-                head: p,
-                tail: tail,
-            },
-            tail_remainder,
         )
     }
 }
@@ -845,26 +729,6 @@ mod tests {
     }
 
     #[test]
-    fn test_keys() {
-        #[derive(PartialEq, Eq, Debug)]
-        struct Meh<T>(PhantomData<T>);
-        type ExpectedKeys = Hlist![name, age];
-        type ObservedKeys = <Hlist![Field<name, &'static str>, Field<age, isize>] as Keys>::Out;
-        let expected = Meh::<ExpectedKeys>(PhantomData);
-        let observed = Meh::<ObservedKeys>(PhantomData);
-        assert_eq!(expected, observed);
-    }
-
-    #[test]
-    fn test_pluck_by_key() {
-        type Record = Hlist![Field<name, &'static str>, Field<age, isize>];
-        let record: Record = hlist![field!(name, "joe"), field!((a, g, e), 3)];
-        let (value, remainder) = <Record as ByKeyPlucker<name, _>>::pluck_by_key(record);
-        assert_eq!(value, "joe");
-        assert_eq!(remainder, hlist![field!(age, 3)]);
-    }
-
-    #[test]
     fn test_transmogrify_simple_identity() {
         let one: PluckedValue<i32> = PluckedValue(1);
         let one_again: i32 = one.transmogrify();
@@ -936,33 +800,4 @@ mod tests {
             hlist!(field!(is_admin, true), field!(name, "joe"), field!(age, 3))
         );
     }
-
-    //    #[test]
-    //    fn test_transmogrify_hcons_sculpting_required_simple_recursive() {
-    //        let hcons = hlist!(
-    //            field!(name, "joe"),
-    //            field!(inner, hlist!(field!(age, 3), field!(is_admin, true)))
-    //        );
-    //        let t_hcons: Hlist![
-    //            Field<inner,
-    //                Hlist![
-    //                    Field<is_admin, bool>,
-    //                    Field<age, isize>
-    //                ]
-    //             >,
-    //             Field<name, &str>] = hcons.transmogrify();
-    //        assert_eq!(
-    //            t_hcons,
-    //            hlist!(
-    //                field_with_name::<inner, Hlist![Field<is_admin, bool>, Field<age, isize>]>(
-    //                    ZIPPED_FIELD,
-    //                    hlist!(
-    //                        field_with_name::<is_admin, bool>(ZIPPED_FIELD, true),
-    //                        field_with_name::<age, isize>(ZIPPED_FIELD, 3)
-    //                    ),
-    //                ),
-    //                field_with_name::<name, &str>(ZIPPED_FIELD, "joe")
-    //            )
-    //        );
-    //    }
 }
