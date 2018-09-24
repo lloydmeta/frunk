@@ -670,6 +670,7 @@ impl<SourceHead, SourceTail> Transmogrifier<HNil, HNil> for HCons<SourceHead, So
     }
 }
 
+/// Implementation of Transmogrifier for when the target is an HList, and the Source is a Plucked HList
 impl<SourceHead, SourceTail, TargetHead, TargetTail, TransmogHeadIndex, TransmogTailIndices>
     Transmogrifier<HCons<TargetHead, TargetTail>, HCons<TransmogHeadIndex, TransmogTailIndices>>
     for PluckedValue<HCons<SourceHead, SourceTail>>
@@ -893,16 +894,6 @@ mod tests {
         type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
         type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>, Field<age, i32>];
         let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
-        //        let t_hcons: Target = <Source as Transmogrifier<
-        //            Target,
-        //            HCons<
-        //                DoTransmog<There<There<Here>>, HNil>,
-        //                HCons<
-        //                    DoTransmog<Here, HNil>,
-        //                    HCons<DoTransmog<Here, HNil>, HNil>,
-        //                >,
-        //            >,
-        //        >>::transmogrify(hcons);
         let t_hcons: Target = hcons.transmogrify();
         assert_eq!(
             t_hcons,
