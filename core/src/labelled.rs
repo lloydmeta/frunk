@@ -833,38 +833,31 @@ mod tests {
         let one_again: i32 = one.transmogrify();
         assert_eq!(one_again, 1);
     }
-    //
-    //    #[test]
-    //    fn test_transmogrify_hnil_identity() {
-    //        let hnil_again: HNil = HNil.transmogrify();
-    //        assert_eq!(HNil, hnil_again);
-    //    }
 
-    //    #[test]
-    //    fn test_transmogrify_hcons_identity() {
-    //        let hcons = hlist!(1, 2f32, true);
-    //        let again: Hlist![isize, f32, bool] = hcons.transmogrify();
-    //        assert_eq!(again, hlist!(1, 2f32, true));
-    //    }
-    //
-    //    #[test]
-    //    fn test_transmogrify_hcons_sculpting_super_simple() {
-    //        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
-    //        type Target = Hlist![Field<age, i32>];
-    //        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
-    //        let t_hcons: Target = hcons.transmogrify();
-    //        assert_eq!(t_hcons, hlist!(field!(age, 3)));
-    //    }
-    //
-    //    #[test]
-    //    fn test_transmogrify_hcons_sculpting_somewhat_simple() {
-    //        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
-    //        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>];
-    //        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
-    //        let t_hcons: Target = hcons.transmogrify();
-    //        assert_eq!(t_hcons, hlist!(field!(is_admin, true), field!(name, "joe")));
-    //    }
-    //
+    #[test]
+    fn test_transmogrify_hnil_identity() {
+        let hnil_again: HNil = HNil.transmogrify();
+        assert_eq!(HNil, hnil_again);
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_super_simple() {
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<age, i32>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = hcons.transmogrify();
+        assert_eq!(t_hcons, hlist!(field!(age, 3)));
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_somewhat_simple() {
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = hcons.transmogrify();
+        assert_eq!(t_hcons, hlist!(field!(is_admin, true), field!(name, "joe")));
+    }
+
     #[test]
     fn test_transmogrify_hcons_recursive_simple() {
         type Source = Hlist![
