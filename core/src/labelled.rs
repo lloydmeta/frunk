@@ -736,6 +736,42 @@ where
     }
 }
 
+/// Index type wrapper for transmogrifying a generic Source to a generic Target
+pub struct LabelledGenericTransmogIndicesWrapper<T>(PhantomData<T>);
+
+impl<Source, Target, TransmogIndices>
+    Transmogrifier<Target, LabelledGenericTransmogIndicesWrapper<TransmogIndices>> for Source
+where
+    Source: LabelledGeneric,
+    Target: LabelledGeneric,
+    <Source as LabelledGeneric>::Repr:
+        Transmogrifier<<Target as LabelledGeneric>::Repr, TransmogIndices>,
+{
+    fn transmogrify(self) -> Target {
+        let source_as_repr = self.into();
+        let source_transmogged = source_as_repr.transmogrify();
+        <Target as LabelledGeneric>::from(source_transmogged)
+    }
+}
+
+/// Index type wrapper for transmogrifying a generic plucked Source to a generic Target
+pub struct PluckedLabelledGenericIndicesWrapper<T>(T);
+
+// Implementation for when the source value is plucked
+impl<Source, Target, TransmogIndices>
+Transmogrifier<Target, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
+for PluckedValue<Source>
+    where
+        Source: LabelledGeneric,
+        Target: LabelledGeneric,
+        Source: Transmogrifier<Target, TransmogIndices>,
+{
+    fn transmogrify(self) -> Target {
+        self.0.transmogrify()
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::chars::*;
