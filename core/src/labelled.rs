@@ -472,6 +472,7 @@ pub trait ByNameFieldPlucker<TargetKey, Index> {
     type Remainder;
 
     /// Returns a pair consisting of the  value pointed to by the target key and the remainder
+    #[inline(always)]
     fn pluck_by_name(
         self,
     ) -> (
@@ -479,6 +480,13 @@ pub trait ByNameFieldPlucker<TargetKey, Index> {
         Self::Remainder,
     );
 }
+
+/// Wrapper for values that have been plucked by key type out of a given type
+///
+/// Allows us to get around the fact that we need to have a way of doing identity
+/// transmogrification *without* having to clash with HNil to HNil transmogrification
+/// (which is never actually plucked)
+pub struct PluckedValue<T>(T);
 
 /// Implementation when the pluck target key is in head
 impl<K, V, Tail> ByNameFieldPlucker<K, Here> for HCons<Field<K, V>, Tail> {
@@ -514,27 +522,19 @@ where
     }
 }
 
-/// Wrapper for things that are under Transmogrification
-///
-/// Allows us to get around the fact that we need to have a way of
-/// *wrapping* stuff
-pub struct PluckedValue<T>(T);
-
 /// Trait for transmogrifying a Source type into a Target type
-///
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
+    #[inline(always)]
     fn transmogrify(self) -> Target;
 }
 
+/// For the case where we don't need to do any transmogrifying at all because the source
+/// type is the same as the target type
 pub enum IdentityTransMog {}
-
-pub struct DoTransmog<PluckByKeyIndex, TransMogIndex> {
-    _marker1: PhantomData<PluckByKeyIndex>,
-    _marker2: PhantomData<TransMogIndex>,
-}
 
 /// Implementation of Transmogrifier for identity plucked Field to Field Transforms
 impl<Source> Transmogrifier<Source, IdentityTransMog> for PluckedValue<Source> {
+    #[inline(always)]
     fn transmogrify(self) -> Source {
         self.0
     }
@@ -542,6 +542,7 @@ impl<Source> Transmogrifier<Source, IdentityTransMog> for PluckedValue<Source> {
 
 /// Implementation of Transmogrifier for when the Target is empty and the Source is empty
 impl Transmogrifier<HNil, HNil> for HNil {
+    #[inline(always)]
     fn transmogrify(self) -> HNil {
         HNil
     }
@@ -549,6 +550,7 @@ impl Transmogrifier<HNil, HNil> for HNil {
 
 /// Implementation of Transmogrifier for when the target is empty and the Source is non-empty
 impl<SourceHead, SourceTail> Transmogrifier<HNil, HNil> for HCons<SourceHead, SourceTail> {
+    #[inline(always)]
     fn transmogrify(self) -> HNil {
         HNil
     }
@@ -564,18 +566,23 @@ where
         HCons<TransmogHeadIndex, TransmogTailIndices>,
     >,
 {
+    #[inline(always)]
     fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
         self.0.transmogrify()
     }
 }
 
-/// Problem is, HNil as Source + Target implementation clashes with
-///             HNil as Target (for non-matching lengths)
-/// In order for full on re-structuring to work, we need to solve this ambiguity..somehow
+/// For the case where we need to do work in order to transmogrify one type into another
+pub struct DoTransmog<PluckByKeyIndex, TransMogIndex> {
+    _marker1: PhantomData<PluckByKeyIndex>,
+    _marker2: PhantomData<TransMogIndex>,
+}
 
+/// Non-trivial implementation of Transmogrifier where similarly-shapedSource and Target types are
+/// both Labelled HLists, but do not immediately transform into one another due to mis-matched
+/// fields, possibly recursively so.
 impl<
-        SourceHeadName,
-        SourceHeadValue,
+        SourceHead,
         SourceTail,
         TargetHeadName,
         TargetHeadValue,
@@ -590,21 +597,25 @@ impl<
             DoTransmog<PluckSourceHeadNameIndex, TransMogSourceHeadValueIndices>,
             TransMogTailIndices,
         >,
-    > for HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail>
+    > for HCons<SourceHead, SourceTail>
 where
-    HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail>:
-        ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>, // pluck a value out of the Source by the Head Target Name
+    // Pluck a value out of the Source by the Head Target Name
+    HCons<SourceHead, SourceTail>: ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>,
+    // The value we pluck out needs to be able to be transmogrified to the Head Target Value type
     PluckedValue<
-        <HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail> as ByNameFieldPlucker<
+        <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
             TargetHeadName,
             PluckSourceHeadNameIndex,
         >>::TargetValue,
-    >: Transmogrifier<TargetHeadValue, TransMogSourceHeadValueIndices>, // the value we pluck out needs to be able to be transmogrified to the Head Target Value type
-    <HCons<Field<SourceHeadName, SourceHeadValue>, SourceTail> as ByNameFieldPlucker<
+    >: Transmogrifier<TargetHeadValue, TransMogSourceHeadValueIndices>,
+    // The remainder from plucking out the Head Target Name must be able to be transmogrified to the
+    // target tail, utilising the other remaining indices
+    <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
         TargetHeadName,
         PluckSourceHeadNameIndex,
-    >>::Remainder: Transmogrifier<TargetTail, TransMogTailIndices>, // the remainder from plucking out the Head Target Name must be able to be transmogrified to the target tail, utilising the other remaining indices
+    >>::Remainder: Transmogrifier<TargetTail, TransMogTailIndices>,
 {
+    #[inline(always)]
     fn transmogrify(self) -> HCons<Field<TargetHeadName, TargetHeadValue>, TargetTail> {
         let (source_field_for_head_target_name, remainder) = self.pluck_by_name();
         let transmogrified_head_field: TargetHeadValue =
@@ -631,6 +642,7 @@ where
     <Source as LabelledGeneric>::Repr:
         Transmogrifier<<Target as LabelledGeneric>::Repr, TransmogIndices>,
 {
+    #[inline(always)]
     fn transmogrify(self) -> Target {
         let source_as_repr = self.into();
         let source_transmogged = source_as_repr.transmogrify();
@@ -643,18 +655,18 @@ pub struct PluckedLabelledGenericIndicesWrapper<T>(T);
 
 // Implementation for when the source value is plucked
 impl<Source, Target, TransmogIndices>
-Transmogrifier<Target, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
-for PluckedValue<Source>
-    where
-        Source: LabelledGeneric,
-        Target: LabelledGeneric,
-        Source: Transmogrifier<Target, TransmogIndices>,
+    Transmogrifier<Target, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
+    for PluckedValue<Source>
+where
+    Source: LabelledGeneric,
+    Target: LabelledGeneric,
+    Source: Transmogrifier<Target, TransmogIndices>,
 {
+    #[inline(always)]
     fn transmogrify(self) -> Target {
         self.0.transmogrify()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
