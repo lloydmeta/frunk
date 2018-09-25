@@ -6,6 +6,7 @@ extern crate time; //Time library
 use frunk::hlist::Sculptor;
 use frunk::labelled::chars::*;
 use frunk::labelled::Field;
+use frunk::labelled::Transmogrifier;
 use frunk::{from_labelled_generic, into_labelled_generic, transform_from};
 use frunk::{HCons, LabelledGeneric};
 
@@ -96,6 +97,34 @@ fn test_aligned_labelled_convert_from() {
     assert_eq!(j_u.first_name, "Moe");
     assert_eq!(j_u.last_name, "Ali");
     assert_eq!(j_u.age, 30)
+}
+
+#[test]
+fn test_transmogrify() {
+    let internal_user = InternalUser {
+        name: "John",
+        age: 10,
+        address: InternalAddress {
+            is_whitelisted: true,
+            name: "somewhere out there",
+            phone: InternalPhoneNumber {
+                main: 1234,
+                secondary: None,
+                emergency: Some(5678),
+            },
+        },
+        is_banned: true,
+    };
+    let expected_external_user = ExternalUser {
+        name: "John",
+        age: 10,
+        address: ExternalAddress {
+            name: "somewhere out there",
+            phone: ExternalPhoneNumber { main: 1234 },
+        },
+    };
+    let external_user: ExternalUser = internal_user.transmogrify();
+    assert_eq!(external_user, expected_external_user);
 }
 
 type CreatedAt = (c, r, e, a, t, e, d, __, a, t);

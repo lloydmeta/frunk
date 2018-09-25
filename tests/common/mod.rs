@@ -98,3 +98,45 @@ pub struct JumbledUserWithAudit<'a> {
     pub age: usize,
     pub created_at: Tm,
 }
+
+// Nested + Jumbled
+
+#[derive(LabelledGeneric)]
+pub struct InternalPhoneNumber {
+    pub emergency: Option<usize>,
+    pub main: usize,
+    pub secondary: Option<usize>,
+}
+
+#[derive(LabelledGeneric)]
+pub struct InternalAddress<'a> {
+    pub is_whitelisted: bool,
+    pub name: &'a str,
+    pub phone: InternalPhoneNumber,
+}
+
+#[derive(LabelledGeneric)]
+pub struct InternalUser<'a> {
+    pub name: &'a str,
+    pub age: usize,
+    pub address: InternalAddress<'a>,
+    pub is_banned: bool,
+}
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct ExternalPhoneNumber {
+    pub main: usize,
+}
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct ExternalAddress<'a> {
+    pub name: &'a str,
+    pub phone: ExternalPhoneNumber,
+}
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct ExternalUser<'a> {
+    pub age: usize,
+    pub address: ExternalAddress<'a>,
+    pub name: &'a str,
+}
