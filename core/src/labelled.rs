@@ -556,20 +556,8 @@ pub trait ByNameFieldPlucker<TargetKey, Index> {
 
     /// Returns a pair consisting of the  value pointed to by the target key and the remainder
     #[inline(always)]
-    fn pluck_by_name(
-        self,
-    ) -> (
-        Field<TargetKey, PluckedValue<Self::TargetValue>>,
-        Self::Remainder,
-    );
+    fn pluck_by_name(self) -> (Field<TargetKey, Self::TargetValue>, Self::Remainder);
 }
-
-/// Wrapper for values that have been plucked by key type out of a given type
-///
-/// Allows us to get around the fact that we need to have a way of doing identity
-/// transmogrification *without* having to clash with HNil to HNil transmogrification
-/// (which is never actually plucked)
-pub struct PluckedValue<T>(T);
 
 /// Implementation when the pluck target key is in head
 impl<K, V, Tail> ByNameFieldPlucker<K, Here> for HCons<Field<K, V>, Tail> {
@@ -577,8 +565,8 @@ impl<K, V, Tail> ByNameFieldPlucker<K, Here> for HCons<Field<K, V>, Tail> {
     type Remainder = Tail;
 
     #[inline(always)]
-    fn pluck_by_name(self) -> (Field<K, PluckedValue<Self::TargetValue>>, Self::Remainder) {
-        let field = field_with_name(self.head.name, PluckedValue(self.head.value));
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let field = field_with_name(self.head.name, self.head.value);
         (field, self.tail)
     }
 }
@@ -592,7 +580,7 @@ where
     type Remainder = HCons<Head, <Tail as ByNameFieldPlucker<K, TailIndex>>::Remainder>;
 
     #[inline(always)]
-    fn pluck_by_name(self) -> (Field<K, PluckedValue<Self::TargetValue>>, Self::Remainder) {
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
         let (target, tail_remainder) =
             <Tail as ByNameFieldPlucker<K, TailIndex>>::pluck_by_name(self.tail);
         (
@@ -699,7 +687,6 @@ where
 /// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
 ///
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
-
     /// Consume this current object and return an object of the Target type.
     ///
     /// Although similar to sculpting, transmogrifying does its job recursively.
@@ -712,10 +699,10 @@ pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
 pub enum IdentityTransMog {}
 
 /// Implementation of Transmogrifier for identity plucked Field to Field Transforms
-impl<Source> Transmogrifier<Source, IdentityTransMog> for PluckedValue<Source> {
+impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<Key, SourceValue> {
     #[inline(always)]
-    fn transmogrify(self) -> Source {
-        self.0
+    fn transmogrify(self) -> SourceValue {
+        self.value
     }
 }
 
@@ -736,9 +723,16 @@ impl<SourceHead, SourceTail> Transmogrifier<HNil, HNil> for HCons<SourceHead, So
 }
 
 /// Implementation of Transmogrifier for when the target is an HList, and the Source is a Plucked HList
-impl<SourceHead, SourceTail, TargetHead, TargetTail, TransmogHeadIndex, TransmogTailIndices>
-    Transmogrifier<HCons<TargetHead, TargetTail>, HCons<TransmogHeadIndex, TransmogTailIndices>>
-    for PluckedValue<HCons<SourceHead, SourceTail>>
+impl<
+        SourceHead,
+        SourceTail,
+        TargetName,
+        TargetHead,
+        TargetTail,
+        TransmogHeadIndex,
+        TransmogTailIndices,
+    > Transmogrifier<HCons<TargetHead, TargetTail>, HCons<TransmogHeadIndex, TransmogTailIndices>>
+    for Field<TargetName, HCons<SourceHead, SourceTail>>
 where
     HCons<SourceHead, SourceTail>: Transmogrifier<
         HCons<TargetHead, TargetTail>,
@@ -747,7 +741,7 @@ where
 {
     #[inline(always)]
     fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
-        self.0.transmogrify()
+        self.value.transmogrify()
     }
 }
 
@@ -781,7 +775,8 @@ where
     // Pluck a value out of the Source by the Head Target Name
     HCons<SourceHead, SourceTail>: ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>,
     // The value we pluck out needs to be able to be transmogrified to the Head Target Value type
-    PluckedValue<
+    Field<
+        TargetHeadName,
         <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
             TargetHeadName,
             PluckSourceHeadNameIndex,
@@ -797,12 +792,11 @@ where
     #[inline(always)]
     fn transmogrify(self) -> HCons<Field<TargetHeadName, TargetHeadValue>, TargetTail> {
         let (source_field_for_head_target_name, remainder) = self.pluck_by_name();
-        let transmogrified_head_field: TargetHeadValue =
-            source_field_for_head_target_name.value.transmogrify();
-        let as_field: Field<TargetHeadName, TargetHeadValue> = field_with_name(
-            source_field_for_head_target_name.name,
-            transmogrified_head_field,
-        );
+        let name = source_field_for_head_target_name.name;
+        let transmogrified_value: TargetHeadValue =
+            source_field_for_head_target_name.transmogrify();
+        let as_field: Field<TargetHeadName, TargetHeadValue> =
+            field_with_name(name, transmogrified_value);
         HCons {
             head: as_field,
             tail: remainder.transmogrify(),
@@ -833,17 +827,17 @@ where
 pub struct PluckedLabelledGenericIndicesWrapper<T>(T);
 
 // Implementation for when the source value is plucked
-impl<Source, Target, TransmogIndices>
-    Transmogrifier<Target, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
-    for PluckedValue<Source>
+impl<Source, TargetName, TargetValue, TransmogIndices>
+    Transmogrifier<TargetValue, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
+    for Field<TargetName, Source>
 where
     Source: LabelledGeneric,
-    Target: LabelledGeneric,
-    Source: Transmogrifier<Target, TransmogIndices>,
+    TargetValue: LabelledGeneric,
+    Source: Transmogrifier<TargetValue, TransmogIndices>,
 {
     #[inline(always)]
-    fn transmogrify(self) -> Target {
-        self.0.transmogrify()
+    fn transmogrify(self) -> TargetValue {
+        self.value.transmogrify()
     }
 }
 
@@ -917,13 +911,6 @@ mod tests {
     fn test_name() {
         let labelled = field!(name, "joe");
         assert_eq!(labelled.name, "name")
-    }
-
-    #[test]
-    fn test_transmogrify_simple_identity() {
-        let one: PluckedValue<i32> = PluckedValue(1);
-        let one_again: i32 = one.transmogrify();
-        assert_eq!(one_again, 1);
     }
 
     #[test]
