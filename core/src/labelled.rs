@@ -665,8 +665,6 @@ where
 /// /// ExternalUser, taking care of subfield conversions as well.
 /// let external_user: ExternalUser = internal_user.transmogrify();
 ///
-/// println!("{:?}", external_user);
-///
 /// let expected_external_user = ExternalUser {
 ///     name: "John",
 ///     age: 10,
