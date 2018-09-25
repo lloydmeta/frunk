@@ -66,7 +66,7 @@
 //! ```
 //!
 //! If you have the need to transform types that are similarly-shaped recursively, then
-//! use the Transmogrifier trait
+//! use the Transmogrifier trait.
 //!
 //! ```
 //! #[macro_use] extern crate frunk;
