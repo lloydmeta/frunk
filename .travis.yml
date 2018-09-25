@@ -16,7 +16,7 @@ script:
     travis-cargo build &&
     travis-cargo build -- --example generic &&
     travis-cargo build -- --example labelled &&
-    travis-cargo test -- --all &&
+    travis-cargo test -- --all --no-fail-fast &&
     travis-cargo doc
 
 after_success:
