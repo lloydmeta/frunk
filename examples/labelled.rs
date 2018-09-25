@@ -83,7 +83,7 @@ fn main() {
     assert_eq!(d_user.first_name, "Joe");
     println!("{}", d_user.last_name);
 
-    let internal_user = InternalPerson {
+    let internal_person = InternalPerson {
         name: "John",
         age: 10,
         address: InternalAddress {
@@ -92,12 +92,12 @@ fn main() {
             phone: InternalPhoneNumber {
                 main: 1234,
                 secondary: None,
-                emergency: Some(1234),
+                emergency: Some(5678),
             },
         },
         is_banned: true,
     };
 
-    let external_user: ExternalPerson = internal_user.transmogrify();
-    println!("{:?}", external_user);
+    let external_person: ExternalPerson = internal_person.transmogrify();
+    println!("{:?}", external_person);
 }
