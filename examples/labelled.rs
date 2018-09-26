@@ -99,5 +99,5 @@ fn main() {
     };
 
     let external_person: ExternalPerson = internal_person.transmogrify();
-    println!("{:?}", external_person);
+    println!("{:#?}", external_person);
 }
