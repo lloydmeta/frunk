@@ -1,6 +1,6 @@
 [package]
 name = "frunk_derives"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_derives contains the custom derivations for certain traits in Frunk."
 license = "MIT"
@@ -15,9 +15,9 @@ travis-ci = { repository = "lloydmeta/frunk" }
 proc-macro = true
 
 [dependencies]
-syn = "0.12"
-quote = "0.4"
+syn = "0.15"
+quote = "0.6"
 
 [dependencies.frunk_core]
 path = "../core"
-version = "0.2.0"
+version = "0.2.1"

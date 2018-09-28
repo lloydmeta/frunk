@@ -1,36 +1,34 @@
-use quote::Tokens;
-use common::{build_hcons_constr, to_ast};
-use syn::{Ident, Data, Fields, Type};
+use common::{build_hcons_constr, call_site_ident, to_ast};
 use proc_macro::TokenStream;
+use quote::ToTokens;
+use syn::{Data, Fields, Ident, Type};
 
 /// Given an AST, returns an implementation of Generic using HList
 ///
 /// Only works with Structs and Tuple Structs
-pub fn impl_generic(input: TokenStream) -> Tokens {
+pub fn impl_generic(input: TokenStream) -> impl ToTokens {
     let ast = to_ast(input);
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let fields: &Fields = match ast.data {
         Data::Struct(ref data) => &data.fields,
-        _ => panic!("Only structs are supported")
+        _ => panic!("Only structs are supported"),
     };
-    let field_types: Vec<Type> = fields.iter()
-        .map(|f| f.ty.clone()).collect();
+    let field_types: Vec<Type> = fields.iter().map(|f| f.ty.clone()).collect();
     let repr_type = build_repr(&field_types);
 
-
-    let maybe_fnames: Vec<Option<Ident>> = fields
-        .iter()
-        .map(|f| f.ident.clone())
-        .collect();
+    let maybe_fnames: Vec<Option<Ident>> = fields.iter().map(|f| f.ident.clone()).collect();
     let is_tuple_struct = maybe_fnames.iter().all(|m_f| m_f.is_none());
 
     let fnames: Vec<Ident> = fields
         .iter()
         .enumerate()
-        .map(|(i, f)| f.ident.clone().unwrap_or(format!("_{}", i).into()))
-        .collect();
+        .map(|(i, f)| {
+            f.ident
+                .clone()
+                .unwrap_or(call_site_ident(&format!("_{}", i)))
+        }).collect();
     let hcons_constr = build_hcons_constr(&fnames);
     let hcons_pat = build_hcons_constr(&fnames);
     let new_struct_constr = build_new_struct_constr(name, &fnames, is_tuple_struct);
@@ -60,13 +58,13 @@ pub fn impl_generic(input: TokenStream) -> Tokens {
     }
 }
 
-fn build_repr(field_types: &Vec<Type>) -> Tokens {
+fn build_repr(field_types: &Vec<Type>) -> impl ToTokens {
     match field_types.len() {
         0 => quote! { ::frunk_core::hlist::HNil },
         1 => {
             let h = field_types[0].clone();
             quote! { ::frunk_core::hlist::HCons<#h, ::frunk_core::hlist::HNil> }
-        },
+        }
         _ => {
             let h = field_types[0].clone();
             let tail = field_types[1..].to_vec();
@@ -76,8 +74,11 @@ fn build_repr(field_types: &Vec<Type>) -> Tokens {
     }
 }
 
-
-fn build_new_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>, is_tuple_struct: bool) -> Tokens {
+fn build_new_struct_constr(
+    struct_name: &Ident,
+    bindnames: &Vec<Ident>,
+    is_tuple_struct: bool,
+) -> impl ToTokens {
     if is_tuple_struct {
         let cloned_bind = bindnames.clone();
         quote! { #struct_name (#(#cloned_bind),* ) }
