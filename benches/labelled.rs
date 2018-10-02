@@ -10,6 +10,8 @@ use frunk::labelled::*;
 use std::convert::From;
 use test::Bencher;
 
+use frunk_core::labelled::chars::*;
+
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {
     first_name: &'a str,

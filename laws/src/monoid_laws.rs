@@ -60,15 +60,13 @@ pub fn right_identity<A: Monoid + Eq>(a: A) -> bool {
     a.combine(&<A as Monoid>::empty()) == a
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wrapper::*;
     use frunk::semigroup::*;
     use quickcheck::quickcheck;
-    use std::collections::{HashSet, HashMap};
+    use std::collections::{HashMap, HashSet};
+    use wrapper::*;
 
     #[test]
     fn string_id_prop() {
