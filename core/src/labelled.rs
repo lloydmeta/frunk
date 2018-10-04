@@ -558,7 +558,7 @@ pub trait ByNameFieldPlucker<TargetKey, Index> {
     fn pluck_by_name(self) -> (Field<TargetKey, Self::TargetValue>, Self::Remainder);
 }
 
-/// Implementation when the pluck target key is in head
+/// Implementation when the pluck target key is in the head.
 impl<K, V, Tail> ByNameFieldPlucker<K, Here> for HCons<Field<K, V>, Tail> {
     type TargetValue = V;
     type Remainder = Tail;
@@ -690,10 +690,6 @@ pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     fn transmogrify(self) -> Target;
 }
 
-/// For the case where we don't need to do any transmogrifying at all because the source
-/// type is the same as the target type.
-pub enum IdentityTransMog {}
-
 /// Implementation of `Transmogrifier` for identity plucked `Field` to `Field` Transforms.
 impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<Key, SourceValue> {
     #[inline(always)]
@@ -740,12 +736,6 @@ where
     fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
         self.value.transmogrify()
     }
-}
-
-/// For the case where we need to do work in order to transmogrify one type into another.
-pub struct DoTransmog<PluckByKeyIndex, TransMogIndex> {
-    _marker1: PhantomData<PluckByKeyIndex>,
-    _marker2: PhantomData<TransMogIndex>,
 }
 
 /// Non-trivial implementation of `Transmogrifier` where similarly-shaped `Source` and `Target` types are
@@ -801,9 +791,6 @@ where
     }
 }
 
-/// Index type wrapper for transmogrifying a generic Source to a generic Target
-pub struct LabelledGenericTransmogIndicesWrapper<T>(PhantomData<T>);
-
 impl<Source, Target, TransmogIndices>
     Transmogrifier<Target, LabelledGenericTransmogIndicesWrapper<TransmogIndices>> for Source
 where
@@ -819,9 +806,6 @@ where
         <Target as LabelledGeneric>::from(source_transmogged)
     }
 }
-
-/// Index type wrapper for transmogrifying a generic plucked Source to a generic Target
-pub struct PluckedLabelledGenericIndicesWrapper<T>(T);
 
 // Implementation for when the source value is plucked
 impl<Source, TargetName, TargetValue, TransmogIndices>

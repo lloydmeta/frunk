@@ -95,6 +95,106 @@
 //! # }
 //! ```
 //!
+//! ##### Transmogrifying
+//!
+//! Sometimes you need might have one data type that is "similar in shape" to another data type, but it
+//! is similar _recursively_ (e.g. it has fields that are structs that have fields that are a superset of
+//! the fields in the target type, so they are transformable recursively).  `.transform_from` can't
+//! help you there because it doesn't deal with recursion, but the `Transmogrifier` can help if both
+//! are `LabelledGeneric` by `transmogrify()`ing from one to the other.
+//!
+//! What is "transmogrifying"? In this context, it means to recursively transform some data of type A
+//! into data of type B, in a typesafe way, as long as A and B are "similarly-shaped".  In other words,
+//! as long as B's fields and their subfields are subsets of A's fields and their respective subfields,
+//! then A can be turned into B.
+//!
+//! As usual, the goal with Frunk is to do this:
+//! * Using stable (so no specialisation, which would have been helpful, methinks)
+//! * Typesafe
+//! * No usage of `unsafe`
+//!
+//! Here is an example:
+//!
+//! ```rust
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # fn main() {
+//! use frunk::labelled::Transmogrifier;
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalPhoneNumber {
+//!     emergency: Option<usize>,
+//!     main: usize,
+//!     secondary: Option<usize>,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalAddress<'a> {
+//!     is_whitelisted: bool,
+//!     name: &'a str,
+//!     phone: InternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalUser<'a> {
+//!     name: &'a str,
+//!     age: usize,
+//!     address: InternalAddress<'a>,
+//!     is_banned: bool,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalPhoneNumber {
+//!     main: usize,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalAddress<'a> {
+//!     name: &'a str,
+//!     phone: ExternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalUser<'a> {
+//!     age: usize,
+//!     address: ExternalAddress<'a>,
+//!     name: &'a str,
+//! }
+//!
+//! let internal_user = InternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: InternalAddress {
+//!         is_whitelisted: true,
+//!         name: "somewhere out there",
+//!         phone: InternalPhoneNumber {
+//!             main: 1234,
+//!             secondary: None,
+//!             emergency: Some(5678),
+//!         },
+//!     },
+//!     is_banned: true,
+//! };
+//!
+//! /// Boilerplate-free conversion of a top-level InternalUser into an
+//! /// ExternalUser, taking care of subfield conversions as well.
+//! let external_user: ExternalUser = internal_user.transmogrify();
+//!
+//! let expected_external_user = ExternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: ExternalAddress {
+//!         name: "somewhere out there",
+//!         phone: ExternalPhoneNumber {
+//!             main: 1234,
+//!         },
+//!     }
+//! };
+//!
+//! assert_eq!(external_user, expected_external_user);
+//! # }
+//! ```
+//!
 //! Links:
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
