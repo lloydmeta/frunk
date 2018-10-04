@@ -560,10 +560,10 @@ impl<Head, Tail> HCons<Head, Tail> {
     /// # #[macro_use] extern crate frunk; fn main() {
     /// let mut h = hlist![1i32, true];
     ///
-    /// // type inference ensures we fetch the correct type
+    /// // Type inference ensures we fetch the correct type.
     /// *h.get_mut() = false;
     /// *h.get_mut() = 2;
-    /// // *h.get_mut() = "neigh";  // won't compile
+    /// // *h.get_mut() = "neigh";  // Won't compile.
     ///
     /// assert_eq!(h, hlist![2i32, false]);
     /// # }
