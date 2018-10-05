@@ -555,6 +555,30 @@ impl<Head, Tail> HCons<Head, Tail> {
         Selector::get(self)
     }
 
+    /// Mutably borrow an element by type from an HList.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// let mut h = hlist![1i32, true];
+    ///
+    /// // Type inference ensures we fetch the correct type.
+    /// *h.get_mut() = false;
+    /// *h.get_mut() = 2;
+    /// // *h.get_mut() = "neigh";  // Won't compile.
+    ///
+    /// assert_eq!(h, hlist![2i32, false]);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn get_mut<T, Index>(&mut self) -> &mut T
+    where
+        Self: Selector<T, Index>,
+    {
+        Selector::get_mut(self)
+    }
+
     /// Remove an element by type from an HList.
     ///
     /// The remaining elements are returned along with it.
@@ -660,16 +684,31 @@ pub trait Selector<S, I> {
     /// Please see the [inherent method] for more information.
     ///
     /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters.
-    /// (here, they are on the trait rather than the method)
+    /// trait method is the location of the type parameters
+    /// (here, they are on the trait rather than the method).
     ///
     /// [inherent method]: struct.HCons.html#method.get
     fn get(&self) -> &S;
+
+    /// Mutably borrow an element by type from an HList.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters
+    /// (here, they are on the trait rather than the method).
+    ///
+    /// [inherent method]: struct.HCons.html#method.get_mut
+    fn get_mut(&mut self) -> &mut S;
 }
 
 impl<T, Tail> Selector<T, Here> for HCons<T, Tail> {
     fn get(&self) -> &T {
         &self.head
+    }
+
+    fn get_mut(&mut self) -> &mut T {
+        &mut self.head
     }
 }
 
@@ -679,6 +718,10 @@ where
 {
     fn get(&self) -> &FromTail {
         self.tail.get()
+    }
+
+    fn get_mut(&mut self) -> &mut FromTail {
+        self.tail.get_mut()
     }
 }
 
