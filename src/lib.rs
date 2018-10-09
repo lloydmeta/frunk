@@ -95,6 +95,106 @@
 //! # }
 //! ```
 //!
+//! ##### Transmogrifying
+//!
+//! Sometimes you need might have one data type that is "similar in shape" to another data type, but it
+//! is similar _recursively_ (e.g. it has fields that are structs that have fields that are a superset of
+//! the fields in the target type, so they are transformable recursively).  `.transform_from` can't
+//! help you there because it doesn't deal with recursion, but the `Transmogrifier` can help if both
+//! are `LabelledGeneric` by `transmogrify()`ing from one to the other.
+//!
+//! What is "transmogrifying"? In this context, it means to recursively transform some data of type A
+//! into data of type B, in a typesafe way, as long as A and B are "similarly-shaped".  In other words,
+//! as long as B's fields and their subfields are subsets of A's fields and their respective subfields,
+//! then A can be turned into B.
+//!
+//! As usual, the goal with Frunk is to do this:
+//! * Using stable (so no specialisation, which would have been helpful, methinks)
+//! * Typesafe
+//! * No usage of `unsafe`
+//!
+//! Here is an example:
+//!
+//! ```rust
+//! # #[macro_use] extern crate frunk;
+//! # #[macro_use] extern crate frunk_core;
+//! # fn main() {
+//! use frunk::labelled::Transmogrifier;
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalPhoneNumber {
+//!     emergency: Option<usize>,
+//!     main: usize,
+//!     secondary: Option<usize>,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalAddress<'a> {
+//!     is_whitelisted: bool,
+//!     name: &'a str,
+//!     phone: InternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalUser<'a> {
+//!     name: &'a str,
+//!     age: usize,
+//!     address: InternalAddress<'a>,
+//!     is_banned: bool,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalPhoneNumber {
+//!     main: usize,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalAddress<'a> {
+//!     name: &'a str,
+//!     phone: ExternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalUser<'a> {
+//!     age: usize,
+//!     address: ExternalAddress<'a>,
+//!     name: &'a str,
+//! }
+//!
+//! let internal_user = InternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: InternalAddress {
+//!         is_whitelisted: true,
+//!         name: "somewhere out there",
+//!         phone: InternalPhoneNumber {
+//!             main: 1234,
+//!             secondary: None,
+//!             emergency: Some(5678),
+//!         },
+//!     },
+//!     is_banned: true,
+//! };
+//!
+//! /// Boilerplate-free conversion of a top-level InternalUser into an
+//! /// ExternalUser, taking care of subfield conversions as well.
+//! let external_user: ExternalUser = internal_user.transmogrify();
+//!
+//! let expected_external_user = ExternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: ExternalAddress {
+//!         name: "somewhere out there",
+//!         phone: ExternalPhoneNumber {
+//!             main: 1234,
+//!         },
+//!     }
+//! };
+//!
+//! assert_eq!(external_user, expected_external_user);
+//! # }
+//! ```
+//!
 //! Links:
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
@@ -106,8 +206,8 @@ extern crate frunk_core;
 #[macro_use]
 extern crate frunk_derives;
 
-pub mod semigroup;
 pub mod monoid;
+pub mod semigroup;
 pub mod validated;
 
 pub use frunk_core::*;
@@ -132,15 +232,15 @@ pub use frunk_derives::*;
 //       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.
 
 #[doc(no_inline)]
-pub use hlist::HNil;
+pub use hlist::lift_from;
 #[doc(no_inline)]
 pub use hlist::HCons;
 #[doc(no_inline)]
-pub use hlist::lift_from;
-#[doc(no_inline)]
-pub use traits::Poly;
+pub use hlist::HNil;
 #[doc(no_inline)]
 pub use traits::Func;
+#[doc(no_inline)]
+pub use traits::Poly;
 #[doc(no_inline)]
 pub use traits::ToRef; // useful for where bounds
 
@@ -148,20 +248,18 @@ pub use traits::ToRef; // useful for where bounds
 pub use coproduct::Coproduct;
 
 #[doc(no_inline)]
-pub use generic::Generic;
+pub use generic::convert_from;
 #[doc(no_inline)]
 pub use generic::from_generic;
 #[doc(no_inline)]
 pub use generic::into_generic;
 #[doc(no_inline)]
-pub use generic::convert_from;
+pub use generic::map_inter;
 #[doc(no_inline)]
 pub use generic::map_repr;
 #[doc(no_inline)]
-pub use generic::map_inter;
+pub use generic::Generic;
 
-#[doc(no_inline)]
-pub use labelled::LabelledGeneric;
 #[doc(no_inline)]
 pub use labelled::from_labelled_generic;
 #[doc(no_inline)]
@@ -170,6 +268,8 @@ pub use labelled::into_labelled_generic;
 pub use labelled::labelled_convert_from;
 #[doc(no_inline)]
 pub use labelled::transform_from;
+#[doc(no_inline)]
+pub use labelled::LabelledGeneric;
 
 #[doc(no_inline)]
 pub use semigroup::Semigroup;

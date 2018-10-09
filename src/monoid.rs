@@ -90,9 +90,7 @@ where
     T: Monoid + Semigroup + Clone,
 {
     xs.iter()
-        .fold(<T as Monoid>::empty(), |acc, next| {
-            acc.combine(&next)
-        })
+        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
 }
 
 impl<T> Monoid for Option<T>
@@ -278,8 +276,8 @@ tuple_impls! {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::semigroup::{All, Any, Product};
+    use super::*;
 
     #[test]
     fn test_combine_n() {

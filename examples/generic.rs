@@ -35,8 +35,9 @@ fn main() {
     });
     assert_eq!(older_person.age, 60);
 
-    let oldest_person = frunk::map_inter(older_person, |p| {
-        Person2 { age_of_person: 90, ..p }
+    let oldest_person = frunk::map_inter(older_person, |p| Person2 {
+        age_of_person: 90,
+        ..p
     });
     assert_eq!(oldest_person.age, 90);
 }

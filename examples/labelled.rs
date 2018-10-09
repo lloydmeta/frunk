@@ -2,6 +2,8 @@
 extern crate frunk;
 extern crate frunk_core;
 
+use frunk::labelled::Transmogrifier;
+
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {
     first_name: &'a str,
@@ -23,6 +25,46 @@ struct DeletedUser<'a> {
     age: usize,
 }
 
+#[derive(LabelledGeneric)]
+struct InternalPhoneNumber {
+    emergency: Option<usize>,
+    main: usize,
+    secondary: Option<usize>,
+}
+
+#[derive(LabelledGeneric)]
+struct InternalAddress<'a> {
+    is_whitelisted: bool,
+    name: &'a str,
+    phone: InternalPhoneNumber,
+}
+
+#[derive(LabelledGeneric)]
+struct InternalPerson<'a> {
+    name: &'a str,
+    age: usize,
+    address: InternalAddress<'a>,
+    is_banned: bool,
+}
+
+#[derive(LabelledGeneric, Debug)]
+struct ExternalPhoneNumber {
+    main: usize,
+}
+
+#[derive(LabelledGeneric, Debug)]
+struct ExternalAddress<'a> {
+    name: &'a str,
+    phone: ExternalPhoneNumber,
+}
+
+#[derive(LabelledGeneric, Debug)]
+struct ExternalPerson<'a> {
+    age: usize,
+    address: ExternalAddress<'a>,
+    name: &'a str,
+}
+
 fn main() {
     let n_user = NewUser {
         first_name: "Joe",
@@ -40,4 +82,22 @@ fn main() {
 
     assert_eq!(d_user.first_name, "Joe");
     println!("{}", d_user.last_name);
+
+    let internal_person = InternalPerson {
+        name: "John",
+        age: 10,
+        address: InternalAddress {
+            is_whitelisted: true,
+            name: "somewhere out there",
+            phone: InternalPhoneNumber {
+                main: 1234,
+                secondary: None,
+                emergency: Some(5678),
+            },
+        },
+        is_banned: true,
+    };
+
+    let external_person: ExternalPerson = internal_person.transmogrify();
+    println!("{:#?}", external_person);
 }

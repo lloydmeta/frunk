@@ -37,13 +37,12 @@ pub fn associativity<A: Semigroup + Eq>(a: A, b: A, c: A) -> bool {
     a.combine(&b).combine(&c) == a.combine(&b.combine(&c))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wrapper::*;
     use quickcheck::quickcheck;
-    use std::collections::{HashSet, HashMap};
+    use std::collections::{HashMap, HashSet};
+    use wrapper::*;
 
     #[test]
     fn string_prop() {
@@ -67,37 +66,38 @@ mod tests {
 
     #[test]
     fn hashmap_prop() {
-        quickcheck(associativity as
-                   fn(HashMap<i8, String>,
-                      HashMap<i8, String>,
-                      HashMap<i8, String>)
-                      -> bool)
+        quickcheck(
+            associativity
+                as fn(HashMap<i8, String>, HashMap<i8, String>, HashMap<i8, String>) -> bool,
+        )
     }
 
     #[test]
     fn max_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Max<i8>>, Wrapper<Max<i8>>, Wrapper<Max<i8>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Max<i8>>, Wrapper<Max<i8>>, Wrapper<Max<i8>>) -> bool,
+        )
     }
 
     #[test]
     fn min_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Min<i8>>, Wrapper<Min<i8>>, Wrapper<Min<i8>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Min<i8>>, Wrapper<Min<i8>>, Wrapper<Min<i8>>) -> bool,
+        )
     }
 
     #[test]
     fn any_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<Any<bool>>, Wrapper<Any<bool>>, Wrapper<Any<bool>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<Any<bool>>, Wrapper<Any<bool>>, Wrapper<Any<bool>>) -> bool,
+        )
     }
 
     #[test]
     fn all_prop() {
-        quickcheck(associativity as
-                   fn(Wrapper<All<bool>>, Wrapper<All<bool>>, Wrapper<All<bool>>) -> bool)
+        quickcheck(
+            associativity as fn(Wrapper<All<bool>>, Wrapper<All<bool>>, Wrapper<All<bool>>) -> bool,
+        )
     }
-
-
 
 }

@@ -37,7 +37,6 @@
 //! ```
 //! #[macro_use] extern crate frunk;
 //! #[macro_use] extern crate frunk_core; // required when using custom derives
-//!
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
@@ -65,10 +64,94 @@
 //! let s_user: ShortUser = frunk::transform_from(n_user); // done
 //! # }
 //! ```
+//!
+//! If you have the need to transform types that are similarly-shaped recursively, then
+//! use the Transmogrifier trait.
+//!
+//! ```
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! # fn main() {
+//! use frunk::labelled::Transmogrifier;
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalPhoneNumber {
+//!     emergency: Option<usize>,
+//!     main: usize,
+//!     secondary: Option<usize>,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalAddress<'a> {
+//!     is_whitelisted: bool,
+//!     name: &'a str,
+//!     phone: InternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct InternalUser<'a> {
+//!     name: &'a str,
+//!     age: usize,
+//!     address: InternalAddress<'a>,
+//!     is_banned: bool,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalPhoneNumber {
+//!     main: usize,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalAddress<'a> {
+//!     name: &'a str,
+//!     phone: ExternalPhoneNumber,
+//! }
+//!
+//! #[derive(LabelledGeneric, PartialEq, Debug)]
+//! struct ExternalUser<'a> {
+//!     age: usize,
+//!     address: ExternalAddress<'a>,
+//!     name: &'a str,
+//! }
+//!
+//! let internal_user = InternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: InternalAddress {
+//!         is_whitelisted: true,
+//!         name: "somewhere out there",
+//!         phone: InternalPhoneNumber {
+//!             main: 1234,
+//!             secondary: None,
+//!             emergency: Some(5678),
+//!         },
+//!     },
+//!     is_banned: true,
+//! };
+//!
+//! /// Boilerplate-free conversion of a top-level InternalUser into an
+//! /// ExternalUser, taking care of subfield conversions as well.
+//! let external_user: ExternalUser = internal_user.transmogrify();
+//!
+//! let expected_external_user = ExternalUser {
+//!     name: "John",
+//!     age: 10,
+//!     address: ExternalAddress {
+//!         name: "somewhere out there",
+//!         phone: ExternalPhoneNumber {
+//!             main: 1234,
+//!         },
+//!     }
+//! };
+//!
+//! assert_eq!(external_user, expected_external_user);
+//! # }
+//! ```
 
-use std::marker::PhantomData;
 use hlist::*;
+use indices::*;
 use std::fmt;
+use std::marker::PhantomData;
 
 /// A trait that converts from a type to a labelled generic representation.
 ///
@@ -465,10 +548,284 @@ where
     }
 }
 
+/// Trait for plucking out a `Field` from a type by type-level `TargetKey`.
+pub trait ByNameFieldPlucker<TargetKey, Index> {
+    type TargetValue;
+    type Remainder;
+
+    /// Returns a pair consisting of the value pointed to by the target key and the remainder.
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<TargetKey, Self::TargetValue>, Self::Remainder);
+}
+
+/// Implementation when the pluck target key is in the head.
+impl<K, V, Tail> ByNameFieldPlucker<K, Here> for HCons<Field<K, V>, Tail> {
+    type TargetValue = V;
+    type Remainder = Tail;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let field = field_with_name(self.head.name, self.head.value);
+        (field, self.tail)
+    }
+}
+
+/// Implementation when the pluck target key is in the tail.
+impl<Head, Tail, K, TailIndex> ByNameFieldPlucker<K, There<TailIndex>> for HCons<Head, Tail>
+where
+    Tail: ByNameFieldPlucker<K, TailIndex>,
+{
+    type TargetValue = <Tail as ByNameFieldPlucker<K, TailIndex>>::TargetValue;
+    type Remainder = HCons<Head, <Tail as ByNameFieldPlucker<K, TailIndex>>::Remainder>;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let (target, tail_remainder) =
+            <Tail as ByNameFieldPlucker<K, TailIndex>>::pluck_by_name(self.tail);
+        (
+            target,
+            HCons {
+                head: self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
+/// Trait for transmogrifying a `Source` type into a `Target` type.
+///
+/// What is "transmogrifying"? In this context, it means to convert some data of type `A`
+/// into data of type `B`, in a typesafe, recursive way, as long as `A` and `B` are "similarly-shaped".
+/// In other words, as long as `B`'s fields and their subfields are subsets of `A`'s fields and
+/// their respective subfields, then `A` can be turned into `B`.
+///
+/// # Example
+///
+/// ```
+/// #[macro_use] extern crate frunk;
+/// #[macro_use] extern crate frunk_core; // required when using custom derives
+/// # fn main() {
+/// use frunk::labelled::Transmogrifier;
+/// #[derive(LabelledGeneric)]
+/// struct InternalPhoneNumber {
+///     emergency: Option<usize>,
+///     main: usize,
+///     secondary: Option<usize>,
+/// }
+///
+/// #[derive(LabelledGeneric)]
+/// struct InternalAddress<'a> {
+///     is_whitelisted: bool,
+///     name: &'a str,
+///     phone: InternalPhoneNumber,
+/// }
+///
+/// #[derive(LabelledGeneric)]
+/// struct InternalUser<'a> {
+///     name: &'a str,
+///     age: usize,
+///     address: InternalAddress<'a>,
+///     is_banned: bool,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalPhoneNumber {
+///     main: usize,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalAddress<'a> {
+///     name: &'a str,
+///     phone: ExternalPhoneNumber,
+/// }
+///
+/// #[derive(LabelledGeneric, PartialEq, Debug)]
+/// struct ExternalUser<'a> {
+///     age: usize,
+///     address: ExternalAddress<'a>,
+///     name: &'a str,
+/// }
+///
+/// let internal_user = InternalUser {
+///     name: "John",
+///     age: 10,
+///     address: InternalAddress {
+///         is_whitelisted: true,
+///         name: "somewhere out there",
+///         phone: InternalPhoneNumber {
+///             main: 1234,
+///             secondary: None,
+///             emergency: Some(5678),
+///         },
+///     },
+///     is_banned: true,
+/// };
+///
+/// /// Boilerplate-free conversion of a top-level InternalUser into an
+/// /// ExternalUser, taking care of subfield conversions as well.
+/// let external_user: ExternalUser = internal_user.transmogrify();
+///
+/// let expected_external_user = ExternalUser {
+///     name: "John",
+///     age: 10,
+///     address: ExternalAddress {
+///         name: "somewhere out there",
+///         phone: ExternalPhoneNumber {
+///             main: 1234,
+///         },
+///     }
+/// };
+///
+/// assert_eq!(external_user, expected_external_user);
+/// # }
+/// ```
+///
+/// Credit:
+/// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
+pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
+    /// Consume this current object and return an object of the Target type.
+    ///
+    /// Although similar to sculpting, transmogrifying does its job recursively.
+    #[inline(always)]
+    fn transmogrify(self) -> Target;
+}
+
+/// Implementation of `Transmogrifier` for identity plucked `Field` to `Field` Transforms.
+impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<Key, SourceValue> {
+    #[inline(always)]
+    fn transmogrify(self) -> SourceValue {
+        self.value
+    }
+}
+
+/// Implementation of `Transmogrifier` for when the `Target` is empty and the `Source` is empty.
+impl Transmogrifier<HNil, HNil> for HNil {
+    #[inline(always)]
+    fn transmogrify(self) -> HNil {
+        HNil
+    }
+}
+
+/// Implementation of `Transmogrifier` for when the `Target` is empty and the `Source` is non-empty.
+impl<SourceHead, SourceTail> Transmogrifier<HNil, HNil> for HCons<SourceHead, SourceTail> {
+    #[inline(always)]
+    fn transmogrify(self) -> HNil {
+        HNil
+    }
+}
+
+/// Implementation of `Transmogrifier` for when the target is an `HList`, and the `Source` is a plucked
+/// `HList`.
+impl<
+        SourceHead,
+        SourceTail,
+        TargetName,
+        TargetHead,
+        TargetTail,
+        TransmogHeadIndex,
+        TransmogTailIndices,
+    > Transmogrifier<HCons<TargetHead, TargetTail>, HCons<TransmogHeadIndex, TransmogTailIndices>>
+    for Field<TargetName, HCons<SourceHead, SourceTail>>
+where
+    HCons<SourceHead, SourceTail>: Transmogrifier<
+        HCons<TargetHead, TargetTail>,
+        HCons<TransmogHeadIndex, TransmogTailIndices>,
+    >,
+{
+    #[inline(always)]
+    fn transmogrify(self) -> HCons<TargetHead, TargetTail> {
+        self.value.transmogrify()
+    }
+}
+
+/// Non-trivial implementation of `Transmogrifier` where similarly-shaped `Source` and `Target` types are
+/// both Labelled HLists, but do not immediately transform into one another due to mis-matched
+/// fields, possibly recursively so.
+impl<
+        SourceHead,
+        SourceTail,
+        TargetHeadName,
+        TargetHeadValue,
+        TargetTail,
+        PluckSourceHeadNameIndex,
+        TransMogSourceHeadValueIndices,
+        TransMogTailIndices,
+    >
+    Transmogrifier<
+        HCons<Field<TargetHeadName, TargetHeadValue>, TargetTail>,
+        HCons<
+            DoTransmog<PluckSourceHeadNameIndex, TransMogSourceHeadValueIndices>,
+            TransMogTailIndices,
+        >,
+    > for HCons<SourceHead, SourceTail>
+where
+    // Pluck a value out of the Source by the Head Target Name
+    HCons<SourceHead, SourceTail>: ByNameFieldPlucker<TargetHeadName, PluckSourceHeadNameIndex>,
+    // The value we pluck out needs to be able to be transmogrified to the Head Target Value type
+    Field<
+        TargetHeadName,
+        <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
+            TargetHeadName,
+            PluckSourceHeadNameIndex,
+        >>::TargetValue,
+    >: Transmogrifier<TargetHeadValue, TransMogSourceHeadValueIndices>,
+    // The remainder from plucking out the Head Target Name must be able to be transmogrified to the
+    // target tail, utilising the other remaining indices
+    <HCons<SourceHead, SourceTail> as ByNameFieldPlucker<
+        TargetHeadName,
+        PluckSourceHeadNameIndex,
+    >>::Remainder: Transmogrifier<TargetTail, TransMogTailIndices>,
+{
+    #[inline(always)]
+    fn transmogrify(self) -> HCons<Field<TargetHeadName, TargetHeadValue>, TargetTail> {
+        let (source_field_for_head_target_name, remainder) = self.pluck_by_name();
+        let name = source_field_for_head_target_name.name;
+        let transmogrified_value: TargetHeadValue =
+            source_field_for_head_target_name.transmogrify();
+        let as_field: Field<TargetHeadName, TargetHeadValue> =
+            field_with_name(name, transmogrified_value);
+        HCons {
+            head: as_field,
+            tail: remainder.transmogrify(),
+        }
+    }
+}
+
+impl<Source, Target, TransmogIndices>
+    Transmogrifier<Target, LabelledGenericTransmogIndicesWrapper<TransmogIndices>> for Source
+where
+    Source: LabelledGeneric,
+    Target: LabelledGeneric,
+    <Source as LabelledGeneric>::Repr:
+        Transmogrifier<<Target as LabelledGeneric>::Repr, TransmogIndices>,
+{
+    #[inline(always)]
+    fn transmogrify(self) -> Target {
+        let source_as_repr = self.into();
+        let source_transmogged = source_as_repr.transmogrify();
+        <Target as LabelledGeneric>::from(source_transmogged)
+    }
+}
+
+// Implementation for when the source value is plucked
+impl<Source, TargetName, TargetValue, TransmogIndices>
+    Transmogrifier<TargetValue, PluckedLabelledGenericIndicesWrapper<TransmogIndices>>
+    for Field<TargetName, Source>
+where
+    Source: LabelledGeneric,
+    TargetValue: LabelledGeneric,
+    Source: Transmogrifier<TargetValue, TransmogIndices>,
+{
+    #[inline(always)]
+    fn transmogrify(self) -> TargetValue {
+        self.value.transmogrify()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::chars::*;
+    use super::*;
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -477,6 +834,10 @@ mod tests {
     type name = (n, a, m, e);
     #[allow(non_camel_case_types)]
     type age = (a, g, e);
+    #[allow(non_camel_case_types)]
+    type is_admin = (i, s, __, a, d, m, i, n);
+    #[allow(non_camel_case_types)]
+    type inner = (i, n, n, e, r);
 
     #[test]
     fn test_label_new_building() {
@@ -532,4 +893,112 @@ mod tests {
         let labelled = field!(name, "joe");
         assert_eq!(labelled.name, "name")
     }
+
+    #[test]
+    fn test_transmogrify_hnil_identity() {
+        let hnil_again: HNil = HNil.transmogrify();
+        assert_eq!(HNil, hnil_again);
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_super_simple() {
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<age, i32>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = hcons.transmogrify();
+        assert_eq!(t_hcons, hlist!(field!(age, 3)));
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_somewhat_simple() {
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = hcons.transmogrify();
+        assert_eq!(t_hcons, hlist!(field!(is_admin, true), field!(name, "joe")));
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_recursive_simple() {
+        type Source = Hlist![
+            Field<name,  Hlist![
+                Field<inner, f32>,
+                Field<is_admin, bool>,
+            ]>,
+            Field<age, i32>,
+            Field<is_admin, bool>];
+        type Target = Hlist![
+                Field<is_admin, bool>,
+                Field<name,  Hlist![
+                    Field<is_admin, bool>,
+                ]>,
+            ];
+        let source: Source = hlist![
+            field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
+            field!(age, 32),
+            field!(is_admin, true)
+        ];
+        let target: Target = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![
+                field!(is_admin, true),
+                field!(name, hlist![field!(is_admin, true)]),
+            ]
+        )
+    }
+
+    #[test]
+    fn test_transmogrify_hcons_sculpting_required_simple() {
+        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>, Field<age, i32>];
+        let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
+        let t_hcons: Target = hcons.transmogrify();
+        assert_eq!(
+            t_hcons,
+            hlist!(field!(is_admin, true), field!(name, "joe"), field!(age, 3))
+        );
+    }
+
+    #[test]
+    fn test_transmogrify_identical_transform_labelled_fields() {
+        type Source = Hlist![
+            Field<name,  &'static str>,
+            Field<age, i32>,
+            Field<is_admin, bool>
+        ];
+        type Target = Source;
+        let source: Source = hlist![field!(name, "joe"), field!(age, 32), field!(is_admin, true)];
+        let target: Target = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![field!(name, "joe"), field!(age, 32), field!(is_admin, true)]
+        )
+    }
+
+    //    #[test]
+    //    fn test_transmogrify_identical_transform_nested_labelled_fields() {
+    //        type Source = Hlist![
+    //    Field<name,  Hlist![
+    //        Field<inner, f32>,
+    //        Field<is_admin, bool>,
+    //    ]>,
+    //    Field<age, i32>,
+    //    Field<is_admin, bool>];
+    //        type Target = Source;
+    //        let source: Source = hlist![
+    //            field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
+    //            field!(age, 32),
+    //            field!(is_admin, true)
+    //        ];
+    //        let target: Target = source.transmogrify();
+    //        assert_eq!(
+    //            target,
+    //            hlist![
+    //                field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
+    //                field!(age, 32),
+    //                field!(is_admin, true)
+    //            ]
+    //        )
+    //    }
 }
