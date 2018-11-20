@@ -338,7 +338,8 @@ macro_rules! gen_inherent_methods {
             /// ```
             #[inline(always)]
             pub fn to_mut<'a>(&'a mut self) -> <Self as ToMut<'a>>::Output
-                where Self: ToMut<'a>,
+            where
+                Self: ToMut<'a>,
             {
                 ToMut::to_mut(self)
             }
