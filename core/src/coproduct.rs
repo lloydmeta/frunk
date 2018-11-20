@@ -476,7 +476,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
         ToRef::to_ref(self)
     }
 
-    /// Borrow each variant of the Coproduct mutably.
+    /// Borrow each variant of the `Coproduct` mutably.
     ///
     /// # Example
     ///

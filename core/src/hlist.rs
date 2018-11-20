@@ -324,8 +324,8 @@ macro_rules! gen_inherent_methods {
                 ToRef::to_ref(self)
             }
 
-            /// Return an HList where the contents are mutable references
-            /// to the original HList on which this method was called.
+            /// Return an `HList` where the contents are mutable references
+            /// to the original `HList` on which this method was called.
             ///
             /// # Examples
             ///
