@@ -331,9 +331,9 @@ macro_rules! gen_inherent_methods {
             ///
             /// ```
             /// # #[macro_use] extern crate frunk; fn main() {
-            /// assert_eq!(hlist![].to_ref(), hlist![]);
+            /// assert_eq!(hlist![].to_mut(), hlist![]);
             ///
-            /// assert_eq!(hlist![1, true].to_ref(), hlist![&mut 1, &mut true]);
+            /// assert_eq!(hlist![1, true].to_mut(), hlist![&mut 1, &mut true]);
             /// # }
             /// ```
             #[inline(always)]

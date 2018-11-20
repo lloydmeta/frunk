@@ -487,7 +487,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # #[macro_use] extern crate frunk; fn main() {
     /// use frunk::Coproduct;
     ///
-    /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
+    /// let mut co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
     /// assert!(co.to_mut().subset::<Coprod!(&mut bool, &mut String), _>().is_ok());
     /// # }
