@@ -73,7 +73,7 @@
 
 use hlist::{HCons, HNil};
 use indices::{Here, There};
-use traits::{Func, Poly, ToRef};
+use traits::{Func, Poly, ToMut, ToRef};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -476,6 +476,30 @@ impl<Head, Tail> Coproduct<Head, Tail> {
         ToRef::to_ref(self)
     }
 
+    /// Borrow each variant of the Coproduct mutably.
+    ///
+    /// # Example
+    ///
+    /// Composing with `subset` to match a subset of variants without
+    /// consuming the coproduct:
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// use frunk::Coproduct;
+    ///
+    /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
+    ///
+    /// assert!(co.to_mut().subset::<Coprod!(&mut bool, &mut String), _>().is_ok());
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn to_mut<'a>(&'a mut self) -> <Self as ToMut<'a>>::Output
+    where
+        Self: ToMut<'a>,
+    {
+        ToMut::to_mut(self)
+    }
+
     /// Use functions to transform a Coproduct into a single value.
     ///
     /// A variety of types are supported for the `Folder` argument:
@@ -763,6 +787,29 @@ impl<'a> ToRef<'a> for CNil {
     type Output = CNil;
 
     fn to_ref(&'a self) -> CNil {
+        match *self {}
+    }
+}
+
+impl<'a, CH: 'a, CTail> ToMut<'a> for Coproduct<CH, CTail>
+where
+    CTail: ToMut<'a>,
+{
+    type Output = Coproduct<&'a mut CH, <CTail as ToMut<'a>>::Output>;
+
+    #[inline(always)]
+    fn to_mut(&'a mut self) -> Self::Output {
+        match *self {
+            Coproduct::Inl(ref mut r) => Coproduct::Inl(r),
+            Coproduct::Inr(ref mut rest) => Coproduct::Inr(rest.to_mut()),
+        }
+    }
+}
+
+impl<'a> ToMut<'a> for CNil {
+    type Output = CNil;
+
+    fn to_mut(&'a mut self) -> CNil {
         match *self {}
     }
 }

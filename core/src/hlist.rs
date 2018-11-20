@@ -57,7 +57,7 @@
 //! ```
 
 use indices::{Here, Suffixed, There};
-use traits::{Func, IntoReverse, Poly, ToRef};
+use traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 
 use std::ops::Add;
 
@@ -322,6 +322,25 @@ macro_rules! gen_inherent_methods {
                 where Self: ToRef<'a>,
             {
                 ToRef::to_ref(self)
+            }
+
+            /// Return an HList where the contents are mutable references
+            /// to the original HList on which this method was called.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// assert_eq!(hlist![].to_ref(), hlist![]);
+            ///
+            /// assert_eq!(hlist![1, true].to_ref(), hlist![&mut 1, &mut true]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn to_mut<'a>(&'a mut self) -> <Self as ToMut<'a>>::Output
+                where Self: ToMut<'a>,
+            {
+                ToMut::to_mut(self)
             }
 
             /// Apply a function to each element of an HList.
@@ -1034,6 +1053,31 @@ where
         HCons {
             head: &self.head,
             tail: (&self.tail).to_ref(),
+        }
+    }
+}
+
+impl<'a> ToMut<'a> for HNil {
+    type Output = HNil;
+
+    #[inline(always)]
+    fn to_mut(&'a mut self) -> Self::Output {
+        HNil
+    }
+}
+
+impl<'a, H, Tail> ToMut<'a> for HCons<H, Tail>
+where
+    H: 'a,
+    Tail: ToMut<'a>,
+{
+    type Output = HCons<&'a mut H, <Tail as ToMut<'a>>::Output>;
+
+    #[inline(always)]
+    fn to_mut(&'a mut self) -> Self::Output {
+        HCons {
+            head: &mut self.head,
+            tail: self.tail.to_mut(),
         }
     }
 }
