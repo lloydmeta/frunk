@@ -238,9 +238,9 @@ pub use hlist::HCons;
 #[doc(no_inline)]
 pub use hlist::HNil;
 #[doc(no_inline)]
-pub use traits::Func;
+pub use traits::{Func, FuncMut};
 #[doc(no_inline)]
-pub use traits::Poly;
+pub use traits::{Poly, PolyMut};
 #[doc(no_inline)]
 pub use traits::{ToMut, ToRef}; // useful for where bounds
 
