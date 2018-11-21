@@ -18,6 +18,17 @@ pub trait ToRef<'a> {
     fn to_ref(&'a self) -> Self::Output;
 }
 
+/// An alternative to `AsMut` that does not force the reference type to be a pointer itself.
+///
+/// This parallels [`ToRef`]; see it for more information.
+///
+/// [`ToRef`]: trait.ToRef.html
+pub trait ToMut<'a> {
+    type Output;
+
+    fn to_mut(&'a mut self) -> Self::Output;
+}
+
 /// Trait that allows for reversing a given data structure.
 ///
 /// Implemented for HLists.

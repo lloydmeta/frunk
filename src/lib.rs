@@ -242,7 +242,7 @@ pub use traits::Func;
 #[doc(no_inline)]
 pub use traits::Poly;
 #[doc(no_inline)]
-pub use traits::ToRef; // useful for where bounds
+pub use traits::{ToMut, ToRef}; // useful for where bounds
 
 #[doc(no_inline)]
 pub use coproduct::Coproduct;
