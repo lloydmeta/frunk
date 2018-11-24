@@ -85,6 +85,38 @@ pub trait Func<Input> {
 /// This is a user-implementable alternative to `FnMut`.
 ///
 /// Not necessary if/when the FnMut trait is implementable in stable Rust.
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate frunk;
+/// # use frunk::{FuncMut, PolyMut};
+/// # use std::fmt::{Debug, Write};
+///
+/// struct ConcatDebug<'a>(&'a mut String);
+///
+/// impl<'a, T: Debug> FuncMut<T> for ConcatDebug<'a> {
+///     type Output = ();
+///     fn call(&mut self, t: T) {
+///         write!(self.0, "{:?}", t).unwrap();
+///     }
+/// }
+///
+/// fn main() {
+///     let mut string = String::new();
+///
+///     {
+///         let mut concatter = ConcatDebug(&mut string);
+///         let l = hlist![
+///             23,
+///             "foo",
+///             (1, "two", 3.0)
+///         ];
+///         l.map(PolyMut(concatter));
+///     }
+///
+///     assert_eq!(string, r#"23"foo"(1, "two", 3.0)"#);
+/// }
+/// ```
 pub trait FuncMut<Input> {
     type Output;
 
