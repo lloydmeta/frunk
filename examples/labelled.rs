@@ -2,7 +2,7 @@
 extern crate frunk;
 extern crate frunk_core;
 
-use frunk::labelled::Transmogrifier;
+use frunk::labelled::*;
 
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {
