@@ -65,6 +65,7 @@ pub mod generic;
 pub mod hlist;
 pub mod indices;
 pub mod labelled;
+pub mod path;
 pub mod traits;
 mod tuples;
 
