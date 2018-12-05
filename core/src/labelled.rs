@@ -252,6 +252,25 @@ pub trait LabelledGeneric {
     }
 }
 
+pub trait IntoLabelledGeneric {
+    /// The labelled generic representation type.
+    type Repr;
+
+    /// Convert a value to its representation type `Repr`.
+    fn into(self) -> Self::Repr;
+}
+
+impl<A> IntoLabelledGeneric for A
+where
+    A: LabelledGeneric,
+{
+    type Repr = <A as LabelledGeneric>::Repr;
+
+    fn into(self) -> <Self as IntoLabelledGeneric>::Repr {
+        self.into()
+    }
+}
+
 /// Given a labelled generic representation of a `Dst`, returns `Dst`
 pub fn from_labelled_generic<Dst, Repr>(repr: Repr) -> Dst
 where
