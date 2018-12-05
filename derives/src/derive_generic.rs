@@ -1,4 +1,4 @@
-use common::{build_hcons_constr, call_site_ident, to_ast};
+use frunk_proc_macro_helpers::{build_hcons_constr, call_site_ident, to_ast};
 use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{Data, Fields, Ident, Type};

@@ -12,7 +12,7 @@ pub mod unit_copy {
         )*};
     }
     // Feel free to add more as necessary
-    make_unit_struct!{A B C D E F}
+    make_unit_struct! {A B C D E F}
 }
 
 #[allow(unused)]
@@ -25,7 +25,7 @@ pub mod unit_move {
         )*};
     }
     // Feel free to add more as necessary
-    make_unit_struct!{A B C D E F}
+    make_unit_struct! {A B C D E F}
 }
 
 #[allow(unused)]
@@ -38,7 +38,7 @@ pub mod i32_copy {
         )*};
     }
     // Feel free to add more as necessary
-    make_unit_struct!{X Y Z}
+    make_unit_struct! {X Y Z}
 }
 
 #[allow(unused)]
@@ -51,5 +51,5 @@ pub mod i32_move {
         )*};
     }
     // Feel free to add more as necessary
-    make_unit_struct!{X Y Z}
+    make_unit_struct! {X Y Z}
 }

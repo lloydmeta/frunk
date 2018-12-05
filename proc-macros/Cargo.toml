@@ -1,0 +1,29 @@
+[package]
+name = "frunk_proc_macros"
+version = "0.0.1"
+authors = ["Lloyd <lloydmeta@gmail.com>"]
+description = "Proc macros for Frunk"
+license = "MIT"
+documentation = "https://docs.rs/frunk_proc_macros"
+repository = "https://github.com/lloydmeta/frunk"
+keywords = ["Frunk", "macros"]
+
+[badges]
+travis-ci = { repository = "lloydmeta/frunk" }
+
+[dependencies]
+syn = "0.15"
+quote = "0.6"
+proc-macro-hack = "0.5"
+
+[dependencies.frunk_core]
+path = "../core"
+version = "0.2.2"
+
+[dependencies.frunk_proc_macros_impl]
+path = "../proc-macros-impl"
+version = "0.0.1"
+
+[dev-dependencies.frunk]
+path = "../."
+version = "0.2.2"

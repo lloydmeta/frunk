@@ -722,7 +722,7 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 impl<Key, Source, Target, InnerIndices>
     Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
 where
-    Source: Transmogrifier<Target, InnerIndices>
+    Source: Transmogrifier<Target, InnerIndices>,
 {
     fn transmogrify(self) -> Vec<Target> {
         self.value.into_iter().map(|e| e.transmogrify()).collect()
@@ -959,11 +959,11 @@ mod tests {
             Field<age, i32>,
             Field<is_admin, bool>];
         type Target = Hlist![
+            Field<is_admin, bool>,
+            Field<name,  Hlist![
                 Field<is_admin, bool>,
-                Field<name,  Hlist![
-                    Field<is_admin, bool>,
-                ]>,
-            ];
+            ]>,
+        ];
         let source: Source = hlist![
             field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
             field!(age, 32),
