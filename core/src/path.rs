@@ -3,15 +3,9 @@
 //! ```
 //! #[macro_use] extern crate frunk;
 //! #[macro_use] extern crate frunk_core; // required when using custom derives
-//! # fn main() {
-//! # use frunk_core::hlist::*;
-//! # use frunk_core::labelled::chars::*;
-//! # use frunk_core::path::*;
-//! # use frunk::prelude::*;
-//! #[allow(non_camel_case_types)]
-//! type name = (n, a, m, e);
-//! type address = (a, d, d, r, e, s, s);
-//!
+//! # extern crate frunk_proc_macros;
+//! # use frunk_proc_macros::path;
+//! # fn main() {//!
 //! #[derive(LabelledGeneric)]
 //! struct Address<'a> {
 //!     name: &'a str,
@@ -28,15 +22,39 @@
 //!   address: Address { name: "blue pond" },
 //! };
 //!
+//! let name_path = path!(name);
+//!
 //! {
-//! let name_path = Path::<Hlist![name]>::new();
 //! let traversed_name = name_path.get(&u);
 //! assert_eq!(*traversed_name, "Joe");
 //! }
 //!
-//! let address_name_path = Path::<HCons<address, Path<HCons<name, HNil>>>>::new();
+//! // You can also **add** paths together
+//! let address_path = path!(address);
+//! let address_name_path = address_path + name_path;
+//!
 //! let traversed_address_name = address_name_path.get(u);
 //! assert_eq!(traversed_address_name, "blue pond");
+//! # }
+//! ```
+//!
+//! You can also add paths together
+//!
+//! ```
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! # fn main() {
+//! # use frunk_core::hlist::*;
+//! # use frunk_core::labelled::chars::*;
+//! # use frunk_core::path::*;
+//! #[allow(non_camel_case_types)]
+//! type name = (n, a, m, e);
+//! type address = (a, d, d, r, e, s, s);
+//!
+//! let name_path = Path::<Hlist![name]>::new();
+//! let address_path = Path::<Hlist![address]>::new();
+//!
+//! let address_name_path: Path<HCons<address, Path<HCons<name, HNil>>>> = address_path + name_path;
 //! # }
 //! ```
 
@@ -44,7 +62,9 @@ use super::hlist::*;
 use super::labelled::*;
 
 use std::marker::PhantomData;
+use std::ops::Add;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Path<T>(PhantomData<T>);
 
 impl<T> Path<T> {
@@ -103,5 +123,25 @@ where
 
     fn get(self) -> Self::TargetValue {
         self.into().pluck_by_name().0.value.get()
+    }
+}
+
+// For the simple case of adding to a single path
+impl<Name, RHSParam> Add<Path<RHSParam>> for Path<HCons<Name, HNil>> {
+    type Output = Path<HCons<Name, Path<RHSParam>>>;
+
+    fn add(self, _: Path<RHSParam>) -> Self::Output {
+        Path::new()
+    }
+}
+
+impl<Name, Tail, RHSParam> Add<Path<RHSParam>> for Path<HCons<Name, Path<Tail>>>
+where
+    Path<Tail>: Add<Path<RHSParam>>,
+{
+    type Output = Path<HCons<Name, <Path<Tail> as Add<Path<RHSParam>>>::Output>>;
+
+    fn add(self, _: Path<RHSParam>) -> <Self as Add<Path<RHSParam>>>::Output {
+        Path::new()
     }
 }

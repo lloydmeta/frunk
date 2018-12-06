@@ -49,8 +49,11 @@ fn main() {
         },
     };
 
-    // generic, re-usable paths
-    let height_lens = path!(dimensions.height);
+    // generic, re-usable, composable paths
+    let dimensions_lens = path!(dimensions);
+    let height_lens = dimensions_lens + path!(height);
+
+    // Can also use simple "dot" . chaining
     let unit_lens = path!(dimensions.unit);
 
     println!(

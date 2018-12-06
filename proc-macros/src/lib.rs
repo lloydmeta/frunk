@@ -129,9 +129,10 @@ mod tests {
             },
         };
 
-        // generic, re-usable paths
-        let height_lens = path!(dimensions.height);
-        let unit_lens = path!(dimensions.unit);
+        // generic, re-usable, compsable paths
+        let dimensions_lens = path!(dimensions);
+        let height_lens = dimensions_lens + path!(height); // compose multiple
+        let unit_lens = path!(dimensions.unit); // dot syntax to just do the whole thing at once
 
         assert_eq!(*height_lens.get(&dog), 10);
         assert_eq!(*height_lens.get(&cat), 7);
