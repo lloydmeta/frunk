@@ -98,11 +98,13 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
 
             type Repr = #repr_type;
 
+            #[inline(always)]
             fn into(self) -> Self::Repr {
                 let #deconstructor = self;
                 #hcons_constr
             }
 
+            #[inline(always)]
             fn from(r: Self::Repr) -> Self {
                 let #hcons_pat = r;
                 #constructor
@@ -114,6 +116,7 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
 
             type Repr = #ref_repr_type;
 
+            #[inline(always)]
             fn into(self) -> Self::Repr {
                 let #struct_ref_deconstr = *self;
                 #hcons_constr_ref
@@ -126,6 +129,7 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
 
             type Repr = #mut_ref_repr_type;
 
+            #[inline(always)]
             fn into(self) -> Self::Repr {
                 let #struct_mut_ref_deconstr = *self;
                 #hcons_constr_mut_ref

@@ -198,14 +198,17 @@ pub trait LabelledGeneric {
     type Repr;
 
     /// Convert a value to its representation type `Repr`.
+    #[inline(always)]
     fn into(self) -> Self::Repr;
 
     /// Convert a value's labelled representation type `Repr`
     /// to the values's type.
+    #[inline(always)]
     fn from(repr: Self::Repr) -> Self;
 
     /// Convert from one type to another using a type with the same
     /// labelled generic representation
+    #[inline(always)]
     fn convert_from<Src>(src: Src) -> Self
     where
         Src: LabelledGeneric<Repr = Self::Repr>,
@@ -238,6 +241,7 @@ pub trait LabelledGeneric {
     /// Note that this method tosses away the "remainder" of the sculpted
     /// representation. In other words, anything that is not needed from `Src`
     /// gets tossed out.
+    #[inline(always)]
     fn transform_from<Src, Indices>(src: Src) -> Self
     where
         Src: LabelledGeneric,
@@ -257,6 +261,7 @@ pub trait IntoLabelledGeneric {
     type Repr;
 
     /// Convert a value to its representation type `Repr`.
+    #[inline(always)]
     fn into(self) -> Self::Repr;
 }
 
@@ -266,6 +271,7 @@ where
 {
     type Repr = <A as LabelledGeneric>::Repr;
 
+    #[inline(always)]
     fn into(self) -> <Self as IntoLabelledGeneric>::Repr {
         self.into()
     }

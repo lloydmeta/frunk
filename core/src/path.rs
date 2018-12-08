@@ -37,26 +37,6 @@
 //! assert_eq!(traversed_address_name, "blue pond");
 //! # }
 //! ```
-//!
-//! You can also add paths together
-//!
-//! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
-//! # fn main() {
-//! # use frunk_core::hlist::*;
-//! # use frunk_core::labelled::chars::*;
-//! # use frunk_core::path::*;
-//! #[allow(non_camel_case_types)]
-//! type name = (n, a, m, e);
-//! type address = (a, d, d, r, e, s, s);
-//!
-//! let name_path = Path::<Hlist![name]>::new();
-//! let address_path = Path::<Hlist![address]>::new();
-//!
-//! let address_name_path: Path<HCons<address, Path<HCons<name, HNil>>>> = address_path + name_path;
-//! # }
-//! ```
 
 use super::hlist::*;
 use super::labelled::*;
@@ -103,6 +83,7 @@ where
         PluckIndex,
     >>::TargetValue;
 
+    #[inline(always)]
     fn get(self) -> Self::TargetValue {
         self.into().pluck_by_name().0.value
     }
@@ -121,6 +102,7 @@ where
     type TargetValue = <<<Traversable as IntoLabelledGeneric>::Repr as ByNameFieldPlucker<HeadName, HeadPluckIndex>>::TargetValue as
     PathTraverser<Path<TailNames>, TailPluckIndices>>::TargetValue ;
 
+    #[inline(always)]
     fn get(self) -> Self::TargetValue {
         self.into().pluck_by_name().0.value.get()
     }
@@ -130,6 +112,7 @@ where
 impl<Name, RHSParam> Add<Path<RHSParam>> for Path<HCons<Name, HNil>> {
     type Output = Path<HCons<Name, Path<RHSParam>>>;
 
+    #[inline(always)]
     fn add(self, _: Path<RHSParam>) -> Self::Output {
         Path::new()
     }
@@ -141,6 +124,7 @@ where
 {
     type Output = Path<HCons<Name, <Path<Tail> as Add<Path<RHSParam>>>::Output>>;
 
+    #[inline(always)]
     fn add(self, _: Path<RHSParam>) -> <Self as Add<Path<RHSParam>>>::Output {
         Path::new()
     }

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]:
 - Added `ToMut` trait, which allows borrowing mutably from a Coproduct or HList.
 - Allow `#[derive(LabelledGeneric)]` on tuple structs
+- Add `Path` model and `PathTraverser` trait, which allows for composable lens-like-usage
 
 ## [0.2.2] - 2018-10-21
 - Added support for [transmogrifying (recursively sculpting)](https://docs.rs/frunk/0.2.2/frunk/labelled/trait.Transmogrifier.html) one data type into another
