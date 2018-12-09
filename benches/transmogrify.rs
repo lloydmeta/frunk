@@ -1,4 +1,5 @@
 #![feature(test)]
+#![allow(dead_code, unused)]
 
 #[macro_use]
 extern crate frunk;
@@ -1163,19 +1164,19 @@ impl From<DeepLayer1a> for DeepLayer1aReversed {
 }
 
 #[bench]
-fn manual_deep_from_24fields(b: &mut Bencher) {
+fn manual_deep_from(b: &mut Bencher) {
     b.iter(|| {
-        let d_1 = DeepLayer1a::new();
-        let reversed: DeepLayer1aReversed = d_1.into();
+        let d_1 = DeepLayer3a::new();
+        let reversed: DeepLayer3aReversed = d_1.into();
         reversed
     })
 }
 
 #[bench]
-fn transmogrify_deep_from_24fields(b: &mut Bencher) {
+fn transmogrify_deep(b: &mut Bencher) {
     b.iter(|| {
-        let d_1 = DeepLayer1a::new();
-        let reversed: DeepLayer1aReversed = d_1.transmogrify();
+        let d_1 = DeepLayer3a::new();
+        let reversed: DeepLayer3aReversed = d_1.transmogrify();
         reversed
     })
 }
