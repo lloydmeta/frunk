@@ -220,7 +220,7 @@ pub trait LabelledGeneric {
     ///
     /// Note that this method tosses away the "remainder" of the sculpted representation. In other
     /// words, anything that is not needed from A gets tossed out.
-    #[deprecated = "obsolete, transform_from instead"]
+    #[deprecated(note = "obsolete, transform_from instead")]
     fn sculpted_convert_from<A, Indices>(a: A) -> Self
     where
         A: LabelledGeneric,
@@ -283,7 +283,7 @@ where
 ///
 /// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
-#[deprecated = "obsolete, transform_from instead"]
+#[deprecated(note = "obsolete, transform_from instead")]
 pub fn sculpted_convert_from<A, B, Indices>(a: A) -> B
 where
     A: LabelledGeneric,
