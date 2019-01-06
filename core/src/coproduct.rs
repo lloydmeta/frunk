@@ -73,7 +73,7 @@
 
 use hlist::{HCons, HNil};
 use indices::{Here, There};
-use traits::{Func, Poly, ToMut, ToRef};
+use traits::{Func, FuncMut, Poly, PolyMut, ToMut, ToRef};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -506,9 +506,10 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     ///
     /// * An `hlist![]` of closures (one for each type, in order).
     /// * A single closure (for a Coproduct that is homogenous).
-    /// * A single [`Poly`].
+    /// * A single [`Poly`] or [`PolyMut`].
     ///
     /// [`Poly`]: ../traits/struct.Poly.html
+    /// [`PolyMut`]: ../traits/struct.PolyMut.html
     ///
     /// # Example
     ///
@@ -740,6 +741,20 @@ where
         use self::Coproduct::*;
         match self {
             Inl(r) => P::call(r),
+            Inr(rest) => rest.fold(f),
+        }
+    }
+}
+
+impl<P, R, CH, CTail> CoproductFoldable<PolyMut<P>, R> for Coproduct<CH, CTail>
+where
+    P: FuncMut<CH, Output = R>,
+    CTail: CoproductFoldable<PolyMut<P>, R>,
+{
+    fn fold(self, mut f: PolyMut<P>) -> R {
+        use self::Coproduct::*;
+        match self {
+            Inl(r) => f.0.call(r),
             Inr(rest) => rest.fold(f),
         }
     }

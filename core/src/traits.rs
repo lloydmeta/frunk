@@ -58,6 +58,13 @@ pub trait IntoReverse {
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Poly<T>(pub T);
 
+/// A wrapper like [`Poly`] for [`FuncMut`].
+///
+/// [`FuncMut`]: trait.FuncMut.html
+/// [`Poly`]: trait.Poly.html
+#[derive(Debug, Copy, Clone, Default)]
+pub struct PolyMut<T>(pub T);
+
 /// This is a simple, user-implementable alternative to `Fn`.
 ///
 /// Might not be necessary if/when Fn(Once, Mut) traits are implementable
@@ -73,4 +80,46 @@ pub trait Func<Input> {
     /// small fraction of use-cases, but it also comes at great expanse to the other 95% of
     /// use cases.
     fn call(i: Input) -> Self::Output;
+}
+
+/// This is a user-implementable alternative to `FnMut`.
+///
+/// Not necessary if/when the FnMut trait is implementable in stable Rust.
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate frunk;
+/// # use frunk::{FuncMut, PolyMut};
+/// # use std::fmt::{Debug, Write};
+///
+/// struct ConcatDebug<'a>(&'a mut String);
+///
+/// impl<'a, T: Debug> FuncMut<T> for ConcatDebug<'a> {
+///     type Output = ();
+///     fn call(&mut self, t: T) {
+///         write!(self.0, "{:?}", t).unwrap();
+///     }
+/// }
+///
+/// fn main() {
+///     let mut string = String::new();
+///
+///     {
+///         let mut concatter = ConcatDebug(&mut string);
+///         let l = hlist![
+///             23,
+///             "foo",
+///             (1, "two", 3.0)
+///         ];
+///         l.map(PolyMut(concatter));
+///     }
+///
+///     assert_eq!(string, r#"23"foo"(1, "two", 3.0)"#);
+/// }
+/// ```
+pub trait FuncMut<Input> {
+    type Output;
+
+    /// Call the `FuncMut`.
+    fn call(&mut self, i: Input) -> Self::Output;
 }

@@ -57,7 +57,7 @@
 //! ```
 
 use indices::{Here, Suffixed, There};
-use traits::{Func, IntoReverse, Poly, ToMut, ToRef};
+use traits::{Func, FuncMut, IntoReverse, Poly, PolyMut, ToMut, ToRef};
 
 use std::ops::Add;
 
@@ -352,9 +352,10 @@ macro_rules! gen_inherent_methods {
             ///
             /// * An `hlist![]` of closures (one for each element).
             /// * A single closure (for mapping an HList that is homogenous).
-            /// * A single [`Poly`].
+            /// * A single [`Poly`] or [`PolyMut`].
             ///
             /// [`Poly`]: ../traits/struct.Poly.html
+            /// [`PolyMut`]: ../traits/struct.PolyMut.html
             ///
             /// # Examples
             ///
@@ -908,6 +909,20 @@ where
     }
 }
 
+impl<P, H, Tail> HMappable<PolyMut<P>> for HCons<H, Tail>
+where
+    P: FuncMut<H>,
+    Tail: HMappable<PolyMut<P>>,
+{
+    type Output = HCons<<P as FuncMut<H>>::Output, <Tail as HMappable<PolyMut<P>>>::Output>;
+    fn map(self, mut poly: PolyMut<P>) -> Self::Output {
+        HCons {
+            head: poly.0.call(self.head),
+            tail: self.tail.map(poly),
+        }
+    }
+}
+
 /// Trait for mapping over an HList
 ///
 /// This trait is part of the implementation of the inherent method
@@ -943,12 +958,12 @@ impl<F> HMappable<F> for HNil {
 
 impl<F, R, H, Tail> HMappable<F> for HCons<H, Tail>
 where
-    F: Fn(H) -> R,
+    F: FnMut(H) -> R,
     Tail: HMappable<F>,
 {
     type Output = HCons<R, <Tail as HMappable<F>>::Output>;
 
-    fn map(self, f: F) -> Self::Output {
+    fn map(self, mut f: F) -> Self::Output {
         let HCons { head, tail } = self;
         HCons {
             head: f(head),
@@ -1143,11 +1158,11 @@ where
 impl<F, H, Tail, Acc> HFoldLeftable<F, Acc> for HCons<H, Tail>
 where
     Tail: HFoldLeftable<F, Acc>,
-    F: Fn(Acc, H) -> Acc,
+    F: FnMut(Acc, H) -> Acc,
 {
     type Output = <Tail as HFoldLeftable<F, Acc>>::Output;
 
-    fn foldl(self, f: F, acc: Acc) -> Self::Output {
+    fn foldl(self, mut f: F, acc: Acc) -> Self::Output {
         let HCons { head, tail } = self;
         let acc = f(acc, head);
         tail.foldl(f, acc)
