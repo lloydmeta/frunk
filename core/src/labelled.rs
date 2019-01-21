@@ -690,6 +690,18 @@ pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     fn transmogrify(self) -> Target;
 }
 
+pub struct MappingIndicesWrapper<T>(PhantomData<(T)>);
+
+impl<Key, Source, Target, InnerIndices>
+    Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
+where
+    Source: Transmogrifier<Target, InnerIndices>
+{
+    fn transmogrify(self) -> Vec<Target> {
+        self.value.into_iter().map(|e| e.transmogrify()).collect()
+    }
+}
+
 /// Implementation of `Transmogrifier` for identity plucked `Field` to `Field` Transforms.
 impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<Key, SourceValue> {
     #[inline(always)]
