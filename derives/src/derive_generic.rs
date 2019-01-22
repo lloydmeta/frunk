@@ -28,7 +28,8 @@ pub fn impl_generic(input: TokenStream) -> impl ToTokens {
             f.ident
                 .clone()
                 .unwrap_or(call_site_ident(&format!("_{}", i)))
-        }).collect();
+        })
+        .collect();
     let hcons_constr = build_hcons_constr(&fnames);
     let hcons_pat = build_hcons_constr(&fnames);
     let new_struct_constr = build_new_struct_constr(name, &fnames, is_tuple_struct);
