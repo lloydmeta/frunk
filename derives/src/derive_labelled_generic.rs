@@ -51,11 +51,11 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
     let hcons_pat = build_hcons_constr(&fnames);
     let (constructor, deconstructor) = match struct_type {
         Tuple => (
-            build_new_labelled_tuple_struct_constr(name, &fnames),
+            Box::new(build_new_labelled_tuple_struct_constr(name, &fnames)) as Box<dyn ToTokens>,
             quote! { #name ( #(#fnames, )* ) },
         ),
         Named => (
-            build_new_labelled_struct_constr(name, &fnames),
+            Box::new(build_new_labelled_struct_constr(name, &fnames)) as Box<dyn ToTokens>,
             quote! { #name { #(#fnames, )* } },
         ),
     };
@@ -216,13 +216,10 @@ fn build_field_constr_for(field: &Field) -> impl ToTokens {
 /// are bound to Field values.
 ///
 /// The opposite of build_labelled_hcons_constr for named structs
-fn build_new_labelled_struct_constr(
-    struct_name: &Ident,
-    bindnames: &Vec<Ident>,
-) -> Box<dyn ToTokens> {
+fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> impl ToTokens {
     let cloned_bind1 = bindnames.clone();
     let cloned_bind2 = bindnames.clone();
-    Box::new(quote! { #struct_name { #(#cloned_bind1: #cloned_bind2.value),* } })
+    quote! { #struct_name { #(#cloned_bind1: #cloned_bind2.value),* } }
 }
 
 /// Given a tuple struct name, and a number of Idents that act as accessors
@@ -235,7 +232,7 @@ fn build_new_labelled_struct_constr(
 fn build_new_labelled_tuple_struct_constr(
     struct_name: &Ident,
     bindnames: &Vec<Ident>,
-) -> Box<dyn ToTokens> {
+) -> impl ToTokens {
     let cloned_bind = bindnames.clone();
-    Box::new(quote! { #struct_name ( #(#cloned_bind.value),* ) })
+    quote! { #struct_name ( #(#cloned_bind.value),* ) }
 }
