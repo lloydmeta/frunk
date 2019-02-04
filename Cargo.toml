@@ -41,7 +41,7 @@ serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 [features]
 default = ["validated"]
 validated = ["std"]
-std = []
+std = ["frunk_core/std"]
 
 [profile.bench]
 opt-level = 3
