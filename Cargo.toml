@@ -38,6 +38,10 @@ version = "0.2.4"
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 
+[features]
+default = ["validated"]
+validated = []
+
 [profile.bench]
 opt-level = 3
 debug = false

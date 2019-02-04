@@ -1,3 +1,5 @@
+#![cfg(feature = "validated")]
+
 extern crate frunk;
 extern crate frunk_core;
 

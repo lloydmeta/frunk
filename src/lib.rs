@@ -208,6 +208,7 @@ extern crate frunk_derives;
 
 pub mod monoid;
 pub mod semigroup;
+#[cfg(feature = "validated")]
 pub mod validated;
 
 pub use frunk_core::*;
@@ -278,6 +279,7 @@ pub use semigroup::Semigroup;
 pub use monoid::Monoid;
 
 #[doc(no_inline)]
+#[cfg(feature = "validated")]
 pub use validated::Validated;
 
 pub mod prelude {
@@ -294,5 +296,6 @@ pub mod prelude {
     pub use hlist::LiftInto;
 
     #[doc(no_inline)]
+    #[cfg(feature = "validated")]
     pub use validated::IntoValidated;
 }
