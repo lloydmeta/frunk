@@ -1,32 +1,32 @@
 //! Module for holding the Semigroup typeclass definition and typeclass instances
 //!
 //! You can, for example, combine tuples.
-//!
-//! # Examples
-//!
-//! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
-//! # fn main() {
-//! use frunk::Semigroup;
-//!
-//! let t1 = (1, 2.5f32, String::from("hi"), Some(3));
-//! let t2 = (1, 2.5f32, String::from(" world"), None);
-//!
-//! let expected = (2, 5.0f32, String::from("hi world"), Some(3));
-//!
-//! assert_eq!(t1.combine(&t2), expected);
-//!
-//! // ultimately, the Tuple-based Semigroup implementations are only available for a maximum of
-//! // 26 elements. If you need more, use HList, which is has no such limit.
-//!
-//! let h1 = hlist![1, 3.3, 53i64];
-//! let h2 = hlist![2, 1.2, 1i64];
-//! let h3 = hlist![3, 4.5, 54];
-//! assert_eq!(h1.combine(&h2), h3)
-//! # }
-//! ```
+#![cfg_attr(feature = "std", doc = r#"
+# Examples
+
+```
+#[macro_use]
+extern crate frunk;
+
+# fn main() {
+use frunk::Semigroup;
+
+let t1 = (1, 2.5f32, String::from("hi"), Some(3));
+let t2 = (1, 2.5f32, String::from(" world"), None);
+
+let expected = (2, 5.0f32, String::from("hi world"), Some(3));
+
+assert_eq!(t1.combine(&t2), expected);
+
+// ultimately, the Tuple-based Semigroup implementations are only available for a maximum of
+// 26 elements. If you need more, use HList, which is has no such limit.
+
+let h1 = hlist![1, 3.3, 53i64];
+let h2 = hlist![2, 1.2, 1i64];
+let h3 = hlist![3, 4.5, 54];
+assert_eq!(h1.combine(&h2), h3)
+# }
+```"#)]
 
 use frunk_core::hlist::*;
 use std::cell::*;

@@ -2,36 +2,37 @@
 //!
 //! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to
 //! define a `combine_all` method to work on a list of said things:
-//!
-//! Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
-//! their values are summed in the new map?
-//!
-//! # Examples
-//!
-//! ```
-//! use std::collections::HashMap;
-//! use frunk::{monoid, Monoid};
-//!
-//! let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
-//! assert_eq!(monoid::combine_all(&vec_of_no_hashmaps),
-//!            <HashMap<i32, String> as Monoid>::empty());
-//!
-//! let mut h1: HashMap<i32, String> = HashMap::new();
-//! h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
-//! let mut h2: HashMap<i32, String> = HashMap::new();
-//! h2.insert(1, String::from(" World"));
-//! h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
-//! let mut h3: HashMap<i32, String> = HashMap::new();
-//! h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
-//! let vec_of_hashes = vec![h1, h2, h3];
-//!
-//! let mut h_expected: HashMap<i32, String> = HashMap::new();
-//! h_expected.insert(1, String::from("Hello World"));
-//! h_expected.insert(2, String::from("Goodbye"));
-//! h_expected.insert(3, String::from("Cruel World"));
-//! // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
-//! assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
-//! ```
+#![cfg_attr(feature = "std", doc = r#"
+Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
+their values are summed in the new map?
+
+# Examples
+
+```
+use std::collections::HashMap;
+use frunk::{monoid, Monoid};
+
+let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
+assert_eq!(monoid::combine_all(&vec_of_no_hashmaps),
+           <HashMap<i32, String> as Monoid>::empty());
+
+let mut h1: HashMap<i32, String> = HashMap::new();
+h1.insert(1, String::from("Hello"));  // h1 is HashMap( 1 -> "Hello")
+let mut h2: HashMap<i32, String> = HashMap::new();
+h2.insert(1, String::from(" World"));
+h2.insert(2, String::from("Goodbye"));  // h2 is HashMap( 1 -> " World", 2 -> "Goodbye")
+let mut h3: HashMap<i32, String> = HashMap::new();
+h3.insert(3, String::from("Cruel World")); // h3 is HashMap( 3 -> "Cruel World")
+let vec_of_hashes = vec![h1, h2, h3];
+
+let mut h_expected: HashMap<i32, String> = HashMap::new();
+h_expected.insert(1, String::from("Hello World"));
+h_expected.insert(2, String::from("Goodbye"));
+h_expected.insert(3, String::from("Cruel World"));
+// h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
+assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
+```"#)]
+
 use super::semigroup::{All, Any, Product, Semigroup};
 #[cfg(feature = "std")]
 use std::collections::*;
@@ -73,20 +74,20 @@ where
 }
 
 /// Given a sequence of `xs`, combine them and return the total
-///
-/// # Examples
-///
-/// ```
-/// use frunk::monoid::combine_all;
-///
-/// assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
-///
-/// let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
-/// assert_eq!(combine_all(&empty_vec_opt_int), None);
-///
-/// let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
-/// assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
-/// ```
+#[cfg_attr(feature = "std", doc = r#"
+# Examples
+
+```
+use frunk::monoid::combine_all;
+
+assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
+
+let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
+assert_eq!(combine_all(&empty_vec_opt_int), None);
+
+let some_strings = [Some(String::from("Hello")), Some(String::from(" World"))];
+assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
+```"#)]
 pub fn combine_all<T>(xs: &[T]) -> T
 where
     T: Monoid + Semigroup + Clone,
