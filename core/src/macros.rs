@@ -363,10 +363,10 @@ mod tests {
         let h = hlist![9000, "joe", 41f32, "schmoe", 50];
         let h2 = h.map(poly_fn!(
             |x: i32| -> bool { x > 100 },
-            |x: f32| -> String { format!("{}", x) },
+            |_x: f32| -> &'static str { "dummy" },
             ['a] |x: &'a str| -> usize { x.len() }
         ));
-        assert_eq!(h2, hlist![true, 3, "41".to_string(), 6, false]);
+        assert_eq!(h2, hlist![true, 3, "dummy", 6, false]);
     }
 
     #[test]
@@ -387,9 +387,9 @@ mod tests {
         let h = hlist![9000, "joe", 41f32, "schmoe", 50];
         let h2 = h.map(poly_fn!(
             |x: i32| -> bool { x > 100 },
-            |x: f32| -> String { format!("{}", x) },
+            |_x: f32| -> &'static str { "dummy" },
             ['a,] |x: &'a str| -> usize { x.len() },
         ));
-        assert_eq!(h2, hlist![true, 3, "41".to_string(), 6, false]);
+        assert_eq!(h2, hlist![true, 3, "dummy", 6, false]);
     }
 }

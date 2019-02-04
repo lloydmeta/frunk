@@ -294,14 +294,11 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_combine_all_basic() {
-        assert_eq!(combine_all(&vec![1, 2, 3]), 6);
-
-        let empty_vec_int: Vec<i32> = Vec::new();
-        assert_eq!(combine_all(&empty_vec_int), 0);
-
-        let empty_vec_opt_int: Vec<Option<i32>> = Vec::new();
-        assert_eq!(combine_all(&empty_vec_opt_int), None);
+        assert_eq!(combine_all(&[1, 2, 3]), 6);
+        assert_eq!(combine_all(&[] as &[i32]), 0);
+        assert_eq!(combine_all(&[] as &[Option<i32>]), None);
 
         let vec_of_some_strings = vec![Some("Hello".to_owned()), Some(" World".to_owned())];
         assert_eq!(
@@ -311,6 +308,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_combine_all_hashset() {
         let vec_of_no_hashes: Vec<HashSet<i32>> = Vec::new();
         assert_eq!(
@@ -333,6 +331,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_combine_all_hashmap() {
         let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
         assert_eq!(
@@ -358,29 +357,26 @@ mod tests {
 
     #[test]
     fn test_combine_all_all() {
-        let v1: Vec<All<i32>> = Vec::new();
-        assert_eq!(combine_all(&v1), All(!0));
-        assert_eq!(combine_all(&vec![All(3), All(7)]), All(3));
+        assert_eq!(combine_all(&[] as &[All<i32>]), All(!0));
+        assert_eq!(combine_all(&[All(3), All(7)]), All(3));
 
-        let v2: Vec<All<bool>> = Vec::new();
-        assert_eq!(combine_all(&v2), All(true));
-        assert_eq!(combine_all(&vec![All(false), All(false)]), All(false));
-        assert_eq!(combine_all(&vec![All(true), All(true)]), All(true));
+        assert_eq!(combine_all(&[] as &[All<bool>]), All(true));
+        assert_eq!(combine_all(&[All(false), All(false)]), All(false));
+        assert_eq!(combine_all(&[All(true), All(true)]), All(true));
     }
 
     #[test]
     fn test_combine_all_any() {
-        let v1: Vec<Any<i32>> = Vec::new();
-        assert_eq!(combine_all(&v1), Any(0));
-        assert_eq!(combine_all(&vec![Any(3), Any(8)]), Any(11));
+        assert_eq!(combine_all(&[] as &[Any<i32>]), Any(0));
+        assert_eq!(combine_all(&[Any(3), Any(8)]), Any(11));
 
-        let v2: Vec<Any<bool>> = Vec::new();
-        assert_eq!(combine_all(&v2), Any(false));
-        assert_eq!(combine_all(&vec![Any(false), Any(false)]), Any(false));
-        assert_eq!(combine_all(&vec![Any(true), Any(false)]), Any(true));
+        assert_eq!(combine_all(&[] as &[Any<bool>]), Any(false));
+        assert_eq!(combine_all(&[Any(false), Any(false)]), Any(false));
+        assert_eq!(combine_all(&[Any(true), Any(false)]), Any(true));
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_combine_all_tuple() {
         let t1 = (1, 2.5f32, String::from("hi"), Some(3));
         let t2 = (1, 2.5f32, String::from(" world"), None);
@@ -393,7 +389,7 @@ mod tests {
 
     #[test]
     fn test_combine_all_product() {
-        let v = vec![Product(2), Product(3), Product(4)];
+        let v = [Product(2), Product(3), Product(4)];
         assert_eq!(combine_all(&v), Product(24))
     }
 

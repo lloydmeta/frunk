@@ -405,6 +405,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_string() {
         let v1 = String::from("Hello");
         let v2 = String::from(" world");
@@ -412,6 +413,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_vec_i32() {
         let v1 = vec![1, 2, 3];
         let v2 = vec![4, 5, 6];
@@ -426,6 +428,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_hashset() {
         let mut v1 = HashSet::new();
         v1.insert(1);
@@ -444,6 +447,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_tuple() {
         let t1 = (1, 2.5f32, String::from("hi"), Some(3));
         let t2 = (1, 2.5f32, String::from(" world"), None);
@@ -457,7 +461,7 @@ mod tests {
     fn test_max() {
         assert_eq!(Max(1).combine(&Max(2)), Max(2));
 
-        let v = vec![Max(1), Max(2), Max(3)];
+        let v = [Max(1), Max(2), Max(3)];
         assert_eq!(combine_all_option(&v), Some(Max(3)));
     }
 
@@ -465,7 +469,7 @@ mod tests {
     fn test_min() {
         assert_eq!(Min(1).combine(&Min(2)), Min(1));
 
-        let v = vec![Min(1), Min(2), Min(3)];
+        let v = [Min(1), Min(2), Min(3)];
         assert_eq!(combine_all_option(&v), Some(Min(1)));
     }
 
@@ -482,6 +486,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_hashmap() {
         let mut v1: HashMap<i32, Option<String>> = HashMap::new();
         v1.insert(1, Some("Hello".to_owned()));
@@ -499,10 +504,10 @@ mod tests {
 
     #[test]
     fn test_combine_all_option() {
-        let v1 = &vec![1, 2, 3];
-        assert_eq!(combine_all_option(v1), Some(6));
-        let v2 = &vec![Some(1), Some(2), Some(3)];
-        assert_eq!(combine_all_option(v2), Some(Some(6)));
+        let v1 = [1, 2, 3];
+        assert_eq!(combine_all_option(&v1), Some(6));
+        let v2 = [Some(1), Some(2), Some(3)];
+        assert_eq!(combine_all_option(&v2), Some(Some(6)));
     }
 
     #[test]
@@ -513,6 +518,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_combine_hlist() {
         let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
         let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];
