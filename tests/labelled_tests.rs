@@ -170,3 +170,18 @@ fn test_generalised_auditing() {
     assert!(n_u_audited.created_at.tm_nsec >= now);
     assert!(j_u_audited.created_at.tm_nsec >= now);
 }
+
+#[test]
+fn test_conversion_between_newtypes() {
+    let s = "Foo".to_string();
+    let nt = TypeWrapper(s.clone());
+    let nt2: TypeWrapper2 = nt.transmogrify();
+    assert_eq!(nt2.0, s);
+}
+
+#[test]
+fn test_transmogrify_tuples() {
+    let vec4 = Vec4f(1.0, 2.0, 0.0, 3.0);
+    let vec3 = vec4.transmogrify();
+    assert_eq!(Vec3f(1.0, 2.0, 0.0), vec3);
+}
