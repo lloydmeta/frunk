@@ -18,11 +18,6 @@ proc-macro = true
 syn = "0.15"
 quote = "0.6"
 
-[dependencies.frunk_core]
-path = "../core"
-default-features = false
-version = "0.2.4"
-
 [dependencies.frunk_proc_macro_helpers]
 path = "../proc-macro-helpers"
 default-features = false

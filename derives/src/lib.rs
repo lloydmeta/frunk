@@ -8,7 +8,6 @@
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
-extern crate frunk_core;
 extern crate frunk_proc_macro_helpers;
 extern crate proc_macro;
 
