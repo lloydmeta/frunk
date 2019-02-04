@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk: generic functional programming toolbelt for Rust
 //!
@@ -198,6 +199,9 @@
 //! Links:
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
+
+#[cfg(not(feature = "std"))]
+extern crate core as std;
 
 #[allow(unused_imports)]
 #[macro_use]

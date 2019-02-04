@@ -11,6 +11,10 @@ keywords = ["Frunk", "HList", "Generic", "Coproduct", "LabelledGeneric"]
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
+[features]
+default = ["std"]
+std = []
+
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 
