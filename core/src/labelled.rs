@@ -416,8 +416,7 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let v_debug = format!("{:?}", self.value);
-        write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
+        write!(f, "Field{{ name: {}, value: {:?} }}", self.name, self.value)
     }
 }
 
@@ -426,8 +425,7 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let v_debug = format!("{:?}", self.value);
-        write!(f, "ValueField{{ name: {}, value: {} }}", self.name, v_debug)
+        write!(f, "ValueField{{ name: {}, value: {:?} }}", self.name, self.value)
     }
 }
 

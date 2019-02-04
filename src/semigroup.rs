@@ -115,20 +115,12 @@ where
 /// let v2: Vec<i16> = Vec::new(); // empty!
 /// assert_eq!(combine_all_option(&v2), None);
 /// ```
-pub fn combine_all_option<T>(xs: &Vec<T>) -> Option<T>
+pub fn combine_all_option<T>(xs: &[T]) -> Option<T>
 where
     T: Semigroup + Clone,
 {
     match xs.first() {
-        Some(ref head) => {
-            let tail = xs[1..].to_vec();
-            // TODO figure out how to write this as a fold
-            let mut x = (*head).clone();
-            for i in tail {
-                x = x.combine(&i)
-            }
-            Some(x)
-        }
+        Some(head) => Some(xs[1..].iter().fold(head.clone(), |a, b| a.combine(b))),
         _ => None,
     }
 }
