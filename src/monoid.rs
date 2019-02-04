@@ -82,10 +82,10 @@ use frunk::monoid::combine_all;
 
 assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
 
-let empty_vec_opt_int:  Vec<Option<i32>> = Vec::new();
+let empty_vec_opt_int: Vec<Option<i32>> = Vec::new();
 assert_eq!(combine_all(&empty_vec_opt_int), None);
 
-let some_strings = [Some(String::from("Hello")), Some(String::from(" World"))];
+let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
 assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
 ```"#)]
 pub fn combine_all<T>(xs: &[T]) -> T
