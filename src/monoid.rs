@@ -33,7 +33,9 @@
 //! assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
 //! ```
 use super::semigroup::{All, Any, Product, Semigroup};
+#[cfg(feature = "std")]
 use std::collections::*;
+#[cfg(feature = "std")]
 use std::hash::Hash;
 
 /// A Monoid is a Semigroup that has an empty/ zero value
@@ -102,12 +104,14 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl Monoid for String {
     fn empty() -> Self {
         String::new()
     }
 }
 
+#[cfg(feature = "std")]
 impl<T> Monoid for Vec<T>
 where
     T: Clone,
@@ -117,6 +121,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T> Monoid for HashSet<T>
 where
     T: Hash + Eq + Clone,
@@ -126,6 +131,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<K, V> Monoid for HashMap<K, V>
 where
     K: Eq + Hash + Clone,

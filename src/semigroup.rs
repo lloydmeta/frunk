@@ -31,8 +31,11 @@
 use frunk_core::hlist::*;
 use std::cell::*;
 use std::cmp::Ordering;
+#[cfg(feature = "std")]
 use std::collections::hash_map::Entry;
+#[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
+#[cfg(feature = "std")]
 use std::hash::Hash;
 use std::ops::{BitAnd, BitOr, Deref};
 
@@ -168,12 +171,14 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T: Semigroup> Semigroup for Box<T> {
     fn combine(&self, other: &Self) -> Self {
         Box::new(self.deref().combine(other.deref()))
     }
 }
 
+#[cfg(feature = "std")]
 impl Semigroup for String {
     fn combine(&self, other: &Self) -> Self {
         let mut cloned = self.clone();
@@ -182,6 +187,7 @@ impl Semigroup for String {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T: Clone> Semigroup for Vec<T> {
     fn combine(&self, other: &Self) -> Self {
         let mut v = self.clone();
@@ -207,6 +213,7 @@ impl<T: Semigroup> Semigroup for RefCell<T> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T> Semigroup for HashSet<T>
 where
     T: Eq + Hash + Clone,
@@ -223,6 +230,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<K, V> Semigroup for HashMap<K, V>
 where
     K: Eq + Hash + Clone,

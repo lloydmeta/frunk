@@ -1203,6 +1203,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
@@ -1218,6 +1219,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T> Into<Vec<T>> for HNil {
     fn into(self) -> Vec<T> {
         Vec::with_capacity(0)
