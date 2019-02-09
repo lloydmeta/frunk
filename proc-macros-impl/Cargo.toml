@@ -1,6 +1,6 @@
 [package]
 name = "frunk_proc_macros_impl"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Proc macros inernal implementations for Frunk"
 license = "MIT"
@@ -22,8 +22,8 @@ proc-macro = true
 
 [dependencies.frunk_core]
 path = "../core"
-version = "0.2.2"
+version = "0.2.4"
 
 [dependencies.frunk_proc_macro_helpers]
 path = "../proc-macro-helpers"
-version = "0.0.1"
+version = "0.0.2"
