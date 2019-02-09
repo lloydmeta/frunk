@@ -5,10 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]:
+
+## [0.2.4] - 2019-02-10
+### Added
 - Added `ToMut` trait, which allows borrowing mutably from a Coproduct or HList.
-- Allow `#[derive(LabelledGeneric)]` on tuple structs
-- Add `Path` model and `PathTraverser` trait, which allows for composable lens-like-usage
-- Make macros call themselves recursively with `$crate::` 
+- Added support for `#[derive(LabelledGeneric)]` on tuple structs
+- Added `Path` model and `PathTraverser` trait, which allows for composable lens-like-usage
+
+### Changed
+- Make macros call themselves recursively with `$crate::`
+
+## [0.2.3]
+- Skipped due to [release mis-steps](https://github.com/lloydmeta/frunk/pull/150#issue-251682325)
 
 ## [0.2.2] - 2018-10-21
 - Added support for [transmogrifying (recursively sculpting)](https://docs.rs/frunk/0.2.2/frunk/labelled/trait.Transmogrifier.html) one data type into another
