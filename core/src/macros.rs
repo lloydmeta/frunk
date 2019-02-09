@@ -30,11 +30,11 @@
 macro_rules! hlist {
     () => { $crate::hlist::HNil };
     (...$rest:expr) => { $rest };
-    ($a:expr) => { hlist![$a,] };
+    ($a:expr) => { $crate::hlist![$a,] };
     ($a:expr, $($tok:tt)*) => {
         $crate::hlist::HCons {
             head: $a,
-            tail: hlist![$($tok)*],
+            tail: $crate::hlist![$($tok)*],
         }
     };
 }
@@ -68,11 +68,11 @@ macro_rules! hlist_pat {
     () => { $crate::hlist::HNil };
     (...) => { _ };
     (...$rest:pat) => { $rest };
-    ($a:pat) => { hlist_pat![$a,] };
+    ($a:pat) => { $crate::hlist_pat![$a,] };
     ($a:pat, $($tok:tt)*) => {
         $crate::hlist::HCons {
             head: $a,
-            tail: hlist_pat![$($tok)*],
+            tail: $crate::hlist_pat![$($tok)*],
         }
     };
 }
@@ -96,9 +96,9 @@ macro_rules! hlist_pat {
 macro_rules! Hlist {
     () => { $crate::hlist::HNil };
     (...$Rest:ty) => { $Rest };
-    ($A:ty) => { Hlist![$A,] };
+    ($A:ty) => { $crate::Hlist![$A,] };
     ($A:ty, $($tok:tt)*) => {
-        $crate::hlist::HCons<$A, Hlist![$($tok)*]>
+        $crate::hlist::HCons<$A, $crate::Hlist![$($tok)*]>
     };
 }
 
@@ -123,9 +123,9 @@ macro_rules! Hlist {
 macro_rules! Coprod {
     () => { $crate::coproduct::CNil };
     (...$Rest:ty) => { $Rest };
-    ($A:ty) => { Coprod![$A,] };
+    ($A:ty) => { $crate::Coprod![$A,] };
     ($A:ty, $($tok:tt)*) => {
-        $crate::coproduct::Coproduct<$A, Coprod![$($tok)*]>
+        $crate::coproduct::Coproduct<$A, $crate::Coprod![$($tok)*]>
     };
 }
 
@@ -184,15 +184,15 @@ macro_rules! Coprod {
 macro_rules! field {
     // No name provided and type is a tuple
     (($($repeated: ty),*), $value: expr) => {
-        field!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
+        $crate::field!( ($($repeated),*), $value, concat!( $(stringify!($repeated)),* ) )
     };
     // No name provided and type is a tuple, but with trailing commas
     (($($repeated: ty,)*), $value: expr) => {
-        field!( ($($repeated),*), $value )
+        $crate::field!( ($($repeated),*), $value )
     };
     // We are provided any type, with no stable name
     ($name_type: ty, $value: expr) => {
-        field!( $name_type, $value, stringify!($name_type) )
+        $crate::field!( $name_type, $value, stringify!($name_type) )
     };
     // We are provided any type, with a stable name
     ($name_type: ty, $value: expr, $name: expr) => {
@@ -228,49 +228,49 @@ macro_rules! field {
 macro_rules! poly_fn {
     // encountered first func w/ type params
     ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/ type params, trailing comma on tparams
     ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/o type params
     (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, ~f $($rest)*
     )};
 
     // encountered non-first func w/ type params
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
     )};
     // encountered non-first func w/ type params, trailing comma in tparams
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
     )};
     // encountered non-first func w/o type params
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
     )};
 
     // last w/ type params, for when there is no trailing comma on the funcs...
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
     )};
     // last w/ type params, for when there is a trailing comma in tparams, but no trailing comma on the funcs..
     (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
     )};
     // last w/o type params, for when there is no trailing comma on the funcs...
     (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
-    => { poly_fn!(
+    => { $crate::poly_fn!(
        p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
     )};
 
