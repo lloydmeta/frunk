@@ -1,7 +1,8 @@
 use common::{build_hcons_constr, call_site_ident, to_ast};
 use proc_macro::TokenStream;
 use quote::ToTokens;
-use syn::{Data, Field, Fields, FieldsNamed, Ident};
+use syn::spanned::Spanned;
+use syn::{Data, Field, Fields, FieldsUnnamed, Ident};
 
 /// These are assumed to exist as enums in frunk_core::labelled
 const ALPHA_CHARS: &'static [char] = &[
@@ -13,6 +14,12 @@ const ALPHA_CHARS: &'static [char] = &[
 /// These are assumed to exist as enums in frunk_core::labelled as underscore prepended enums
 const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+enum StructType {
+    Named,
+    Tuple,
+}
+use self::StructType::*;
+
 /// Given an AST, returns an implementation of Generic using HList with
 /// Field (see frunk_core::labelled) elements
 ///
@@ -22,28 +29,36 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
     let name = &ast.ident;
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let fields_named: &FieldsNamed = match ast.data {
-        Data::Struct(ref data) => {
-            match data.fields {
-                Fields::Named(ref fields_named) => fields_named,
-                _ => panic!("Only Structs are supported. Tuple structs cannot be turned into Labelled Generics.")
-            }
+    let (struct_type, fields): (StructType, Vec<Field>) = match ast.data {
+        Data::Struct(ref data) => match data.fields {
+            Fields::Named(ref fields) => (Named, fields.named.iter().cloned().collect()),
+            Fields::Unnamed(ref fields) => (Tuple, create_indexed_fields(fields)),
+            Fields::Unit => panic!("Unit structs cannot be turned into Labelled Generics"),
         },
-        _ => panic!("Only Structs are supported. Tuple structs cannot be turned into Labelled Generics.")
+        _ => panic!(
+            "Only Structs are supported. Enums/Unions cannot be turned into Labelled Generics."
+        ),
     };
-    let fields: Vec<Field> = fields_named.named.iter().map(|f| f.clone()).collect();
-    let repr_type = build_labelled_repr(&fields);
 
+    let repr_type = build_labelled_repr(&fields);
     let fnames: Vec<Ident> = fields
         .iter()
-        // it's impossible to not have idents because we're sure this isn't a tuple struct
+        // it's impossible to not have idents because we create synthetic names for tuple structs
         .map(|f| f.ident.clone().unwrap())
         .collect();
 
     let hcons_constr = build_labelled_hcons_constr(&fields);
     let hcons_pat = build_hcons_constr(&fnames);
-    let new_struct_constr = build_new_labelled_struct_constr(name, &fnames);
-    let struct_deconstr = quote! { #name { #(#fnames, )* } };
+    let (constructor, deconstructor) = match struct_type {
+        Tuple => (
+            Box::new(build_new_labelled_tuple_struct_constr(name, &fnames)) as Box<dyn ToTokens>,
+            quote! { #name ( #(#fnames, )* ) },
+        ),
+        Named => (
+            Box::new(build_new_labelled_struct_constr(name, &fnames)) as Box<dyn ToTokens>,
+            quote! { #name { #(#fnames, )* } },
+        ),
+    };
 
     quote! {
         #[allow(non_snake_case, non_camel_case_types)]
@@ -52,16 +67,30 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
             type Repr = #repr_type;
 
             fn into(self) -> Self::Repr {
-                let #struct_deconstr = self;
+                let #deconstructor = self;
                 #hcons_constr
             }
 
             fn from(r: Self::Repr) -> Self {
                 let #hcons_pat = r;
-                #new_struct_constr
+                #constructor
             }
         }
     }
+}
+
+/// Create synthetic names for tuple struct members
+fn create_indexed_fields(fields: &FieldsUnnamed) -> Vec<Field> {
+    fields
+        .unnamed
+        .iter()
+        .enumerate()
+        .map(|(i, f)| {
+            let mut f = f.clone();
+            f.ident = Some(Ident::new(&format!("_{}", i), f.span()));
+            f
+        })
+        .collect()
 }
 
 /// Builds the labelled HList representation for a vector of fields
@@ -104,7 +133,8 @@ fn build_type_level_name_for(ident: &Ident) -> impl ToTokens {
         .iter()
         .map(|ident| {
             quote! { ::frunk_core::labelled::chars::#ident }
-        }).collect();
+        })
+        .collect();
     quote! { (#(#name_as_tokens),*) }
 }
 
@@ -185,9 +215,24 @@ fn build_field_constr_for(field: &Field) -> impl ToTokens {
 /// Assumes that there are bindings in the immediate environment with those names that
 /// are bound to Field values.
 ///
-/// The opposite of build_labelled_hcons_constr
+/// The opposite of build_labelled_hcons_constr for named structs
 fn build_new_labelled_struct_constr(struct_name: &Ident, bindnames: &Vec<Ident>) -> impl ToTokens {
     let cloned_bind1 = bindnames.clone();
     let cloned_bind2 = bindnames.clone();
     quote! { #struct_name { #(#cloned_bind1: #cloned_bind2.value),* } }
+}
+
+/// Given a tuple struct name, and a number of Idents that act as accessors
+/// names, returns an AST representing how to construct said tuple struct.
+///
+/// Assumes that there are bindings in the immediate environment with those names that
+/// are bound to Field values.
+///
+/// The opposite of build_labelled_hcons_constr for yuple structs
+fn build_new_labelled_tuple_struct_constr(
+    struct_name: &Ident,
+    bindnames: &Vec<Ident>,
+) -> impl ToTokens {
+    let cloned_bind = bindnames.clone();
+    quote! { #struct_name ( #(#cloned_bind.value),* ) }
 }

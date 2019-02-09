@@ -140,3 +140,15 @@ pub struct ExternalUser<'a> {
     pub address: ExternalAddress<'a>,
     pub name: &'a str,
 }
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct TypeWrapper(pub String);
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct TypeWrapper2(pub String);
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct Vec4f(pub f32, pub f32, pub f32, pub f32);
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub struct Vec3f(pub f32, pub f32, pub f32);
