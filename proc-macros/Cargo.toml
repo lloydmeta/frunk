@@ -1,6 +1,6 @@
 [package]
 name = "frunk_proc_macros"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Proc macros for Frunk"
 license = "MIT"
@@ -18,11 +18,11 @@ proc-macro-hack = "0.5"
 
 [dependencies.frunk_core]
 path = "../core"
-version = "0.2.2"
+version = "0.2.4"
 
 [dependencies.frunk_proc_macros_impl]
 path = "../proc-macros-impl"
-version = "0.0.1"
+version = "0.0.2"
 
 [dev-dependencies.frunk]
 path = "../."
