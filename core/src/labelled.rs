@@ -698,6 +698,18 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
     }
 }
 
+/// Implementation of `Transmogrifier` that maps over a `Vec` in a `Field`, transmogrifying the
+/// elements on the way past.
+impl<Key, Source, Target, InnerIndices>
+    Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
+where
+    Source: Transmogrifier<Target, InnerIndices>
+{
+    fn transmogrify(self) -> Vec<Target> {
+        self.value.into_iter().map(|e| e.transmogrify()).collect()
+    }
+}
+
 /// Implementation of `Transmogrifier` for when the `Target` is empty and the `Source` is empty.
 impl Transmogrifier<HNil, HNil> for HNil {
     #[inline(always)]
@@ -973,6 +985,35 @@ mod tests {
         assert_eq!(
             target,
             hlist![field!(name, "joe"), field!(age, 32), field!(is_admin, true)]
+        )
+    }
+
+    #[test]
+    fn test_transmogrify_through_containers() {
+        type SourceOuter = Hlist![
+            Field<name, &'static str>,
+            Field<inner, Vec<SourceInner>>,
+        ];
+        type SourceInner = Hlist![
+            Field<is_admin, bool>,
+            Field<age, i32>,
+        ];
+        type TargetOuter = Hlist![
+            Field<name, &'static str>,
+            Field<inner, Vec<TargetInner>>,
+        ];
+        type TargetInner = Hlist![
+            Field<age, i32>,
+            Field<is_admin, bool>,
+        ];
+        let child: SourceInner = hlist![field!(is_admin, true), field!(age, 14)];
+        let source: SourceOuter = hlist![field!(name, "Joe"), field!(inner, vec![child])];
+
+        let target: TargetOuter = source.transmogrify();
+        let expected_inner: TargetInner = hlist![field!(age, 14), field!(is_admin, true)];
+        assert_eq!(
+            target,
+            hlist![field!(name, "Joe"), field!(inner, vec![expected_inner])]
         )
     }
 
