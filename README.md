@@ -32,6 +32,7 @@ For a deep dive, RustDocs are available for:
 1. [HList](#hlist)
 2. [Generic](#generic)
     * 2.1 [LabelledGeneric](#labelledgeneric)
+       * 2.1.2 [Path (Lenses)](#path)
 3. [Coproduct](#coproduct)
 4. [Validated](#validated)
 5. [Semigroup](#semigroup)
@@ -401,6 +402,79 @@ some of which may be addressed in the future:
 For more information how Generic and Field work, check out their respective Rustdocs:
   * [Generic](https://beachape.com/frunk/frunk_core/generic/index.html)
   * [Labelled](https://beachape.com/frunk/frunk_core/labelled/index.html)
+  
+#### Path
+
+One of the other things that `LabelledGeneric`-deriving structs can do is be generically traversed
+using `Path` and its companion trait `PathTraverser`. In some circles, this functionality is also
+called a Lens.
+
+`Path`-based traversals are 
+* Easy to use through the procedural macro `path!` (`frunk_proc_macros`)
+  * Traversing multiple levels is familiar; just use dot `.` syntax (`path!(nested.attribute.value)`)
+* Compile-time safe
+* Composable (add one to the other using `+`)  
+* Allows you to get by value, get by reference or get by mutable reference, depending on the type
+  of thing you pass it.
+
+```rust
+#[derive(LabelledGeneric)]
+struct Dog<'a> {
+    name: &'a str,
+    dimensions: Dimensions,
+}
+
+#[derive(LabelledGeneric)]
+struct Cat<'a> {
+    name: &'a str,
+    dimensions: Dimensions,
+}
+
+#[derive(LabelledGeneric)]
+struct Dimensions {
+    height: usize,
+    width: usize,
+    unit: SizeUnit,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum SizeUnit {
+    Cm,
+    Inch,
+}
+
+let mut dog = Dog {
+    name: "Joe",
+    dimensions: Dimensions {
+        height: 10,
+        width: 5,
+        unit: SizeUnit::Inch,
+    },
+};
+
+let cat = Cat {
+    name: "Schmoe",
+    dimensions: Dimensions {
+        height: 7,
+        width: 3,
+        unit: SizeUnit::Cm,
+    },
+};
+
+// generic, re-usable, compsable paths
+let dimensions_lens = path!(dimensions);
+let height_lens = dimensions_lens + path!(height); // compose multiple
+let unit_lens = path!(dimensions.unit); // dot syntax to just do the whole thing at once
+
+assert_eq!(*height_lens.get(&dog), 10);
+assert_eq!(*height_lens.get(&cat), 7);
+assert_eq!(*unit_lens.get(&dog), SizeUnit::Inch);
+assert_eq!(*unit_lens.get(&cat), SizeUnit::Cm);
+
+// modify by passing a &mut
+*height_lens.get(&mut dog) = 13;
+assert_eq!(*height_lens.get(&dog), 13);
+```
 
 ### Coproduct
 

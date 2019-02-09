@@ -1,22 +1,24 @@
 [package]
-name = "frunk_derives"
-version = "0.2.2"
+name = "frunk_proc_macros_impl"
+version = "0.0.1"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
-description = "frunk_derives contains the custom derivations for certain traits in Frunk."
+description = "Proc macros inernal implementations for Frunk"
 license = "MIT"
-documentation = "https://docs.rs/frunk_derives"
+documentation = "https://docs.rs/frunk_proc_macros_internal"
 repository = "https://github.com/lloydmeta/frunk"
-keywords = ["Frunk", "derives"]
+keywords = ["Frunk", "macros", "internal"]
 
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
-[lib]
-proc-macro = true
-
 [dependencies]
 syn = "0.15"
 quote = "0.6"
+proc-macro-hack = "0.5"
+
+[lib]
+proc-macro = true
+
 
 [dependencies.frunk_core]
 path = "../core"

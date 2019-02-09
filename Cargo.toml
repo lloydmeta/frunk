@@ -19,6 +19,10 @@ time = "0.1.36"
 path = "core"
 version = "0.2.2"
 
+[dependencies.frunk_proc_macros]
+path = "proc-macros"
+version = "0.0.1"
+
 [dependencies.frunk_derives]
 path = "derives"
 version = "0.2.2"
@@ -36,11 +40,14 @@ debug = false
 rpath = false
 lto = false
 debug-assertions = false
-# codegen-units = 1 https://users.rust-lang.org/t/odd-benchmark-results-compiler-optimisation-wall/10503
+codegen-units = 1 # https://users.rust-lang.org/t/odd-benchmark-results-compiler-optimisation-wall/10503
 
 [workspace]
 members = [
+    "proc-macro-helpers",
     "core",
+    "proc-macros-impl",
+    "proc-macros",
     "derives",
     "laws"
 ]

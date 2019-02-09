@@ -79,10 +79,7 @@ pub trait HList: Sized {
     /// ```
     const LEN: usize;
 
-    #[deprecated(
-        since = "0.1.30",
-        note = "Please use len() or static_len() instead."
-    )]
+    #[deprecated(since = "0.1.30", note = "Please use len() or static_len() instead.")]
     fn length(&self) -> u32 {
         Self::LEN as u32
     }
@@ -536,10 +533,10 @@ macro_rules! gen_inherent_methods {
     };
 }
 
-gen_inherent_methods!{
+gen_inherent_methods! {
     impl<> HNil { ... }
 }
-gen_inherent_methods!{
+gen_inherent_methods! {
     impl<Head, Tail> HCons<Head, Tail> { ... }
 }
 
@@ -887,10 +884,11 @@ where
     type Output = <<Tail as IntoReverse>::Output as Add<HCons<H, HNil>>>::Output;
 
     fn into_reverse(self) -> Self::Output {
-        self.tail.into_reverse() + HCons {
-            head: self.head,
-            tail: HNil,
-        }
+        self.tail.into_reverse()
+            + HCons {
+                head: self.head,
+                tail: HNil,
+            }
     }
 }
 

@@ -56,4 +56,3 @@ pub struct PluckedLabelledGenericIndicesWrapper<T>(T);
 
 /// Index type wrapper for transmogrifying through a (known) container (e.g. `Vec`).
 pub struct MappingIndicesWrapper<T>(PhantomData<(T)>);
-

@@ -1,3 +1,4 @@
+#![recursion_limit = "128"]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk Derives
 //!
@@ -8,6 +9,7 @@
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
 extern crate frunk_core;
+extern crate frunk_proc_macro_helpers;
 extern crate proc_macro;
 
 #[macro_use]
@@ -15,8 +17,6 @@ extern crate quote;
 extern crate syn;
 
 use proc_macro::TokenStream;
-
-mod common;
 
 mod derive_generic;
 use derive_generic::impl_generic;

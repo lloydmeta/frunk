@@ -21,3 +21,7 @@ version = "0.2.2"
 [dev-dependencies.frunk]
 path = ".."
 version = "0.2.2"
+
+[dev-dependencies.frunk_proc_macros]
+path = "../proc-macros"
+version = "0.0.1"

@@ -198,14 +198,17 @@ pub trait LabelledGeneric {
     type Repr;
 
     /// Convert a value to its representation type `Repr`.
+    #[inline(always)]
     fn into(self) -> Self::Repr;
 
     /// Convert a value's labelled representation type `Repr`
     /// to the values's type.
+    #[inline(always)]
     fn from(repr: Self::Repr) -> Self;
 
     /// Convert from one type to another using a type with the same
     /// labelled generic representation
+    #[inline(always)]
     fn convert_from<Src>(src: Src) -> Self
     where
         Src: LabelledGeneric<Repr = Self::Repr>,
@@ -238,6 +241,7 @@ pub trait LabelledGeneric {
     /// Note that this method tosses away the "remainder" of the sculpted
     /// representation. In other words, anything that is not needed from `Src`
     /// gets tossed out.
+    #[inline(always)]
     fn transform_from<Src, Indices>(src: Src) -> Self
     where
         Src: LabelledGeneric,
@@ -249,6 +253,27 @@ pub trait LabelledGeneric {
         // We toss away the remainder.
         let (self_gen, _): (<Self as LabelledGeneric>::Repr, _) = src_gen.sculpt();
         <Self as LabelledGeneric>::from(self_gen)
+    }
+}
+
+pub trait IntoLabelledGeneric {
+    /// The labelled generic representation type.
+    type Repr;
+
+    /// Convert a value to its representation type `Repr`.
+    #[inline(always)]
+    fn into(self) -> Self::Repr;
+}
+
+impl<A> IntoLabelledGeneric for A
+where
+    A: LabelledGeneric,
+{
+    type Repr = <A as LabelledGeneric>::Repr;
+
+    #[inline(always)]
+    fn into(self) -> <Self as IntoLabelledGeneric>::Repr {
+        self.into()
     }
 }
 
@@ -703,7 +728,7 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 impl<Key, Source, Target, InnerIndices>
     Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
 where
-    Source: Transmogrifier<Target, InnerIndices>
+    Source: Transmogrifier<Target, InnerIndices>,
 {
     fn transmogrify(self) -> Vec<Target> {
         self.value.into_iter().map(|e| e.transmogrify()).collect()
@@ -940,11 +965,11 @@ mod tests {
             Field<age, i32>,
             Field<is_admin, bool>];
         type Target = Hlist![
+            Field<is_admin, bool>,
+            Field<name,  Hlist![
                 Field<is_admin, bool>,
-                Field<name,  Hlist![
-                    Field<is_admin, bool>,
-                ]>,
-            ];
+            ]>,
+        ];
         let source: Source = hlist![
             field!(name, hlist![field!(inner, 42f32), field!(is_admin, true)]),
             field!(age, 32),
