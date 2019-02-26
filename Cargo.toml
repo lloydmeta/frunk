@@ -17,18 +17,22 @@ time = "0.1.36"
 
 [dependencies.frunk_core]
 path = "core"
+default-features = false
 version = "0.2.4"
 
 [dependencies.frunk_proc_macros]
 path = "proc-macros"
+default-features = false
 version = "0.0.2"
 
 [dependencies.frunk_derives]
 path = "derives"
+default-features = false
 version = "0.2.4"
 
 [dev-dependencies.frunk_laws]
 path = "laws"
+default-features = false
 version = "0.2.4"
 
 [dependencies]
