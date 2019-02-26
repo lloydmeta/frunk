@@ -11,10 +11,8 @@ keywords = ["Frunk", "macros"]
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
-[dependencies]
-syn = "0.15"
-quote = "0.6"
-proc-macro-hack = "0.5"
+[dependencies.proc-macro-hack]
+version = "0.5"
 
 [dependencies.frunk_core]
 path = "../core"

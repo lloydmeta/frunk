@@ -23,6 +23,7 @@ version = "0.2.4"
 [dependencies.frunk_proc_macros]
 path = "proc-macros"
 default-features = false
+optional = true
 version = "0.0.2"
 
 [dependencies.frunk_derives]
@@ -39,8 +40,9 @@ version = "0.2.4"
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 
 [features]
-default = ["validated"]
+default = ["validated", "proc-macros"]
 validated = ["std"]
+proc-macros = ["frunk_proc_macros"]
 std = ["frunk_core/std"]
 
 [profile.bench]
