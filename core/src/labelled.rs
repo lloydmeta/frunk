@@ -416,8 +416,7 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let v_debug = format!("{:?}", self.value);
-        write!(f, "Field{{ name: {}, value: {} }}", self.name, v_debug)
+        write!(f, "Field{{ name: {}, value: {:?} }}", self.name, self.value)
     }
 }
 
@@ -426,8 +425,7 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let v_debug = format!("{:?}", self.value);
-        write!(f, "ValueField{{ name: {}, value: {} }}", self.name, v_debug)
+        write!(f, "ValueField{{ name: {}, value: {:?} }}", self.name, self.value)
     }
 }
 
@@ -725,6 +723,7 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 
 /// Implementation of `Transmogrifier` that maps over a `Vec` in a `Field`, transmogrifying the
 /// elements on the way past.
+#[cfg(feature = "std")]
 impl<Key, Source, Target, InnerIndices>
     Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
 where

@@ -1203,6 +1203,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
@@ -1218,6 +1219,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T> Into<Vec<T>> for HNil {
     fn into(self) -> Vec<T> {
         Vec::with_capacity(0)
@@ -1406,12 +1408,12 @@ mod tests {
         let hlist_pat!(one2,) = hlist!["one"];
         assert_eq!(one2, "one");
 
-        let h = hlist![5, 3.2f32, true, "blue".to_owned()];
+        let h = hlist![5, 3.2f32, true, "blue"];
         let hlist_pat!(five, float, right, s) = h;
         assert_eq!(five, 5);
         assert_eq!(float, 3.2f32);
         assert_eq!(right, true);
-        assert_eq!(s, "blue".to_owned());
+        assert_eq!(s, "blue");
 
         let h2 = hlist![13.5f32, "hello", Some(41)];
         let hlist_pat![a, b, c,] = h2;
@@ -1521,13 +1523,13 @@ mod tests {
             }
         }
         impl Func<f32> for P {
-            type Output = String;
-            fn call(args: f32) -> Self::Output {
-                format!("{}", args)
+            type Output = &'static str;
+            fn call(_: f32) -> Self::Output {
+                "dummy"
             }
         }
         struct P;
-        assert_eq!(h.map(Poly(P)), hlist![true, 3, "41".to_string(), 6, false]);
+        assert_eq!(h.map(Poly(P)), hlist![true, 3, "dummy", 6, false]);
     }
 
     #[test]
@@ -1546,15 +1548,15 @@ mod tests {
             }
         }
         impl<'a> Func<&'a f32> for P {
-            type Output = String;
-            fn call(args: &'a f32) -> Self::Output {
-                format!("{}", args)
+            type Output = &'static str;
+            fn call(_: &'a f32) -> Self::Output {
+                "dummy"
             }
         }
         struct P;
         assert_eq!(
             h.to_ref().map(Poly(P)),
-            hlist![true, 3, "41".to_string(), 6, false]
+            hlist![true, 3, "dummy", 6, false]
         );
     }
 
@@ -1593,6 +1595,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_single_func_foldl_consuming() {
         use std::collections::HashMap;
         let h = hlist![
@@ -1609,19 +1612,14 @@ mod tests {
             },
             HashMap::with_capacity(5),
         );
-        let expected = {
-            let mut m = HashMap::with_capacity(5);
-            let vec = vec![
+        let expected: HashMap<_, _> = {
+            vec![
                 ("one", 1),
                 ("two", 2),
                 ("three", 3),
                 ("four", 4),
                 ("five", 5),
-            ];
-            for (k, v) in vec {
-                m.insert(k, v);
-            }
-            m
+            ].into_iter().collect()
         };
         assert_eq!(r, expected);
     }
@@ -1634,6 +1632,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_into_vec() {
         let h = hlist![1, 2, 3, 4, 5];
         let as_vec: Vec<_> = h.into();

@@ -11,17 +11,24 @@ keywords = ["Frunk", "HList", "Generic", "Coproduct", "LabelledGeneric"]
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
+[features]
+default = ["std"]
+std = []
+
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 
 [dev-dependencies.frunk_derives]
 path = "../derives"
+default-features = false
 version = "0.2.4"
 
 [dev-dependencies.frunk]
 path = ".."
+default-features = false
 version = "0.2.4"
 
 [dev-dependencies.frunk_proc_macros]
 path = "../proc-macros"
+default-features = false
 version = "0.0.2"

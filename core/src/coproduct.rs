@@ -999,6 +999,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_coproduct_fold_consuming() {
         type I32F32StrBool = Coprod!(i32, f32, bool);
 
@@ -1043,6 +1044,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn test_coproduct_fold_non_consuming() {
         type I32F32Bool = Coprod!(i32, f32, bool);
 
