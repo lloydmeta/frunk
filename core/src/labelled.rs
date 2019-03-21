@@ -416,7 +416,11 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Field{{ name: {}, value: {:?} }}", self.name, self.value)
+        f.debug_struct("Field")
+            // show name without quotes
+            .field("name", &DebugAsDisplay(&self.name))
+            .field("value", &self.value)
+            .finish()
     }
 }
 
@@ -425,11 +429,20 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "ValueField{{ name: {}, value: {:?} }}",
-            self.name, self.value
-        )
+        f.debug_struct("ValueField")
+            // show name without quotes
+            .field("name", &DebugAsDisplay(&self.name))
+            .field("value", &self.value)
+            .finish()
+    }
+}
+
+/// Utility type that implements Debug in terms of Display.
+struct DebugAsDisplay<T>(T);
+
+impl<T: fmt::Display> fmt::Debug for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
     }
 }
 
@@ -944,6 +957,19 @@ mod tests {
         let f1 = field!(age, 3);
         let f2 = field!((a, g, e), 3);
         assert_eq!(f1, f2)
+    }
+
+    #[test]
+    fn test_field_debug() {
+        let field = field!(age, 3);
+        let hlist_pat![value_field] = hlist![field].into_value_labelled();
+
+        // names don't have quotation marks
+        assert!(format!("{:?}", field).contains("name: age"));
+        assert!(format!("{:?}", value_field).contains("name: age"));
+        // :#? works
+        assert!(format!("{:#?}", field).contains("\n"));
+        assert!(format!("{:#?}", value_field).contains("\n"));
     }
 
     #[test]
