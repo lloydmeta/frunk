@@ -425,7 +425,11 @@ where
     Type: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "ValueField{{ name: {}, value: {:?} }}", self.name, self.value)
+        write!(
+            f,
+            "ValueField{{ name: {}, value: {:?} }}",
+            self.name, self.value
+        )
     }
 }
 
@@ -721,16 +725,57 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
     }
 }
 
-/// Implementation of `Transmogrifier` that maps over a `Vec` in a `Field`, transmogrifying the
-/// elements on the way past.
+/// Implementations of `Transmogrifier` that allow recursion through stdlib container types.
 #[cfg(feature = "std")]
+mod std {
+    use super::MappingIndicesWrapper;
+    use super::{Field, Transmogrifier};
+    use std::collections::{LinkedList, VecDeque};
+
+    macro_rules! transmogrify_seq {
+        ($container:ident) => {
+            /// Implementation of `Transmogrifier` that maps over a `$container` in a `Field`, transmogrifying the
+            /// elements on the way past.
+            impl<Key, Source, Target, InnerIndices>
+                Transmogrifier<$container<Target>, MappingIndicesWrapper<InnerIndices>>
+                for Field<Key, $container<Source>>
+            where
+                Source: Transmogrifier<Target, InnerIndices>,
+            {
+                fn transmogrify(self) -> $container<Target> {
+                    self.value.into_iter().map(|e| e.transmogrify()).collect()
+                }
+            }
+        };
+    }
+
+    transmogrify_seq!(Vec);
+    transmogrify_seq!(LinkedList);
+    transmogrify_seq!(VecDeque);
+
+    /// Implementation of `Transmogrifier` that maps over an `Box` in a `Field`, transmogrifying the
+    /// contained element on the way past.
+    impl<Key, Source, Target, InnerIndices>
+        Transmogrifier<Box<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Box<Source>>
+    where
+        Source: Transmogrifier<Target, InnerIndices>,
+    {
+        fn transmogrify(self) -> Box<Target> {
+            Box::new(self.value.transmogrify())
+        }
+    }
+}
+
+/// Implementation of `Transmogrifier` that maps over an `Option` in a `Field`, transmogrifying the
+/// contained element on the way past if present.
 impl<Key, Source, Target, InnerIndices>
-    Transmogrifier<Vec<Target>, MappingIndicesWrapper<InnerIndices>> for Field<Key, Vec<Source>>
+    Transmogrifier<Option<Target>, MappingIndicesWrapper<InnerIndices>>
+    for Field<Key, Option<Source>>
 where
     Source: Transmogrifier<Target, InnerIndices>,
 {
-    fn transmogrify(self) -> Vec<Target> {
-        self.value.into_iter().map(|e| e.transmogrify()).collect()
+    fn transmogrify(self) -> Option<Target> {
+        self.value.map(|e| e.transmogrify())
     }
 }
 
@@ -862,6 +907,7 @@ where
 mod tests {
     use super::chars::*;
     use super::*;
+    use std::collections::{LinkedList, VecDeque};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -1014,31 +1060,106 @@ mod tests {
 
     #[test]
     fn test_transmogrify_through_containers() {
-        type SourceOuter = Hlist![
+        type SourceOuter<T> = Hlist![
             Field<name, &'static str>,
-            Field<inner, Vec<SourceInner>>,
+            Field<inner, T>,
         ];
         type SourceInner = Hlist![
             Field<is_admin, bool>,
             Field<age, i32>,
         ];
-        type TargetOuter = Hlist![
+        type TargetOuter<T> = Hlist![
             Field<name, &'static str>,
-            Field<inner, Vec<TargetInner>>,
+            Field<inner, T>,
         ];
         type TargetInner = Hlist![
             Field<age, i32>,
             Field<is_admin, bool>,
         ];
-        let child: SourceInner = hlist![field!(is_admin, true), field!(age, 14)];
-        let source: SourceOuter = hlist![field!(name, "Joe"), field!(inner, vec![child])];
 
-        let target: TargetOuter = source.transmogrify();
-        let expected_inner: TargetInner = hlist![field!(age, 14), field!(is_admin, true)];
+        fn create_inner() -> (SourceInner, TargetInner) {
+            let source_inner: SourceInner = hlist![field!(is_admin, true), field!(age, 14)];
+            let target_inner: TargetInner = hlist![field!(age, 14), field!(is_admin, true)];
+            (source_inner, target_inner)
+        }
+
+        // Vec -> Vec
+        let (source_inner, target_inner) = create_inner();
+        let source: SourceOuter<Vec<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, vec![source_inner])];
+        let target: TargetOuter<Vec<TargetInner>> = source.transmogrify();
         assert_eq!(
             target,
-            hlist![field!(name, "Joe"), field!(inner, vec![expected_inner])]
-        )
+            hlist![field!(name, "Joe"), field!(inner, vec![target_inner])]
+        );
+
+        // LInkedList -> LinkedList
+        let (source_inner, target_inner) = create_inner();
+        let source_inner = {
+            let mut list = LinkedList::new();
+            list.push_front(source_inner);
+            list
+        };
+        let target_inner = {
+            let mut list = LinkedList::new();
+            list.push_front(target_inner);
+            list
+        };
+        let source: SourceOuter<LinkedList<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, source_inner)];
+        let target: TargetOuter<LinkedList<TargetInner>> = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![field!(name, "Joe"), field!(inner, target_inner)]
+        );
+
+        // VecDeque -> VecDeque
+        let (source_inner, target_inner) = create_inner();
+        let source_inner = {
+            let mut list = VecDeque::new();
+            list.push_front(source_inner);
+            list
+        };
+        let target_inner = {
+            let mut list = VecDeque::new();
+            list.push_front(target_inner);
+            list
+        };
+        let source: SourceOuter<VecDeque<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, source_inner)];
+        let target: TargetOuter<VecDeque<TargetInner>> = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![field!(name, "Joe"), field!(inner, target_inner)]
+        );
+
+        // Option -> Option
+        let (source_inner, target_inner) = create_inner();
+        let source_inner = Some(source_inner);
+        let target_inner = Some(target_inner);
+        let source: SourceOuter<Option<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, source_inner)];
+        let target: TargetOuter<Option<TargetInner>> = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![field!(name, "Joe"), field!(inner, target_inner)]
+        );
+        let source: SourceOuter<Option<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, None)];
+        let target: TargetOuter<Option<TargetInner>> = source.transmogrify();
+        assert_eq!(target, hlist![field!(name, "Joe"), field!(inner, None)]);
+
+        // Box -> Box
+        let (source_inner, target_inner) = create_inner();
+        let source_inner = Box::new(source_inner);
+        let target_inner = Box::new(target_inner);
+        let source: SourceOuter<Box<SourceInner>> =
+            hlist![field!(name, "Joe"), field!(inner, source_inner)];
+        let target: TargetOuter<Box<TargetInner>> = source.transmogrify();
+        assert_eq!(
+            target,
+            hlist![field!(name, "Joe"), field!(inner, target_inner)]
+        );
     }
 
     //    #[test]
