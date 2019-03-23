@@ -1,6 +1,6 @@
 [package]
 name = "frunk_core"
-version = "0.2.4"
+version = "0.3.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList, Coproduct, LabelledGeneric and Generic"
 license = "MIT"
@@ -21,14 +21,14 @@ serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 [dev-dependencies.frunk_derives]
 path = "../derives"
 default-features = false
-version = "0.2.4"
+version = "0.3.0"
 
 [dev-dependencies.frunk]
 path = ".."
 default-features = false
-version = "0.2.4"
+version = "0.3.0"
 
 [dev-dependencies.frunk_proc_macros]
 path = "../proc-macros"
 default-features = false
-version = "0.0.2"
+version = "0.0.3"
