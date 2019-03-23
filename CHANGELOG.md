@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]:
 
+## [0.3.0] - 2019-03-23
+### Added
+- More transmogrifications supported out of the box (https://github.com/lloydmeta/frunk/pull/152)
+  - `Box`, `Option`, `Vec` and more.
+- More idiomatic Debug impl for Field Debug impls should use DebugStruct #153
+- [no-std] support https://github.com/lloydmeta/frunk/pull/148
+  - Note: this is a breaking change, see [the PR](https://github.com/lloydmeta/frunk/pull/148) for details
+
 ## [0.2.4] - 2019-02-10
 ### Added
 - Added `ToMut` trait, which allows borrowing mutably from a Coproduct or HList.
