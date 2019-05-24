@@ -106,6 +106,10 @@ impl From<()> for Hlist![] {
     }
 }
 
+impl From<Hlist![]> for () {
+    fn from(_: Hlist![]) -> Self {}
+}
+
 tup_def!( T0 ; F1, ; T1, );
 tup_def!( T0 ; F1, F2, ;
                T1, T2, );
