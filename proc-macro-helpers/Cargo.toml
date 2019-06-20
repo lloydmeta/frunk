@@ -14,6 +14,7 @@ travis-ci = { repository = "lloydmeta/frunk" }
 [dependencies]
 syn = "0.15"
 quote = "0.6"
+proc-macro2 = "0.4"
 
 [dependencies.frunk_core]
 path = "../core"

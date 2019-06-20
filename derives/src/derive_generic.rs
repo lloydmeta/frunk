@@ -1,7 +1,7 @@
-use frunk_proc_macro_helpers::{build_hcons_constr, call_site_ident, to_ast};
+use frunk_proc_macro_helpers::*;
 use proc_macro::TokenStream;
 use quote::ToTokens;
-use syn::{Data, Fields, Ident, Type};
+use syn::Data;
 
 /// Given an AST, returns an implementation of Generic using HList
 ///
@@ -9,83 +9,40 @@ use syn::{Data, Fields, Ident, Type};
 pub fn impl_generic(input: TokenStream) -> impl ToTokens {
     let ast = to_ast(input);
     let name = &ast.ident;
+
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let fields: &Fields = match ast.data {
-        Data::Struct(ref data) => &data.fields,
-        _ => panic!("Only structs are supported"),
-    };
-    let field_types: Vec<Type> = fields.iter().map(|f| f.ty.clone()).collect();
-    let repr_type = build_repr(&field_types);
 
-    let maybe_fnames: Vec<Option<Ident>> = fields.iter().map(|f| f.ident.clone()).collect();
-    let is_tuple_struct = maybe_fnames.iter().all(|m_f| m_f.is_none());
+    let tree = match ast.data {
+        Data::Struct(ref data) => {
+            let field_bindings = FieldBindings::new(&data.fields);
+            let repr_type = field_bindings.build_hlist_type(FieldBinding::build_type);
+            let hcons_constr = field_bindings.build_hlist_constr(FieldBinding::build);
+            let type_constr = field_bindings.build_type_constr(FieldBinding::build);
 
-    let fnames: Vec<Ident> = fields
-        .iter()
-        .enumerate()
-        .map(|(i, f)| {
-            f.ident
-                .clone()
-                .unwrap_or(call_site_ident(&format!("_{}", i)))
-        })
-        .collect();
-    let hcons_constr = build_hcons_constr(&fnames);
-    let hcons_pat = build_hcons_constr(&fnames);
-    let new_struct_constr = build_new_struct_constr(name, &fnames, is_tuple_struct);
+            quote! {
+                #[allow(non_snake_case, non_camel_case_types)]
+                impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
 
-    let struct_deconstr = if is_tuple_struct {
-        quote! { #name ( #(#fnames, )* ) }
-    } else {
-        quote! { #name { #(#fnames, )* } }
-    };
+                    type Repr = #repr_type;
 
-    quote! {
-        #[allow(non_snake_case, non_camel_case_types)]
-        impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
+                    fn into(self) -> Self::Repr {
+                        let #name #type_constr = self;
+                        #hcons_constr
+                    }
 
-            type Repr = #repr_type;
-
-            fn into(self) -> Self::Repr {
-                let #struct_deconstr = self;
-                #hcons_constr
+                    fn from(r: Self::Repr) -> Self {
+                        let #hcons_constr = r;
+                        #name #type_constr
+                    }
+                }
             }
+        },
+        _ => panic!(
+            "Only Structs are supported. Enums/Unions cannot be turned into Generics."
+        ),
+    };
 
-            fn from(r: Self::Repr) -> Self {
-                let #hcons_pat = r;
-                #new_struct_constr
-            }
-        }
-    }
-}
-
-fn build_repr(field_types: &Vec<Type>) -> impl ToTokens {
-    match field_types.len() {
-        0 => quote! { ::frunk_core::hlist::HNil },
-        1 => {
-            let h = field_types[0].clone();
-            quote! { ::frunk_core::hlist::HCons<#h, ::frunk_core::hlist::HNil> }
-        }
-        _ => {
-            let h = field_types[0].clone();
-            let tail = field_types[1..].to_vec();
-            let tail_type = build_repr(&tail);
-            quote! { ::frunk_core::hlist::HCons<#h, #tail_type> }
-        }
-    }
-}
-
-fn build_new_struct_constr(
-    struct_name: &Ident,
-    bindnames: &Vec<Ident>,
-    is_tuple_struct: bool,
-) -> impl ToTokens {
-    if is_tuple_struct {
-        let cloned_bind = bindnames.clone();
-        quote! { #struct_name (#(#cloned_bind),* ) }
-    } else {
-        let cloned_bind1 = bindnames.clone();
-        let cloned_bind2 = bindnames.clone();
-        quote! { #struct_name { #(#cloned_bind1: #cloned_bind2),* } }
-    }
+    //     print!("{}", tree);
+    tree
 }
