@@ -1,3 +1,5 @@
+use std::iter::repeat;
+
 use frunk_proc_macro_helpers::*;
 use proc_macro::TokenStream;
 use quote::ToTokens;
@@ -74,11 +76,100 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
                 }
             }
         }
+        Data::Enum(ref data) => {
+            let variant_bindings = VariantBindings::new(&data.variants);
+            let repr_type =
+                &variant_bindings.build_coprod_type(VariantBinding::build_hlist_field_type);
+            let repr_type_ref =
+                &variant_bindings.build_coprod_type(VariantBinding::build_hlist_field_type_ref);
+            let repr_type_mut =
+                &variant_bindings.build_coprod_type(VariantBinding::build_hlist_field_type_mut);
+            let coprod_exprs =
+                &variant_bindings.build_coprod_constrs(VariantBinding::build_hlist_field_expr);
+            let coprod_pats =
+                &variant_bindings.build_coprod_constrs(VariantBinding::build_hlist_field_pat);
+            let coprod_unreachable = &variant_bindings.build_coprod_unreachable_arm(false);
+            let type_constrs1 =
+                &variant_bindings.build_variant_constrs(VariantBinding::build_type_constr);
+            let type_constrs2 = type_constrs1;
+            let type_pat_ref =
+                &variant_bindings.build_variant_constrs(VariantBinding::build_type_pat_ref);
+            let type_pat_mut =
+                &variant_bindings.build_variant_constrs(VariantBinding::build_type_pat_mut);
+            let name_it1 = repeat(name);
+            let name_it2 = repeat(name);
+            let name_it3 = repeat(name);
+            let name_it4 = repeat(name);
+
+            let base_impl = quote! {
+                #[allow(non_snake_case, non_camel_case_types)]
+                impl #impl_generics ::frunk_core::labelled::LabelledGeneric for #name #ty_generics #where_clause {
+
+                    type Repr = #repr_type;
+
+                    #[inline(always)]
+                    fn into(self) -> Self::Repr {
+                        match self {
+                            #(
+                                #name_it1 :: #type_constrs1 => #coprod_exprs,
+                            )*
+                        }
+                    }
+
+                    #[inline(always)]
+                    fn from(r: Self::Repr) -> Self {
+                        match r {
+                            #(
+                                #coprod_pats => #name_it2 :: #type_constrs2,
+                            )*
+                            #coprod_unreachable
+                        }
+                    }
+                }
+            };
+
+            let ref_impl = quote! {
+                #[allow(non_snake_case, non_camel_case_types)]
+                impl #impl_generics_ref ::frunk_core::labelled::IntoLabelledGeneric for & '_frunk_ref_ #name #ty_generics #where_clause_ref {
+
+                    type Repr = #repr_type_ref;
+
+                    #[inline(always)]
+                    fn into(self) -> Self::Repr {
+                        match self {
+                            #(
+                                #name_it3 :: #type_pat_ref => #coprod_exprs,
+                            )*
+                        }
+                    }
+
+                }
+            };
+
+            let mut_impl = quote! {
+                #[allow(non_snake_case, non_camel_case_types)]
+                impl #impl_generics_ref ::frunk_core::labelled::IntoLabelledGeneric for & '_frunk_ref_ mut #name #ty_generics #where_clause_ref {
+
+                    type Repr = #repr_type_mut;
+
+                    #[inline(always)]
+                    fn into(self) -> Self::Repr {
+                        match self {
+                            #(
+                                #name_it4 :: #type_pat_mut => #coprod_exprs,
+                            )*
+                        }
+                    }
+
+                }
+            };
+
+            quote! { #base_impl #ref_impl #mut_impl }
+        }
         _ => panic!(
             "Only Structs are supported. Enums/Unions cannot be turned into Labelled Generics."
         ),
     };
 
-    //     print!("{}", tree);
     tree
 }

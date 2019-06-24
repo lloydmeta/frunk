@@ -8,7 +8,7 @@ use frunk::labelled::chars::*;
 use frunk::labelled::Field;
 use frunk::labelled::Transmogrifier;
 use frunk::{from_labelled_generic, into_labelled_generic, transform_from};
-use frunk::{HCons, LabelledGeneric};
+use frunk::{Coproduct, HCons, LabelledGeneric};
 
 mod common;
 
@@ -184,4 +184,81 @@ fn test_transmogrify_tuples() {
     let vec4 = Vec4f(1.0, 2.0, 0.0, 3.0);
     let vec3 = vec4.transmogrify();
     assert_eq!(Vec3f(1.0, 2.0, 0.0), vec3);
+}
+
+#[test]
+fn test_enum_from_labelled_generic() {
+    let variant_a = Coproduct::inject(field!((V, a, r, i, a, n, t, A), hlist![]));
+    let variant_b = Coproduct::inject(field!(
+        (V, a, r, i, a, n, t, B),
+        hlist![field!((_, _0), 42i32)]
+    ));
+    let variant_c = Coproduct::inject(field!(
+        (V, a, r, i, a, n, t, C),
+        hlist![field!((x), "test".into()), field!((y), true)]
+    ));
+    assert_eq!(
+        from_labelled_generic::<LabelledEnum1, _>(variant_a),
+        LabelledEnum1::VariantA,
+    );
+    assert_eq!(
+        from_labelled_generic::<LabelledEnum1, _>(variant_b),
+        LabelledEnum1::VariantB(42),
+    );
+    assert_eq!(
+        from_labelled_generic::<LabelledEnum1, _>(variant_c),
+        LabelledEnum1::VariantC {
+            x: "test".into(),
+            y: true
+        },
+    );
+}
+
+#[test]
+fn test_enum_into_labelled_generic() {
+    let variant_a = into_labelled_generic(LabelledEnum1::VariantA);
+    let variant_b = into_labelled_generic(LabelledEnum1::VariantB(42));
+    let variant_c = into_labelled_generic(LabelledEnum1::VariantC {
+        x: "test".into(),
+        y: true,
+    });
+    assert_eq!(
+        variant_a,
+        Coproduct::inject(field!((V, a, r, i, a, n, t, A), hlist![])),
+    );
+    assert_eq!(
+        variant_b,
+        Coproduct::inject(field!(
+            (V, a, r, i, a, n, t, B),
+            hlist![field!((_, _0), 42i32, "_0")]
+        )),
+    );
+    assert_eq!(
+        variant_c,
+        Coproduct::inject(field!(
+            (V, a, r, i, a, n, t, C),
+            hlist![field!((x), "test".into()), field!((y), true)]
+        ))
+    );
+}
+
+#[test]
+fn test_sculpt_enum() {
+    let value = LabelledEnum1::VariantC {
+        x: "test".into(),
+        y: true,
+    };
+    let repr = match into_labelled_generic(value).subset() {
+        Ok(repr) => repr,
+        Err(rem) => match rem {}, // should be unreachable
+    };
+    let new_value: LabelledEnum2 = from_labelled_generic(repr);
+
+    assert_eq!(
+        new_value,
+        LabelledEnum2::VariantC {
+            x: "test".into(),
+            y: true
+        }
+    );
 }
