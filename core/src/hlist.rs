@@ -1554,10 +1554,7 @@ mod tests {
             }
         }
         struct P;
-        assert_eq!(
-            h.to_ref().map(Poly(P)),
-            hlist![true, 3, "dummy", 6, false]
-        );
+        assert_eq!(h.to_ref().map(Poly(P)), hlist![true, 3, "dummy", 6, false]);
     }
 
     #[test]
@@ -1619,7 +1616,9 @@ mod tests {
                 ("three", 3),
                 ("four", 4),
                 ("five", 5),
-            ].into_iter().collect()
+            ]
+            .into_iter()
+            .collect()
         };
         assert_eq!(r, expected);
     }

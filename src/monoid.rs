@@ -74,7 +74,9 @@ where
 }
 
 /// Given a sequence of `xs`, combine them and return the total
-#[cfg_attr(feature = "std", doc = r#"
+#[cfg_attr(
+    feature = "std",
+    doc = r#"
 # Examples
 
 ```
@@ -87,7 +89,8 @@ assert_eq!(combine_all(&empty_vec_opt_int), None);
 
 let vec_of_some_strings = vec![Some(String::from("Hello")), Some(String::from(" World"))];
 assert_eq!(combine_all(&vec_of_some_strings), Some(String::from("Hello World")));
-```"#)]
+```"#
+)]
 pub fn combine_all<T>(xs: &[T]) -> T
 where
     T: Monoid + Semigroup + Clone,

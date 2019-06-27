@@ -12,7 +12,9 @@
 //!   5. Semigroup
 //!   6. Monoid
 //!
-#![cfg_attr(feature = "std", doc = r#"
+#![cfg_attr(
+    feature = "std",
+    doc = r#"
 Here is a small taste of what Frunk has to offer:
 
 ```
@@ -95,7 +97,8 @@ struct DeletedUser<'a> {
 let d_user: DeletedUser = frunk::transform_from(s_user);
 assert_eq!(d_user.first_name, "Joe");
 # }
-```"#)]
+```"#
+)]
 //!
 //! ##### Transmogrifying
 //!

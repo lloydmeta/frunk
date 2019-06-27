@@ -19,8 +19,10 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
 use quote::__rt::Span;
-use syn::{DeriveInput, Expr, Ident, Member, Fields, Field, Generics, GenericParam, Lifetime, LifetimeDef};
 use syn::spanned::Spanned;
+use syn::{
+    DeriveInput, Expr, Field, Fields, GenericParam, Generics, Ident, Lifetime, LifetimeDef, Member,
+};
 
 /// These are assumed to exist as enums in frunk_core::labelled
 const ALPHA_CHARS: &'static [char] = &[
@@ -50,7 +52,7 @@ pub fn call_site_ident(s: &str) -> Ident {
 pub fn build_hlist_type<L: IntoIterator>(items: L) -> TokenStream2
 where
     L::Item: ToTokens,
-    L::IntoIter: DoubleEndedIterator
+    L::IntoIter: DoubleEndedIterator,
 {
     let mut result = quote! { ::frunk_core::hlist::HNil };
     for item in items.into_iter().rev() {
@@ -64,7 +66,7 @@ where
 pub fn build_hlist_constr<L: IntoIterator>(items: L) -> TokenStream2
 where
     L::Item: ToTokens,
-    L::IntoIter: DoubleEndedIterator
+    L::IntoIter: DoubleEndedIterator,
 {
     let mut result = quote! { ::frunk_core::hlist::HNil };
     for item in items.into_iter().rev() {
@@ -120,9 +122,10 @@ fn encode_as_ident(c: &char) -> Vec<Ident> {
 
 pub fn build_path_type(path_expr: Expr) -> impl ToTokens {
     let idents = find_idents_in_expr(path_expr);
-    idents.iter().map(|i| build_label_type(i)).fold(
-        quote!(::frunk_core::hlist::HNil),
-        |acc, t| {
+    idents
+        .iter()
+        .map(|i| build_label_type(i))
+        .fold(quote!(::frunk_core::hlist::HNil), |acc, t| {
             quote! {
             ::frunk_core::path::Path<
                 ::frunk_core::hlist::HCons<
@@ -131,8 +134,7 @@ pub fn build_path_type(path_expr: Expr) -> impl ToTokens {
                 >
               >
             }
-        },
-    )
+        })
 }
 
 /// Returns the idents in a path like expression in reverse
@@ -242,12 +244,17 @@ impl FieldBindings {
                 Fields::Unnamed(_) => StructType::Tuple,
                 Fields::Unit => StructType::Unit,
             },
-            fields: fields.iter().enumerate().map(|(index, field)| FieldBinding {
-                field: field.clone(),
-                binding: field.ident.clone().unwrap_or_else(
-                    || Ident::new(&format!("_{}", index), field.span())
-                ),
-            }).collect()
+            fields: fields
+                .iter()
+                .enumerate()
+                .map(|(index, field)| FieldBinding {
+                    field: field.clone(),
+                    binding: field
+                        .ident
+                        .clone()
+                        .unwrap_or_else(|| Ident::new(&format!("_{}", index), field.span())),
+                })
+                .collect(),
         }
     }
 
@@ -272,7 +279,6 @@ impl FieldBindings {
 }
 
 pub fn ref_generics(generics: &Generics) -> Generics {
-    
     let mut generics_ref = generics.clone();
 
     // instantiate a lifetime and lifetime def to add

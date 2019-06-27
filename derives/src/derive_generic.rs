@@ -37,10 +37,8 @@ pub fn impl_generic(input: TokenStream) -> impl ToTokens {
                     }
                 }
             }
-        },
-        _ => panic!(
-            "Only Structs are supported. Enums/Unions cannot be turned into Generics."
-        ),
+        }
+        _ => panic!("Only Structs are supported. Enums/Unions cannot be turned into Generics."),
     };
 
     //     print!("{}", tree);
