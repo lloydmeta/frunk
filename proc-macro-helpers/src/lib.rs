@@ -22,6 +22,7 @@ use quote::__rt::Span;
 use syn::spanned::Spanned;
 use syn::{
     DeriveInput, Expr, Field, Fields, GenericParam, Generics, Ident, Lifetime, LifetimeDef, Member,
+    Variant,
 };
 
 /// These are assumed to exist as enums in frunk_core::labelled
@@ -73,6 +74,58 @@ where
         result = quote! { ::frunk_core::hlist::HCons { head: #item, tail: #result }}
     }
     result
+}
+
+/// Given a list of types, creates an AST for the corresponding Coproduct
+/// type.
+pub fn build_coprod_type<L: IntoIterator>(items: L) -> TokenStream2
+where
+    L::Item: ToTokens,
+    L::IntoIter: DoubleEndedIterator,
+{
+    let mut result = quote! { ::frunk_core::coproduct::CNil };
+    for item in items.into_iter().rev() {
+        result = quote! { ::frunk_core::coproduct::Coproduct<#item, #result> }
+    }
+    result
+}
+
+/// Given an index and an expression or pattern, creates an AST for the corresponding Coproduct
+/// constructor, which may itself be used as an expression or a pattern.
+pub fn build_coprod_constr(index: usize, item: impl ToTokens) -> TokenStream2 {
+    let mut result = quote! { ::frunk_core::coproduct::Coproduct::Inl(#item) };
+    for _ in 0..index {
+        result = quote! { ::frunk_core::coproduct::Coproduct::Inr(#result) }
+    }
+    result
+}
+
+/// Given the length of a Coproduct type, generates an "unreachable" match arm, matching
+/// the CNil case in order to work around limitations in the compiler's exhaustiveness
+/// checking.
+pub fn build_coprod_unreachable_arm(length: usize, deref: bool) -> TokenStream2 {
+    let mut result = quote! { _frunk_unreachable_ };
+    for _ in 0..length {
+        result = quote! { ::frunk_core::coproduct::Coproduct::Inr(#result)}
+    }
+    if deref {
+        quote! { #result => match *_frunk_unreachable_ {} }
+    } else {
+        quote! { #result => match _frunk_unreachable_ {} }
+    }
+}
+
+pub fn build_field_type(name: &Ident, inner_type: impl ToTokens) -> TokenStream2 {
+    let label_type = build_label_type(name);
+    quote! { ::frunk_core::labelled::Field<#label_type, #inner_type> }
+}
+pub fn build_field_expr(name: &Ident, inner_expr: impl ToTokens) -> TokenStream2 {
+    let label_type = build_label_type(name);
+    let literal_name = name.to_string();
+    quote! { ::frunk_core::labelled::field_with_name::<#label_type, _>(#literal_name, #inner_expr) }
+}
+pub fn build_field_pat(inner_pat: impl ToTokens) -> TokenStream2 {
+    quote! { ::frunk_core::labelled::Field { value: #inner_pat, .. } }
 }
 
 /// Given an Ident returns an AST for its type level representation based on the
@@ -190,21 +243,6 @@ impl FieldBinding {
         let ty = &self.field.ty;
         quote! { &'_frunk_ref_ mut #ty }
     }
-    pub fn build_field_type(&self) -> TokenStream2 {
-        let label_type = build_label_type(&self.binding);
-        let ty = &self.field.ty;
-        quote! { ::frunk_core::labelled::Field<#label_type, #ty> }
-    }
-    pub fn build_field_type_ref(&self) -> TokenStream2 {
-        let label_type = build_label_type(&self.binding);
-        let ty = &self.field.ty;
-        quote! { ::frunk_core::labelled::Field<#label_type, &'_frunk_ref_ #ty> }
-    }
-    pub fn build_field_type_mut(&self) -> TokenStream2 {
-        let label_type = build_label_type(&self.binding);
-        let ty = &self.field.ty;
-        quote! { ::frunk_core::labelled::Field<#label_type, &'_frunk_ref_ mut #ty> }
-    }
     pub fn build(&self) -> TokenStream2 {
         let binding = &self.binding;
         quote! { #binding }
@@ -217,15 +255,20 @@ impl FieldBinding {
         let binding = &self.binding;
         quote! { ref mut #binding }
     }
+    pub fn build_field_type(&self) -> TokenStream2 {
+        build_field_type(&self.binding, self.build_type())
+    }
+    pub fn build_field_type_ref(&self) -> TokenStream2 {
+        build_field_type(&self.binding, self.build_type_ref())
+    }
+    pub fn build_field_type_mut(&self) -> TokenStream2 {
+        build_field_type(&self.binding, self.build_type_mut())
+    }
     pub fn build_field_expr(&self) -> TokenStream2 {
-        let label_type = build_label_type(&self.binding);
-        let binding = &self.binding;
-        let literal_name = self.binding.to_string();
-        quote! { ::frunk_core::labelled::field_with_name::<#label_type, _>(#literal_name, #binding) }
+        build_field_expr(&self.binding, &self.binding)
     }
     pub fn build_field_pat(&self) -> TokenStream2 {
-        let binding = &self.binding;
-        quote! { ::frunk_core::labelled::Field { value: #binding, .. } }
+        build_field_pat(&self.binding)
     }
 }
 
@@ -299,4 +342,101 @@ pub fn ref_generics(generics: &Generics) -> Generics {
     generics_ref.params.push(ref_lifetime_generic);
 
     generics_ref
+}
+
+pub struct VariantBinding {
+    pub name: Ident,
+    pub fields: FieldBindings,
+}
+
+impl VariantBinding {
+    pub fn build_type_constr(&self) -> TokenStream2 {
+        let name = &self.name;
+        let constr = self.fields.build_type_constr(FieldBinding::build);
+        quote! { #name #constr }
+    }
+    pub fn build_type_pat_ref(&self) -> TokenStream2 {
+        let name = &self.name;
+        let constr = self.fields.build_type_constr(FieldBinding::build_pat_ref);
+        quote! { #name #constr }
+    }
+    pub fn build_type_pat_mut(&self) -> TokenStream2 {
+        let name = &self.name;
+        let constr = self.fields.build_type_constr(FieldBinding::build_pat_mut);
+        quote! { #name #constr }
+    }
+    pub fn build_hlist_field_type(&self) -> TokenStream2 {
+        build_field_type(
+            &self.name,
+            self.fields.build_hlist_type(FieldBinding::build_field_type),
+        )
+    }
+    pub fn build_hlist_field_type_ref(&self) -> TokenStream2 {
+        build_field_type(
+            &self.name,
+            self.fields
+                .build_hlist_type(FieldBinding::build_field_type_ref),
+        )
+    }
+    pub fn build_hlist_field_type_mut(&self) -> TokenStream2 {
+        build_field_type(
+            &self.name,
+            self.fields
+                .build_hlist_type(FieldBinding::build_field_type_mut),
+        )
+    }
+    pub fn build_hlist_field_expr(&self) -> TokenStream2 {
+        build_field_expr(
+            &self.name,
+            self.fields
+                .build_hlist_constr(FieldBinding::build_field_expr),
+        )
+    }
+    pub fn build_hlist_field_pat(&self) -> TokenStream2 {
+        build_field_pat(
+            self.fields
+                .build_hlist_constr(FieldBinding::build_field_pat),
+        )
+    }
+}
+
+pub struct VariantBindings {
+    pub variants: Vec<VariantBinding>,
+}
+
+impl VariantBindings {
+    pub fn new<'a>(data: impl IntoIterator<Item = &'a Variant>) -> Self {
+        VariantBindings {
+            variants: data
+                .into_iter()
+                .map(|variant| VariantBinding {
+                    name: variant.ident.clone(),
+                    fields: FieldBindings::new(&variant.fields),
+                })
+                .collect(),
+        }
+    }
+
+    pub fn build_coprod_type<R: ToTokens>(&self, f: impl Fn(&VariantBinding) -> R) -> TokenStream2 {
+        build_coprod_type(self.variants.iter().map(f))
+    }
+
+    pub fn build_coprod_constrs<R: ToTokens>(
+        &self,
+        f: impl Fn(&VariantBinding) -> R,
+    ) -> Vec<TokenStream2> {
+        self.variants
+            .iter()
+            .enumerate()
+            .map(|(index, variant)| build_coprod_constr(index, f(variant)))
+            .collect()
+    }
+
+    pub fn build_variant_constrs<R: ToTokens>(&self, f: impl Fn(&VariantBinding) -> R) -> Vec<R> {
+        self.variants.iter().map(f).collect()
+    }
+
+    pub fn build_coprod_unreachable_arm(&self, deref: bool) -> TokenStream2 {
+        build_coprod_unreachable_arm(self.variants.len(), deref)
+    }
 }

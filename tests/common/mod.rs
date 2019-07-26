@@ -152,3 +152,17 @@ pub struct Vec4f(pub f32, pub f32, pub f32, pub f32);
 
 #[derive(LabelledGeneric, PartialEq, Debug)]
 pub struct Vec3f(pub f32, pub f32, pub f32);
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub enum LabelledEnum1 {
+    VariantA,
+    VariantB(i32),
+    VariantC { x: String, y: bool },
+}
+
+#[derive(LabelledGeneric, PartialEq, Debug)]
+pub enum LabelledEnum2 {
+    VariantA,
+    VariantC { x: String, y: bool },
+    VariantB(i32),
+}
