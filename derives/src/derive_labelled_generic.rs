@@ -166,9 +166,7 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
 
             quote! { #base_impl #ref_impl #mut_impl }
         }
-        _ => panic!(
-            "Only Structs and Enums can be turned into Labelled Generics."
-        ),
+        _ => panic!("Only Structs and Enums can be turned into Labelled Generics."),
     };
 
     tree

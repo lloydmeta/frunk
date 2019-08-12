@@ -57,7 +57,6 @@ codegen-units = 1 # https://users.rust-lang.org/t/odd-benchmark-results-compiler
 members = [
     "proc-macro-helpers",
     "core",
-    "proc-macros-impl",
     "proc-macros",
     "derives",
     "laws"
