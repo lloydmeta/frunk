@@ -1,6 +1,7 @@
 //! Holds models, traits, and logic for generic traversal of models
 //!
 //! ```
+//! #![feature(proc_macro_hygiene)]
 //! #[macro_use] extern crate frunk;
 //! #[macro_use] extern crate frunk_core; // required when using custom derives
 //! # extern crate frunk_proc_macros;
