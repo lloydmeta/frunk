@@ -388,6 +388,37 @@ macro_rules! gen_inherent_methods {
                 HMappable::map(self, mapper)
             }
 
+            /// Zip two HLists together.
+            ///
+            /// This zips a `Hlist![A1, B1, ..., C1]` with a `Hlist![A2, B2, ..., C2]`
+            /// to make a `Hlist![(A1, A2), (B1, B2), ..., (C1, C2)]`
+            ///
+            /// # Example
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// use ::frunk::HNil;
+            ///
+            /// assert_eq!(HNil.zip(HNil), HNil);
+            ///
+            /// let h1 = hlist![1, false, 42f32];
+            /// let h2 = hlist![true, "foo", 2];
+            ///
+            /// let zipped = h1.zip(h2);
+            /// assert_eq!(zipped, hlist![
+            ///     (1, true),
+            ///     (false, "foo"),
+            ///     (42f32, 2),
+            /// ]);
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn zip<Other>(self, other: Other) -> <Self as HZippable<Other>>::Zipped
+            where Self: HZippable<Other>,
+            {
+                HZippable::zip(self, other)
+            }
+
             /// Perform a left fold over an HList.
             ///
             /// This transforms some `Hlist![A, B, C, ..., E]` into a single
@@ -967,6 +998,47 @@ where
         HCons {
             head: (mapper.head)(head),
             tail: tail.map(mapper.tail),
+        }
+    }
+}
+
+/// Trait for zipping HLists
+///
+/// This trait is part of the implementation of the inherent method
+/// [`HCons::zip`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// HLists of unknown type. If the type of everything is known,
+/// then `list.zip(list2)` should "just work" even without the trait.
+///
+/// [`HCons::zip`]: struct.HCons.html#method.zip
+pub trait HZippable<Other> {
+    type Zipped: HList;
+
+    /// Zip this HList with another one.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// [inherent method]: struct.HCons.html#method.zip
+    fn zip(self, other: Other) -> Self::Zipped;
+}
+
+impl HZippable<HNil> for HNil {
+    type Zipped = HNil;
+    fn zip(self, _other: HNil) -> Self::Zipped {
+        HNil
+    }
+}
+
+impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
+where
+    T1: HZippable<T2>,
+{
+    type Zipped = HCons<(H1, H2), T1::Zipped>;
+    fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
+        HCons {
+            head: (self.head, other.head),
+            tail: self.tail.zip(other.tail),
         }
     }
 }
@@ -1576,6 +1648,29 @@ mod tests {
         let h = hlist![9000, "joe", 41f32];
         let mapped = h.to_ref().map(hlist![|&n| n + 1, |&s| s, |&f| f + 1f32]);
         assert_eq!(mapped, hlist![9001, "joe", 42f32]);
+    }
+
+    #[test]
+    fn test_zip_easy() {
+        let h1 = hlist![9000, "joe", 41f32];
+        let h2 = hlist!["joe", 9001, 42f32];
+        let zipped = h1.zip(h2);
+        assert_eq!(
+            zipped,
+            hlist![(9000, "joe"), ("joe", 9001), (41f32, 42f32),]
+        );
+    }
+
+    #[test]
+    fn test_zip_composes() {
+        let h1 = hlist![1, "1", 1.0];
+        let h2 = hlist![2, "2", 2.0];
+        let h3 = hlist![3, "3", 3.0];
+        let zipped = h1.zip(h2).zip(h3);
+        assert_eq!(
+            zipped,
+            hlist![((1, 2), 3), (("1", "2"), "3"), ((1.0, 2.0), 3.0)],
+        );
     }
 
     #[test]
