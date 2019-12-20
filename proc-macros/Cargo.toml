@@ -11,8 +11,8 @@ keywords = ["Frunk", "macros"]
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
-[dependencies.proc-macro-hack]		 [lib]
- version = "0.5"
+[dependencies.proc-macro-hack]
+version = "0.5"
 
 [dependencies.frunk_core]
 path = "../core"
@@ -20,9 +20,9 @@ default-features = false
 version = "0.3.0"
 
 [dependencies.frunk_proc_macros_impl]
- path = "../proc-macros-impl"
- default-features = false
- version = "0.0.3"
+path = "../proc-macros-impl"
+default-features = false
+version = "0.0.3"
 
 [dev-dependencies.frunk]
 path = "../."
