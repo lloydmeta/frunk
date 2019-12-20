@@ -71,7 +71,6 @@ extern crate frunk_core;
 extern crate frunk_proc_macros_impl;
 extern crate proc_macro_hack;
 
-
 use proc_macro_hack::proc_macro_hack;
 
 /// Add one to an expression.
@@ -83,7 +82,6 @@ pub use frunk_proc_macros_impl::Path;
 #[cfg(test)]
 #[macro_use]
 extern crate frunk;
-
 
 #[cfg(test)]
 mod tests {
