@@ -7,7 +7,7 @@
 //! #[macro_use] extern crate frunk;
 //! #[macro_use] extern crate frunk_core;
 //! # extern crate frunk_proc_macros;
-//! # use frunk_proc_macros::path;
+//! # use frunk_proc_macros::{path, Path};
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct Dog<'a> {
@@ -53,8 +53,8 @@
 //! };
 //!
 //! // generic, re-usable paths
-//! let height_lens = path!(dimensions.height);
-//! let unit_lens = path!(dimensions.unit);
+//! let height_lens: Path!(dimensions.height) = path!(dimensions.height);
+//! let unit_lens: Path!(dimensions.unit) = path!(dimensions.unit);
 //!
 //! assert_eq!(*height_lens.get(&dog), 10);
 //! assert_eq!(*height_lens.get(&cat), 7);
@@ -76,6 +76,8 @@ use proc_macro_hack::proc_macro_hack;
 /// Add one to an expression.
 #[proc_macro_hack]
 pub use frunk_proc_macros_impl::path;
+
+pub use frunk_proc_macros_impl::Path;
 
 #[cfg(test)]
 #[macro_use]

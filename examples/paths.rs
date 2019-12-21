@@ -1,9 +1,12 @@
 #[macro_use]
-extern crate frunk; // for derives
-extern crate frunk_core; // for labelledgeneric
+extern crate frunk;
+// for derives
+extern crate frunk_core;
+// for labelledgeneric
 extern crate frunk_proc_macros;
 
-use frunk_proc_macros::path;
+use frunk_core::path::PathTraverser;
+use frunk_proc_macros::{path, Path};
 
 #[derive(LabelledGeneric)]
 struct Dog<'a> {
@@ -49,21 +52,20 @@ fn main() {
         },
     };
 
-    // generic, re-usable, composable paths
-    let dimensions_lens = path!(dimensions);
-    let height_lens = dimensions_lens + path!(height);
+    // Prints height as long as `A` has the right "shape" (e.g.
+    // has `dimensions.height: usize` and `dimension.unit: SizeUnit)
+    fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> ()
+    where
+        &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
+            + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,
+    {
+        println!(
+            "Height [{} {:?}]",
+            path!(dimensions.height).get(obj),
+            path!(dimensions.unit).get(obj)
+        );
+    }
 
-    // Can also use simple "dot" . chaining
-    let unit_lens = path!(dimensions.unit);
-
-    println!(
-        "Dog height: [{} {:?}]",
-        height_lens.get(&dog),
-        unit_lens.get(&dog)
-    );
-    println!(
-        "Cat height: [{} {:?}]",
-        height_lens.get(&cat),
-        unit_lens.get(&cat)
-    );
+    print_height(&dog);
+    print_height(&cat);
 }

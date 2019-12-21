@@ -35,3 +35,16 @@ pub fn path(input: TokenStream) -> TokenStream {
     //    println!("ast: [{}]", ast);
     TokenStream::from(ast)
 }
+
+/// Build a generic path that can be used for traversals
+#[proc_macro]
+#[allow(non_snake_case)]
+pub fn Path(input: TokenStream) -> TokenStream {
+    let expr = parse_macro_input!(input as Expr);
+    let path_type = build_path_type(expr);
+    let ast = quote! {
+        #path_type
+    };
+    //    println!("ast: [{}]", ast);
+    TokenStream::from(ast)
+}
