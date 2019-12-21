@@ -476,6 +476,27 @@ assert_eq!(*unit_lens.get(&cat), SizeUnit::Cm);
 assert_eq!(*height_lens.get(&dog), 13);
 ```
 
+There's also a `Path!` type-level macro for declaring shape-constraints. This allows you to write adhoc shape-dependent
+functions for `LabelledGeneric` types.
+
+```rust
+// Prints height as long as `A` has the right "shape" (e.g.
+// has `dimensions.height: usize` and `dimension.unit: SizeUnit)
+fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> ()
+where
+    &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
+        + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,
+{
+    println!(
+        "Height [{} {:?}]",
+        path!(dimensions.height).get(obj),
+        path!(dimensions.unit).get(obj)
+    );
+}
+```
+
+See `examples/paths.rs` to see how this works.
+
 ### Coproduct
 
 If you've ever wanted to have an adhoc union / sum type of types that you do not control, you may want

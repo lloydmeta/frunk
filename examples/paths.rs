@@ -34,38 +34,38 @@ enum SizeUnit {
 }
 
 fn main() {
-    let dog = Dog {
-        name: "Joe",
-        dimensions: Dimensions {
-            height: 10,
-            width: 5,
-            unit: SizeUnit::Inch,
-        },
-    };
+let dog = Dog {
+    name: "Joe",
+    dimensions: Dimensions {
+        height: 10,
+        width: 5,
+        unit: SizeUnit::Inch,
+    },
+};
 
-    let cat = Cat {
-        name: "Schmoe",
-        dimensions: Dimensions {
-            height: 7,
-            width: 3,
-            unit: SizeUnit::Cm,
-        },
-    };
+let cat = Cat {
+    name: "Schmoe",
+    dimensions: Dimensions {
+        height: 7,
+        width: 3,
+        unit: SizeUnit::Cm,
+    },
+};
 
-    // Prints height as long as `A` has the right "shape" (e.g.
-    // has `dimensions.height: usize` and `dimension.unit: SizeUnit)
-    fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> ()
-    where
-        &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
-            + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,
-    {
-        println!(
-            "Height [{} {:?}]",
-            path!(dimensions.height).get(obj),
-            path!(dimensions.unit).get(obj)
-        );
-    }
+// Prints height as long as `A` has the right "shape" (e.g.
+// has `dimensions.height: usize` and `dimension.unit: SizeUnit)
+fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> ()
+where
+    &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
+        + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,
+{
+    println!(
+        "Height [{} {:?}]",
+        path!(dimensions.height).get(obj),
+        path!(dimensions.unit).get(obj)
+    );
+}
 
-    print_height(&dog);
-    print_height(&cat);
+print_height(&dog);
+print_height(&cat);
 }

@@ -37,7 +37,78 @@
 //! assert_eq!(traversed_address_name, "blue pond");
 //! # }
 //! ```
-
+//!
+//! There is also a Path! type macro that allows you to declare type constraints for
+//! shape-dependent functions on LabelledGeneric types.
+//!
+//! ```
+//! #[macro_use] extern crate frunk;
+//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! # extern crate frunk_proc_macros;
+//! # use frunk_proc_macros::{path, Path};
+//! # use frunk_core::path::PathTraverser;
+//! # fn main() {//!
+//! #[derive(LabelledGeneric)]
+//! struct Dog<'a> {
+//!     name: &'a str,
+//!     dimensions: Dimensions,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct Cat<'a> {
+//!     name: &'a str,
+//!     dimensions: Dimensions,
+//! }
+//!
+//! #[derive(LabelledGeneric)]
+//! struct Dimensions {
+//!     height: usize,
+//!     width: usize,
+//!     unit: SizeUnit,
+//! }
+//!
+//! #[derive(Debug)]
+//! enum SizeUnit {
+//!     Cm,
+//!     Inch,
+//! }
+//!
+//! let dog = Dog {
+//!     name: "Joe",
+//!     dimensions: Dimensions {
+//!         height: 10,
+//!         width: 5,
+//!         unit: SizeUnit::Inch,
+//!     },
+//! };
+//!
+//! let cat = Cat {
+//!     name: "Schmoe",
+//!     dimensions: Dimensions {
+//!         height: 7,
+//!         width: 3,
+//!         unit: SizeUnit::Cm,
+//!     },
+//! };
+//!
+//! // Prints height as long as `A` has the right "shape" (e.g.
+//! // has `dimensions.height: usize` and `dimension.unit: SizeUnit)
+//! fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> String
+//! where
+//!     &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
+//!         + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,
+//! {
+//!     format!(
+//!         "Height [{} {:?}]",
+//!         path!(dimensions.height).get(obj),
+//!         path!(dimensions.unit).get(obj)
+//!     )
+//! }
+//!
+//! assert_eq!(print_height(&dog), "Height [10 Inch]".to_string());
+//! assert_eq!(print_height(&cat), "Height [7 Cm]".to_string());
+//! # }
+//! ```
 use super::hlist::*;
 use super::labelled::*;
 
