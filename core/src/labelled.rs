@@ -198,12 +198,10 @@ pub trait LabelledGeneric {
     type Repr;
 
     /// Convert a value to its representation type `Repr`.
-    #[inline(always)]
     fn into(self) -> Self::Repr;
 
     /// Convert a value's labelled representation type `Repr`
     /// to the values's type.
-    #[inline(always)]
     fn from(repr: Self::Repr) -> Self;
 
     /// Convert from one type to another using a type with the same
@@ -261,7 +259,6 @@ pub trait IntoLabelledGeneric {
     type Repr;
 
     /// Convert a value to its representation type `Repr`.
-    #[inline(always)]
     fn into(self) -> Self::Repr;
 }
 
@@ -594,7 +591,6 @@ pub trait ByNameFieldPlucker<TargetKey, Index> {
     type Remainder;
 
     /// Returns a pair consisting of the value pointed to by the target key and the remainder.
-    #[inline(always)]
     fn pluck_by_name(self) -> (Field<TargetKey, Self::TargetValue>, Self::Remainder);
 }
 
@@ -726,7 +722,6 @@ pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     /// Consume this current object and return an object of the Target type.
     ///
     /// Although similar to sculpting, transmogrifying does its job recursively.
-    #[inline(always)]
     fn transmogrify(self) -> Target;
 }
 

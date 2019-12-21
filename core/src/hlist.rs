@@ -110,7 +110,6 @@ pub trait HList: Sized {
     /// assert_eq!(<Hlist![i32, bool, f32]>::static_len(), 3);
     /// # }
     /// ```
-    #[inline]
     #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
     fn static_len() -> usize;
 
