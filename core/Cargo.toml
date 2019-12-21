@@ -1,6 +1,6 @@
 [package]
 name = "frunk_core"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk core provides developers with HList, Coproduct, LabelledGeneric and Generic"
 license = "MIT"
@@ -26,9 +26,9 @@ version = "0.3.0"
 [dev-dependencies.frunk]
 path = ".."
 default-features = false
-version = "0.3.0"
+version = "0.3.1"
 
 [dev-dependencies.frunk_proc_macros]
 path = "../proc-macros"
 default-features = false
-version = "0.0.3"
+version = "0.0.4"

@@ -67,7 +67,6 @@ pub trait PathTraverser<Path, Indices> {
     type TargetValue;
 
     /// Returns a pair consisting of the value pointed to by the target key and the remainder.
-    #[inline(always)]
     fn get(self) -> Self::TargetValue;
 }
 

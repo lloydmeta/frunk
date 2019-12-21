@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]:
 
+## [0.3.1] - 2019-12-21
+- Refactoring derives (https://github.com/lloydmeta/frunk/pull/157)
+- Add support for deriving LabelledGeneric on enums (https://github.com/lloydmeta/frunk/pull/158)
+- Added HZippable (https://github.com/lloydmeta/frunk/pull/160)
+- Add a type macro for paths (https://github.com/lloydmeta/frunk/pull/161)
+
 ## [0.3.0] - 2019-03-23
 ### Added
 - More transmogrifications supported out of the box (https://github.com/lloydmeta/frunk/pull/152)
