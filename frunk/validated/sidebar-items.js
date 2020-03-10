@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Validated","A Validated is either an Ok holding an HList or an Err, holding a vector of collected errors."]],"trait":[["IntoValidated","Trait for \"lifting\" a given type into a Validated"]]});

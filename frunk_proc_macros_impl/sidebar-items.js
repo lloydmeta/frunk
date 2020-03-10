@@ -1,0 +1,1 @@
+initSidebarItems({"derive":[["proc_macro_hack_path","Build a generic path that can be used for traversals"]],"macro":[["Path","Build a generic path that can be used for traversals"]]});

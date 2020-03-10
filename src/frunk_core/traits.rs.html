@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `core/src/traits.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>traits.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! Traits that provide generic functionality for multiple types in frunk</span>
+
+<span class="doccomment">/// An alternative to AsRef that does not force the reference type to be a pointer itself.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This lets us create implementations for our recursive traits that take the resulting</span>
+<span class="doccomment">/// Output reference type, without having to deal with strange, spurious overflows</span>
+<span class="doccomment">/// that sometimes occur when trying to implement a trait for &amp;&#39;a T (see this comment:</span>
+<span class="doccomment">/// https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198)</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This functionality is also provided as an inherent method [on HLists] and [on Coproducts].</span>
+<span class="doccomment">/// However, you may find this trait useful in generic contexts.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [on HLists]: ../hlist/struct.HCons.html#method.to_ref</span>
+<span class="doccomment">/// [on Coproducts]: ../coproduct/enum.Coproduct.html#method.to_ref</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ToRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span>;
+
+    <span class="kw">fn</span> <span class="ident">to_ref</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
+}
+
+<span class="doccomment">/// An alternative to `AsMut` that does not force the reference type to be a pointer itself.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This parallels [`ToRef`]; see it for more information.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`ToRef`]: trait.ToRef.html</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ToMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span>;
+
+    <span class="kw">fn</span> <span class="ident">to_mut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
+}
+
+<span class="doccomment">/// Trait that allows for reversing a given data structure.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Implemented for HLists.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This functionality is also provided as an [inherent method].</span>
+<span class="doccomment">/// However, you may find this trait useful in generic contexts.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [inherent method]: ../hlist/struct.HCons.html#method.into_reverse</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoReverse</span> {
+    <span class="kw">type</span> <span class="ident">Output</span>;
+
+    <span class="doccomment">/// Reverses a given data structure.</span>
+    <span class="kw">fn</span> <span class="ident">into_reverse</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
+}
+
+<span class="doccomment">/// Wrapper type around a function for polymorphic maps and folds.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is a thin generic wrapper type that is used to differentiate</span>
+<span class="doccomment">/// between single-typed generic closures `F` that implements, say, `Fn(i8) -&gt; bool`,</span>
+<span class="doccomment">/// and a Poly-typed `F` that implements multiple Function types</span>
+<span class="doccomment">/// via the [`Func`] trait. (say, `Func&lt;i8, Output=bool&gt;` and `Func&lt;bool, Output=f32&gt;`)</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is needed because there are completely generic impls for many of the</span>
+<span class="doccomment">/// HList traits that take a simple unwrapped closure.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`Func`]: trait.Func.html</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Poly</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">T</span>);
+
+<span class="doccomment">/// This is a simple, user-implementable alternative to `Fn`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Might not be necessary if/when Fn(Once, Mut) traits are implementable</span>
+<span class="doccomment">/// in stable Rust</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Func</span><span class="op">&lt;</span><span class="ident">Input</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span>;
+
+    <span class="doccomment">/// Call the `Func`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Notice that this does not take a self argument, which in turn means `Func`</span>
+    <span class="doccomment">/// cannot effectively close over a context. This decision trades power for convenience;</span>
+    <span class="doccomment">/// a three-trait `Fn` heirarchy like that in std provides a great deal of power in a</span>
+    <span class="doccomment">/// small fraction of use-cases, but it also comes at great expanse to the other 95% of</span>
+    <span class="doccomment">/// use cases.</span>
+    <span class="kw">fn</span> <span class="ident">call</span>(<span class="ident">i</span>: <span class="ident">Input</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
+}
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "frunk_core";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

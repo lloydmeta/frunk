@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["combine_all","Given a sequence of `xs`, combine them and return the total"],["combine_n","Return this combined with itself `n` times."]],"trait":[["Monoid","A Monoid is a Semigroup that has an empty/ zero value"]]});

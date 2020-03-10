@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `core/src/indices.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>indices.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! Types used for indexing into HLists and coproducts.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! frunk frequently uses phantom index types as a technique to avoid</span>
+<span class="doccomment">//! overlapping impls for some traits.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Currently, `Index` type parameters in traits are not ever really intended</span>
+<span class="doccomment">//! to be selected by the user, and are instead simply solved for by type</span>
+<span class="doccomment">//! inference wherever the compiler can see that there is a unique solution.</span>
+<span class="doccomment">//! Therefore, you don&#39;t really have much of a reason to use the things in this</span>
+<span class="doccomment">//! module.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! **...yet.** `;)`</span>
+
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
+
+<span class="comment">// Largely lifted from https://github.com/Sgeo/hlist/blob/master/src/lib.rs#L30</span>
+
+<span class="doccomment">/// Used as an index into an `HList`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `Here` is 0, pointing to the head of the HList.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Users should normally allow type inference to create this type.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Here</span> {
+    <span class="ident">_priv</span>: (),
+}
+
+<span class="doccomment">/// Used as an index into an `HList`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `There&lt;T&gt;` is 1 + `T`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Users should normally allow type inference to create this type.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">There</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// An index denoting that `Suffix` is just that.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Suffixed</span><span class="op">&lt;</span><span class="ident">Suffix</span><span class="op">&gt;</span> {
+    <span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Suffix</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Index for the case where we don&#39;t need to do any transmogrifying at all because the source</span>
+<span class="doccomment">/// type is the same as the target type.</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">IdentityTransMog</span> {}
+
+<span class="doccomment">/// Index for the case where we need to do work in order to transmogrify one type into another.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DoTransmog</span><span class="op">&lt;</span><span class="ident">PluckByKeyIndex</span>, <span class="ident">TransMogIndex</span><span class="op">&gt;</span> {
+    <span class="ident">_marker1</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">PluckByKeyIndex</span><span class="op">&gt;</span>,
+    <span class="ident">_marker2</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">TransMogIndex</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Index type wrapper for transmogrifying a generic Source to a generic Target</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LabelledGenericTransmogIndicesWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+
+<span class="doccomment">/// Index type wrapper for transmogrifying a generic plucked Source to a generic Target</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PluckedLabelledGenericIndicesWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">T</span>);
+
+<span class="doccomment">/// Index type wrapper for transmogrifying through a (known) container (e.g. `Vec`).</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MappingIndicesWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "frunk_core";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

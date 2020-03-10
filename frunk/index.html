@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `frunk` crate."><meta name="keywords" content="rust, rustlang, rust-lang, frunk"><title>frunk - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../frunk/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate frunk</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all frunk's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'frunk', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/frunk/lib.rs.html#1-309' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>frunk</a></span></h1><div class='docblock'><p>Frunk: generic functional programming toolbelt for Rust</p>
+<p>Aims to be a collection of functional programming abstractions implemented in Rust
+in effective, useful, and idiomatic ways. Examples of things that are included in rust are:</p>
+<ol>
+<li>HLists (heterogeneously-typed lists)</li>
+<li>LabelledGeneric, and Generic</li>
+<li>Coproduct</li>
+<li>Validated (accumulator for Result)</li>
+<li>Semigroup</li>
+<li>Monoid</li>
+</ol>
+<p>Here is a small taste of what Frunk has to offer:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">frunk</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">frunk</span>::{<span class="self">self</span>, <span class="ident">monoid</span>, <span class="ident">Semigroup</span>, <span class="ident">Generic</span>};
+
+<span class="comment">// Combining Monoids</span>
+<span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)];
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">monoid</span>::<span class="ident">combine_all</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>));
+
+<span class="comment">// HLists</span>
+<span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;hi&quot;</span>];
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">h</span>.<span class="ident">len</span>(), <span class="number">2</span>);
+<span class="kw">let</span> <span class="macro">hlist_pat</span><span class="macro">!</span>(<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="ident">h</span>;
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">a</span>, <span class="number">1</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">b</span>, <span class="string">&quot;hi&quot;</span>);
+
+<span class="kw">let</span> <span class="ident">h1</span> <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="number">3.3</span>, <span class="number">53i64</span>, <span class="string">&quot;hello&quot;</span>.<span class="ident">to_owned</span>()];
+<span class="kw">let</span> <span class="ident">h2</span> <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="number">1.2</span>, <span class="number">1i64</span>, <span class="string">&quot; world&quot;</span>.<span class="ident">to_owned</span>()];
+<span class="kw">let</span> <span class="ident">h3</span> <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="prelude-val">Some</span>(<span class="number">3</span>), <span class="number">4.5</span>, <span class="number">54</span>, <span class="string">&quot;hello world&quot;</span>.<span class="ident">to_owned</span>()];
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">h1</span>.<span class="ident">combine</span>(<span class="kw-2">&amp;</span><span class="ident">h2</span>), <span class="ident">h3</span>);
+
+<span class="comment">// Generic and LabelledGeneric-based programming</span>
+<span class="comment">// Allows Structs to play well easily with HLists</span>
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Generic</span>, <span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ApiUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">FirstName</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">LastName</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">Age</span>: <span class="ident">usize</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Generic</span>, <span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">NewUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">first_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">last_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">age</span>: <span class="ident">usize</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">SavedUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">first_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">last_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">age</span>: <span class="ident">usize</span>,
+}
+
+<span class="comment">// Instantiate a struct from an HList. Note that you can go the other way too.</span>
+<span class="kw">let</span> <span class="ident">a_user</span>: <span class="ident">ApiUser</span> <span class="op">=</span> <span class="ident">frunk</span>::<span class="ident">from_generic</span>(<span class="macro">hlist</span><span class="macro">!</span>[<span class="string">&quot;Joe&quot;</span>, <span class="string">&quot;Blow&quot;</span>, <span class="number">30</span>]);
+
+<span class="comment">// Convert using Generic</span>
+<span class="kw">let</span> <span class="ident">n_user</span>: <span class="ident">NewUser</span> <span class="op">=</span> <span class="ident">Generic</span>::<span class="ident">convert_from</span>(<span class="ident">a_user</span>); <span class="comment">// done</span>
+
+<span class="comment">// Convert using LabelledGeneric</span>
+<span class="comment">//</span>
+<span class="comment">// This will fail if the fields of the types converted to and from do not</span>
+<span class="comment">// have the same names or do not line up properly :)</span>
+<span class="comment">//</span>
+<span class="comment">// Also note that we&#39;re using a helper method to avoid having to use universal</span>
+<span class="comment">// function call syntax</span>
+<span class="kw">let</span> <span class="ident">s_user</span>: <span class="ident">SavedUser</span> <span class="op">=</span> <span class="ident">frunk</span>::<span class="ident">labelled_convert_from</span>(<span class="ident">n_user</span>);
+
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s_user</span>.<span class="ident">first_name</span>, <span class="string">&quot;Joe&quot;</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s_user</span>.<span class="ident">last_name</span>, <span class="string">&quot;Blow&quot;</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s_user</span>.<span class="ident">age</span>, <span class="number">30</span>);
+
+<span class="comment">// Uh-oh ! last_name and first_name have been flipped!</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">DeletedUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">last_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">first_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">age</span>: <span class="ident">usize</span>,
+}
+<span class="comment">// let d_user = &lt;DeletedUser as LabelledGeneric&gt;::convert_from(s_user); &lt;-- this would fail at compile time :)</span>
+
+<span class="comment">// This will, however, work, because we make use of the Sculptor type-class</span>
+<span class="comment">// to type-safely reshape the representations to align/match each other.</span>
+<span class="kw">let</span> <span class="ident">d_user</span>: <span class="ident">DeletedUser</span> <span class="op">=</span> <span class="ident">frunk</span>::<span class="ident">transform_from</span>(<span class="ident">s_user</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">d_user</span>.<span class="ident">first_name</span>, <span class="string">&quot;Joe&quot;</span>);<a class="test-arrow" target="_blank" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23%5Bmacro_use%5D%20extern%20crate%20frunk%3B%0A%23%5Bmacro_use%5D%20extern%20crate%20frunk_core%3B%0Afn%20main()%20%7B%0Ause%20frunk%3A%3Aprelude%3A%3A*%3B%0Ause%20frunk%3A%3A%7Bself%2C%20monoid%2C%20Semigroup%2C%20Generic%7D%3B%0A%0A%2F%2F%20Combining%20Monoids%0Alet%20v%20%3D%20vec!%5BSome(1)%2C%20Some(3)%5D%3B%0Aassert_eq!(monoid%3A%3Acombine_all(%26v)%2C%20Some(4))%3B%0A%0A%2F%2F%20HLists%0Alet%20h%20%3D%20hlist!%5B1%2C%20%22hi%22%5D%3B%0Aassert_eq!(h.len()%2C%202)%3B%0Alet%20hlist_pat!(a%2C%20b)%20%3D%20h%3B%0Aassert_eq!(a%2C%201)%3B%0Aassert_eq!(b%2C%20%22hi%22)%3B%0A%0Alet%20h1%20%3D%20hlist!%5BSome(1)%2C%203.3%2C%2053i64%2C%20%22hello%22.to_owned()%5D%3B%0Alet%20h2%20%3D%20hlist!%5BSome(2)%2C%201.2%2C%201i64%2C%20%22%20world%22.to_owned()%5D%3B%0Alet%20h3%20%3D%20hlist!%5BSome(3)%2C%204.5%2C%2054%2C%20%22hello%20world%22.to_owned()%5D%3B%0Aassert_eq!(h1.combine(%26h2)%2C%20h3)%3B%0A%0A%2F%2F%20Generic%20and%20LabelledGeneric-based%20programming%0A%2F%2F%20Allows%20Structs%20to%20play%20well%20easily%20with%20HLists%0A%0A%23%5Bderive(Generic%2C%20LabelledGeneric)%5D%0Astruct%20ApiUser%3C'a%3E%20%7B%0A%20%20%20%20FirstName%3A%20%26'a%20str%2C%0A%20%20%20%20LastName%3A%20%26'a%20str%2C%0A%20%20%20%20Age%3A%20usize%2C%0A%7D%0A%0A%23%5Bderive(Generic%2C%20LabelledGeneric)%5D%0Astruct%20NewUser%3C'a%3E%20%7B%0A%20%20%20%20first_name%3A%20%26'a%20str%2C%0A%20%20%20%20last_name%3A%20%26'a%20str%2C%0A%20%20%20%20age%3A%20usize%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric)%5D%0Astruct%20SavedUser%3C'a%3E%20%7B%0A%20%20%20%20first_name%3A%20%26'a%20str%2C%0A%20%20%20%20last_name%3A%20%26'a%20str%2C%0A%20%20%20%20age%3A%20usize%2C%0A%7D%0A%0A%2F%2F%20Instantiate%20a%20struct%20from%20an%20HList.%20Note%20that%20you%20can%20go%20the%20other%20way%20too.%0Alet%20a_user%3A%20ApiUser%20%3D%20frunk%3A%3Afrom_generic(hlist!%5B%22Joe%22%2C%20%22Blow%22%2C%2030%5D)%3B%0A%0A%2F%2F%20Convert%20using%20Generic%0Alet%20n_user%3A%20NewUser%20%3D%20Generic%3A%3Aconvert_from(a_user)%3B%20%2F%2F%20done%0A%0A%2F%2F%20Convert%20using%20LabelledGeneric%0A%2F%2F%0A%2F%2F%20This%20will%20fail%20if%20the%20fields%20of%20the%20types%20converted%20to%20and%20from%20do%20not%0A%2F%2F%20have%20the%20same%20names%20or%20do%20not%20line%20up%20properly%20%3A)%0A%2F%2F%0A%2F%2F%20Also%20note%20that%20we're%20using%20a%20helper%20method%20to%20avoid%20having%20to%20use%20universal%0A%2F%2F%20function%20call%20syntax%0Alet%20s_user%3A%20SavedUser%20%3D%20frunk%3A%3Alabelled_convert_from(n_user)%3B%0A%0Aassert_eq!(s_user.first_name%2C%20%22Joe%22)%3B%0Aassert_eq!(s_user.last_name%2C%20%22Blow%22)%3B%0Aassert_eq!(s_user.age%2C%2030)%3B%0A%0A%2F%2F%20Uh-oh%20!%20last_name%20and%20first_name%20have%20been%20flipped!%0A%23%5Bderive(LabelledGeneric)%5D%0Astruct%20DeletedUser%3C'a%3E%20%7B%0A%20%20%20%20last_name%3A%20%26'a%20str%2C%0A%20%20%20%20first_name%3A%20%26'a%20str%2C%0A%20%20%20%20age%3A%20usize%2C%0A%7D%0A%2F%2F%20let%20d_user%20%3D%20%3CDeletedUser%20as%20LabelledGeneric%3E%3A%3Aconvert_from(s_user)%3B%20%3C--%20this%20would%20fail%20at%20compile%20time%20%3A)%0A%0A%2F%2F%20This%20will%2C%20however%2C%20work%2C%20because%20we%20make%20use%20of%20the%20Sculptor%20type-class%0A%2F%2F%20to%20type-safely%20reshape%20the%20representations%20to%20align%2Fmatch%20each%20other.%0Alet%20d_user%3A%20DeletedUser%20%3D%20frunk%3A%3Atransform_from(s_user)%3B%0Aassert_eq!(d_user.first_name%2C%20%22Joe%22)%3B%0A%7D&amp;edition=2015">Run</a></pre></div>
+<h5 id="transmogrifying" class="section-header"><a href="#transmogrifying">Transmogrifying</a></h5>
+<p>Sometimes you need might have one data type that is &quot;similar in shape&quot; to another data type, but it
+is similar <em>recursively</em> (e.g. it has fields that are structs that have fields that are a superset of
+the fields in the target type, so they are transformable recursively).  <code>.transform_from</code> can't
+help you there because it doesn't deal with recursion, but the <code>Transmogrifier</code> can help if both
+are <code>LabelledGeneric</code> by <code>transmogrify()</code>ing from one to the other.</p>
+<p>What is &quot;transmogrifying&quot;? In this context, it means to recursively transform some data of type A
+into data of type B, in a typesafe way, as long as A and B are &quot;similarly-shaped&quot;.  In other words,
+as long as B's fields and their subfields are subsets of A's fields and their respective subfields,
+then A can be turned into B.</p>
+<p>As usual, the goal with Frunk is to do this:</p>
+<ul>
+<li>Using stable (so no specialisation, which would have been helpful, methinks)</li>
+<li>Typesafe</li>
+<li>No usage of <code>unsafe</code></li>
+</ul>
+<p>Here is an example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">frunk</span>::<span class="ident">labelled</span>::<span class="ident">Transmogrifier</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">InternalPhoneNumber</span> {
+    <span class="ident">emergency</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="ident">main</span>: <span class="ident">usize</span>,
+    <span class="ident">secondary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">InternalAddress</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">is_whitelisted</span>: <span class="ident">bool</span>,
+    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">phone</span>: <span class="ident">InternalPhoneNumber</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>)]</span>
+<span class="kw">struct</span> <span class="ident">InternalUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">age</span>: <span class="ident">usize</span>,
+    <span class="ident">address</span>: <span class="ident">InternalAddress</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">is_banned</span>: <span class="ident">bool</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ExternalPhoneNumber</span> {
+    <span class="ident">main</span>: <span class="ident">usize</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ExternalAddress</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="ident">phone</span>: <span class="ident">ExternalPhoneNumber</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">LabelledGeneric</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ExternalUser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">age</span>: <span class="ident">usize</span>,
+    <span class="ident">address</span>: <span class="ident">ExternalAddress</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+}
+
+<span class="kw">let</span> <span class="ident">internal_user</span> <span class="op">=</span> <span class="ident">InternalUser</span> {
+    <span class="ident">name</span>: <span class="string">&quot;John&quot;</span>,
+    <span class="ident">age</span>: <span class="number">10</span>,
+    <span class="ident">address</span>: <span class="ident">InternalAddress</span> {
+        <span class="ident">is_whitelisted</span>: <span class="bool-val">true</span>,
+        <span class="ident">name</span>: <span class="string">&quot;somewhere out there&quot;</span>,
+        <span class="ident">phone</span>: <span class="ident">InternalPhoneNumber</span> {
+            <span class="ident">main</span>: <span class="number">1234</span>,
+            <span class="ident">secondary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">emergency</span>: <span class="prelude-val">Some</span>(<span class="number">5678</span>),
+        },
+    },
+    <span class="ident">is_banned</span>: <span class="bool-val">true</span>,
+};
+
+<span class="doccomment">/// Boilerplate-free conversion of a top-level InternalUser into an</span>
+<span class="doccomment">/// ExternalUser, taking care of subfield conversions as well.</span>
+<span class="kw">let</span> <span class="ident">external_user</span>: <span class="ident">ExternalUser</span> <span class="op">=</span> <span class="ident">internal_user</span>.<span class="ident">transmogrify</span>();
+
+<span class="kw">let</span> <span class="ident">expected_external_user</span> <span class="op">=</span> <span class="ident">ExternalUser</span> {
+    <span class="ident">name</span>: <span class="string">&quot;John&quot;</span>,
+    <span class="ident">age</span>: <span class="number">10</span>,
+    <span class="ident">address</span>: <span class="ident">ExternalAddress</span> {
+        <span class="ident">name</span>: <span class="string">&quot;somewhere out there&quot;</span>,
+        <span class="ident">phone</span>: <span class="ident">ExternalPhoneNumber</span> {
+            <span class="ident">main</span>: <span class="number">1234</span>,
+        },
+    }
+};
+
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">external_user</span>, <span class="ident">expected_external_user</span>);<a class="test-arrow" target="_blank" href="https://play.rust-lang.org/?code=%23!%5Ballow(unused)%5D%0A%23%5Bmacro_use%5D%20extern%20crate%20frunk%3B%0A%23%5Bmacro_use%5D%20extern%20crate%20frunk_core%3B%0Afn%20main()%20%7B%0Ause%20frunk%3A%3Alabelled%3A%3ATransmogrifier%3B%0A%0A%23%5Bderive(LabelledGeneric)%5D%0Astruct%20InternalPhoneNumber%20%7B%0A%20%20%20%20emergency%3A%20Option%3Cusize%3E%2C%0A%20%20%20%20main%3A%20usize%2C%0A%20%20%20%20secondary%3A%20Option%3Cusize%3E%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric)%5D%0Astruct%20InternalAddress%3C'a%3E%20%7B%0A%20%20%20%20is_whitelisted%3A%20bool%2C%0A%20%20%20%20name%3A%20%26'a%20str%2C%0A%20%20%20%20phone%3A%20InternalPhoneNumber%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric)%5D%0Astruct%20InternalUser%3C'a%3E%20%7B%0A%20%20%20%20name%3A%20%26'a%20str%2C%0A%20%20%20%20age%3A%20usize%2C%0A%20%20%20%20address%3A%20InternalAddress%3C'a%3E%2C%0A%20%20%20%20is_banned%3A%20bool%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric%2C%20PartialEq%2C%20Debug)%5D%0Astruct%20ExternalPhoneNumber%20%7B%0A%20%20%20%20main%3A%20usize%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric%2C%20PartialEq%2C%20Debug)%5D%0Astruct%20ExternalAddress%3C'a%3E%20%7B%0A%20%20%20%20name%3A%20%26'a%20str%2C%0A%20%20%20%20phone%3A%20ExternalPhoneNumber%2C%0A%7D%0A%0A%23%5Bderive(LabelledGeneric%2C%20PartialEq%2C%20Debug)%5D%0Astruct%20ExternalUser%3C'a%3E%20%7B%0A%20%20%20%20age%3A%20usize%2C%0A%20%20%20%20address%3A%20ExternalAddress%3C'a%3E%2C%0A%20%20%20%20name%3A%20%26'a%20str%2C%0A%7D%0A%0Alet%20internal_user%20%3D%20InternalUser%20%7B%0A%20%20%20%20name%3A%20%22John%22%2C%0A%20%20%20%20age%3A%2010%2C%0A%20%20%20%20address%3A%20InternalAddress%20%7B%0A%20%20%20%20%20%20%20%20is_whitelisted%3A%20true%2C%0A%20%20%20%20%20%20%20%20name%3A%20%22somewhere%20out%20there%22%2C%0A%20%20%20%20%20%20%20%20phone%3A%20InternalPhoneNumber%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20main%3A%201234%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20secondary%3A%20None%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20emergency%3A%20Some(5678)%2C%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%7D%2C%0A%20%20%20%20is_banned%3A%20true%2C%0A%7D%3B%0A%0A%2F%2F%2F%20Boilerplate-free%20conversion%20of%20a%20top-level%20InternalUser%20into%20an%0A%2F%2F%2F%20ExternalUser%2C%20taking%20care%20of%20subfield%20conversions%20as%20well.%0Alet%20external_user%3A%20ExternalUser%20%3D%20internal_user.transmogrify()%3B%0A%0Alet%20expected_external_user%20%3D%20ExternalUser%20%7B%0A%20%20%20%20name%3A%20%22John%22%2C%0A%20%20%20%20age%3A%2010%2C%0A%20%20%20%20address%3A%20ExternalAddress%20%7B%0A%20%20%20%20%20%20%20%20name%3A%20%22somewhere%20out%20there%22%2C%0A%20%20%20%20%20%20%20%20phone%3A%20ExternalPhoneNumber%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20main%3A%201234%2C%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%7D%0A%7D%3B%0A%0Aassert_eq!(external_user%2C%20expected_external_user)%3B%0A%7D&amp;edition=2015">Run</a></pre></div>
+<p>Links:</p>
+<ol>
+<li><a href="https://github.com/lloydmeta/frunk">Source on Github</a></li>
+<li><a href="https://crates.io/crates/frunk">Crates.io page</a></li>
+</ol>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use hlist::<a class="fn" href="../frunk/hlist/fn.lift_from.html" title="fn frunk::hlist::lift_from">lift_from</a>;</code></td></tr><tr><td><code>pub use hlist::<a class="struct" href="../frunk/hlist/struct.HCons.html" title="struct frunk::hlist::HCons">HCons</a>;</code></td></tr><tr><td><code>pub use hlist::<a class="struct" href="../frunk/hlist/struct.HNil.html" title="struct frunk::hlist::HNil">HNil</a>;</code></td></tr><tr><td><code>pub use traits::<a class="trait" href="../frunk/traits/trait.Func.html" title="trait frunk::traits::Func">Func</a>;</code></td></tr><tr><td><code>pub use traits::<a class="struct" href="../frunk/traits/struct.Poly.html" title="struct frunk::traits::Poly">Poly</a>;</code></td></tr><tr><td><code>pub use traits::<a class="trait" href="../frunk/traits/trait.ToMut.html" title="trait frunk::traits::ToMut">ToMut</a>;</code></td></tr><tr><td><code>pub use traits::<a class="trait" href="../frunk/traits/trait.ToRef.html" title="trait frunk::traits::ToRef">ToRef</a>;</code></td></tr><tr><td><code>pub use coproduct::<a class="enum" href="../frunk/coproduct/enum.Coproduct.html" title="enum frunk::coproduct::Coproduct">Coproduct</a>;</code></td></tr><tr><td><code>pub use generic::<a class="fn" href="../frunk/generic/fn.convert_from.html" title="fn frunk::generic::convert_from">convert_from</a>;</code></td></tr><tr><td><code>pub use generic::<a class="fn" href="../frunk/generic/fn.from_generic.html" title="fn frunk::generic::from_generic">from_generic</a>;</code></td></tr><tr><td><code>pub use generic::<a class="fn" href="../frunk/generic/fn.into_generic.html" title="fn frunk::generic::into_generic">into_generic</a>;</code></td></tr><tr><td><code>pub use generic::<a class="fn" href="../frunk/generic/fn.map_inter.html" title="fn frunk::generic::map_inter">map_inter</a>;</code></td></tr><tr><td><code>pub use generic::<a class="fn" href="../frunk/generic/fn.map_repr.html" title="fn frunk::generic::map_repr">map_repr</a>;</code></td></tr><tr><td><code>pub use generic::<a class="trait" href="../frunk/generic/trait.Generic.html" title="trait frunk::generic::Generic">Generic</a>;</code></td></tr><tr><td><code>pub use labelled::<a class="fn" href="../frunk/labelled/fn.from_labelled_generic.html" title="fn frunk::labelled::from_labelled_generic">from_labelled_generic</a>;</code></td></tr><tr><td><code>pub use labelled::<a class="fn" href="../frunk/labelled/fn.into_labelled_generic.html" title="fn frunk::labelled::into_labelled_generic">into_labelled_generic</a>;</code></td></tr><tr><td><code>pub use labelled::<a class="fn" href="../frunk/labelled/fn.labelled_convert_from.html" title="fn frunk::labelled::labelled_convert_from">labelled_convert_from</a>;</code></td></tr><tr><td><code>pub use labelled::<a class="fn" href="../frunk/labelled/fn.transform_from.html" title="fn frunk::labelled::transform_from">transform_from</a>;</code></td></tr><tr><td><code>pub use labelled::<a class="trait" href="../frunk/labelled/trait.LabelledGeneric.html" title="trait frunk::labelled::LabelledGeneric">LabelledGeneric</a>;</code></td></tr><tr><td><code>pub use semigroup::<a class="trait" href="../frunk/semigroup/trait.Semigroup.html" title="trait frunk::semigroup::Semigroup">Semigroup</a>;</code></td></tr><tr><td><code>pub use monoid::<a class="trait" href="../frunk/monoid/trait.Monoid.html" title="trait frunk::monoid::Monoid">Monoid</a>;</code></td></tr><tr><td><code>pub use validated::<a class="enum" href="../frunk/validated/enum.Validated.html" title="enum frunk::validated::Validated">Validated</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="coproduct/index.html" title='frunk::coproduct mod'>coproduct</a></td><td class='docblock-short'><p>Module that holds Coproduct data structures, traits, and implementations</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="generic/index.html" title='frunk::generic mod'>generic</a></td><td class='docblock-short'><p>This module holds the machinery behind <code>Generic</code>.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="hlist/index.html" title='frunk::hlist mod'>hlist</a></td><td class='docblock-short'><p>Module that holds HList data structures, implementations, and typeclasses.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="indices/index.html" title='frunk::indices mod'>indices</a></td><td class='docblock-short'><p>Types used for indexing into HLists and coproducts.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="labelled/index.html" title='frunk::labelled mod'>labelled</a></td><td class='docblock-short'><p>This module holds the machinery behind LabelledGeneric.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="monoid/index.html" title='frunk::monoid mod'>monoid</a></td><td class='docblock-short'><p>Module for holding Monoid typeclass definitions and default implementations</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="path/index.html" title='frunk::path mod'>path</a></td><td class='docblock-short'><p>Holds models, traits, and logic for generic traversal of models</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="prelude/index.html" title='frunk::prelude mod'>prelude</a></td><td class='docblock-short'><p>Traits that need to be imported for the complete <code>frunk</code> experience.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="semigroup/index.html" title='frunk::semigroup mod'>semigroup</a></td><td class='docblock-short'><p>Module for holding the Semigroup typeclass definition and typeclass instances</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="traits/index.html" title='frunk::traits mod'>traits</a></td><td class='docblock-short'><p>Traits that provide generic functionality for multiple types in frunk</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="validated/index.html" title='frunk::validated mod'>validated</a></td><td class='docblock-short'><p>Module for holding Validated logic</p>
+</td></tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table><tr class='module-item'><td><a class="macro" href="macro.Coprod.html" title='frunk::Coprod macro'>Coprod</a></td><td class='docblock-short'><p>Returns a type signature for a Coproduct of the provided types</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.Hlist.html" title='frunk::Hlist macro'>Hlist</a></td><td class='docblock-short'><p>Returns a type signature for an HList of the provided types</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.field.html" title='frunk::field macro'>field</a></td><td class='docblock-short'><p>Used for creating a Field</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.hlist.html" title='frunk::hlist macro'>hlist</a></td><td class='docblock-short'><p>Returns an <code>HList</code> based on the values passed in.</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.hlist_pat.html" title='frunk::hlist_pat macro'>hlist_pat</a></td><td class='docblock-short'><p>Macro for pattern-matching on HLists.</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.poly_fn.html" title='frunk::poly_fn macro'>poly_fn</a></td><td class='docblock-short'><p>Returns a polymorphic function for use with mapping/folding heterogeneous
+types.</p>
+</td></tr></table><h2 id='derives' class='section-header'><a href="#derives">Derive Macros</a></h2>
+<table><tr class='module-item'><td><a class="derive" href="derive.Generic.html" title='frunk::Generic derive'>Generic</a></td><td class='docblock-short'><p>Derives a Generic instance based on HList for
+a given Struct or Tuple Struct</p>
+</td></tr><tr class='module-item'><td><a class="derive" href="derive.LabelledGeneric.html" title='frunk::LabelledGeneric derive'>LabelledGeneric</a></td><td class='docblock-short'><p>Derives a Generic instance based on Field + HList for
+a given Struct (Tuple Structs not supported because they have
+no labels)</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "frunk";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

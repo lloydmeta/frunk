@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Path",""]],"trait":[["PathTraverser","Trait for traversing based on Path"]]});
