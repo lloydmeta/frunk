@@ -710,4 +710,4 @@ Scalaz, Shapeless, Cats, Haskell, the usual suspects ;)
 A.k.a. people whom you can bug/tag/@ on Gitter :D
 
 1. [lloydmeta](https://github.com/lloydmeta)
-2. [Centrl](https://github.com/centril)
+2. [Centril](https://github.com/centril)
