@@ -134,6 +134,39 @@ pub trait HList: Sized {
     }
 }
 
+/// Trait for appending a value to HList
+pub trait Appender<Last> {
+    type Output;
+
+    /// Append `l` to this HList
+    fn append(self, l: Last) -> Self::Output;
+}
+
+impl<Last> Appender<Last> for HNil {
+    type Output = HCons<Last, HNil>;
+
+    fn append(self, l: Last) -> Self::Output {
+        HCons {
+            head: l,
+            tail: HNil,
+        }
+    }
+}
+
+impl<Last, Head, Tail> Appender<Last> for HCons<Head, Tail>
+where
+    Tail: Appender<Last>,
+{
+    type Output = HCons<Head, <Tail as Appender<Last>>::Output>;
+
+    fn append(self, l: Last) -> Self::Output {
+        HCons {
+            head: self.head,
+            tail: self.tail.append(l),
+        }
+    }
+}
+
 /// Represents the right-most end of a heterogeneous list
 ///
 /// # Examples
@@ -1758,5 +1791,17 @@ mod tests {
 
         let x: H = hlist![(), 1337, 42.0, (), true].lift_into();
         assert_eq!(x, hlist![(), 1337, 42.0, (), true]);
+    }
+
+    #[test]
+    fn test_hlist_append_to_nil() {
+        assert_eq!(hlist![1], HNil.append(1));
+    }
+
+    #[test]
+    fn test_hlist_append_to_cons() {
+        let h = hlist![1, "Hello", true];
+        let h_appended = hlist![1, "Hello", true, 66.66];
+        assert_eq!(h_appended, h.append(66.66));
     }
 }
