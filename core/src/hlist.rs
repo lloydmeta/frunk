@@ -135,14 +135,14 @@ pub trait HList: Sized {
 }
 
 /// Trait for appending a value to HList
-pub trait Appender<Last> {
+pub trait HAppender<Last> {
     type Output;
 
     /// Append `l` to this HList
     fn append(self, l: Last) -> Self::Output;
 }
 
-impl<Last> Appender<Last> for HNil {
+impl<Last> HAppender<Last> for HNil {
     type Output = HCons<Last, HNil>;
 
     fn append(self, l: Last) -> Self::Output {
@@ -153,11 +153,11 @@ impl<Last> Appender<Last> for HNil {
     }
 }
 
-impl<Last, Head, Tail> Appender<Last> for HCons<Head, Tail>
+impl<Last, Head, Tail> HAppender<Last> for HCons<Head, Tail>
 where
-    Tail: Appender<Last>,
+    Tail: HAppender<Last>,
 {
-    type Output = HCons<Head, <Tail as Appender<Last>>::Output>;
+    type Output = HCons<Head, <Tail as HAppender<Last>>::Output>;
 
     fn append(self, l: Last) -> Self::Output {
         HCons {
