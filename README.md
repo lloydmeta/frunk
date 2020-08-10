@@ -616,6 +616,7 @@ Things that can be combined.
 
 ```rust
 use frunk::Semigroup;
+use frunk::semigroup::All;
 
 assert_eq!(Some(1).combine(&Some(2)), Some(3));
 
