@@ -2,7 +2,7 @@ window.BENCHMARK_DATA = {
   "lastUpdate": 1617345702914,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
-    "Rust Benchmark": [
+    "Frunk Benchmarks": [
       {
         "commit": {
           "author": {
@@ -506,9 +506,7 @@ window.BENCHMARK_DATA = {
             "unit": "ns/iter"
           }
         ]
-      }
-    ],
-    "Frunk Benchmarks": [
+      },
       {
         "commit": {
           "author": {
