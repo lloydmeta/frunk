@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["left_identity","Left identity law"],["right_identity","Right identity law"]]});

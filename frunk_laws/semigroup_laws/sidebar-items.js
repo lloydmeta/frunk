@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["associativity","Function for checking adherence to the associativity law"]]});

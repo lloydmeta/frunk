@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `core/src/hlist.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hlist.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hlist.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1760,6 +1763,31 @@
 <span id="1760">1760</span>
 <span id="1761">1761</span>
 <span id="1762">1762</span>
+<span id="1763">1763</span>
+<span id="1764">1764</span>
+<span id="1765">1765</span>
+<span id="1766">1766</span>
+<span id="1767">1767</span>
+<span id="1768">1768</span>
+<span id="1769">1769</span>
+<span id="1770">1770</span>
+<span id="1771">1771</span>
+<span id="1772">1772</span>
+<span id="1773">1773</span>
+<span id="1774">1774</span>
+<span id="1775">1775</span>
+<span id="1776">1776</span>
+<span id="1777">1777</span>
+<span id="1778">1778</span>
+<span id="1779">1779</span>
+<span id="1780">1780</span>
+<span id="1781">1781</span>
+<span id="1782">1782</span>
+<span id="1783">1783</span>
+<span id="1784">1784</span>
+<span id="1785">1785</span>
+<span id="1786">1786</span>
+<span id="1787">1787</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Module that holds HList data structures, implementations, and typeclasses.</span>
 <span class="doccomment">//!</span>
@@ -1860,6 +1888,21 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="self">Self</span>::<span class="ident">LEN</span>
+    }
+
+    <span class="doccomment">/// Returns whether a given HList is empty</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
+    <span class="doccomment">/// let h = hlist![];</span>
+    <span class="doccomment">/// assert!(h.is_empty());</span>
+    <span class="doccomment">/// # }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">Self</span>::<span class="ident">LEN</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Returns the length of a given HList type without making use of any references, or</span>
@@ -1970,10 +2013,7 @@
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">h_cons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&gt;</span>(<span class="ident">h</span>: <span class="ident">H</span>, <span class="ident">tail</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">HCons</span> {
-        <span class="ident">head</span>: <span class="ident">h</span>,
-        <span class="ident">tail</span>: <span class="ident">tail</span>,
-    }
+    <span class="ident">HCons</span> { <span class="ident">head</span>: <span class="ident">h</span>, <span class="ident">tail</span> }
 }
 
 <span class="comment">// Inherent methods shared by HNil and HCons.</span>
@@ -1996,6 +2036,23 @@
             <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">HList</span>,
             {
                 <span class="ident">HList</span>::<span class="ident">len</span>(<span class="self">self</span>)
+            }
+
+            <span class="doccomment">/// Returns whether a given HList is empty</span>
+            <span class="doccomment">///</span>
+            <span class="doccomment">/// # Examples</span>
+            <span class="doccomment">///</span>
+            <span class="doccomment">/// ```</span>
+            <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
+            <span class="doccomment">/// let h = hlist![];</span>
+            <span class="doccomment">/// assert!(h.is_empty());</span>
+            <span class="doccomment">/// # }</span>
+            <span class="doccomment">/// ```</span>
+            <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+            <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">HList</span>,
+            {
+                <span class="ident">HList</span>::<span class="ident">is_empty</span>(<span class="self">self</span>)
             }
 
             <span class="doccomment">/// Prepend an item to the current HList</span>
@@ -2652,13 +2709,7 @@
             <span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">SHead</span>, <span class="ident">STail</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Plucker</span><span class="op">&lt;</span><span class="ident">THead</span>, <span class="ident">IndexHead</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Remainder</span>,
         ) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pluck</span>();
         <span class="kw">let</span> (<span class="ident">tail</span>, <span class="ident">tail_remainder</span>): (<span class="ident">TTail</span>, <span class="self">Self</span>::<span class="ident">Remainder</span>) <span class="op">=</span> <span class="ident">r</span>.<span class="ident">sculpt</span>();
-        (
-            <span class="ident">HCons</span> {
-                <span class="ident">head</span>: <span class="ident">p</span>,
-                <span class="ident">tail</span>: <span class="ident">tail</span>,
-            },
-            <span class="ident">tail_remainder</span>,
-        )
+        (<span class="ident">HCons</span> { <span class="ident">head</span>: <span class="ident">p</span>, <span class="ident">tail</span> }, <span class="ident">tail_remainder</span>)
     }
 }
 
@@ -3038,6 +3089,7 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">from_over_into</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Tail</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Tail</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Tail</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">HList</span>,
@@ -3054,6 +3106,7 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">from_over_into</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HNil</span> {
     <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">0</span>)
@@ -3149,7 +3202,7 @@
     <span class="ident">Tail</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">HList</span>,
 {
     <span class="kw">fn</span> <span class="ident">lift_from</span>(<span class="ident">part</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">h_cons</span>(<span class="ident">part</span>.<span class="ident">into</span>(), <span class="ident">Tail</span>::<span class="ident">default</span>())
+        <span class="ident">h_cons</span>(<span class="ident">part</span>, <span class="ident">Tail</span>::<span class="ident">default</span>())
     }
 }
 
@@ -3311,7 +3364,7 @@
         <span class="kw">let</span> <span class="ident">folded</span> <span class="op">=</span> <span class="ident">h</span>.<span class="ident">foldl</span>(
             <span class="macro">hlist</span><span class="macro">!</span>[
                 <span class="op">|</span><span class="ident">acc</span>, <span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">+</span> <span class="ident">acc</span>,
-                <span class="op">|</span><span class="ident">acc</span>, <span class="ident">b</span>: <span class="ident">bool</span><span class="op">|</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">b</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">acc</span> <span class="op">&gt;</span> <span class="number">42</span> { <span class="number">9000f32</span> } <span class="kw">else</span> { <span class="number">0f32</span> },
+                <span class="op">|</span><span class="ident">acc</span>, <span class="ident">b</span>: <span class="ident">bool</span><span class="op">|</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">b</span> <span class="op">&amp;&amp;</span> <span class="ident">acc</span> <span class="op">&gt;</span> <span class="number">42</span> { <span class="number">9000f32</span> } <span class="kw">else</span> { <span class="number">0f32</span> },
                 <span class="op">|</span><span class="ident">acc</span>, <span class="ident">f</span><span class="op">|</span> <span class="ident">f</span> <span class="op">+</span> <span class="ident">acc</span>,
             ],
             <span class="number">1</span>,
@@ -3325,7 +3378,7 @@
         <span class="kw">let</span> <span class="ident">folded</span> <span class="op">=</span> <span class="ident">h</span>.<span class="ident">to_ref</span>().<span class="ident">foldl</span>(
             <span class="macro">hlist</span><span class="macro">!</span>[
                 <span class="op">|</span><span class="ident">acc</span>, <span class="kw-2">&amp;</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">+</span> <span class="ident">acc</span>,
-                <span class="op">|</span><span class="ident">acc</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">bool</span><span class="op">|</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">b</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">acc</span> <span class="op">&gt;</span> <span class="number">42</span> { <span class="number">9000f32</span> } <span class="kw">else</span> { <span class="number">0f32</span> },
+                <span class="op">|</span><span class="ident">acc</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">bool</span><span class="op">|</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">b</span> <span class="op">&amp;&amp;</span> <span class="ident">acc</span> <span class="op">&gt;</span> <span class="number">42</span> { <span class="number">9000f32</span> } <span class="kw">else</span> { <span class="number">0f32</span> },
                 <span class="op">|</span><span class="ident">acc</span>, <span class="kw-2">&amp;</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span> <span class="op">+</span> <span class="ident">acc</span>,
             ],
             <span class="number">1</span>,
@@ -3524,4 +3577,5 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "frunk_core";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk_core"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
