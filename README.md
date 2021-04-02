@@ -1,4 +1,4 @@
-# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Build Status](https://travis-ci.org/lloydmeta/frunk.svg?branch=master)](https://travis-ci.org/lloydmeta/frunk) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Frunk](https://docs.rs/frunk/badge.svg)](https://docs.rs/frunk)
+# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Continuous integration](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Frunk](https://docs.rs/frunk/badge.svg)](https://docs.rs/frunk)
 
 > **frunk** *frəNGk*
 >  * Functional programming toolbelt in Rust.
@@ -38,10 +38,11 @@ For a deep dive, RustDocs are available for:
 5. [Semigroup](#semigroup)
 6. [Monoid](#monoid)
 7. [Features](#features)
-8. [Todo](#todo)
-9. [Contributing](#contributing)
-10. [Inspirations](#inspirations)
-11. [Maintainers](#maintainers)
+8. [Benchmarks](#benchmarks)
+9. [Todo](#todo)
+10. [Contributing](#contributing)
+11. [Inspirations](#inspirations)
+12. [Maintainers](#maintainers)
 
 ## Examples
 
@@ -663,21 +664,20 @@ frunk = { version = "$version", features = ["serde"] }
 frunk_core = { version = "$version", features = ["serde"] }
 ```
 
-## Todo
-
-### Stabilise interface, general cleanup
-
-Before a 1.0 release, would be best to revisit the design of the interfaces
-and do some general code (and test cleanup).
-
 ### Benchmarks
 
 Benchmarks are available in `./benches` and can be run with:
 
 `$ rustup run nightly cargo bench`
 
-It would be nice to use something like [bench-cmp](https://github.com/BurntSushi/cargo-benchcmp) to compare
-before and after, but for some reason, there is no output. Should investigate why.
+Benchmarks on `master` are also [auto-generated, uploaded and available online](https://beachape.com/frunk/dev/bench).
+
+## Todo
+
+### Stabilise interface, general cleanup
+
+Before a 1.0 release, would be best to revisit the design of the interfaces
+and do some general code (and test cleanup).
 
 ### Not yet implemented
 
