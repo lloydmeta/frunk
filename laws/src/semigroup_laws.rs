@@ -105,5 +105,4 @@ mod tests {
             associativity as fn(Wrapper<All<bool>>, Wrapper<All<bool>>, Wrapper<All<bool>>) -> bool,
         )
     }
-
 }

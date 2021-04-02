@@ -13,6 +13,7 @@ pub fn impl_generic(input: TokenStream) -> impl ToTokens {
     let generics = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
+    #[allow(clippy::let_and_return)]
     let tree = match ast.data {
         Data::Struct(ref data) => {
             let field_bindings = FieldBindings::new(&data.fields);

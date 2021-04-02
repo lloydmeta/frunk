@@ -50,6 +50,7 @@ macro_rules! tup_iso {
             fn from(tup: ($t,)) -> Self { Generic::into(tup) }
         }
 
+        #[allow(clippy::from_over_into)]
         impl<$t> Into<($t,)> for Hlist![$t] {
             fn into(self) -> ($t,) { Generic::from(self) }
         }
@@ -81,6 +82,7 @@ macro_rules! tup_iso {
             }
         }
 
+        #[allow(clippy::from_over_into)]
         impl< $type1, $($type),*> Into< ( $type1, $($type),*, ) >
         for Hlist![ $type1, $($type),*, ] {
             fn into(self) -> ( $type1, $( $type ),*, ) {
@@ -95,9 +97,7 @@ impl Generic for () {
     fn into(self) -> Self::Repr {
         hlist![]
     }
-    fn from(_: Self::Repr) -> Self {
-        ()
-    }
+    fn from(_: Self::Repr) -> Self {}
 }
 
 impl From<()> for Hlist![] {
