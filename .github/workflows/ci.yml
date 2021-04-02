@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         name: thumbv6m-none-eabi toolchain setup
-        if: ${ matrix.use_std == 'y' }}
+        if: ${{ matrix.use_std == 'y' }}
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
@@ -44,20 +44,20 @@ jobs:
           override: true
       - uses: actions-rs/toolchain@v1
         name: std toolchain setup
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
       - uses: actions-rs/cargo@v1
         name: thumbv6m-none-eabi check
-        if: ${ matrix.use_std == 'y' }}
+        if: ${{ matrix.use_std == 'y' }}
         with:
           command: check
           args: --target thumbv6m-none-eabi --no-default-features
       - uses: actions-rs/cargo@v1
         name: std check
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           command: check
 
@@ -80,7 +80,7 @@ jobs:
           override: true
       - uses: actions-rs/toolchain@v1
         name: std toolchain setup
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
@@ -93,18 +93,18 @@ jobs:
           args: --target thumbv6m-none-eabi --no-default-features
       - uses: actions-rs/cargo@v1
         name: std build
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           command: build
       - uses: actions-rs/cargo@v1
         name: std build generic example
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           command: build
           args: --example generic
       - uses: actions-rs/cargo@v1
         name: std build labelled example
-        if: ${ matrix.use_std == 'n' }}
+        if: ${{ matrix.use_std == 'n' }}
         with:
           command: build
           args: --example labelled
