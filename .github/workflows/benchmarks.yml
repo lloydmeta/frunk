@@ -1,0 +1,42 @@
+name: Benchmarks
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+
+      - uses: actions/checkout@v1
+        name: checkout current branch
+
+      - uses: actions-rs/cargo@v1
+        name: bench branch
+        with:
+          command: bench > benches-variable
+
+      - uses: actions/checkout@v1
+        name: checkout master
+        with:
+          ref: master
+
+      - uses: actions-rs/cargo@v1
+        name: bench master
+        with:
+          command: bench > benches-control
+
+      - name: install cargo-benchcmp
+        run: cargo install cargo-benchcmp --force
+
+      - name: compare benches
+        run: cargo benchcmp benches-control benches-variable

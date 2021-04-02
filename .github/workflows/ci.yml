@@ -1,0 +1,148 @@
+on: [ push, pull_request ]
+
+name: Continuous integration
+
+jobs:
+
+  fmt:
+    name: Basic sanity checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: actions-rs/cargo@v1
+        name: formatting check
+        with:
+          command: fmt
+          args: --all -- --check
+      - uses: actions-rs/cargo@v1
+        name: clippy
+        with:
+          command: clippy
+          args: -- -D warnings
+
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [ stable, nightly ]
+        use_std: [ y, n ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: thumbv6m-none-eabi toolchain setup
+        if: ${ matrix.use_std == 'y' }}
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: thumbv6m-none-eabi
+          override: true
+      - uses: actions-rs/toolchain@v1
+        name: std toolchain setup
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        name: thumbv6m-none-eabi check
+        if: ${ matrix.use_std == 'y' }}
+        with:
+          command: check
+          args: --target thumbv6m-none-eabi --no-default-features
+      - uses: actions-rs/cargo@v1
+        name: std check
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          command: check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [ stable, nightly ]
+        use_std: [ y, n ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: thumbv6m-none-eabi toolchain setup
+        if: ${ matrix.use_std == 'y' }}
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: thumbv6m-none-eabi
+          override: true
+      - uses: actions-rs/toolchain@v1
+        name: std toolchain setup
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        name: thumbv6m-none-eabi build
+        if: ${ matrix.use_std == 'y' }}
+        with:
+          command: build
+          args: --target thumbv6m-none-eabi --no-default-features
+      - uses: actions-rs/cargo@v1
+        name: std build
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          command: build
+      - uses: actions-rs/cargo@v1
+        name: std build generic example
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          command: build
+          args: --example generic
+      - uses: actions-rs/cargo@v1
+        name: std build labelled example
+        if: ${ matrix.use_std == 'n' }}
+        with:
+          command: build
+          args: --example labelled
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [ stable, nightly ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        name: std test all
+        with:
+          command: test
+          args: --all --no-fail-fast
+
+  doc_check:
+    name: Doc check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [ stable, nightly ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        name: std doc check
+        with:
+          command: doc
+          args: --all --no-deps
