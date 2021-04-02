@@ -1,0 +1,33 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Push docs to GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - uses: actions-rs/cargo@v1
+        name: build docs
+        with:
+          command: doc
+          args: --all --no-deps
+
+      - uses: peaceiris/actions-gh-pages@v3
+        name: push docs
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./target/doc
+          keep_files: true

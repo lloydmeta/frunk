@@ -26,14 +26,14 @@ use syn::{
 };
 
 /// These are assumed to exist as enums in frunk_core::labelled
-const ALPHA_CHARS: &'static [char] = &[
+const ALPHA_CHARS: &[char] = &[
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
     't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
     'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 ];
 
 /// These are assumed to exist as enums in frunk_core::labelled as underscore prepended enums
-const UNDERSCORE_CHARS: &'static [char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const UNDERSCORE_CHARS: &[char] = &['_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 /// Parses a TokenStream (usually received as input into a
 /// custom derive function), into a syn MacroInput AST,

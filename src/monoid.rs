@@ -2,7 +2,9 @@
 //!
 //! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to
 //! define a `combine_all` method to work on a list of said things:
-#![cfg_attr(feature = "std", doc = r#"
+#![cfg_attr(
+    feature = "std",
+    doc = r#"
 Have you ever wanted to combine 2 Hashmaps such that for a given key, if it exists in both maps,
 their values are summed in the new map?
 
@@ -31,7 +33,8 @@ h_expected.insert(2, String::from("Goodbye"));
 h_expected.insert(3, String::from("Cruel World"));
 // h_expected is HashMap ( 1 -> "Hello World", 2 -> "Goodbye", 3 -> "Cruel World")
 assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
-```"#)]
+```"#
+)]
 
 use super::semigroup::{All, Any, Product, Semigroup};
 #[cfg(feature = "std")]
@@ -396,5 +399,4 @@ mod tests {
         let v = [Product(2), Product(3), Product(4)];
         assert_eq!(combine_all(&v), Product(24))
     }
-
 }
