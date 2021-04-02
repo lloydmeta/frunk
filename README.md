@@ -1,4 +1,4 @@
-# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Continuous integration](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Frunk](https://docs.rs/frunk/badge.svg)](https://docs.rs/frunk)
+# Frunk [![Crates.io](https://img.shields.io/crates/v/frunk.svg)](https://crates.io/crates/frunk) [![Continuous integration](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lloydmeta/frunk/actions/workflows/ci.yml?query=branch%3Amaster) [![Gitter](https://badges.gitter.im/lloydmeta/frunk.svg)](https://gitter.im/lloydmeta/frunk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Frunk](https://docs.rs/frunk/badge.svg)](https://docs.rs/frunk)
 
 > **frunk** *frəNGk*
 >  * Functional programming toolbelt in Rust.
