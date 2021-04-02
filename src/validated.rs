@@ -77,10 +77,7 @@ where
     /// assert!(v.is_ok());
     /// ```
     pub fn is_ok(&self) -> bool {
-        match *self {
-            Validated::Ok(_) => true,
-            _ => false,
-        }
+        matches!(*self, Validated::Ok(_))
     }
 
     /// Returns true if this validation is Err, false otherwise

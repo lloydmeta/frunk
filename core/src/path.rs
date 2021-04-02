@@ -133,6 +133,12 @@ impl<T> Path<T> {
     }
 }
 
+impl<T> Default for Path<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Trait for traversing based on Path
 pub trait PathTraverser<Path, Indices> {
     type TargetValue;
@@ -192,6 +198,7 @@ impl<Name, Tail, RHSParam> Add<Path<RHSParam>> for Path<HCons<Name, Path<Tail>>>
 where
     Path<Tail>: Add<Path<RHSParam>>,
 {
+    #[allow(clippy::type_complexity)]
     type Output = Path<HCons<Name, <Path<Tail> as Add<Path<RHSParam>>>::Output>>;
 
     #[inline(always)]

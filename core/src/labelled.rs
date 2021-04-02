@@ -463,8 +463,8 @@ impl<T: fmt::Display> fmt::Debug for DebugAsDisplay<T> {
 pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
     Field {
         name_type_holder: PhantomData,
-        name: name,
-        value: value,
+        name,
+        value,
     }
 }
 

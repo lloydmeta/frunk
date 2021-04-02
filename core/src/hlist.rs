@@ -99,6 +99,21 @@ pub trait HList: Sized {
         Self::LEN
     }
 
+    /// Returns whether a given HList is empty
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate frunk; fn main() {
+    /// let h = hlist![];
+    /// assert!(h.is_empty());
+    /// # }
+    /// ```
+    #[inline]
+    fn is_empty(&self) -> bool {
+        Self::LEN == 0
+    }
+
     /// Returns the length of a given HList type without making use of any references, or
     /// in fact, any values at all.
     ///
@@ -207,10 +222,7 @@ impl<H, T> HCons<H, T> {
 /// # }
 /// ```
 pub fn h_cons<H, T: HList>(h: H, tail: T) -> HCons<H, T> {
-    HCons {
-        head: h,
-        tail: tail,
-    }
+    HCons { head: h, tail }
 }
 
 // Inherent methods shared by HNil and HCons.
@@ -233,6 +245,23 @@ macro_rules! gen_inherent_methods {
             where Self: HList,
             {
                 HList::len(self)
+            }
+
+            /// Returns whether a given HList is empty
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # #[macro_use] extern crate frunk; fn main() {
+            /// let h = hlist![];
+            /// assert!(h.is_empty());
+            /// # }
+            /// ```
+            #[inline(always)]
+            pub fn is_empty(&self) -> bool
+            where Self: HList,
+            {
+                HList::is_empty(self)
             }
 
             /// Prepend an item to the current HList
@@ -889,13 +918,7 @@ where
             <HCons<SHead, STail> as Plucker<THead, IndexHead>>::Remainder,
         ) = self.pluck();
         let (tail, tail_remainder): (TTail, Self::Remainder) = r.sculpt();
-        (
-            HCons {
-                head: p,
-                tail: tail,
-            },
-            tail_remainder,
-        )
+        (HCons { head: p, tail }, tail_remainder)
     }
 }
 
@@ -1275,6 +1298,7 @@ where
 }
 
 #[cfg(feature = "std")]
+#[allow(clippy::from_over_into)]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
@@ -1291,6 +1315,7 @@ where
 }
 
 #[cfg(feature = "std")]
+#[allow(clippy::from_over_into)]
 impl<T> Into<Vec<T>> for HNil {
     fn into(self) -> Vec<T> {
         Vec::with_capacity(0)
@@ -1386,7 +1411,7 @@ where
     Tail: Default + HList,
 {
     fn lift_from(part: T) -> Self {
-        h_cons(part.into(), Tail::default())
+        h_cons(part, Tail::default())
     }
 }
 
