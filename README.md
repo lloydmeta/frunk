@@ -38,10 +38,11 @@ For a deep dive, RustDocs are available for:
 5. [Semigroup](#semigroup)
 6. [Monoid](#monoid)
 7. [Features](#features)
-8. [Todo](#todo)
-9. [Contributing](#contributing)
-10. [Inspirations](#inspirations)
-11. [Maintainers](#maintainers)
+8. [Benchmarks](#benchmarks)
+9. [Todo](#todo)
+10. [Contributing](#contributing)
+11. [Inspirations](#inspirations)
+12. [Maintainers](#maintainers)
 
 ## Examples
 
@@ -663,20 +664,20 @@ frunk = { version = "$version", features = ["serde"] }
 frunk_core = { version = "$version", features = ["serde"] }
 ```
 
-## Todo
-
-### Stabilise interface, general cleanup
-
-Before a 1.0 release, would be best to revisit the design of the interfaces
-and do some general code (and test cleanup).
-
 ### Benchmarks
 
 Benchmarks are available in `./benches` and can be run with:
 
 `$ rustup run nightly cargo bench`
 
-Benchmarks on `master` are also [auto-generated, uploaded and available online](https://beachape.com/frunk/dev/bench). 
+Benchmarks on `master` are also [auto-generated, uploaded and available online](https://beachape.com/frunk/dev/bench).
+
+## Todo
+
+### Stabilise interface, general cleanup
+
+Before a 1.0 release, would be best to revisit the design of the interfaces
+and do some general code (and test cleanup).
 
 ### Not yet implemented
 
