@@ -1,7 +1,9 @@
 //! Module for holding the Semigroup typeclass definition and typeclass instances
 //!
 //! You can, for example, combine tuples.
-#![cfg_attr(feature = "std", doc = r#"
+#![cfg_attr(
+    feature = "std",
+    doc = r#"
 # Examples
 
 ```
@@ -26,7 +28,8 @@ let h2 = hlist![2, 1.2, 1i64];
 let h3 = hlist![3, 4.5, 54];
 assert_eq!(h1.combine(&h2), h3)
 # }
-```"#)]
+```"#
+)]
 
 use frunk_core::hlist::*;
 use std::cell::*;

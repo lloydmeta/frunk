@@ -151,5 +151,4 @@ mod tests {
         usize_id_prop; usize,
         product_usize_id_prop; Wrapper<Product<usize>>,
     }
-
 }
