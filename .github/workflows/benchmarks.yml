@@ -12,10 +12,10 @@ jobs:
       - run: rustup toolchain update nightly && rustup default nightly
       - name: run benchmark
         run: cargo +nightly bench | tee benchmark_output.txt
-      - name: Store benchmark result
+      - name: store benchmark result
         uses: rhysd/github-action-benchmark@v1
         with:
-          name: Rust Benchmark
+          name: Frunk Benchmarks
           tool: 'cargo'
           output-file-path: benchmark_output.txt
           github-token: ${{ secrets.GITHUB_TOKEN }}
