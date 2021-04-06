@@ -551,12 +551,12 @@ macro_rules! gen_inherent_methods {
             /// * Substitute each [`h_cons`] with a function,
             ///   and substitute [`HNil`] with `init`
             ///
-            /// ```ignore
+            /// ```text
             /// the list:
-            ///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil))...)))
+            ///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil)...)))
             ///
             /// becomes:
-            ///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init))...)))
+            ///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init)...)))
             /// ```
             ///
             /// [`HNil`]: struct.HNil.html
