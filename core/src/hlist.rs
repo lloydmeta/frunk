@@ -455,6 +455,7 @@ macro_rules! gen_inherent_methods {
             ///
             /// * An `hlist![]` of closures (one for each element).
             /// * A single closure (for folding an HList that is homogenous).
+            /// * A single [`Poly`].
             ///
             /// The accumulator can freely change type over the course of the call.
             /// When called with a list of `N` functions, an expanded form of the
@@ -469,6 +470,8 @@ macro_rules! gen_inherent_methods {
             /// let acc: AccN = fN(acc, xN);
             /// acc
             /// ```
+            ///
+            /// [`Poly`]: ../traits/struct.Poly.html
             ///
             /// # Examples
             ///
@@ -526,8 +529,11 @@ macro_rules! gen_inherent_methods {
             /// * An `hlist![]` of closures (one for each element).
             /// * A single closure (for folding an HList that is homogenous),
             ///   taken by reference.
+            /// * A single [`Poly`].
             ///
             /// The accumulator can freely change type over the course of the call.
+            ///
+            /// [`Poly`]: ../traits/struct.Poly.html
             ///
             /// # Comparison to `foldl`
             ///
@@ -1125,6 +1131,20 @@ where
     }
 }
 
+impl<P, R, H, Tail, Init> HFoldRightable<Poly<P>, Init> for HCons<H, Tail>
+where
+    Tail: HFoldRightable<Poly<P>, Init>,
+    P: Func<(H, <Tail as HFoldRightable<Poly<P>, Init>>::Output), Output = R>,
+{
+    type Output = R;
+
+    fn foldr(self, poly: Poly<P>, init: Init) -> Self::Output {
+        let HCons { head, tail } = self;
+        let folded_tail = tail.foldr(poly, init);
+        P::call((head, folded_tail))
+    }
+}
+
 impl<'a> ToRef<'a> for HNil {
     type Output = HNil;
 
@@ -1218,6 +1238,20 @@ where
     fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
         let HCons { head, tail } = self;
         tail.foldl(folder.tail, (folder.head)(acc, head))
+    }
+}
+
+impl<P, R, H, Tail, Acc> HFoldLeftable<Poly<P>, Acc> for HCons<H, Tail>
+where
+    Tail: HFoldLeftable<Poly<P>, R>,
+    P: Func<(Acc, H), Output = R>,
+{
+    type Output = <Tail as HFoldLeftable<Poly<P>, R>>::Output;
+
+    fn foldl(self, poly: Poly<P>, acc: Acc) -> Self::Output {
+        let HCons { head, tail } = self;
+        let r = P::call((acc, head));
+        tail.foldl(poly, r)
     }
 }
 
@@ -1568,6 +1602,36 @@ mod tests {
     }
 
     #[test]
+    fn test_poly_foldr_consuming() {
+        trait Dummy {
+            fn dummy(&self) -> i32 {
+                1
+            }
+        }
+        impl<T: ?Sized> Dummy for T {}
+
+        struct Dummynator;
+        impl<T: Dummy, I: IntoIterator<Item = T>> Func<(I, i32)> for Dummynator {
+            type Output = i32;
+            fn call(args: (I, i32)) -> Self::Output {
+                let (i, init) = args;
+                i.into_iter().fold(init, |init, x| init + x.dummy())
+            }
+        }
+
+        let h = hlist![0..10, 0..=10, &[0, 1, 2], &['a', 'b', 'c']];
+        assert_eq!(
+            h.foldr(Poly(Dummynator), 0),
+            (0..10)
+                .map(|d| d.dummy())
+                .chain((0..=10).map(|d| d.dummy()))
+                .chain([0_i32, 1, 2].iter().map(|d| d.dummy()))
+                .chain(['a', 'b', 'c'].iter().map(|d| d.dummy()))
+                .sum()
+        );
+    }
+
+    #[test]
     fn test_foldl_consuming() {
         let h = hlist![1, false, 42f32];
         let folded = h.foldl(
@@ -1594,6 +1658,36 @@ mod tests {
         );
         assert_eq!(42f32, folded);
         assert_eq!((&h.head), &1);
+    }
+
+    #[test]
+    fn test_poly_foldl_consuming() {
+        trait Dummy {
+            fn dummy(&self) -> i32 {
+                1
+            }
+        }
+        impl<T: ?Sized> Dummy for T {}
+
+        struct Dummynator;
+        impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
+            type Output = i32;
+            fn call(args: (i32, I)) -> Self::Output {
+                let (acc, i) = args;
+                i.into_iter().fold(acc, |acc, x| acc + x.dummy())
+            }
+        }
+
+        let h = hlist![0..10, 0..=10, &[0, 1, 2], &['a', 'b', 'c']];
+        assert_eq!(
+            h.foldl(Poly(Dummynator), 0),
+            (0..10)
+                .map(|d| d.dummy())
+                .chain((0..=10).map(|d| d.dummy()))
+                .chain([0_i32, 1, 2].iter().map(|d| d.dummy()))
+                .chain(['a', 'b', 'c'].iter().map(|d| d.dummy()))
+                .sum()
+        );
     }
 
     #[test]
@@ -1714,6 +1808,7 @@ mod tests {
     #[cfg(feature = "std")]
     fn test_single_func_foldl_consuming() {
         use std::collections::HashMap;
+
         let h = hlist![
             ("one", 1),
             ("two", 2),
