@@ -4,8 +4,8 @@ participant proc_macro_helpers as pmh
 participant proc_macro_impl as pmi
 participant proc_macros as pm
 participant derives as d
-participant laws as l
 participant frunk as f
+participant laws as l
 
 c --> d: dev-dependency
 c --> pm: dev-dependency
@@ -23,10 +23,12 @@ pm --> f: dev-dependency
 d -> c: dependency
 d -> pmh: dependency
 
-l -> c: dependency
-
 f -> c: dependency
 f -> pm: dependency
 f -> d: dependency
 f --> l: dev-dependency
+
+l -> c: dependency
+l -> f: dependency
+
 @enduml

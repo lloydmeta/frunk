@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]:
 
+## [0.3.2] - 2021-04-16
+- Allow folding hlist with a single Poly (https://github.com/lloydmeta/frunk/pull/170)
+
 ## [0.3.1] - 2019-12-21
 - Refactoring derives (https://github.com/lloydmeta/frunk/pull/157)
 - Add support for deriving LabelledGeneric on enums (https://github.com/lloydmeta/frunk/pull/158)
