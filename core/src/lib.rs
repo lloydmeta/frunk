@@ -13,9 +13,9 @@
 //! # fn main() {
 //!
 //! let h = hlist![1, false, 42f32];
-//! let folded = h.foldr(hlist![|i, acc| i + acc,
-//!     |_, acc| if acc > 42f32 { 9000 } else { 0 },
-//!     |f, acc| f + acc],
+//! let folded = h.foldr(hlist![|acc, i| i + acc,
+//!     |acc, _| if acc > 42f32 { 9000 } else { 0 },
+//!     |acc, f| f + acc],
 //!     1f32);
 //! assert_eq!(folded, 9001);
 //!
@@ -26,9 +26,9 @@
 //! // foldr (foldl also available)
 //! let h2 = hlist![1, false, 42f32];
 //! let folded = h2.foldr(
-//!             hlist![|i, acc| i + acc,
-//!                    |_, acc| if acc > 42f32 { 9000 } else { 0 },
-//!                    |f, acc| f + acc],
+//!             hlist![|acc, i| i + acc,
+//!                    |acc, _| if acc > 42f32 { 9000 } else { 0 },
+//!                    |acc, f| f + acc],
 //!             1f32
 //!     );
 //! assert_eq!(folded, 9001);

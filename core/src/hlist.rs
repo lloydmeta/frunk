@@ -23,9 +23,9 @@
 //! // foldr (foldl also available)
 //! let h2 = hlist![1, false, 42f32];
 //! let folded = h2.foldr(
-//!             hlist![|i, acc| i + acc,
-//!                    |_, acc| if acc > 42f32 { 9000 } else { 0 },
-//!                    |f, acc| f + acc],
+//!             hlist![|acc, i| i + acc,
+//!                    |acc, _| if acc > 42f32 { 9000 } else { 0 },
+//!                    |acc, f| f + acc],
 //!             1f32
 //!     );
 //! assert_eq!(folded, 9001);
@@ -574,9 +574,9 @@ macro_rules! gen_inherent_methods {
             ///
             /// let folded = h.foldr(
             ///     hlist![
-            ///         |i, acc| i + acc,
-            ///         |b: bool, acc| if !b && acc > 42f32 { 9000 } else { 0 },
-            ///         |f, acc| f + acc
+            ///         |acc, i| i + acc,
+            ///         |acc, b: bool| if !b && acc > 42f32 { 9000 } else { 0 },
+            ///         |acc, f| f + acc
             ///     ],
             ///     1f32
             /// );
@@ -1108,40 +1108,40 @@ impl<F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTa
     for HCons<H, Tail>
 where
     Tail: HFoldRightable<FolderTail, Init>,
-    F: FnOnce(H, <Tail as HFoldRightable<FolderTail, Init>>::Output) -> FolderHeadR,
+    F: FnOnce(<Tail as HFoldRightable<FolderTail, Init>>::Output, H) -> FolderHeadR,
 {
     type Output = FolderHeadR;
 
     fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
         let folded_tail = self.tail.foldr(folder.tail, init);
-        (folder.head)(self.head, folded_tail)
+        (folder.head)(folded_tail, self.head)
     }
 }
 
 impl<'a, F, R, H, Tail, Init> HFoldRightable<&'a F, Init> for HCons<H, Tail>
 where
     Tail: HFoldRightable<&'a F, Init>,
-    F: Fn(H, <Tail as HFoldRightable<&'a F, Init>>::Output) -> R,
+    F: Fn(<Tail as HFoldRightable<&'a F, Init>>::Output, H) -> R,
 {
     type Output = R;
 
     fn foldr(self, folder: &'a F, init: Init) -> Self::Output {
         let folded_tail = self.tail.foldr(folder, init);
-        (folder)(self.head, folded_tail)
+        (folder)(folded_tail, self.head)
     }
 }
 
 impl<P, R, H, Tail, Init> HFoldRightable<Poly<P>, Init> for HCons<H, Tail>
 where
     Tail: HFoldRightable<Poly<P>, Init>,
-    P: Func<(H, <Tail as HFoldRightable<Poly<P>, Init>>::Output), Output = R>,
+    P: Func<(<Tail as HFoldRightable<Poly<P>, Init>>::Output, H), Output = R>,
 {
     type Output = R;
 
     fn foldr(self, poly: Poly<P>, init: Init) -> Self::Output {
         let HCons { head, tail } = self;
         let folded_tail = tail.foldr(poly, init);
-        P::call((head, folded_tail))
+        P::call((folded_tail, head))
     }
 }
 
@@ -1573,9 +1573,9 @@ mod tests {
         let h = hlist![1, false, 42f32];
         let folded = h.foldr(
             hlist![
-                |i, acc| i + acc,
-                |_, acc| if acc > 42f32 { 9000 } else { 0 },
-                |f, acc| f + acc,
+                |acc, i| i + acc,
+                |acc, _| if acc > 42f32 { 9000 } else { 0 },
+                |acc, f| f + acc,
             ],
             1f32,
         );
@@ -1585,7 +1585,7 @@ mod tests {
     #[test]
     fn test_single_func_foldr_consuming() {
         let h = hlist![1, 2, 3];
-        let folded = h.foldr(&|i, acc| i * acc, 1);
+        let folded = h.foldr(&|acc, i| i * acc, 1);
         assert_eq!(folded, 6)
     }
 
@@ -1593,9 +1593,9 @@ mod tests {
     fn test_foldr_non_consuming() {
         let h = hlist![1, false, 42f32];
         let folder = hlist![
-            |&i, acc| i + acc,
-            |&_, acc| if acc > 42f32 { 9000 } else { 0 },
-            |&f, acc| f + acc
+            |acc, &i| i + acc,
+            |acc, &_| if acc > 42f32 { 9000 } else { 0 },
+            |acc, &f| f + acc
         ];
         let folded = h.to_ref().foldr(folder, 1f32);
         assert_eq!(folded, 9001)
@@ -1611,10 +1611,10 @@ mod tests {
         impl<T: ?Sized> Dummy for T {}
 
         struct Dummynator;
-        impl<T: Dummy, I: IntoIterator<Item = T>> Func<(I, i32)> for Dummynator {
+        impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
             type Output = i32;
-            fn call(args: (I, i32)) -> Self::Output {
-                let (i, init) = args;
+            fn call(args: (i32, I)) -> Self::Output {
+                let (init, i) = args;
                 i.into_iter().fold(init, |init, x| init + x.dummy())
             }
         }
