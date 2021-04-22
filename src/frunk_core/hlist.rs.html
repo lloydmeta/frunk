@@ -2437,12 +2437,12 @@
             <span class="doccomment">/// * Substitute each [`h_cons`] with a function,</span>
             <span class="doccomment">///   and substitute [`HNil`] with `init`</span>
             <span class="doccomment">///</span>
-            <span class="doccomment">/// ```ignore</span>
+            <span class="doccomment">/// ```text</span>
             <span class="doccomment">/// the list:</span>
-            <span class="doccomment">///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil))...)))</span>
+            <span class="doccomment">///     h_cons(x1, h_cons(x2, h_cons(x3, ...h_cons(xN, HNil)...)))</span>
             <span class="doccomment">///</span>
             <span class="doccomment">/// becomes:</span>
-            <span class="doccomment">///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init))...)))</span>
+            <span class="doccomment">///        f1( x1,    f2( x2,    f3( x3, ...   fN( xN, init)...)))</span>
             <span class="doccomment">/// ```</span>
             <span class="doccomment">///</span>
             <span class="doccomment">/// [`HNil`]: struct.HNil.html</span>
