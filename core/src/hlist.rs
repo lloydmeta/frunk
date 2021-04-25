@@ -1120,21 +1120,21 @@ where
 
 impl<F, R, H, Tail, Init> HFoldRightable<F, Init> for HCons<H, Tail>
 where
-    Tail: fn_foldr::FnHFoldRightable<F, Init>,
+    Tail: foldr_owned::HFoldRightableOwned<F, Init>,
     F: Fn(<Tail as HFoldRightable<F, Init>>::Output, H) -> R,
 {
     type Output = R;
 
     fn foldr(self, folder: F, init: Init) -> Self::Output {
-        fn_foldr::FnHFoldRightable::real_foldr(self, folder, init).0
+        foldr_owned::HFoldRightableOwned::real_foldr(self, folder, init).0
     }
 }
 
-/// [`HFoldRightable`] inner mechanics for folding with a single closure/function.
-pub mod fn_foldr {
+/// [`HFoldRightable`] inner mechanics for folding with a folder that needs to be owned.
+pub mod foldr_owned {
     use super::{HCons, HFoldRightable, HNil};
 
-    /// A real `foldr` for the folder that is a closure or a function.
+    /// A real `foldr` for the folder that must be owned to fold.
     ///
     /// Due to `HList` being a recursive struct and not linear array,
     /// the only way to fold it is recursive.
@@ -1146,23 +1146,20 @@ pub mod fn_foldr {
     ///     of the folder to the next recursive call.
     /// 2. `foldr` passes the ownership of the folder to the next recursive call,
     ///     and then tries to call `folder(head)`; but the ownership is already gone!
-    ///
-    /// Thus, it should either take a reference to the folder or return ownership back.
-    /// This trait does the latter to avoid lifetimes in the trait definition.
-    pub trait FnHFoldRightable<Folder, Init>: HFoldRightable<Folder, Init> {
+    pub trait HFoldRightableOwned<Folder, Init>: HFoldRightable<Folder, Init> {
         fn real_foldr(self, folder: Folder, init: Init) -> (Self::Output, Folder);
     }
 
-    impl<F, Init> FnHFoldRightable<F, Init> for HNil {
+    impl<F, Init> HFoldRightableOwned<F, Init> for HNil {
         fn real_foldr(self, f: F, i: Init) -> (Self::Output, F) {
             (i, f)
         }
     }
 
-    impl<F, H, Tail, Init> FnHFoldRightable<F, Init> for HCons<H, Tail>
+    impl<F, H, Tail, Init> HFoldRightableOwned<F, Init> for HCons<H, Tail>
     where
         Self: HFoldRightable<F, Init>,
-        Tail: FnHFoldRightable<F, Init>,
+        Tail: HFoldRightableOwned<F, Init>,
         F: Fn(<Tail as HFoldRightable<F, Init>>::Output, H) -> Self::Output,
     {
         fn real_foldr(self, folder: F, init: Init) -> (Self::Output, F) {
