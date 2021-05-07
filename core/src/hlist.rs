@@ -79,11 +79,6 @@ pub trait HList: Sized {
     /// ```
     const LEN: usize;
 
-    #[deprecated(since = "0.1.30", note = "Please use len() or static_len() instead.")]
-    fn length(&self) -> u32 {
-        Self::LEN as u32
-    }
-
     /// Returns the length of a given HList
     ///
     /// # Examples
