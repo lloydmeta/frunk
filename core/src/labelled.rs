@@ -542,7 +542,7 @@ pub trait IntoValueLabelled {
     ///     field!((a, g, e), 3)
     /// ];
     /// // Notice the lack of type-level names
-    /// let value_labelled: Hlist![ValueField<&str>, ValueField<isize>] = labelled_hlist.into_value_labelled();
+    /// let value_labelled: HList![ValueField<&str>, ValueField<isize>] = labelled_hlist.into_value_labelled();
     ///
     /// assert_eq!(
     ///   value_labelled,
@@ -984,7 +984,7 @@ mod tests {
     #[test]
     fn test_value_labelling() {
         let labelled_hlist = hlist![field!(name, "joe"), field!((a, g, e), 3)];
-        let value_labelled: Hlist![ValueField<&str>, ValueField<isize>] =
+        let value_labelled: HList![ValueField<&str>, ValueField<isize>] =
             labelled_hlist.into_value_labelled();
         let hlist_pat!(f1, f2) = value_labelled;
         assert_eq!(f1.name, "name");
@@ -1005,8 +1005,8 @@ mod tests {
 
     #[test]
     fn test_transmogrify_hcons_sculpting_super_simple() {
-        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
-        type Target = Hlist![Field<age, i32>];
+        type Source = HList![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = HList![Field<age, i32>];
         let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
         let t_hcons: Target = hcons.transmogrify();
         assert_eq!(t_hcons, hlist!(field!(age, 3)));
@@ -1014,8 +1014,8 @@ mod tests {
 
     #[test]
     fn test_transmogrify_hcons_sculpting_somewhat_simple() {
-        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
-        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>];
+        type Source = HList![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = HList![Field<is_admin, bool>, Field<name, &'static str>];
         let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
         let t_hcons: Target = hcons.transmogrify();
         assert_eq!(t_hcons, hlist!(field!(is_admin, true), field!(name, "joe")));
@@ -1023,16 +1023,16 @@ mod tests {
 
     #[test]
     fn test_transmogrify_hcons_recursive_simple() {
-        type Source = Hlist![
-            Field<name,  Hlist![
+        type Source = HList![
+            Field<name,  HList![
                 Field<inner, f32>,
                 Field<is_admin, bool>,
             ]>,
             Field<age, i32>,
             Field<is_admin, bool>];
-        type Target = Hlist![
+        type Target = HList![
             Field<is_admin, bool>,
-            Field<name,  Hlist![
+            Field<name,  HList![
                 Field<is_admin, bool>,
             ]>,
         ];
@@ -1053,8 +1053,8 @@ mod tests {
 
     #[test]
     fn test_transmogrify_hcons_sculpting_required_simple() {
-        type Source = Hlist![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
-        type Target = Hlist![Field<is_admin, bool>, Field<name, &'static str>, Field<age, i32>];
+        type Source = HList![Field<name, &'static str>, Field<age, i32>, Field<is_admin, bool>];
+        type Target = HList![Field<is_admin, bool>, Field<name, &'static str>, Field<age, i32>];
         let hcons: Source = hlist!(field!(name, "joe"), field!(age, 3), field!(is_admin, true));
         let t_hcons: Target = hcons.transmogrify();
         assert_eq!(
@@ -1065,7 +1065,7 @@ mod tests {
 
     #[test]
     fn test_transmogrify_identical_transform_labelled_fields() {
-        type Source = Hlist![
+        type Source = HList![
             Field<name,  &'static str>,
             Field<age, i32>,
             Field<is_admin, bool>
@@ -1081,19 +1081,19 @@ mod tests {
 
     #[test]
     fn test_transmogrify_through_containers() {
-        type SourceOuter<T> = Hlist![
+        type SourceOuter<T> = HList![
             Field<name, &'static str>,
             Field<inner, T>,
         ];
-        type SourceInner = Hlist![
+        type SourceInner = HList![
             Field<is_admin, bool>,
             Field<age, i32>,
         ];
-        type TargetOuter<T> = Hlist![
+        type TargetOuter<T> = HList![
             Field<name, &'static str>,
             Field<inner, T>,
         ];
-        type TargetInner = Hlist![
+        type TargetInner = HList![
             Field<age, i32>,
             Field<is_admin, bool>,
         ];
@@ -1185,8 +1185,8 @@ mod tests {
 
     //    #[test]
     //    fn test_transmogrify_identical_transform_nested_labelled_fields() {
-    //        type Source = Hlist![
-    //    Field<name,  Hlist![
+    //        type Source = HList![
+    //    Field<name,  HList![
     //        Field<inner, f32>,
     //        Field<is_admin, bool>,
     //    ]>,

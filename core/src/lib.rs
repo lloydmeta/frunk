@@ -48,7 +48,7 @@
 //!
 //! // Resculpting an HList
 //! let h5 = hlist![9000, "joe", 41f32, true];
-//! let (reshaped, remainder2): (Hlist![f32, i32, &str], _) = h5.sculpt();
+//! let (reshaped, remainder2): (HList![f32, i32, &str], _) = h5.sculpt();
 //! assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
 //! assert_eq!(remainder2, hlist![true]);
 //! # }
