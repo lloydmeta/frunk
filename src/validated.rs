@@ -29,7 +29,7 @@
 //!     Result::Ok(32)
 //! }
 //!
-//! let v: Validated<Hlist!(String, i32), String> = get_name().into_validated() + get_age();
+//! let v: Validated<HList!(String, i32), String> = get_name().into_validated() + get_age();
 //! let person = v.into_result()
 //!                .map(|hlist_pat!(name, age)| {
 //!                     Person {
