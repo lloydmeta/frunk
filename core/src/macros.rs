@@ -86,19 +86,19 @@ macro_rules! hlist_pat {
 ///
 /// ```
 /// # #[macro_use] extern crate frunk; fn main() {
-/// let h: Hlist!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
+/// let h: HList!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 ///
 /// // Use "...Tail" to append another HList type at the end.
-/// let h: Hlist!(f32, ...Hlist!(&str, Option<i32>)) = hlist![13.5f32, "hello", Some(41)];
+/// let h: HList!(f32, ...HList!(&str, Option<i32>)) = hlist![13.5f32, "hello", Some(41)];
 /// # }
 /// ```
 #[macro_export]
-macro_rules! Hlist {
+macro_rules! HList {
     () => { $crate::hlist::HNil };
     (...$Rest:ty) => { $Rest };
-    ($A:ty) => { $crate::Hlist![$A,] };
+    ($A:ty) => { $crate::HList![$A,] };
     ($A:ty, $($tok:tt)*) => {
-        $crate::hlist::HCons<$A, $crate::Hlist![$($tok)*]>
+        $crate::hlist::HCons<$A, $crate::HList![$($tok)*]>
     };
 }
 
@@ -301,11 +301,11 @@ mod tests {
     fn trailing_commas() {
         use test_structs::unit_copy::{A, B};
 
-        let hlist_pat![]: Hlist![] = hlist![];
-        let hlist_pat![A]: Hlist![A] = hlist![A];
-        let hlist_pat![A,]: Hlist![A,] = hlist![A,];
-        let hlist_pat![A, B]: Hlist![A, B] = hlist![A, B];
-        let hlist_pat![A, B,]: Hlist![A, B,] = hlist![A, B,];
+        let hlist_pat![]: HList![] = hlist![];
+        let hlist_pat![A]: HList![A] = hlist![A];
+        let hlist_pat![A,]: HList![A,] = hlist![A,];
+        let hlist_pat![A, B]: HList![A, B] = hlist![A, B];
+        let hlist_pat![A, B,]: HList![A, B,] = hlist![A, B,];
 
         let falsum = || false;
         if falsum() {
@@ -331,9 +331,9 @@ mod tests {
         use test_structs::unit_copy::{A, B, C};
 
         // hlist: accepted locations, and consistency between macros
-        let hlist_pat![...hlist_pat![C]]: Hlist![...Hlist![C]] = { hlist![...hlist![C]] };
-        let hlist_pat![A, ...hlist_pat![C]]: Hlist![A, ...Hlist![C]] = { hlist![A, ...hlist![C]] };
-        let hlist_pat![A, B, ...hlist_pat![C]]: Hlist![A, B, ...Hlist![C]] =
+        let hlist_pat![...hlist_pat![C]]: HList![...HList![C]] = { hlist![...hlist![C]] };
+        let hlist_pat![A, ...hlist_pat![C]]: HList![A, ...HList![C]] = { hlist![A, ...hlist![C]] };
+        let hlist_pat![A, B, ...hlist_pat![C]]: HList![A, B, ...HList![C]] =
             { hlist![A, B, ...hlist![C]] };
 
         // hlist: ellipsis semantics

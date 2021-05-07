@@ -50,7 +50,7 @@
 //!
 //! // Resculpting an HList
 //! let h5 = hlist![9000, "joe", 41f32, true];
-//! let (reshaped, remainder2): (Hlist![f32, i32, &str], _) = h5.sculpt();
+//! let (reshaped, remainder2): (HList![f32, i32, &str], _) = h5.sculpt();
 //! assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
 //! assert_eq!(remainder2, hlist![true]);
 //! # }
@@ -74,15 +74,10 @@ pub trait HList: Sized {
     /// # #[macro_use] extern crate frunk; fn main() {
     /// use frunk::prelude::*;
     ///
-    /// assert_eq!(<Hlist![i32, bool, f32]>::LEN, 3);
+    /// assert_eq!(<HList![i32, bool, f32]>::LEN, 3);
     /// # }
     /// ```
     const LEN: usize;
-
-    #[deprecated(since = "0.1.30", note = "Please use len() or static_len() instead.")]
-    fn length(&self) -> u32 {
-        Self::LEN as u32
-    }
 
     /// Returns the length of a given HList
     ///
@@ -122,7 +117,7 @@ pub trait HList: Sized {
     /// # #[macro_use] extern crate frunk; fn main() {
     /// use frunk::prelude::*;
     ///
-    /// assert_eq!(<Hlist![i32, bool, f32]>::static_len(), 3);
+    /// assert_eq!(<HList![i32, bool, f32]>::static_len(), 3);
     /// # }
     /// ```
     #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
@@ -297,7 +292,7 @@ macro_rules! gen_inherent_methods {
             /// ```
             /// # #[macro_use] extern crate frunk; fn main() {
             /// let h = hlist![9000, "joe", 41f32, true];
-            /// let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+            /// let (reshaped, remainder): (HList![f32, i32, &str], _) = h.sculpt();
             /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
             /// assert_eq!(remainder, hlist![true]);
             /// # }
@@ -371,8 +366,8 @@ macro_rules! gen_inherent_methods {
 
             /// Apply a function to each element of an HList.
             ///
-            /// This transforms some `Hlist![A, B, C, ..., E]` into some
-            /// `Hlist![T, U, V, ..., Z]`.  A variety of types are supported
+            /// This transforms some `HList![A, B, C, ..., E]` into some
+            /// `HList![T, U, V, ..., Z]`.  A variety of types are supported
             /// for the folder argument:
             ///
             /// * An `hlist![]` of closures (one for each element).
@@ -418,8 +413,8 @@ macro_rules! gen_inherent_methods {
 
             /// Zip two HLists together.
             ///
-            /// This zips a `Hlist![A1, B1, ..., C1]` with a `Hlist![A2, B2, ..., C2]`
-            /// to make a `Hlist![(A1, A2), (B1, B2), ..., (C1, C2)]`
+            /// This zips a `HList![A1, B1, ..., C1]` with a `HList![A2, B2, ..., C2]`
+            /// to make a `HList![(A1, A2), (B1, B2), ..., (C1, C2)]`
             ///
             /// # Example
             ///
@@ -449,7 +444,7 @@ macro_rules! gen_inherent_methods {
 
             /// Perform a left fold over an HList.
             ///
-            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// This transforms some `HList![A, B, C, ..., E]` into a single
             /// value by visiting all of the elements in left-to-right order.
             /// A variety of types are supported for the mapper argument:
             ///
@@ -522,7 +517,7 @@ macro_rules! gen_inherent_methods {
 
             /// Perform a right fold over an HList.
             ///
-            /// This transforms some `Hlist![A, B, C, ..., E]` into a single
+            /// This transforms some `HList![A, B, C, ..., E]` into a single
             /// value by visiting all of the elements in reverse order.
             /// A variety of types are supported for the mapper argument:
             ///
@@ -1379,7 +1374,7 @@ impl<T: Default, Tail: Default + HList> Default for HCons<T, Tail> {
 /// use frunk::lift_from;
 /// use frunk::prelude::*;
 ///
-/// type H = Hlist![(), usize, f64, (), bool];
+/// type H = HList![(), usize, f64, (), bool];
 ///
 /// let x = H::lift_from(42.0);
 /// assert_eq!(x, hlist![(), 0, 42.0, (), false]);
@@ -1406,7 +1401,7 @@ pub fn lift_from<I, T, PF: LiftFrom<T, I>>(part: T) -> PF {
 /// # #[macro_use] extern crate frunk; fn main() {
 /// use frunk::prelude::*;
 ///
-/// type H = Hlist![(), usize, f64, (), bool];
+/// type H = HList![(), usize, f64, (), bool];
 ///
 /// // Type inference works as expected:
 /// let x: H = 1337.lift_into();
@@ -1508,7 +1503,7 @@ mod tests {
     #[test]
     fn test_hlist_macro() {
         assert_eq!(hlist![], HNil);
-        let h: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
+        let h: HList!(i32, &str, i32) = hlist![1, "2", 3];
         let (h1, tail1) = h.pop();
         assert_eq!(h1, 1);
         assert_eq!(tail1, hlist!["2", 3]);
@@ -1523,10 +1518,10 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn test_Hlist_macro() {
-        let h1: Hlist!(i32, &str, i32) = hlist![1, "2", 3];
-        let h2: Hlist!(i32, &str, i32,) = hlist![1, "2", 3];
-        let h3: Hlist!(i32) = hlist![1];
-        let h4: Hlist!(i32,) = hlist![1,];
+        let h1: HList!(i32, &str, i32) = hlist![1, "2", 3];
+        let h2: HList!(i32, &str, i32,) = hlist![1, "2", 3];
+        let h3: HList!(i32) = hlist![1];
+        let h4: HList!(i32,) = hlist![1,];
         assert_eq!(h1, h2);
         assert_eq!(h3, h4);
     }
@@ -1794,14 +1789,14 @@ mod tests {
     #[test]
     fn test_sculpt() {
         let h = hlist![9000, "joe", 41f32];
-        let (reshaped, remainder): (Hlist!(f32, i32), _) = h.sculpt();
+        let (reshaped, remainder): (HList!(f32, i32), _) = h.sculpt();
         assert_eq!(reshaped, hlist![41f32, 9000]);
         assert_eq!(remainder, hlist!["joe"])
     }
 
     #[test]
     fn test_len_const() {
-        assert_eq!(<Hlist![usize, &str, f32] as HList>::LEN, 3);
+        assert_eq!(<HList![usize, &str, f32] as HList>::LEN, 3);
     }
 
     #[test]
@@ -1854,7 +1849,7 @@ mod tests {
 
     #[test]
     fn test_lift() {
-        type H = Hlist![(), usize, f64, (), bool];
+        type H = HList![(), usize, f64, (), bool];
 
         // Ensure type inference works as expected first:
         let x: H = 1337.lift_into();
