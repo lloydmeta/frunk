@@ -72,14 +72,14 @@ let t: (f32, bool, &str) = h2.into();
 assert_eq!(t, (42f32, true, "hello"));
 
 let t3 = (999, false, "world");
-let h3: Hlist![ isize, bool, &str ] = t3.into();
+let h3: HList![ isize, bool, &str ] = t3.into();
 assert_eq!(h3, hlist![ 999, false, "world" ]);
 ```
 
 HLists have a `hlist_pat!` macro for pattern matching;
 ```rust
-let h: Hlist!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
-// We use the Hlist! type macro to make it easier to write
+let h: HList!(&str, &str, i32, bool) = hlist!["Joe", "Blow", 30, true];
+// We use the HList! type macro to make it easier to write
 // a type signature for HLists, which is a series of nested HCons
 // h has an expanded static type of: HCons<&str, HCons<&str, HCons<i32, HCons<bool, HNil>>>>
 
@@ -153,7 +153,7 @@ must be a subset of the types in the original `HList`.
 
 ```rust
 let h = hlist![9000, "joe", 41f32, true];
-let (reshaped, remainder): (Hlist![f32, i32, &str], _) = h.sculpt();
+let (reshaped, remainder): (HList![f32, i32, &str], _) = h.sculpt();
 assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
 assert_eq!(remainder, hlist![true]);
 ```
@@ -712,3 +712,4 @@ A.k.a. people whom you can bug/tag/@ on Gitter :D
 
 1. [lloydmeta](https://github.com/lloydmeta)
 2. [Centril](https://github.com/centril)
+3. [ExpHP](https://github.com/ExpHP)
