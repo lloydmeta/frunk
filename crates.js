@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["frunk","frunk_core","frunk_derives","frunk_laws","frunk_proc_macro_helpers","frunk_proc_macros","frunk_proc_macros_impl"];

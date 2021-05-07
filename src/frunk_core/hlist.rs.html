@@ -1,7 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hlist.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>hlist.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1878,11 +1878,6 @@
 <span id="1875">1875</span>
 <span id="1876">1876</span>
 <span id="1877">1877</span>
-<span id="1878">1878</span>
-<span id="1879">1879</span>
-<span id="1880">1880</span>
-<span id="1881">1881</span>
-<span id="1882">1882</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Module that holds HList data structures, implementations, and typeclasses.</span>
 <span class="doccomment">//!</span>
@@ -1936,7 +1931,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Resculpting an HList</span>
 <span class="doccomment">//! let h5 = hlist![9000, &quot;joe&quot;, 41f32, true];</span>
-<span class="doccomment">//! let (reshaped, remainder2): (Hlist![f32, i32, &amp;str], _) = h5.sculpt();</span>
+<span class="doccomment">//! let (reshaped, remainder2): (HList![f32, i32, &amp;str], _) = h5.sculpt();</span>
 <span class="doccomment">//! assert_eq!(reshaped, hlist![41f32, 9000, &quot;joe&quot;]);</span>
 <span class="doccomment">//! assert_eq!(remainder2, hlist![true]);</span>
 <span class="doccomment">//! # }</span>
@@ -1960,15 +1955,10 @@
     <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
     <span class="doccomment">/// use frunk::prelude::*;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&lt;Hlist![i32, bool, f32]&gt;::LEN, 3);</span>
+    <span class="doccomment">/// assert_eq!(&lt;HList![i32, bool, f32]&gt;::LEN, 3);</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">const</span> <span class="ident">LEN</span>: <span class="ident">usize</span>;
-
-    <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.1.30&quot;</span>, <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;Please use len() or static_len() instead.&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="self">Self</span>::<span class="ident">LEN</span> <span class="kw">as</span> <span class="ident">u32</span>
-    }
 
     <span class="doccomment">/// Returns the length of a given HList</span>
     <span class="doccomment">///</span>
@@ -2008,7 +1998,7 @@
     <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
     <span class="doccomment">/// use frunk::prelude::*;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&lt;Hlist![i32, bool, f32]&gt;::static_len(), 3);</span>
+    <span class="doccomment">/// assert_eq!(&lt;HList![i32, bool, f32]&gt;::static_len(), 3);</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.1.31&quot;</span>, <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;Please use LEN instead&quot;</span>)]</span>
@@ -2183,7 +2173,7 @@
             <span class="doccomment">/// ```</span>
             <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
             <span class="doccomment">/// let h = hlist![9000, &quot;joe&quot;, 41f32, true];</span>
-            <span class="doccomment">/// let (reshaped, remainder): (Hlist![f32, i32, &amp;str], _) = h.sculpt();</span>
+            <span class="doccomment">/// let (reshaped, remainder): (HList![f32, i32, &amp;str], _) = h.sculpt();</span>
             <span class="doccomment">/// assert_eq!(reshaped, hlist![41f32, 9000, &quot;joe&quot;]);</span>
             <span class="doccomment">/// assert_eq!(remainder, hlist![true]);</span>
             <span class="doccomment">/// # }</span>
@@ -2257,8 +2247,8 @@
 
             <span class="doccomment">/// Apply a function to each element of an HList.</span>
             <span class="doccomment">///</span>
-            <span class="doccomment">/// This transforms some `Hlist![A, B, C, ..., E]` into some</span>
-            <span class="doccomment">/// `Hlist![T, U, V, ..., Z]`.  A variety of types are supported</span>
+            <span class="doccomment">/// This transforms some `HList![A, B, C, ..., E]` into some</span>
+            <span class="doccomment">/// `HList![T, U, V, ..., Z]`.  A variety of types are supported</span>
             <span class="doccomment">/// for the folder argument:</span>
             <span class="doccomment">///</span>
             <span class="doccomment">/// * An `hlist![]` of closures (one for each element).</span>
@@ -2304,8 +2294,8 @@
 
             <span class="doccomment">/// Zip two HLists together.</span>
             <span class="doccomment">///</span>
-            <span class="doccomment">/// This zips a `Hlist![A1, B1, ..., C1]` with a `Hlist![A2, B2, ..., C2]`</span>
-            <span class="doccomment">/// to make a `Hlist![(A1, A2), (B1, B2), ..., (C1, C2)]`</span>
+            <span class="doccomment">/// This zips a `HList![A1, B1, ..., C1]` with a `HList![A2, B2, ..., C2]`</span>
+            <span class="doccomment">/// to make a `HList![(A1, A2), (B1, B2), ..., (C1, C2)]`</span>
             <span class="doccomment">///</span>
             <span class="doccomment">/// # Example</span>
             <span class="doccomment">///</span>
@@ -2335,7 +2325,7 @@
 
             <span class="doccomment">/// Perform a left fold over an HList.</span>
             <span class="doccomment">///</span>
-            <span class="doccomment">/// This transforms some `Hlist![A, B, C, ..., E]` into a single</span>
+            <span class="doccomment">/// This transforms some `HList![A, B, C, ..., E]` into a single</span>
             <span class="doccomment">/// value by visiting all of the elements in left-to-right order.</span>
             <span class="doccomment">/// A variety of types are supported for the mapper argument:</span>
             <span class="doccomment">///</span>
@@ -2408,7 +2398,7 @@
 
             <span class="doccomment">/// Perform a right fold over an HList.</span>
             <span class="doccomment">///</span>
-            <span class="doccomment">/// This transforms some `Hlist![A, B, C, ..., E]` into a single</span>
+            <span class="doccomment">/// This transforms some `HList![A, B, C, ..., E]` into a single</span>
             <span class="doccomment">/// value by visiting all of the elements in reverse order.</span>
             <span class="doccomment">/// A variety of types are supported for the mapper argument:</span>
             <span class="doccomment">///</span>
@@ -3265,7 +3255,7 @@
 <span class="doccomment">/// use frunk::lift_from;</span>
 <span class="doccomment">/// use frunk::prelude::*;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// type H = Hlist![(), usize, f64, (), bool];</span>
+<span class="doccomment">/// type H = HList![(), usize, f64, (), bool];</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let x = H::lift_from(42.0);</span>
 <span class="doccomment">/// assert_eq!(x, hlist![(), 0, 42.0, (), false]);</span>
@@ -3292,7 +3282,7 @@
 <span class="doccomment">/// # #[macro_use] extern crate frunk; fn main() {</span>
 <span class="doccomment">/// use frunk::prelude::*;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// type H = Hlist![(), usize, f64, (), bool];</span>
+<span class="doccomment">/// type H = HList![(), usize, f64, (), bool];</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Type inference works as expected:</span>
 <span class="doccomment">/// let x: H = 1337.lift_into();</span>
@@ -3394,7 +3384,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_hlist_macro</span>() {
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="macro">hlist</span><span class="macro">!</span>[], <span class="ident">HNil</span>);
-        <span class="kw">let</span> <span class="ident">h</span>: <span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
+        <span class="kw">let</span> <span class="ident">h</span>: <span class="macro">HList</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
         <span class="kw">let</span> (<span class="ident">h1</span>, <span class="ident">tail1</span>) <span class="op">=</span> <span class="ident">h</span>.<span class="ident">pop</span>();
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">h1</span>, <span class="number">1</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">tail1</span>, <span class="macro">hlist</span><span class="macro">!</span>[<span class="string">&quot;2&quot;</span>, <span class="number">3</span>]);
@@ -3409,10 +3399,10 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
     <span class="kw">fn</span> <span class="ident">test_Hlist_macro</span>() {
-        <span class="kw">let</span> <span class="ident">h1</span>: <span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
-        <span class="kw">let</span> <span class="ident">h2</span>: <span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>,) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
-        <span class="kw">let</span> <span class="ident">h3</span>: <span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>];
-        <span class="kw">let</span> <span class="ident">h4</span>: <span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">i32</span>,) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>,];
+        <span class="kw">let</span> <span class="ident">h1</span>: <span class="macro">HList</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
+        <span class="kw">let</span> <span class="ident">h2</span>: <span class="macro">HList</span><span class="macro">!</span>(<span class="ident">i32</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">i32</span>,) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
+        <span class="kw">let</span> <span class="ident">h3</span>: <span class="macro">HList</span><span class="macro">!</span>(<span class="ident">i32</span>) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>];
+        <span class="kw">let</span> <span class="ident">h4</span>: <span class="macro">HList</span><span class="macro">!</span>(<span class="ident">i32</span>,) <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">1</span>,];
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">h1</span>, <span class="ident">h2</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">h3</span>, <span class="ident">h4</span>);
     }
@@ -3680,14 +3670,14 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_sculpt</span>() {
         <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>];
-        <span class="kw">let</span> (<span class="ident">reshaped</span>, <span class="ident">remainder</span>): (<span class="macro">Hlist</span><span class="macro">!</span>(<span class="ident">f32</span>, <span class="ident">i32</span>), <span class="kw">_</span>) <span class="op">=</span> <span class="ident">h</span>.<span class="ident">sculpt</span>();
+        <span class="kw">let</span> (<span class="ident">reshaped</span>, <span class="ident">remainder</span>): (<span class="macro">HList</span><span class="macro">!</span>(<span class="ident">f32</span>, <span class="ident">i32</span>), <span class="kw">_</span>) <span class="op">=</span> <span class="ident">h</span>.<span class="ident">sculpt</span>();
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">reshaped</span>, <span class="macro">hlist</span><span class="macro">!</span>[<span class="number">41f32</span>, <span class="number">9000</span>]);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">remainder</span>, <span class="macro">hlist</span><span class="macro">!</span>[<span class="string">&quot;joe&quot;</span>])
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_len_const</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="op">&lt;</span><span class="macro">Hlist</span><span class="macro">!</span>[<span class="ident">usize</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">f32</span>] <span class="kw">as</span> <span class="ident">HList</span><span class="op">&gt;</span>::<span class="ident">LEN</span>, <span class="number">3</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="op">&lt;</span><span class="macro">HList</span><span class="macro">!</span>[<span class="ident">usize</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">f32</span>] <span class="kw">as</span> <span class="ident">HList</span><span class="op">&gt;</span>::<span class="ident">LEN</span>, <span class="number">3</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -3740,7 +3730,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_lift</span>() {
-        <span class="kw">type</span> <span class="ident">H</span> <span class="op">=</span> <span class="macro">Hlist</span><span class="macro">!</span>[(), <span class="ident">usize</span>, <span class="ident">f64</span>, (), <span class="ident">bool</span>];
+        <span class="kw">type</span> <span class="ident">H</span> <span class="op">=</span> <span class="macro">HList</span><span class="macro">!</span>[(), <span class="ident">usize</span>, <span class="ident">f64</span>, (), <span class="ident">bool</span>];
 
         <span class="comment">// Ensure type inference works as expected first:</span>
         <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">H</span> <span class="op">=</span> <span class="number">1337</span>.<span class="ident">lift_into</span>();
@@ -3767,5 +3757,5 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk_core"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk_core" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
