@@ -125,10 +125,8 @@ pub fn combine_all_option<T>(xs: &[T]) -> Option<T>
 where
     T: Semigroup + Clone,
 {
-    match xs.first() {
-        Some(head) => Some(xs[1..].iter().fold(head.clone(), |a, b| a.combine(b))),
-        _ => None,
-    }
+    xs.first()
+        .map(|head| xs[1..].iter().fold(head.clone(), |a, b| a.combine(b)))
 }
 
 macro_rules! numeric_semigroup_imps {
