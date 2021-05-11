@@ -119,9 +119,9 @@ assert_eq!(h1.into_reverse(), hlist!["hi", true]);
 let h2 = hlist![1, false, 42f32];
 let folded = h2.foldr(
     hlist![
-        |i, acc| i + acc,
-        |_, acc| if acc > 42f32 { 9000 } else { 0 },
-        |f, acc| f + acc
+        |acc, i| i + acc,
+        |acc, _| if acc > 42f32 { 9000 } else { 0 },
+        |acc, f| f + acc
     ],
     1f32
 );
