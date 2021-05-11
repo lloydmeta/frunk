@@ -98,9 +98,9 @@
 <span class="doccomment">//! # fn main() {</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let h = hlist![1, false, 42f32];</span>
-<span class="doccomment">//! let folded = h.foldr(hlist![|i, acc| i + acc,</span>
-<span class="doccomment">//!     |_, acc| if acc &gt; 42f32 { 9000 } else { 0 },</span>
-<span class="doccomment">//!     |f, acc| f + acc],</span>
+<span class="doccomment">//! let folded = h.foldr(hlist![|acc, i| i + acc,</span>
+<span class="doccomment">//!     |acc, _| if acc &gt; 42f32 { 9000 } else { 0 },</span>
+<span class="doccomment">//!     |acc, f| f + acc],</span>
 <span class="doccomment">//!     1f32);</span>
 <span class="doccomment">//! assert_eq!(folded, 9001);</span>
 <span class="doccomment">//!</span>
@@ -111,9 +111,9 @@
 <span class="doccomment">//! // foldr (foldl also available)</span>
 <span class="doccomment">//! let h2 = hlist![1, false, 42f32];</span>
 <span class="doccomment">//! let folded = h2.foldr(</span>
-<span class="doccomment">//!             hlist![|i, acc| i + acc,</span>
-<span class="doccomment">//!                    |_, acc| if acc &gt; 42f32 { 9000 } else { 0 },</span>
-<span class="doccomment">//!                    |f, acc| f + acc],</span>
+<span class="doccomment">//!             hlist![|acc, i| i + acc,</span>
+<span class="doccomment">//!                    |acc, _| if acc &gt; 42f32 { 9000 } else { 0 },</span>
+<span class="doccomment">//!                    |acc, f| f + acc],</span>
 <span class="doccomment">//!             1f32</span>
 <span class="doccomment">//!     );</span>
 <span class="doccomment">//! assert_eq!(folded, 9001);</span>
