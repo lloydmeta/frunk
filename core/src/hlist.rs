@@ -1313,6 +1313,137 @@ where
     }
 }
 
+mod folds_for_ref {
+    use super::{
+        foldr_owned::{self, HFoldRightableOwned},
+        Func, HCons, HFoldLeftable, HFoldRightable, HNil, Poly,
+    };
+
+    macro_rules! ref_fold_impls {
+        ($( $mut_:tt )?) => {
+            impl<F, Acc> HFoldLeftable<F, Acc> for & $( $mut_ )? HNil {
+                type Output = Acc;
+
+                fn foldl(self, _: F, acc: Acc) -> Self::Output {
+                    acc
+                }
+            }
+
+            impl<'a, F, R, FTail, H, Tail, Acc> HFoldLeftable<HCons<F, FTail>, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<FTail, R>,
+                F: FnOnce(Acc, &'a $( $mut_ )? H) -> R,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<FTail, R>>::Output;
+
+                fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    tail.foldl(folder.tail, (folder.head)(acc, head))
+                }
+            }
+
+            impl<'a, P, R, H, Tail, Acc> HFoldLeftable<Poly<P>, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<Poly<P>, R>,
+                P: Func<(Acc, &'a $( $mut_ )? H), Output = R>,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<Poly<P>, R>>::Output;
+
+                fn foldl(self, poly: Poly<P>, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let r = P::call((acc, head));
+                    tail.foldl(poly, r)
+                }
+            }
+
+            impl<'a, F, H, Tail, Acc> HFoldLeftable<F, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<F, Acc>,
+                F: Fn(Acc, &'a $( $mut_ )? H) -> Acc,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<F, Acc>>::Output;
+
+                fn foldl(self, f: F, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let acc = f(acc, head);
+                    tail.foldl(f, acc)
+                }
+            }
+
+            impl<F, Init> HFoldRightable<F, Init> for & $( $mut_ )? HNil {
+                type Output = Init;
+
+                fn foldr(self, _: F, i: Init) -> Self::Output {
+                    i
+                }
+            }
+
+            impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
+                for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldRightable<FolderTail, Init>,
+                F: FnOnce(<&'a $( $mut_ )? Tail as HFoldRightable<FolderTail, Init>>::Output, &'a $( $mut_ )? H) -> FolderHeadR,
+            {
+                type Output = FolderHeadR;
+
+                fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let folded_tail = tail.foldr(folder.tail, init);
+                    (folder.head)(folded_tail, head)
+                }
+            }
+
+            impl<'a, P, R, H, Tail, Init> HFoldRightable<Poly<P>, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldRightable<Poly<P>, Init>,
+                P: Func<(<&'a $( $mut_ )? Tail as HFoldRightable<Poly<P>, Init>>::Output, &'a $( $mut_ )? H), Output = R>,
+            {
+                type Output = R;
+
+                fn foldr(self, poly: Poly<P>, init: Init) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let folded_tail = tail.foldr(poly, init);
+                    P::call((folded_tail, head))
+                }
+            }
+
+            impl<'a, F, R, H, Tail, Init> HFoldRightable<F, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: foldr_owned::HFoldRightableOwned<F, Init>,
+                F: Fn(<&'a $( $mut_ )? Tail as HFoldRightable<F, Init>>::Output, &'a $( $mut_ )? H) -> R,
+            {
+                type Output = R;
+
+                fn foldr(self, folder: F, init: Init) -> Self::Output {
+                    foldr_owned::HFoldRightableOwned::real_foldr(self, folder, init).0
+                }
+            }
+
+            impl<F, Init> HFoldRightableOwned<F, Init> for & $( $mut_ )? HNil {
+                fn real_foldr(self, f: F, i: Init) -> (Self::Output, F) {
+                    (i, f)
+                }
+            }
+
+            impl<'a, F, H, Tail, Init> HFoldRightableOwned<F, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                Self: HFoldRightable<F, Init>,
+                &'a $( $mut_ )? Tail: HFoldRightableOwned<F, Init>,
+                F: Fn(<&'a $( $mut_ )? Tail as HFoldRightable<F, Init>>::Output, &'a $( $mut_ )? H) -> Self::Output,
+            {
+                fn real_foldr(self, folder: F, init: Init) -> (Self::Output, F) {
+                    let HCons { head, tail } = self;
+                    let (folded_tail, folder) = tail.real_foldr(folder, init);
+                    ((folder)(folded_tail, head), folder)
+                }
+            }
+        };
+    }
+
+    ref_fold_impls!();
+    ref_fold_impls!(mut);
+}
+
 /// Trait for transforming an HList into a nested tuple.
 ///
 /// This trait is part of the implementation of the inherent method
