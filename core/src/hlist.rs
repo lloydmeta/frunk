@@ -1721,7 +1721,7 @@ mod tests {
         let h1 = hlist![true, "hi"];
         let h2 = hlist![1, 32f32];
         let combined = h1 + h2;
-        assert_eq!(combined, hlist![true, "hi", 1, 32f32])
+        assert_eq!(combined, hlist![true, "hi", 1, 32f32]);
     }
 
     #[test]
@@ -1743,36 +1743,122 @@ mod tests {
             ],
             1f32,
         );
-        assert_eq!(folded, 9001)
+        assert_eq!(folded, 9001);
     }
 
     #[test]
     fn test_single_func_foldr_consuming() {
         let h = hlist![1, 2, 3];
-        let folded = h.foldr(&|acc, i| i * acc, 1);
-        assert_eq!(folded, 6)
+        let folded = h.foldr(|acc, i| i * acc, 1);
+        assert_eq!(folded, 6);
     }
 
-    #[test]
-    fn test_foldr_non_consuming() {
-        let h = hlist![1, false, 42f32];
-        let folder = hlist![
-            |acc, &i| i + acc,
-            |acc, &_| if acc > 42f32 { 9000 } else { 0 },
-            |acc, &f| f + acc
-        ];
-        let folded = h.to_ref().foldr(folder, 1f32);
-        assert_eq!(folded, 9001)
-    }
+    mod poly_fns {
+        use super::Func;
 
-    #[test]
-    fn test_poly_foldr_consuming() {
-        trait Dummy {
+        pub trait Dummy {
             fn dummy(&self) -> i32 {
                 1
             }
         }
         impl<T: ?Sized> Dummy for T {}
+
+        pub struct Refnator;
+        impl<'a, T: 'a> Func<(i32, &'a T)> for Refnator
+        where
+            &'a T: Dummy,
+        {
+            type Output = i32;
+            fn call(args: (i32, &'a T)) -> Self::Output {
+                let (init, i) = args;
+                init + i.dummy()
+            }
+        }
+
+        pub struct MutDefaultnator;
+        impl<'a, T: 'a> Func<(i32, &'a mut T)> for MutDefaultnator
+        where
+            T: Default,
+            &'a mut T: Dummy,
+        {
+            type Output = i32;
+            fn call(args: (i32, &'a mut T)) -> Self::Output {
+                let (init, i) = args;
+                let r = init + i.dummy();
+                std::mem::take(i);
+                r
+            }
+        }
+    }
+
+    #[test]
+    fn test_foldr_non_consuming() {
+        // fold by hlist
+        {
+            let mut h = hlist![1, false, 42f32];
+            let folder = hlist![
+                |acc, &i| i + acc,
+                |acc, &_| if acc > 42f32 { 9000 } else { 0 },
+                |acc, &f| f + acc
+            ];
+            let folded = (&h).foldr(folder, 1f32);
+            assert_eq!(folded, 9001);
+
+            let mutfolder = hlist![
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i + acc
+                },
+                |acc, b: &mut bool| {
+                    *b = !*b;
+                    if *b {
+                        acc as i32
+                    } else {
+                        0
+                    }
+                },
+                |acc, f: &mut _| {
+                    *f += 12.;
+                    *f + acc
+                }
+            ];
+            let mutfolded = (&mut h).foldr(mutfolder, 1f32);
+            assert_eq!(mutfolded, 57);
+            assert_eq!(h, hlist!(2, true, 54.));
+        }
+
+        // fold by single closure
+        {
+            let mut h = hlist![1, 2, 3];
+            let folded = (&h).foldr(|acc, &i| i * acc, 1);
+            assert_eq!(folded, 6);
+
+            let mutfolded = (&mut h).foldr(
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i * acc
+                },
+                1,
+            );
+            assert_eq!(mutfolded, 24);
+            assert_eq!(h, hlist!(2, 3, 4));
+        }
+
+        // fold by poly fn
+        {
+            let mut h = hlist!(42_i32, 'a');
+            let folded = (&h).foldr(Poly(poly_fns::Refnator), 3);
+            assert_eq!(folded, 5);
+
+            let mutfolded = (&mut h).foldr(Poly(poly_fns::MutDefaultnator), 4);
+            assert_eq!(mutfolded, 6);
+            assert_eq!(h, hlist!(i32::default(), char::default()));
+        }
+    }
+
+    #[test]
+    fn test_poly_foldr_consuming() {
+        use self::poly_fns::Dummy;
 
         struct Dummynator;
         impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
@@ -1811,27 +1897,74 @@ mod tests {
 
     #[test]
     fn test_foldl_non_consuming() {
-        let h = hlist![1, false, 42f32];
-        let folded = h.to_ref().foldl(
-            hlist![
-                |acc, &i| i + acc,
-                |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-                |acc, &f| f + acc,
-            ],
-            1,
-        );
-        assert_eq!(42f32, folded);
-        assert_eq!((&h.head), &1);
+        // fold by hlist
+        {
+            let mut h = hlist![1, false, 42f32];
+            let folded = (&h).foldl(
+                hlist![
+                    |acc, &i| i + acc,
+                    |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                    |acc, &f| f + acc,
+                ],
+                1,
+            );
+            assert_eq!(42f32, folded);
+
+            let mutfolder = hlist![
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i + acc
+                },
+                |acc, b: &mut bool| {
+                    *b = !*b;
+                    if *b {
+                        acc as f32
+                    } else {
+                        0.
+                    }
+                },
+                |acc, f: &mut _| {
+                    *f += 12.;
+                    *f + acc
+                }
+            ];
+            let mutfolded = (&mut h).foldl(mutfolder, 1);
+            assert_eq!(mutfolded, 57.);
+            assert_eq!(h, hlist!(2, true, 54.));
+        }
+
+        // fold by single closure
+        {
+            let mut h = hlist![1, 2, 3];
+            let folded = (&h).foldl(|acc, &i| i * acc, 1);
+            assert_eq!(folded, 6);
+
+            let mutfolded = (&mut h).foldl(
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i * acc
+                },
+                1,
+            );
+            assert_eq!(mutfolded, 24);
+            assert_eq!(h, hlist!(2, 3, 4));
+        }
+
+        // fold by poly fn
+        {
+            let mut h = hlist!(42_i32, 'a');
+            let folded = (&h).foldl(Poly(poly_fns::Refnator), 3);
+            assert_eq!(folded, 5);
+
+            let mutfolded = (&mut h).foldl(Poly(poly_fns::MutDefaultnator), 4);
+            assert_eq!(mutfolded, 6);
+            assert_eq!(h, hlist!(i32::default(), char::default()));
+        }
     }
 
     #[test]
     fn test_poly_foldl_consuming() {
-        trait Dummy {
-            fn dummy(&self) -> i32 {
-                1
-            }
-        }
-        impl<T: ?Sized> Dummy for T {}
+        use self::poly_fns::Dummy;
 
         struct Dummynator;
         impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
