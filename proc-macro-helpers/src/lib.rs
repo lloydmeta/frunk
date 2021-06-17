@@ -16,9 +16,8 @@ extern crate quote;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::ToTokens;
-use quote::__rt::Span;
 use syn::spanned::Spanned;
 use syn::{
     DeriveInput, Expr, Field, Fields, GenericParam, Generics, Ident, Lifetime, LifetimeDef, Member,

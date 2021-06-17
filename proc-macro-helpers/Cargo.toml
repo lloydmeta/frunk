@@ -12,9 +12,9 @@ keywords = ["Frunk", "macros", "internal"]
 travis-ci = { repository = "lloydmeta/frunk" }
 
 [dependencies]
-syn = "0.15"
-quote = "0.6"
-proc-macro2 = "0.4"
+syn = "1"
+quote = "1"
+proc-macro2 = "1"
 
 [dependencies.frunk_core]
 path = "../core"
