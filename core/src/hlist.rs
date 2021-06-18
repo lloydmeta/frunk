@@ -338,6 +338,7 @@ macro_rules! gen_inherent_methods {
             /// # }
             /// ```
             #[inline(always)]
+            #[allow(clippy::wrong_self_convention)]
             pub fn to_ref<'a>(&'a self) -> <Self as ToRef<'a>>::Output
                 where Self: ToRef<'a>,
             {
