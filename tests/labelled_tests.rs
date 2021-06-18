@@ -114,6 +114,7 @@ fn test_transmogrify() {
             },
         },
         is_banned: true,
+        α: true,
     };
     let expected_external_user = ExternalUser {
         name: "John",
@@ -122,6 +123,7 @@ fn test_transmogrify() {
             name: "somewhere out there",
             phone: ExternalPhoneNumber { main: 1234 },
         },
+        α: true,
     };
     let external_user: ExternalUser = internal_user.transmogrify();
     assert_eq!(external_user, expected_external_user);
