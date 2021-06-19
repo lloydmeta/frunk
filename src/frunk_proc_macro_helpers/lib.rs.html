@@ -442,7 +442,6 @@
 <span id="439">439</span>
 <span id="440">440</span>
 <span id="441">441</span>
-<span id="442">442</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_playground_url</span> <span class="op">=</span> <span class="string">&quot;https://play.rust-lang.org/&quot;</span>)]</span>
 <span class="doccomment">//! Frunk Proc Macro internals</span>
@@ -462,9 +461,8 @@
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">syn</span>;
 
 <span class="kw">use</span> <span class="ident">proc_macro::TokenStream</span>;
-<span class="kw">use</span> <span class="ident">proc_macro2::TokenStream</span> <span class="kw">as</span> <span class="ident">TokenStream2</span>;
+<span class="kw">use</span> <span class="ident">proc_macro2</span>::{<span class="ident">Span</span>, <span class="ident">TokenStream</span> <span class="kw">as</span> <span class="ident">TokenStream2</span>};
 <span class="kw">use</span> <span class="ident">quote::ToTokens</span>;
-<span class="kw">use</span> <span class="ident">quote::__rt::Span</span>;
 <span class="kw">use</span> <span class="ident">syn::spanned::Spanned</span>;
 <span class="kw">use</span> <span class="ident">syn</span>::{
     <span class="ident">DeriveInput</span>, <span class="ident">Expr</span>, <span class="ident">Field</span>, <span class="ident">Fields</span>, <span class="ident">GenericParam</span>, <span class="ident">Generics</span>, <span class="ident">Ident</span>, <span class="ident">Lifetime</span>, <span class="ident">LifetimeDef</span>, <span class="ident">Member</span>,
