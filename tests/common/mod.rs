@@ -121,6 +121,7 @@ pub struct InternalUser<'a> {
     pub age: usize,
     pub address: InternalAddress<'a>,
     pub is_banned: bool,
+    pub あ: bool,
 }
 
 #[derive(LabelledGeneric, PartialEq, Debug)]
@@ -139,6 +140,7 @@ pub struct ExternalUser<'a> {
     pub age: usize,
     pub address: ExternalAddress<'a>,
     pub name: &'a str,
+    pub あ: bool,
 }
 
 #[derive(LabelledGeneric, PartialEq, Debug)]
