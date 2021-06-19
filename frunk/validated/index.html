@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Module for holding Validated logic"><meta name="keywords" content="rust, rustlang, rust-lang, validated"><title>frunk::validated - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module validated</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../index.html">frunk</a></p><div id="sidebar-vars" data-name="validated" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">frunk</a>::<wbr><a class="mod" href="">validated</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/frunk/validated.rs.html#1-361" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Module for holding Validated logic</p>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module validated</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../index.html">frunk</a></p><div id="sidebar-vars" data-name="validated" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">frunk</a>::<wbr><a class="mod" href="">validated</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/frunk/validated.rs.html#1-361" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Module for holding Validated logic</p>
 <p><code>Validated</code> is a way of running a bunch of operations that can go wrong (for example,
 functions returning <code>Result&lt;T, E&gt;</code>) and, in the case of one or more things going wrong,
 having all the errors returned to you all at once. In the case that everything went well, you get
@@ -11,8 +11,8 @@ an <code>HList</code> of all your results.</p>
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">frunk</span>;
 
-<span class="kw">use</span> <span class="ident">frunk</span>::<span class="ident">Validated</span>;
-<span class="kw">use</span> <span class="ident">frunk</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>; <span class="comment">// for .into_validated()</span>
+<span class="kw">use</span> <span class="ident">frunk::Validated</span>;
+<span class="kw">use</span> <span class="ident">frunk::prelude</span>::<span class="kw-2">*</span>; <span class="comment">// for .into_validated()</span>
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">Person</span> {
@@ -21,23 +21,23 @@ an <code>HList</code> of all your results.</p>
 }
 
 <span class="kw">fn</span> <span class="ident">get_name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> {
-    <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>())
+    <span class="ident">Result::Ok</span>(<span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>())
 }
 
 <span class="kw">fn</span> <span class="ident">get_age</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> {
-    <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">32</span>)
+    <span class="ident">Result::Ok</span>(<span class="number">32</span>)
 }
 
-<span class="kw">let</span> <span class="ident">v</span>: <span class="ident">Validated</span><span class="op">&lt;</span><span class="macro">HList</span><span class="macro">!</span>(<span class="ident">String</span>, <span class="ident">i32</span>), <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">get_name</span>().<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>();
+<span class="kw">let</span> <span class="ident">v</span>: <span class="ident">Validated</span><span class="op">&lt;</span><span class="macro">HList!</span>(<span class="ident">String</span>, <span class="ident">i32</span>), <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">get_name</span>().<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>();
 <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>()
-               .<span class="ident">map</span>(<span class="op">|</span><span class="macro">hlist_pat</span><span class="macro">!</span>(<span class="ident">name</span>, <span class="ident">age</span>)<span class="op">|</span> {
+               .<span class="ident">map</span>(<span class="op">|</span><span class="macro">hlist_pat!</span>(<span class="ident">name</span>, <span class="ident">age</span>)<span class="op">|</span> {
                     <span class="ident">Person</span> {
                         <span class="ident">name</span>: <span class="ident">name</span>,
                         <span class="ident">age</span>: <span class="ident">age</span>,
                     }
                 });
 
- <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">person</span>.<span class="ident">unwrap</span>(),
+ <span class="macro">assert_eq!</span>(<span class="ident">person</span>.<span class="ident">unwrap</span>(),
             <span class="ident">Person</span> {
                 <span class="ident">name</span>: <span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">age</span>: <span class="number">32</span>,
@@ -47,5 +47,5 @@ an <code>HList</code> of all your results.</p>
 of collected errors.</p>
 </td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
 <table><tr class="module-item"><td><a class="trait" href="trait.IntoValidated.html" title="frunk::validated::IntoValidated trait">IntoValidated</a></td><td class="docblock-short"><p>Trait for “lifting” a given type into a Validated</p>
-</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-js="../../search-index.js"></div>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script></body></html>

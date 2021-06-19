@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/validated.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>validated.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
@@ -411,8 +411,8 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">use</span> <span class="kw">super</span>::<span class="ident">hlist</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Add</span>;
+<span class="kw">use</span> <span class="kw">super</span><span class="ident">::hlist</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::ops::Add</span>;
 
 <span class="doccomment">/// A Validated is either an Ok holding an HList or an Err, holding a vector</span>
 <span class="doccomment">/// of collected errors.</span>
@@ -442,7 +442,7 @@
     <span class="doccomment">/// assert!(v.is_ok());</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="macro">matches</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="kw">_</span>))
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">Validated::Ok</span>(<span class="kw">_</span>))
     }
 
     <span class="doccomment">/// Returns true if this validation is Err, false otherwise</span>
@@ -505,8 +505,8 @@
     <span class="doccomment">/// # }</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_result</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="ident">h</span>),
-            <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errors</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">errors</span>),
+            <span class="ident">Validated::Ok</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Ok</span>(<span class="ident">h</span>),
+            <span class="ident">Validated::Err</span>(<span class="ident">errors</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Err</span>(<span class="ident">errors</span>),
         }
     }
 }
@@ -530,8 +530,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">IntoValidated</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_validated</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">HNil</span><span class="op">&gt;</span>, <span class="ident">E</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="ident">e</span>]),
-            <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="ident">HCons</span> {
+            <span class="ident">Result::Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated::Err</span>(<span class="macro">vec!</span>[<span class="ident">e</span>]),
+            <span class="ident">Result::Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated::Ok</span>(<span class="ident">HCons</span> {
                 <span class="ident">head</span>: <span class="ident">v</span>,
                 <span class="ident">tail</span>: <span class="ident">HNil</span>,
             }),
@@ -559,11 +559,11 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span>, <span class="ident">T2</span><span class="op">&gt;</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">HList</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">HNil</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">HNil</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>: <span class="ident">HList</span>,
+    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">HNil</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>: <span class="ident">HList</span>,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">HNil</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">HNil</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span> {
+    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
         <span class="kw">let</span> <span class="ident">other_as_validated</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">into_validated</span>();
         <span class="self">self</span> <span class="op">+</span> <span class="ident">other_as_validated</span>
     }
@@ -591,19 +591,19 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">HList</span> <span class="op">+</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span>,
     <span class="ident">T2</span>: <span class="ident">HList</span>,
-    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>: <span class="ident">HList</span>,
+    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>: <span class="ident">HList</span>,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Validated</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Validated</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span> {
+    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Validated</span><span class="op">&lt;</span><span class="ident">T2</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
         <span class="kw">match</span> (<span class="self">self</span>, <span class="ident">other</span>) {
-            (<span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="kw-2">mut</span> <span class="ident">errs</span>), <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="ident">Validated::Err</span>(<span class="kw-2">mut</span> <span class="ident">errs</span>), <span class="ident">Validated::Err</span>(<span class="ident">errs2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="ident">errs</span>.<span class="ident">extend</span>(<span class="ident">errs2</span>);
-                <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs</span>)
+                <span class="ident">Validated::Err</span>(<span class="ident">errs</span>)
             }
-            (<span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs</span>), <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs</span>),
-            (<span class="kw">_</span>, <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="ident">errs</span>),
-            (<span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="ident">h1</span>), <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="ident">h2</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="ident">h1</span> <span class="op">+</span> <span class="ident">h2</span>),
+            (<span class="ident">Validated::Err</span>(<span class="ident">errs</span>), <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated::Err</span>(<span class="ident">errs</span>),
+            (<span class="kw">_</span>, <span class="ident">Validated::Err</span>(<span class="ident">errs</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated::Err</span>(<span class="ident">errs</span>),
+            (<span class="ident">Validated::Ok</span>(<span class="ident">h1</span>), <span class="ident">Validated::Ok</span>(<span class="ident">h2</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Validated::Ok</span>(<span class="ident">h1</span> <span class="op">+</span> <span class="ident">h2</span>),
         }
     }
 }
@@ -614,31 +614,31 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_adding_ok_results</span>() {
-        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;hello&quot;</span>));
-        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;hello&quot;</span>));
+        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">r1</span>.<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">r2</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">v</span>, <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="macro">hlist</span><span class="macro">!</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;hello&quot;</span>), <span class="number">1</span>)))
+        <span class="macro">assert_eq!</span>(<span class="ident">v</span>, <span class="ident">Validated::Ok</span>(<span class="macro">hlist!</span>(<span class="ident">String::from</span>(<span class="string">&quot;hello&quot;</span>), <span class="number">1</span>)))
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_adding_validated_oks</span>() {
-        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;hello&quot;</span>));
-        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">1</span>);
-        <span class="kw">let</span> <span class="ident">r3</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">3</span>);
+        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;hello&quot;</span>));
+        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">r3</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="number">3</span>);
         <span class="kw">let</span> <span class="ident">v1</span> <span class="op">=</span> <span class="ident">r1</span>.<span class="ident">into_validated</span>();
         <span class="kw">let</span> <span class="ident">v2</span> <span class="op">=</span> <span class="ident">r2</span>.<span class="ident">into_validated</span>();
         <span class="kw">let</span> <span class="ident">v3</span> <span class="op">=</span> <span class="ident">r3</span>.<span class="ident">into_validated</span>();
         <span class="kw">let</span> <span class="ident">comb</span> <span class="op">=</span> <span class="ident">v1</span> <span class="op">+</span> <span class="ident">v2</span> <span class="op">+</span> <span class="ident">v3</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">comb</span>, <span class="ident">Validated</span>::<span class="prelude-val">Ok</span>(<span class="macro">hlist</span><span class="macro">!</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;hello&quot;</span>), <span class="number">1</span>, <span class="number">3</span>)))
+        <span class="macro">assert_eq!</span>(<span class="ident">comb</span>, <span class="ident">Validated::Ok</span>(<span class="macro">hlist!</span>(<span class="ident">String::from</span>(<span class="string">&quot;hello&quot;</span>), <span class="number">1</span>, <span class="number">3</span>)))
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_adding_err_results</span>() {
-        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i16</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">1</span>);
-        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i16</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;NO!&quot;</span>));
+        <span class="kw">let</span> <span class="ident">r1</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i16</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Ok</span>(<span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">r2</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i16</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Result::Err</span>(<span class="ident">String::from</span>(<span class="string">&quot;NO!&quot;</span>));
         <span class="kw">let</span> <span class="ident">v1</span> <span class="op">=</span> <span class="ident">r1</span>.<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">r2</span>;
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">v1</span>.<span class="ident">is_err</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">v1</span>, <span class="ident">Validated</span>::<span class="prelude-val">Err</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;NO!&quot;</span>.<span class="ident">to_owned</span>()]))
+        <span class="macro">assert!</span>(<span class="ident">v1</span>.<span class="ident">is_err</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">v1</span>, <span class="ident">Validated::Err</span>(<span class="macro">vec!</span>[<span class="string">&quot;NO!&quot;</span>.<span class="ident">to_owned</span>()]))
     }
 
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
@@ -664,36 +664,36 @@
 
     <span class="kw">fn</span> <span class="ident">get_name</span>(<span class="ident">yah_nah</span>: <span class="ident">YahNah</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Nope</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">yah_nah</span> {
-            <span class="ident">YahNah</span>::<span class="ident">Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>()),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">Nope</span>::<span class="ident">NameNope</span>),
+            <span class="ident">YahNah::Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Ok</span>(<span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>()),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Err</span>(<span class="ident">Nope::NameNope</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">get_age</span>(<span class="ident">yah_nah</span>: <span class="ident">YahNah</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">Nope</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">yah_nah</span> {
-            <span class="ident">YahNah</span>::<span class="ident">Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="number">32</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">Nope</span>::<span class="ident">AgeNope</span>),
+            <span class="ident">YahNah::Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Ok</span>(<span class="number">32</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Err</span>(<span class="ident">Nope::AgeNope</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">get_email</span>(<span class="ident">yah_nah</span>: <span class="ident">YahNah</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Nope</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">yah_nah</span> {
-            <span class="ident">YahNah</span>::<span class="ident">Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Ok</span>(<span class="string">&quot;hello@world.com&quot;</span>.<span class="ident">to_owned</span>()),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span>::<span class="prelude-val">Err</span>(<span class="ident">Nope</span>::<span class="ident">EmailNope</span>),
+            <span class="ident">YahNah::Yah</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Ok</span>(<span class="string">&quot;hello@world.com&quot;</span>.<span class="ident">to_owned</span>()),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Err</span>(<span class="ident">Nope::EmailNope</span>),
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_to_result_ok</span>() {
         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span>
-            <span class="ident">get_name</span>(<span class="ident">YahNah</span>::<span class="ident">Yah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah</span>::<span class="ident">Yah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah</span>::<span class="ident">Yah</span>);
-        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="macro">hlist_pat</span><span class="macro">!</span>(<span class="ident">name</span>, <span class="ident">age</span>, <span class="ident">email</span>)<span class="op">|</span> <span class="ident">Person</span> {
+            <span class="ident">get_name</span>(<span class="ident">YahNah::Yah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah::Yah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah::Yah</span>);
+        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="macro">hlist_pat!</span>(<span class="ident">name</span>, <span class="ident">age</span>, <span class="ident">email</span>)<span class="op">|</span> <span class="ident">Person</span> {
             <span class="ident">name</span>: <span class="ident">name</span>,
             <span class="ident">age</span>: <span class="ident">age</span>,
             <span class="ident">email</span>: <span class="ident">email</span>,
         });
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">person</span>.<span class="ident">unwrap</span>(),
             <span class="ident">Person</span> {
                 <span class="ident">name</span>: <span class="string">&quot;James&quot;</span>.<span class="ident">to_owned</span>(),
@@ -706,24 +706,24 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_to_result_all_faulty</span>() {
         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span>
-            <span class="ident">get_name</span>(<span class="ident">YahNah</span>::<span class="ident">Nah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah</span>::<span class="ident">Nah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah</span>::<span class="ident">Nah</span>);
-        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">unimplemented</span><span class="macro">!</span>());
+            <span class="ident">get_name</span>(<span class="ident">YahNah::Nah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah::Nah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah::Nah</span>);
+        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">unimplemented!</span>());
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">person</span>.<span class="ident">unwrap_err</span>(),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Nope</span>::<span class="ident">NameNope</span>, <span class="ident">Nope</span>::<span class="ident">AgeNope</span>, <span class="ident">Nope</span>::<span class="ident">EmailNope</span>]
+            <span class="macro">vec!</span>[<span class="ident">Nope::NameNope</span>, <span class="ident">Nope::AgeNope</span>, <span class="ident">Nope::EmailNope</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_to_result_one_faulty</span>() {
         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span>
-            <span class="ident">get_name</span>(<span class="ident">YahNah</span>::<span class="ident">Nah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah</span>::<span class="ident">Yah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah</span>::<span class="ident">Nah</span>);
-        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">unimplemented</span><span class="macro">!</span>());
+            <span class="ident">get_name</span>(<span class="ident">YahNah::Nah</span>).<span class="ident">into_validated</span>() <span class="op">+</span> <span class="ident">get_age</span>(<span class="ident">YahNah::Yah</span>) <span class="op">+</span> <span class="ident">get_email</span>(<span class="ident">YahNah::Nah</span>);
+        <span class="kw">let</span> <span class="ident">person</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">into_result</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">unimplemented!</span>());
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">person</span>.<span class="ident">unwrap_err</span>(), <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Nope</span>::<span class="ident">NameNope</span>, <span class="ident">Nope</span>::<span class="ident">EmailNope</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">person</span>.<span class="ident">unwrap_err</span>(), <span class="macro">vec!</span>[<span class="ident">Nope::NameNope</span>, <span class="ident">Nope::EmailNope</span>]);
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-js="../../search-index.js"></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
