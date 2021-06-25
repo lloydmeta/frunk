@@ -1,6 +1,6 @@
 [package]
 name = "frunk_derives"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_derives contains the custom derivations for certain traits in Frunk."
 license = "MIT"
@@ -21,4 +21,4 @@ quote = "1"
 [dependencies.frunk_proc_macro_helpers]
 path = "../proc-macro-helpers"
 default-features = false
-version = "0.0.5"
+version = "0.1.0"
