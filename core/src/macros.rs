@@ -299,7 +299,7 @@ macro_rules! poly_fn {
 mod tests {
     #[test]
     fn trailing_commas() {
-        use test_structs::unit_copy::{A, B};
+        use crate::test_structs::unit_copy::{A, B};
 
         let hlist_pat![]: HList![] = hlist![];
         let hlist_pat![A]: HList![A] = hlist![A];
@@ -327,8 +327,8 @@ mod tests {
 
     #[test]
     fn ellipsis_tail() {
-        use coproduct::Coproduct;
-        use test_structs::unit_copy::{A, B, C};
+        use crate::coproduct::Coproduct;
+        use crate::test_structs::unit_copy::{A, B, C};
 
         // hlist: accepted locations, and consistency between macros
         let hlist_pat![...hlist_pat![C]]: HList![...HList![C]] = { hlist![...hlist![C]] };
@@ -350,7 +350,7 @@ mod tests {
 
     #[test]
     fn ellipsis_ignore() {
-        use test_structs::unit_copy::{A, B, C, D, E};
+        use crate::test_structs::unit_copy::{A, B, C, D, E};
 
         // '...' accepted locations
         let hlist_pat![...] = hlist![A, B, C, D, E];

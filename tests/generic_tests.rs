@@ -5,7 +5,7 @@ extern crate frunk_core;
 use frunk::{convert_from, from_generic, into_generic};
 
 mod common;
-use common::*;
+use crate::common::*;
 
 #[test]
 fn test_struct_from_generic() {

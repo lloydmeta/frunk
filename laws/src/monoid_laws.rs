@@ -63,11 +63,11 @@ pub fn right_identity<A: Monoid + Eq>(a: A) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::wrapper::*;
     use frunk::semigroup::*;
     use quickcheck::quickcheck;
     #[cfg(feature = "std")]
     use std::collections::{HashMap, HashSet};
-    use wrapper::*;
 
     #[test]
     #[cfg(feature = "std")]

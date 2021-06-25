@@ -14,7 +14,7 @@
 //! # }
 //! ```
 
-use generic::Generic;
+use crate::generic::Generic;
 
 macro_rules! tup_def {
     ( $($dtype: ident),* ; ; ) => {};
