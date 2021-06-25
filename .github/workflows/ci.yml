@@ -14,6 +14,7 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: formatting check
         with:
@@ -49,6 +50,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: thumbv6m-none-eabi check
         if: ${{ matrix.use_std == 'y' }}
@@ -85,6 +87,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: thumbv6m-none-eabi build
         if: ${{ matrix.use_std == 'y' }}
@@ -122,6 +125,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: std test all
         with:
@@ -141,6 +145,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: std doc check
         with:
