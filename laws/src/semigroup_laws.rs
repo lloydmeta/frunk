@@ -40,10 +40,10 @@ pub fn associativity<A: Semigroup + Eq>(a: A, b: A, c: A) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::wrapper::*;
     use quickcheck::quickcheck;
     #[cfg(feature = "std")]
     use std::collections::{HashMap, HashSet};
-    use crate::wrapper::*;
 
     #[test]
     #[cfg(feature = "std")]
