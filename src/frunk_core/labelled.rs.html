@@ -1363,10 +1363,10 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">use</span> <span class="ident">hlist</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">indices</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std::fmt</span>;
-<span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indices</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">::std::fmt</span>;
+<span class="kw">use</span> <span class="ident">::std::marker::PhantomData</span>;
 
 <span class="doccomment">/// A trait that converts from a type to a labelled generic representation.</span>
 <span class="doccomment">///</span>
@@ -2130,7 +2130,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span><span class="ident">::chars</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">LinkedList</span>, <span class="ident">VecDeque</span>};
+    <span class="kw">use</span> <span class="ident">::std::collections</span>::{<span class="ident">LinkedList</span>, <span class="ident">VecDeque</span>};
 
     <span class="comment">// Set up some aliases</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_camel_case_types</span>)]</span>

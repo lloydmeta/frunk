@@ -698,7 +698,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">trailing_commas</span>() {
-        <span class="kw">use</span> <span class="ident">test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>};
+        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>};
 
         <span class="kw">let</span> <span class="macro">hlist_pat!</span>[]: <span class="macro">HList!</span>[] <span class="op">=</span> <span class="macro">hlist!</span>[];
         <span class="kw">let</span> <span class="macro">hlist_pat!</span>[<span class="ident">A</span>]: <span class="macro">HList!</span>[<span class="ident">A</span>] <span class="op">=</span> <span class="macro">hlist!</span>[<span class="ident">A</span>];
@@ -726,8 +726,8 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">ellipsis_tail</span>() {
-        <span class="kw">use</span> <span class="ident">coproduct::Coproduct</span>;
-        <span class="kw">use</span> <span class="ident">test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">C</span>};
+        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::coproduct::Coproduct</span>;
+        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">C</span>};
 
         <span class="comment">// hlist: accepted locations, and consistency between macros</span>
         <span class="kw">let</span> <span class="macro">hlist_pat!</span>[...<span class="macro">hlist_pat!</span>[<span class="ident">C</span>]]: <span class="macro">HList!</span>[...<span class="macro">HList!</span>[<span class="ident">C</span>]] <span class="op">=</span> { <span class="macro">hlist!</span>[...<span class="macro">hlist!</span>[<span class="ident">C</span>]] };
@@ -749,7 +749,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">ellipsis_ignore</span>() {
-        <span class="kw">use</span> <span class="ident">test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">C</span>, <span class="ident">D</span>, <span class="ident">E</span>};
+        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::test_structs::unit_copy</span>::{<span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">C</span>, <span class="ident">D</span>, <span class="ident">E</span>};
 
         <span class="comment">// &#39;...&#39; accepted locations</span>
         <span class="kw">let</span> <span class="macro">hlist_pat!</span>[...] <span class="op">=</span> <span class="macro">hlist!</span>[<span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">C</span>, <span class="ident">D</span>, <span class="ident">E</span>];

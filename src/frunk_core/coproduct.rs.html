@@ -1266,9 +1266,9 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">use</span> <span class="ident">hlist</span>::{<span class="ident">HCons</span>, <span class="ident">HNil</span>};
-<span class="kw">use</span> <span class="ident">indices</span>::{<span class="ident">Here</span>, <span class="ident">There</span>};
-<span class="kw">use</span> <span class="ident">traits</span>::{<span class="ident">Func</span>, <span class="ident">Poly</span>, <span class="ident">ToMut</span>, <span class="ident">ToRef</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist</span>::{<span class="ident">HCons</span>, <span class="ident">HNil</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indices</span>::{<span class="ident">Here</span>, <span class="ident">There</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::traits</span>::{<span class="ident">Func</span>, <span class="ident">Poly</span>, <span class="ident">ToMut</span>, <span class="ident">ToRef</span>};
 
 <span class="doccomment">/// Enum type representing a Coproduct. Think of this as a Result, but capable</span>
 <span class="doccomment">/// of supporting any arbitrary number of types instead of just 2.</span>
@@ -2317,7 +2317,7 @@
                 <span class="comment">// ...including CNil.</span>
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
                 <span class="kw">let</span> <span class="ident">cnil</span>: <span class="ident">CNil</span> <span class="op">=</span> <span class="macro">panic!</span>();
-                <span class="kw">let</span> <span class="ident">res</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CNil</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">cnil</span>.<span class="ident">subset</span>();
+                <span class="kw">let</span> <span class="ident">_res</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CNil</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">cnil</span>.<span class="ident">subset</span>();
                 <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">res</span>;
             }
         }

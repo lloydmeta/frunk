@@ -554,54 +554,54 @@ assert_eq!(d_user.first_name, &quot;Joe&quot;);
 <span class="comment">//       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.</span>
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::lift_from</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::lift_from</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::HCons</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::HCons</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::HNil</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::HNil</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">traits::Func</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::traits::Func</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">traits::Poly</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::traits::Poly</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">traits</span>::{<span class="ident">ToMut</span>, <span class="ident">ToRef</span>}; <span class="comment">// useful for where bounds</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::traits</span>::{<span class="ident">ToMut</span>, <span class="ident">ToRef</span>}; <span class="comment">// useful for where bounds</span>
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">coproduct::Coproduct</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::coproduct::Coproduct</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::convert_from</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::convert_from</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::from_generic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::from_generic</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::into_generic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::into_generic</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::map_inter</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::map_inter</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::map_repr</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::map_repr</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic::Generic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::generic::Generic</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">labelled::from_labelled_generic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::labelled::from_labelled_generic</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">labelled::into_labelled_generic</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::labelled::into_labelled_generic</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">labelled::labelled_convert_from</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::labelled::labelled_convert_from</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">labelled::transform_from</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::labelled::transform_from</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">labelled::LabelledGeneric</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::labelled::LabelledGeneric</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">semigroup::Semigroup</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::semigroup::Semigroup</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">monoid::Monoid</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::monoid::Monoid</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;validated&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">validated::Validated</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::validated::Validated</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
     <span class="doccomment">//! Traits that need to be imported for the complete `frunk` experience.</span>
@@ -610,15 +610,15 @@ assert_eq!(d_user.first_name, &quot;Joe&quot;);
     <span class="doccomment">//! access to any missing methods advertised in frunk&#39;s documentation.</span>
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::HList</span>; <span class="comment">// for LEN</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::HList</span>; <span class="comment">// for LEN</span>
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::LiftFrom</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::LiftFrom</span>;
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hlist::LiftInto</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist::LiftInto</span>;
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;validated&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">validated::IntoValidated</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::validated::IntoValidated</span>;
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

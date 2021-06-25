@@ -75,10 +75,10 @@
 <span class="kw">use</span> <span class="ident">proc_macro::TokenStream</span>;
 
 <span class="kw">mod</span> <span class="ident">derive_generic</span>;
-<span class="kw">use</span> <span class="ident">derive_generic::impl_generic</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::derive_generic::impl_generic</span>;
 
 <span class="kw">mod</span> <span class="ident">derive_labelled_generic</span>;
-<span class="kw">use</span> <span class="ident">derive_labelled_generic::impl_labelled_generic</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::derive_labelled_generic::impl_labelled_generic</span>;
 
 <span class="kw">use</span> <span class="ident">quote::ToTokens</span>;
 
