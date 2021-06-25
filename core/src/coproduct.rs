@@ -71,9 +71,9 @@
 //! # }
 //! ```
 
-use hlist::{HCons, HNil};
-use indices::{Here, There};
-use traits::{Func, Poly, ToMut, ToRef};
+use crate::hlist::{HCons, HNil};
+use crate::indices::{Here, There};
+use crate::traits::{Func, Poly, ToMut, ToRef};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -1122,7 +1122,7 @@ mod tests {
                 // ...including CNil.
                 #[allow(unused)]
                 let cnil: CNil = panic!();
-                let res: Result<CNil, _> = cnil.subset();
+                let _res: Result<CNil, _> = cnil.subset();
                 let _ = res;
             }
         }

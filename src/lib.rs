@@ -241,54 +241,54 @@ pub use frunk_derives::*;
 //       Hyperlinks will be broken for the ones in `frunk::`, so we need to prevent it.
 
 #[doc(no_inline)]
-pub use hlist::lift_from;
+pub use crate::hlist::lift_from;
 #[doc(no_inline)]
-pub use hlist::HCons;
+pub use crate::hlist::HCons;
 #[doc(no_inline)]
-pub use hlist::HNil;
+pub use crate::hlist::HNil;
 #[doc(no_inline)]
-pub use traits::Func;
+pub use crate::traits::Func;
 #[doc(no_inline)]
-pub use traits::Poly;
+pub use crate::traits::Poly;
 #[doc(no_inline)]
-pub use traits::{ToMut, ToRef}; // useful for where bounds
+pub use crate::traits::{ToMut, ToRef}; // useful for where bounds
 
 #[doc(no_inline)]
-pub use coproduct::Coproduct;
+pub use crate::coproduct::Coproduct;
 
 #[doc(no_inline)]
-pub use generic::convert_from;
+pub use crate::generic::convert_from;
 #[doc(no_inline)]
-pub use generic::from_generic;
+pub use crate::generic::from_generic;
 #[doc(no_inline)]
-pub use generic::into_generic;
+pub use crate::generic::into_generic;
 #[doc(no_inline)]
-pub use generic::map_inter;
+pub use crate::generic::map_inter;
 #[doc(no_inline)]
-pub use generic::map_repr;
+pub use crate::generic::map_repr;
 #[doc(no_inline)]
-pub use generic::Generic;
+pub use crate::generic::Generic;
 
 #[doc(no_inline)]
-pub use labelled::from_labelled_generic;
+pub use crate::labelled::from_labelled_generic;
 #[doc(no_inline)]
-pub use labelled::into_labelled_generic;
+pub use crate::labelled::into_labelled_generic;
 #[doc(no_inline)]
-pub use labelled::labelled_convert_from;
+pub use crate::labelled::labelled_convert_from;
 #[doc(no_inline)]
-pub use labelled::transform_from;
+pub use crate::labelled::transform_from;
 #[doc(no_inline)]
-pub use labelled::LabelledGeneric;
+pub use crate::labelled::LabelledGeneric;
 
 #[doc(no_inline)]
-pub use semigroup::Semigroup;
+pub use crate::semigroup::Semigroup;
 
 #[doc(no_inline)]
-pub use monoid::Monoid;
+pub use crate::monoid::Monoid;
 
 #[doc(no_inline)]
 #[cfg(feature = "validated")]
-pub use validated::Validated;
+pub use crate::validated::Validated;
 
 pub mod prelude {
     //! Traits that need to be imported for the complete `frunk` experience.
@@ -297,13 +297,13 @@ pub mod prelude {
     //! access to any missing methods advertised in frunk's documentation.
 
     #[doc(no_inline)]
-    pub use hlist::HList; // for LEN
+    pub use crate::hlist::HList; // for LEN
     #[doc(no_inline)]
-    pub use hlist::LiftFrom;
+    pub use crate::hlist::LiftFrom;
     #[doc(no_inline)]
-    pub use hlist::LiftInto;
+    pub use crate::hlist::LiftInto;
 
     #[doc(no_inline)]
     #[cfg(feature = "validated")]
-    pub use validated::IntoValidated;
+    pub use crate::validated::IntoValidated;
 }

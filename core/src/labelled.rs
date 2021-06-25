@@ -148,10 +148,10 @@
 //! # }
 //! ```
 
-use hlist::*;
-use indices::*;
-use std::fmt;
-use std::marker::PhantomData;
+use crate::hlist::*;
+use crate::indices::*;
+use ::std::fmt;
+use ::std::marker::PhantomData;
 
 /// A trait that converts from a type to a labelled generic representation.
 ///
@@ -915,7 +915,7 @@ where
 mod tests {
     use super::chars::*;
     use super::*;
-    use std::collections::{LinkedList, VecDeque};
+    use ::std::collections::{LinkedList, VecDeque};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]

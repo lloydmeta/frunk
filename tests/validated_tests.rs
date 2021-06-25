@@ -6,7 +6,7 @@ extern crate frunk_core;
 use frunk::prelude::*;
 
 mod common;
-use common::*;
+use crate::common::*;
 
 // Working with Validated
 

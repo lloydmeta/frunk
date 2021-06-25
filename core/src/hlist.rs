@@ -56,8 +56,8 @@
 //! # }
 //! ```
 
-use indices::{Here, Suffixed, There};
-use traits::{Func, IntoReverse, Poly, ToMut, ToRef};
+use crate::indices::{Here, Suffixed, There};
+use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 
 use std::ops::Add;
 

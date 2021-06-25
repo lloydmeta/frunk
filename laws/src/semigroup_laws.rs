@@ -43,7 +43,7 @@ mod tests {
     use quickcheck::quickcheck;
     #[cfg(feature = "std")]
     use std::collections::{HashMap, HashSet};
-    use wrapper::*;
+    use crate::wrapper::*;
 
     #[test]
     #[cfg(feature = "std")]

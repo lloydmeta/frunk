@@ -1,5 +1,6 @@
 [package]
 name = "frunk_proc_macro_helpers"
+edition = "2018"
 version = "0.1.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Common internal functions for frunk's proc macros"
