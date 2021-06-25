@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [Breaking change] Rename `Hlist!` type macro to `HList!` (https://github.com/lloydmeta/frunk/issues/132)
 - [Breaking change] Remove deprecated `HList.length()` (https://github.com/lloydmeta/frunk/issues/125)
 - [Breaking change] `HFoldRightable` rework: now `HFoldRightable::foldr` does not differ from `HFoldLeftable::foldl` in **calling**, like `std::iter::DoubleEndedIterator::rfold` does not differ from `std::iter::Iterator::fold`. Note: though `foldr` **behavior** wasn't changed, all old `foldr` calls would either stop compiling or produce wrong results (https://github.com/lloydmeta/frunk/issues/171)
+- [Breaking change] Bump quote, syn and proc-macro2 to 1 (https://github.com/lloydmeta/frunk/pull/183)
+- Fix unicode identifiers support https://github.com/lloydmeta/frunk/pull/186
 
 ## [0.3.2] - 2021-04-16
 - Allow folding hlist with a single Poly (https://github.com/lloydmeta/frunk/pull/170)
