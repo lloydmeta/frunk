@@ -40,4 +40,18 @@ fn main() {
         ..p
     });
     assert_eq!(oldest_person.age, 90);
+
+    // mapping over generic representation
+    let peep = Person {
+        first_name: "bo",
+        last_name: "peep",
+        age: 30,
+    };
+    let generic = frunk::into_generic(peep);
+    // mapping each one
+    let _ = generic.map(hlist![
+        |first_name| println!("First name: {}", first_name),
+        |last_name| println!("Last name: {}", last_name),
+        |age| println!("age: {}", age),
+    ]);
 }

@@ -100,4 +100,18 @@ fn main() {
 
     let external_person: ExternalPerson = internal_person.transmogrify();
     println!("{:#?}", external_person);
+
+    // mapping over labelled generic representation
+    let peep = NewUser {
+        first_name: "bo",
+        last_name: "peep",
+        age: 30,
+    };
+    let labelled_generic = frunk::into_labelled_generic(peep);
+
+    let _ = labelled_generic.map(hlist![
+        |f: Field<_, _>| println!("{}: {}", f.name, f.value),
+        |l: Field<_, _>| println!("{}: {}", l.name, l.value),
+        |a: Field<_, _>| println!("{}: {}", a.name, a.value),
+    ]);
 }
