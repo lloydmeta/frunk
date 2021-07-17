@@ -100,17 +100,11 @@ jobs:
         with:
           command: build
       - uses: actions-rs/cargo@v1
-        name: std build generic example
+        name: std build examples
         if: ${{ matrix.use_std == 'n' }}
         with:
           command: build
-          args: --example generic
-      - uses: actions-rs/cargo@v1
-        name: std build labelled example
-        if: ${{ matrix.use_std == 'n' }}
-        with:
-          command: build
-          args: --example labelled
+          args: --examples
 
   test:
     name: Test Suite
