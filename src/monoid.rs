@@ -99,7 +99,7 @@ where
     T: Monoid + Semigroup + Clone,
 {
     xs.iter()
-        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
+        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(next))
 }
 
 impl<T> Monoid for Option<T>
