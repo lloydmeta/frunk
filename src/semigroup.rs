@@ -247,7 +247,7 @@ where
             match h.entry(k_clone) {
                 Entry::Occupied(o) => {
                     let existing = o.into_mut();
-                    let comb = existing.combine(&v);
+                    let comb = existing.combine(v);
                     *existing = comb;
                 }
                 Entry::Vacant(o) => {
