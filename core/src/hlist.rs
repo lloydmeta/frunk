@@ -281,7 +281,7 @@ macro_rules! gen_inherent_methods {
 
             /// Consume the current HList and return an HList with the requested shape.
             ///
-            /// `sculpt` allows us to extract/reshape/scult the current HList into another shape,
+            /// `sculpt` allows us to extract/reshape/sculpt the current HList into another shape,
             /// provided that the requested shape's types are are contained within the current HList.
             ///
             /// The `Indices` type parameter allows the compiler to figure out that `Ts`
