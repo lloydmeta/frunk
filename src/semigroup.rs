@@ -220,14 +220,7 @@ where
     T: Eq + Hash + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        let mut h = HashSet::new();
-        for i in self {
-            h.insert(i.clone());
-        }
-        for i in other {
-            h.insert(i.clone());
-        }
-        h
+        self.union(other).cloned().collect()
     }
 }
 
