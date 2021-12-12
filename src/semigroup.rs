@@ -162,11 +162,9 @@ where
     T: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        match *self {
-            Some(ref v) => match *other {
-                Some(ref v_other) => Some(v.combine(v_other)),
-                _ => self.clone(),
-            },
+        match (self, other) {
+            (Some(ref v), Some(ref v_other)) => Some(v.combine(v_other)),
+            (Some(_), _) => self.clone(),
             _ => other.clone(),
         }
     }
