@@ -231,10 +231,7 @@ where
     V: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        let mut h: HashMap<K, V> = HashMap::new();
-        for (k, v) in self {
-            h.insert(k.clone(), v.clone());
-        }
+        let mut h: HashMap<K, V> = self.clone();
         for (k, v) in other {
             let k_clone = k.clone();
             match h.entry(k_clone) {
