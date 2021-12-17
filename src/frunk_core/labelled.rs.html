@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core&#x2F;src&#x2F;labelled.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>labelled.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core&#x2F;src&#x2F;labelled.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>labelled.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1209,8 +1209,7 @@
 <span id="1209">1209</span>
 <span id="1210">1210</span>
 <span id="1211">1211</span>
-</pre><pre class="rust">
-<span class="doccomment">//! This module holds the machinery behind LabelledGeneric.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! This module holds the machinery behind LabelledGeneric.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! A `LabelledGeneric` instance is pretty much exactly the same as a `Generic`</span>
 <span class="doccomment">//! instance, except that the generic representation should contain information</span>
@@ -1360,8 +1359,8 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::hlist</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indices</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::hlist</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">::std::fmt</span>;
 <span class="kw">use</span> <span class="ident">::std::marker::PhantomData</span>;
 
@@ -1410,18 +1409,18 @@
     <span class="kw">type</span> <span class="ident">Repr</span>;
 
     <span class="doccomment">/// Convert a value to its representation type `Repr`.</span>
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Repr</span>;
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Repr</span>;
 
     <span class="doccomment">/// Convert a value&#39;s labelled representation type `Repr`</span>
     <span class="doccomment">/// to the values&#39;s type.</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">repr</span>: <span class="self">Self</span><span class="ident">::Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">repr</span>: <span class="ident"><span class="self">Self</span>::Repr</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Convert from one type to another using a type with the same</span>
     <span class="doccomment">/// labelled generic representation</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Repr</span><span class="op">&gt;</span>,
+        <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Repr</span><span class="op">&gt;</span>,
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">repr</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Src</span> <span class="kw">as</span> <span class="ident">LabelledGeneric</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">src</span>);
@@ -1434,7 +1433,7 @@
     <span class="doccomment">/// Note that this method tosses away the &quot;remainder&quot; of the sculpted representation. In other</span>
     <span class="doccomment">/// words, anything that is not needed from A gets tossed out.</span>
     <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;obsolete, transform_from instead&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">sculpted_convert_from</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">sculpted_convert_from</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">LabelledGeneric</span>,
         <span class="self">Self</span>: <span class="ident">Sized</span>,
@@ -1452,7 +1451,7 @@
     <span class="doccomment">/// representation. In other words, anything that is not needed from `Src`</span>
     <span class="doccomment">/// gets tossed out.</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transform_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">transform_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span>,
         <span class="self">Self</span>: <span class="ident">Sized</span>,
@@ -1471,7 +1470,7 @@
     <span class="kw">type</span> <span class="ident">Repr</span>;
 
     <span class="doccomment">/// Convert a value to its representation type `Repr`.</span>
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Repr</span>;
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Repr</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> <span class="ident">IntoLabelledGeneric</span> <span class="kw">for</span> <span class="ident">A</span>
@@ -1481,13 +1480,13 @@
     <span class="kw">type</span> <span class="ident">Repr</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">A</span> <span class="kw">as</span> <span class="ident">LabelledGeneric</span><span class="op">&gt;</span><span class="ident">::Repr</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">IntoLabelledGeneric</span><span class="op">&gt;</span><span class="ident">::Repr</span> {
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">IntoLabelledGeneric</span><span class="op">&gt;</span><span class="ident">::Repr</span> {
         <span class="self">self</span>.<span class="ident">into</span>()
     }
 }
 
 <span class="doccomment">/// Given a labelled generic representation of a `Dst`, returns `Dst`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_labelled_generic</span><span class="op">&lt;</span><span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">repr</span>: <span class="ident">Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dst</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_labelled_generic</span><span class="op">&lt;</span><span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">repr</span>: <span class="ident">Repr</span>) -&gt; <span class="ident">Dst</span>
 <span class="kw">where</span>
     <span class="ident">Dst</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
 {
@@ -1495,7 +1494,7 @@
 }
 
 <span class="doccomment">/// Given a `Src`, returns its labelled generic representation.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_labelled_generic</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Repr</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_labelled_generic</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="ident">Repr</span>
 <span class="kw">where</span>
     <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
 {
@@ -1504,7 +1503,7 @@
 
 <span class="doccomment">/// Converts one type into another assuming they have the same labelled generic</span>
 <span class="doccomment">/// representation.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">labelled_convert_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dst</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">labelled_convert_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="ident">Dst</span>
 <span class="kw">where</span>
     <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
     <span class="ident">Dst</span>: <span class="ident">LabelledGeneric</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
@@ -1518,7 +1517,7 @@
 <span class="doccomment">/// The &quot;Indices&quot; type parameter allows the compiler to figure out that the two representations</span>
 <span class="doccomment">/// can indeed be morphed into each other.</span>
 <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;obsolete, transform_from instead&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sculpted_convert_from</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sculpted_convert_from</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="ident">A</span>) -&gt; <span class="ident">B</span>
 <span class="kw">where</span>
     <span class="ident">A</span>: <span class="ident">LabelledGeneric</span>,
     <span class="ident">B</span>: <span class="ident">LabelledGeneric</span>,
@@ -1532,7 +1531,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The &quot;Indices&quot; type parameter allows the compiler to figure out that the two representations</span>
 <span class="doccomment">/// can indeed be morphed into each other.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">transform_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dst</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">transform_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Indices</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="ident">Dst</span>
 <span class="kw">where</span>
     <span class="ident">Src</span>: <span class="ident">LabelledGeneric</span>,
     <span class="ident">Dst</span>: <span class="ident">LabelledGeneric</span>,
@@ -1556,7 +1555,7 @@
     <span class="doccomment">//! ```</span>
 
     <span class="macro">macro_rules!</span> <span class="ident">create_enums_for</span> {
-        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>: <span class="ident">ident</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>: <span class="ident">ident</span>)<span class="kw-2">*</span>) =&gt; {
             $(
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>, <span class="ident">non_camel_case_types</span>)]</span>
                 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>)]</span>
@@ -1581,7 +1580,7 @@
         <span class="comment">// Good thing I don&#39;t plan on adding reified labels. - Exp</span>
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="number">3</span>;
         <span class="kw">match</span> <span class="ident">a</span> {
-            <span class="ident">a</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq!</span>(<span class="ident">a</span>, <span class="number">3</span>),
+            <span class="ident">a</span> =&gt; <span class="macro">assert_eq!</span>(<span class="ident">a</span>, <span class="number">3</span>),
         }
     }
 }
@@ -1624,7 +1623,7 @@
 <span class="kw">where</span>
     <span class="ident">Type</span>: <span class="ident">fmt::Debug</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Field&quot;</span>)
             <span class="comment">// show name without quotes</span>
             .<span class="ident">field</span>(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">DebugAsDisplay</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>))
@@ -1637,7 +1636,7 @@
 <span class="kw">where</span>
     <span class="ident">Type</span>: <span class="ident">fmt::Debug</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;ValueField&quot;</span>)
             <span class="comment">// show name without quotes</span>
             .<span class="ident">field</span>(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">DebugAsDisplay</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>))
@@ -1650,7 +1649,7 @@
 <span class="kw">struct</span> <span class="ident">DebugAsDisplay</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">T</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">fmt::Display</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">DebugAsDisplay</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">fmt::Display::fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="ident">f</span>)
     }
 }
@@ -1672,7 +1671,7 @@
 <span class="doccomment">/// assert_eq!(l.name, &quot;name&quot;);</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">field_with_name</span><span class="op">&lt;</span><span class="ident">Label</span>, <span class="ident">Value</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="ident">Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Field</span><span class="op">&lt;</span><span class="ident">Label</span>, <span class="ident">Value</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">field_with_name</span><span class="op">&lt;</span><span class="ident">Label</span>, <span class="ident">Value</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="ident">Value</span>) -&gt; <span class="ident">Field</span><span class="op">&lt;</span><span class="ident">Label</span>, <span class="ident">Value</span><span class="op">&gt;</span> {
     <span class="ident">Field</span> {
         <span class="ident">name_type_holder</span>: <span class="ident">PhantomData</span>,
         <span class="ident">name</span>,
@@ -1706,13 +1705,13 @@
     <span class="doccomment">/// assert_eq!(unlabelled, hlist![&quot;joe&quot;, 3])</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span>;
+    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span>;
 }
 
 <span class="doccomment">/// Implementation for HNil</span>
 <span class="kw">impl</span> <span class="ident">IntoUnlabelled</span> <span class="kw">for</span> <span class="ident">HNil</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">HNil</span>;
-    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
+    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="self">self</span>
     }
 }
@@ -1724,7 +1723,7 @@
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Value</span>, <span class="op">&lt;</span><span class="ident">Tail</span> <span class="kw">as</span> <span class="ident">IntoUnlabelled</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
+    <span class="kw">fn</span> <span class="ident">into_unlabelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="ident">HCons</span> {
             <span class="ident">head</span>: <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">value</span>,
             <span class="ident">tail</span>: <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">into_unlabelled</span>(),
@@ -1770,12 +1769,12 @@
     <span class="doccomment">/// ]);</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span>;
+    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">IntoValueLabelled</span> <span class="kw">for</span> <span class="ident">HNil</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">HNil</span>;
-    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
+    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="self">self</span>
     }
 }
@@ -1786,7 +1785,7 @@
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">ValueField</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>, <span class="op">&lt;</span><span class="ident">Tail</span> <span class="kw">as</span> <span class="ident">IntoValueLabelled</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
+    <span class="kw">fn</span> <span class="ident">into_value_labelled</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="ident">HCons</span> {
             <span class="ident">head</span>: <span class="ident">ValueField</span> {
                 <span class="ident">name</span>: <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">name</span>,
@@ -1803,7 +1802,7 @@
     <span class="kw">type</span> <span class="ident">Remainder</span>;
 
     <span class="doccomment">/// Returns a pair consisting of the value pointed to by the target key and the remainder.</span>
-    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">TargetKey</span>, <span class="self">Self</span><span class="ident">::TargetValue</span><span class="op">&gt;</span>, <span class="self">Self</span><span class="ident">::Remainder</span>);
+    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) -&gt; (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">TargetKey</span>, <span class="ident"><span class="self">Self</span>::TargetValue</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Remainder</span>);
 }
 
 <span class="doccomment">/// Implementation when the pluck target key is in the head.</span>
@@ -1812,7 +1811,7 @@
     <span class="kw">type</span> <span class="ident">Remainder</span> <span class="op">=</span> <span class="ident">Tail</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="self">Self</span><span class="ident">::TargetValue</span><span class="op">&gt;</span>, <span class="self">Self</span><span class="ident">::Remainder</span>) {
+    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) -&gt; (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident"><span class="self">Self</span>::TargetValue</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Remainder</span>) {
         <span class="kw">let</span> <span class="ident">field</span> <span class="op">=</span> <span class="ident">field_with_name</span>(<span class="self">self</span>.<span class="ident">head</span>.<span class="ident">name</span>, <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">value</span>);
         (<span class="ident">field</span>, <span class="self">self</span>.<span class="ident">tail</span>)
     }
@@ -1827,7 +1826,7 @@
     <span class="kw">type</span> <span class="ident">Remainder</span> <span class="op">=</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Head</span>, <span class="op">&lt;</span><span class="ident">Tail</span> <span class="kw">as</span> <span class="ident">ByNameFieldPlucker</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">TailIndex</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Remainder</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="self">Self</span><span class="ident">::TargetValue</span><span class="op">&gt;</span>, <span class="self">Self</span><span class="ident">::Remainder</span>) {
+    <span class="kw">fn</span> <span class="ident">pluck_by_name</span>(<span class="self">self</span>) -&gt; (<span class="ident">Field</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident"><span class="self">Self</span>::TargetValue</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Remainder</span>) {
         <span class="kw">let</span> (<span class="ident">target</span>, <span class="ident">tail_remainder</span>) <span class="op">=</span>
             <span class="op">&lt;</span><span class="ident">Tail</span> <span class="kw">as</span> <span class="ident">ByNameFieldPlucker</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">TailIndex</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::pluck_by_name</span>(<span class="self">self</span>.<span class="ident">tail</span>);
         (
@@ -1934,13 +1933,13 @@
     <span class="doccomment">/// Consume this current object and return an object of the Target type.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Although similar to sculpting, transmogrifying does its job recursively.</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Target</span>;
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">Target</span>;
 }
 
 <span class="doccomment">/// Implementation of `Transmogrifier` for identity plucked `Field` to `Field` Transforms.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">SourceValue</span><span class="op">&gt;</span> <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">SourceValue</span>, <span class="ident">IdentityTransMog</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Field</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">SourceValue</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SourceValue</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">SourceValue</span> {
         <span class="self">self</span>.<span class="ident">value</span>
     }
 }
@@ -1948,12 +1947,12 @@
 <span class="doccomment">/// Implementations of `Transmogrifier` that allow recursion through stdlib container types.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">std</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::MappingIndicesWrapper</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::MappingIndicesWrapper</span>;
     <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Field</span>, <span class="ident">Transmogrifier</span>};
     <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">LinkedList</span>, <span class="ident">VecDeque</span>};
 
     <span class="macro">macro_rules!</span> <span class="ident">transmogrify_seq</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">container</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">container</span>:<span class="ident">ident</span>) =&gt; {
             <span class="doccomment">/// Implementation of `Transmogrifier` that maps over a `$container` in a `Field`, transmogrifying the</span>
             <span class="doccomment">/// elements on the way past.</span>
             <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">Source</span>, <span class="ident">Target</span>, <span class="ident">InnerIndices</span><span class="op">&gt;</span>
@@ -1962,7 +1961,7 @@
             <span class="kw">where</span>
                 <span class="ident">Source</span>: <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">Target</span>, <span class="ident">InnerIndices</span><span class="op">&gt;</span>,
             {
-                <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">container</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
+                <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">container</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
                     <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">transmogrify</span>()).<span class="ident">collect</span>()
                 }
             }
@@ -1980,7 +1979,7 @@
     <span class="kw">where</span>
         <span class="ident">Source</span>: <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">Target</span>, <span class="ident">InnerIndices</span><span class="op">&gt;</span>,
     {
-        <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
             <span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">value</span>.<span class="ident">transmogrify</span>())
         }
     }
@@ -1994,7 +1993,7 @@
 <span class="kw">where</span>
     <span class="ident">Source</span>: <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">Target</span>, <span class="ident">InnerIndices</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Target</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">transmogrify</span>())
     }
 }
@@ -2002,7 +2001,7 @@
 <span class="doccomment">/// Implementation of `Transmogrifier` for when the `Target` is empty and the `Source` is empty.</span>
 <span class="kw">impl</span> <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">HNil</span>, <span class="ident">HNil</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HNil</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HNil</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">HNil</span> {
         <span class="ident">HNil</span>
     }
 }
@@ -2010,7 +2009,7 @@
 <span class="doccomment">/// Implementation of `Transmogrifier` for when the `Target` is empty and the `Source` is non-empty.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">SourceHead</span>, <span class="ident">SourceTail</span><span class="op">&gt;</span> <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">HNil</span>, <span class="ident">HNil</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">SourceHead</span>, <span class="ident">SourceTail</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HNil</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">HNil</span> {
         <span class="ident">HNil</span>
     }
 }
@@ -2034,7 +2033,7 @@
     <span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">TargetHead</span>, <span class="ident">TargetTail</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">TargetHead</span>, <span class="ident">TargetTail</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">transmogrify</span>()
     }
 }
@@ -2078,7 +2077,7 @@
     <span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Remainder</span>: <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">TargetTail</span>, <span class="ident">TransMogTailIndices</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Field</span><span class="op">&lt;</span><span class="ident">TargetHeadName</span>, <span class="ident">TargetHeadValue</span><span class="op">&gt;</span>, <span class="ident">TargetTail</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Field</span><span class="op">&lt;</span><span class="ident">TargetHeadName</span>, <span class="ident">TargetHeadValue</span><span class="op">&gt;</span>, <span class="ident">TargetTail</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">source_field_for_head_target_name</span>, <span class="ident">remainder</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pluck_by_name</span>();
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">source_field_for_head_target_name</span>.<span class="ident">name</span>;
         <span class="kw">let</span> <span class="ident">transmogrified_value</span>: <span class="ident">TargetHeadValue</span> <span class="op">=</span>
@@ -2101,7 +2100,7 @@
         <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="kw">as</span> <span class="ident">LabelledGeneric</span><span class="op">&gt;</span><span class="ident">::Repr</span>, <span class="ident">TransmogIndices</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Target</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">Target</span> {
         <span class="kw">let</span> <span class="ident">source_as_repr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">source_transmogged</span> <span class="op">=</span> <span class="ident">source_as_repr</span>.<span class="ident">transmogrify</span>();
         <span class="op">&lt;</span><span class="ident">Target</span> <span class="kw">as</span> <span class="ident">LabelledGeneric</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">source_transmogged</span>)
@@ -2118,14 +2117,14 @@
     <span class="ident">Source</span>: <span class="ident">Transmogrifier</span><span class="op">&lt;</span><span class="ident">TargetValue</span>, <span class="ident">TransmogIndices</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TargetValue</span> {
+    <span class="kw">fn</span> <span class="ident">transmogrify</span>(<span class="self">self</span>) -&gt; <span class="ident">TargetValue</span> {
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">transmogrify</span>()
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span><span class="ident">::chars</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::chars</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">::std::collections</span>::{<span class="ident">LinkedList</span>, <span class="ident">VecDeque</span>};
 
@@ -2310,7 +2309,7 @@
             <span class="ident">Field</span><span class="op">&lt;</span><span class="ident">is_admin</span>, <span class="ident">bool</span><span class="op">&gt;</span>,
         ];
 
-        <span class="kw">fn</span> <span class="ident">create_inner</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">SourceInner</span>, <span class="ident">TargetInner</span>) {
+        <span class="kw">fn</span> <span class="ident">create_inner</span>() -&gt; (<span class="ident">SourceInner</span>, <span class="ident">TargetInner</span>) {
             <span class="kw">let</span> <span class="ident">source_inner</span>: <span class="ident">SourceInner</span> <span class="op">=</span> <span class="macro">hlist!</span>[<span class="macro">field!</span>(<span class="ident">is_admin</span>, <span class="bool-val">true</span>), <span class="macro">field!</span>(<span class="ident">age</span>, <span class="number">14</span>)];
             <span class="kw">let</span> <span class="ident">target_inner</span>: <span class="ident">TargetInner</span> <span class="op">=</span> <span class="macro">hlist!</span>[<span class="macro">field!</span>(<span class="ident">age</span>, <span class="number">14</span>), <span class="macro">field!</span>(<span class="ident">is_admin</span>, <span class="bool-val">true</span>)];
             (<span class="ident">source_inner</span>, <span class="ident">target_inner</span>)
@@ -2421,7 +2420,7 @@
     <span class="comment">//        )</span>
     <span class="comment">//    }</span>
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk_core" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

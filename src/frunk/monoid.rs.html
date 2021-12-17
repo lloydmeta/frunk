@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;monoid.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>monoid.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;monoid.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>monoid.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -400,8 +400,7 @@
 <span id="400">400</span>
 <span id="401">401</span>
 <span id="402">402</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Module for holding Monoid typeclass definitions and default implementations</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module for holding Monoid typeclass definitions and default implementations</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! A `Monoid` is a Semigroup that has a defined empty/zero value. This allows us to</span>
 <span class="doccomment">//! define a `combine_all` method to work on a list of said things:</span>
@@ -439,7 +438,7 @@ assert_eq!(monoid::combine_all(&amp;vec_of_hashes), h_expected);
 ```&quot;#</span>
 )]</span>
 
-<span class="kw">use</span> <span class="kw">super</span><span class="ident">::semigroup</span>::{<span class="ident">All</span>, <span class="ident">Any</span>, <span class="ident">Product</span>, <span class="ident">Semigroup</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::semigroup</span>::{<span class="ident">All</span>, <span class="ident">Any</span>, <span class="ident">Product</span>, <span class="ident">Semigroup</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">std::collections</span>::<span class="kw-2">*</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
@@ -456,7 +455,7 @@ assert_eq!(monoid::combine_all(&amp;vec_of_hashes), h_expected);
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&lt;i16 as Monoid&gt;::empty(), 0);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// Return this combined with itself `n` times.</span>
@@ -468,14 +467,14 @@ assert_eq!(monoid::combine_all(&amp;vec_of_hashes), h_expected);
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(monoid::combine_n(&amp;Some(2), 4), Some(8));</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">combine_n</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">times</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">combine_n</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">times</span>: <span class="ident">u32</span>) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Monoid</span> <span class="op">+</span> <span class="ident">Semigroup</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">if</span> <span class="ident">times</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">times</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Monoid</span><span class="op">&gt;</span><span class="ident">::empty</span>()
     } <span class="kw">else</span> {
-        <span class="kw">super</span><span class="ident">::semigroup::combine_n</span>(<span class="ident">o</span>, <span class="ident">times</span>)
+        <span class="ident"><span class="kw">super</span>::semigroup::combine_n</span>(<span class="ident">o</span>, <span class="ident">times</span>)
     }
 }
 
@@ -497,7 +496,7 @@ let vec_of_some_strings = vec![Some(String::from(&quot;Hello&quot;)), Some(Strin
 assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello World&quot;)));
 ```&quot;#</span>
 )]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">combine_all</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">xs</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">combine_all</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">xs</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="ident">T</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Monoid</span> <span class="op">+</span> <span class="ident">Semigroup</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
@@ -509,14 +508,14 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Semigroup</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="prelude-val">None</span>
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">String</span> {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">String::new</span>()
     }
 }
@@ -526,7 +525,7 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Vec::new</span>()
     }
 }
@@ -536,7 +535,7 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Hash</span> <span class="op">+</span> <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">HashSet::new</span>()
     }
 }
@@ -547,28 +546,28 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
     <span class="ident">K</span>: <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Hash</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">V</span>: <span class="ident">Semigroup</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">HashMap::new</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">All</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">All</span>(<span class="bool-val">true</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">Any</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Any</span>(<span class="bool-val">false</span>)
     }
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">numeric_all_impls</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) =&gt; {
       $(
         <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">All</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span><span class="op">&gt;</span> {
-            <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> { <span class="ident">All</span>(<span class="op">!</span><span class="number">0</span>) }
+            <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> { <span class="ident">All</span>(<span class="op">!</span><span class="number">0</span>) }
         }
       )<span class="op">*</span>
     }
@@ -577,10 +576,10 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 <span class="macro">numeric_all_impls!</span> { <span class="ident">usize</span> <span class="ident">u8</span> <span class="ident">u16</span> <span class="ident">u32</span> <span class="ident">u64</span> <span class="ident">isize</span> <span class="ident">i8</span> <span class="ident">i16</span> <span class="ident">i32</span> <span class="ident">i64</span> }
 
 <span class="macro">macro_rules!</span> <span class="ident">numeric_any_impls</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) =&gt; {
       $(
         <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">Any</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span><span class="op">&gt;</span> {
-            <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> { <span class="ident">Any</span>(<span class="number">0</span>) }
+            <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> { <span class="ident">Any</span>(<span class="number">0</span>) }
         }
       )<span class="op">*</span>
     }
@@ -589,10 +588,10 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 <span class="macro">numeric_any_impls!</span> { <span class="ident">usize</span> <span class="ident">u8</span> <span class="ident">u16</span> <span class="ident">u32</span> <span class="ident">u64</span> <span class="ident">isize</span> <span class="ident">i8</span> <span class="ident">i16</span> <span class="ident">i32</span> <span class="ident">i64</span> }
 
 <span class="macro">macro_rules!</span> <span class="ident">numeric_monoid_imps</span> {
-  ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">zero</span>: <span class="ident">expr</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+  ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">zero</span>: <span class="ident">expr</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) =&gt; {
     $(
       <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span> {
-        <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">zero</span> }
+        <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">zero</span> }
       }
     )<span class="op">*</span>
   }
@@ -614,10 +613,10 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">numeric_product_monoid_imps</span> {
-  ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>: <span class="ident">expr</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+  ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>: <span class="ident">expr</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) =&gt; {
     $(
       <span class="kw">impl</span> <span class="ident">Monoid</span> <span class="kw">for</span> <span class="ident">Product</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">tr</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> { <span class="ident">Product</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>) }
+        <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> { <span class="ident">Product</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>) }
       }
     )<span class="op">*</span>
   }
@@ -639,27 +638,27 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">tuple_impls</span> {
-    () <span class="op">=</span><span class="op">&gt;</span> {}; <span class="comment">// no more</span>
+    () =&gt; {}; <span class="comment">// no more</span>
 
-    ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>), $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>), )<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>), $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>), )<span class="kw-2">*</span>) =&gt; {
 <span class="comment">// Invoke recursive reversal of list that ends in the macro expansion implementation</span>
 <span class="comment">// of the reversed list</span>
 <span class="comment">//</span>
-        <span class="macro">tuple_impls!</span>([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>);] $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), )<span class="kw-2">*</span>);
-        <span class="macro">tuple_impls!</span>($( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), )<span class="kw-2">*</span>); <span class="comment">// invoke macro on tail</span>
+        <span class="macro">tuple_impls!</span>([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>);] $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), )<span class="kw-2">*</span>);
+        <span class="macro">tuple_impls!</span>($( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), )<span class="kw-2">*</span>); <span class="comment">// invoke macro on tail</span>
     };
 
 <span class="comment">// ([accumulatedList], listToReverse); recursively calls tuple_impls until the list to reverse</span>
 <span class="comment">// + is empty (see next pattern)</span>
 <span class="comment">//</span>
-    ([$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">accIdx</span>: <span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">accTyp</span>: <span class="ident">ident</span>);)<span class="op">+</span>]  (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>), $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>), )<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
-      <span class="macro">tuple_impls!</span>([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>); $((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">accIdx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">accTyp</span>); )<span class="kw-2">*</span>] $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), ) <span class="kw-2">*</span>);
+    ([$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">accIdx</span>: <span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">accTyp</span>: <span class="ident">ident</span>);)<span class="op">+</span>]  (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>), $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>), )<span class="kw-2">*</span>) =&gt; {
+      <span class="macro">tuple_impls!</span>([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>); $((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">accIdx</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">accTyp</span>); )<span class="kw-2">*</span>] $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>), ) <span class="kw-2">*</span>);
     };
 
 <span class="comment">// Finally expand into our implementation</span>
-    ([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>); $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>); )<span class="kw-2">*</span>]) <span class="op">=</span><span class="op">&gt;</span> {
+    ([(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">idx</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>); $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nidx</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>:<span class="ident">ident</span>); )<span class="kw-2">*</span>]) =&gt; {
         <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>: <span class="ident">Monoid</span>, $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span>: <span class="ident">Monoid</span>),<span class="kw-2">*</span><span class="op">&gt;</span> <span class="ident">Monoid</span> <span class="kw">for</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>, $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span> ),<span class="kw-2">*</span>) {
-            <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
               (<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span> <span class="kw">as</span> <span class="ident">Monoid</span><span class="op">&gt;</span><span class="ident">::empty</span>(), $(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ntyp</span> <span class="kw">as</span> <span class="ident">Monoid</span><span class="op">&gt;</span><span class="ident">::empty</span>(), )<span class="kw-2">*</span>)
             }
         }
@@ -667,32 +666,32 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
 }
 
 <span class="macro">tuple_impls!</span> {
-    (<span class="number">20</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">U</span>),
-    (<span class="number">19</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">T</span>),
-    (<span class="number">18</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">S</span>),
-    (<span class="number">17</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">R</span>),
-    (<span class="number">16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Q</span>),
-    (<span class="number">15</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">P</span>),
-    (<span class="number">14</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">O</span>),
-    (<span class="number">13</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">N</span>),
-    (<span class="number">12</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">M</span>),
-    (<span class="number">11</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">L</span>),
-    (<span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">K</span>),
-    (<span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">J</span>),
-    (<span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">I</span>),
-    (<span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H</span>),
-    (<span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">G</span>),
-    (<span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">F</span>),
-    (<span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">E</span>),
-    (<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">D</span>),
-    (<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">C</span>),
-    (<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">B</span>),
-    (<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">A</span>),
+    (<span class="number">20</span> =&gt; <span class="ident">U</span>),
+    (<span class="number">19</span> =&gt; <span class="ident">T</span>),
+    (<span class="number">18</span> =&gt; <span class="ident">S</span>),
+    (<span class="number">17</span> =&gt; <span class="ident">R</span>),
+    (<span class="number">16</span> =&gt; <span class="ident">Q</span>),
+    (<span class="number">15</span> =&gt; <span class="ident">P</span>),
+    (<span class="number">14</span> =&gt; <span class="ident">O</span>),
+    (<span class="number">13</span> =&gt; <span class="ident">N</span>),
+    (<span class="number">12</span> =&gt; <span class="ident">M</span>),
+    (<span class="number">11</span> =&gt; <span class="ident">L</span>),
+    (<span class="number">10</span> =&gt; <span class="ident">K</span>),
+    (<span class="number">9</span> =&gt; <span class="ident">J</span>),
+    (<span class="number">8</span> =&gt; <span class="ident">I</span>),
+    (<span class="number">7</span> =&gt; <span class="ident">H</span>),
+    (<span class="number">6</span> =&gt; <span class="ident">G</span>),
+    (<span class="number">5</span> =&gt; <span class="ident">F</span>),
+    (<span class="number">4</span> =&gt; <span class="ident">E</span>),
+    (<span class="number">3</span> =&gt; <span class="ident">D</span>),
+    (<span class="number">2</span> =&gt; <span class="ident">C</span>),
+    (<span class="number">1</span> =&gt; <span class="ident">B</span>),
+    (<span class="number">0</span> =&gt; <span class="ident">A</span>),
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw">super</span><span class="ident">::semigroup</span>::{<span class="ident">All</span>, <span class="ident">Any</span>, <span class="ident">Product</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::<span class="kw">super</span>::semigroup</span>::{<span class="ident">All</span>, <span class="ident">Any</span>, <span class="ident">Product</span>};
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -803,7 +802,7 @@ assert_eq!(combine_all(&amp;vec_of_some_strings), Some(String::from(&quot;Hello 
         <span class="macro">assert_eq!</span>(<span class="ident">combine_all</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>), <span class="ident">Product</span>(<span class="number">24</span>))
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core&#x2F;src&#x2F;generic.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>generic.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core&#x2F;src&#x2F;generic.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>generic.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../frunk_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -172,8 +172,7 @@
 <span id="172">172</span>
 <span id="173">173</span>
 <span id="174">174</span>
-</pre><pre class="rust">
-<span class="doccomment">//! This module holds the machinery behind `Generic`.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! This module holds the machinery behind `Generic`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! It contains the `Generic` trait and some helper methods for using the</span>
 <span class="doccomment">//! `Generic` trait without having to use universal function call syntax.</span>
@@ -256,17 +255,17 @@
     <span class="kw">type</span> <span class="ident">Repr</span>;
 
     <span class="doccomment">/// Convert a value to its representation type `Repr`.</span>
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Repr</span>;
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Repr</span>;
 
     <span class="doccomment">/// Convert a value&#39;s representation type `Repr` to the value&#39;s type.</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">repr</span>: <span class="self">Self</span><span class="ident">::Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">repr</span>: <span class="ident"><span class="self">Self</span>::Repr</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Convert a value to another type provided that they have</span>
     <span class="doccomment">/// the same representation type.</span>
-    <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
-        <span class="ident">Src</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Repr</span><span class="op">&gt;</span>,
+        <span class="ident">Src</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Repr</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="ident">repr</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Src</span> <span class="kw">as</span> <span class="ident">Generic</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">src</span>);
         <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Generic</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">repr</span>)
@@ -275,30 +274,30 @@
     <span class="doccomment">/// Maps the given value of type `Self` by first transforming it to</span>
     <span class="doccomment">/// the representation type `Repr`, then applying a `mapper` function</span>
     <span class="doccomment">/// on `Repr` and finally transforming it back to a value of type `Self`.</span>
-    <span class="kw">fn</span> <span class="ident">map_repr</span><span class="op">&lt;</span><span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">map_repr</span><span class="op">&lt;</span><span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
-        <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="self">Self</span><span class="ident">::Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Repr</span>,
+        <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident"><span class="self">Self</span>::Repr</span>) -&gt; <span class="ident"><span class="self">Self</span>::Repr</span>,
     {
-        <span class="self">Self</span><span class="ident">::from</span>(<span class="ident">mapper</span>(<span class="self">self</span>.<span class="ident">into</span>()))
+        <span class="ident"><span class="self">Self</span>::from</span>(<span class="ident">mapper</span>(<span class="self">self</span>.<span class="ident">into</span>()))
     }
 
     <span class="doccomment">/// Maps the given value of type `Self` by first transforming it</span>
     <span class="doccomment">/// a type `Inter` that has the same representation type as `Self`,</span>
     <span class="doccomment">/// then applying a `mapper` function on `Inter` and finally transforming</span>
     <span class="doccomment">/// it back to a value of type `Self`.</span>
-    <span class="kw">fn</span> <span class="ident">map_inter</span><span class="op">&lt;</span><span class="ident">Inter</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">map_inter</span><span class="op">&lt;</span><span class="ident">Inter</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
-        <span class="ident">Inter</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Repr</span><span class="op">&gt;</span>,
-        <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Inter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Inter</span>,
+        <span class="ident">Inter</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Repr</span><span class="op">&gt;</span>,
+        <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Inter</span>) -&gt; <span class="ident">Inter</span>,
     {
-        <span class="self">Self</span><span class="ident">::convert_from</span>(<span class="ident">mapper</span>(<span class="ident">Inter::convert_from</span>(<span class="self">self</span>)))
+        <span class="ident"><span class="self">Self</span>::convert_from</span>(<span class="ident">mapper</span>(<span class="ident">Inter::convert_from</span>(<span class="self">self</span>)))
     }
 }
 
 <span class="doccomment">/// Given a generic representation `Repr` of a `Dst`, returns `Dst`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_generic</span><span class="op">&lt;</span><span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">repr</span>: <span class="ident">Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dst</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_generic</span><span class="op">&lt;</span><span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">repr</span>: <span class="ident">Repr</span>) -&gt; <span class="ident">Dst</span>
 <span class="kw">where</span>
     <span class="ident">Dst</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
 {
@@ -306,7 +305,7 @@
 }
 
 <span class="doccomment">/// Given a value of type `Src`, returns its generic representation `Repr`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_generic</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Repr</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_generic</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="ident">Repr</span>
 <span class="kw">where</span>
     <span class="ident">Src</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
 {
@@ -315,7 +314,7 @@
 
 <span class="doccomment">/// Converts one type `Src` into another type `Dst` assuming they have the same</span>
 <span class="doccomment">/// representation type `Repr`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Dst</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">convert_from</span><span class="op">&lt;</span><span class="ident">Src</span>, <span class="ident">Dst</span>, <span class="ident">Repr</span><span class="op">&gt;</span>(<span class="ident">src</span>: <span class="ident">Src</span>) -&gt; <span class="ident">Dst</span>
 <span class="kw">where</span>
     <span class="ident">Src</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
     <span class="ident">Dst</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Repr</span><span class="op">&gt;</span>,
@@ -325,10 +324,10 @@
 
 <span class="doccomment">/// Maps a value of a given type `Origin` using a function on</span>
 <span class="doccomment">/// the representation type `Repr` of `Origin`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_repr</span><span class="op">&lt;</span><span class="ident">Origin</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="ident">Origin</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Origin</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_repr</span><span class="op">&lt;</span><span class="ident">Origin</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="ident">Origin</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) -&gt; <span class="ident">Origin</span>
 <span class="kw">where</span>
     <span class="ident">Origin</span>: <span class="ident">Generic</span>,
-    <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Origin::Repr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Origin::Repr</span>,
+    <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Origin::Repr</span>) -&gt; <span class="ident">Origin::Repr</span>,
 {
     <span class="op">&lt;</span><span class="ident">Origin</span> <span class="kw">as</span> <span class="ident">Generic</span><span class="op">&gt;</span><span class="ident">::map_repr</span>(<span class="ident">val</span>, <span class="ident">mapper</span>)
 }
@@ -339,15 +338,15 @@
 <span class="doccomment">/// Note that the compiler will have a hard time inferring the type variable</span>
 <span class="doccomment">/// `Inter`. Thus, using `map_inter` is mostly effective if the type is</span>
 <span class="doccomment">/// constrained by the input function or by the body of a lambda.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_inter</span><span class="op">&lt;</span><span class="ident">Inter</span>, <span class="ident">Origin</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="ident">Origin</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Origin</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_inter</span><span class="op">&lt;</span><span class="ident">Inter</span>, <span class="ident">Origin</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="ident">Origin</span>, <span class="ident">mapper</span>: <span class="ident">Mapper</span>) -&gt; <span class="ident">Origin</span>
 <span class="kw">where</span>
     <span class="ident">Origin</span>: <span class="ident">Generic</span>,
     <span class="ident">Inter</span>: <span class="ident">Generic</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">Origin::Repr</span><span class="op">&gt;</span>,
-    <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Inter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Inter</span>,
+    <span class="ident">Mapper</span>: <span class="ident">FnOnce</span>(<span class="ident">Inter</span>) -&gt; <span class="ident">Inter</span>,
 {
     <span class="op">&lt;</span><span class="ident">Origin</span> <span class="kw">as</span> <span class="ident">Generic</span><span class="op">&gt;</span><span class="ident">::map_inter</span>(<span class="ident">val</span>, <span class="ident">mapper</span>)
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="frunk_core" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>
