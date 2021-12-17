@@ -176,7 +176,7 @@ pub fn build_path_type(path_expr: Expr) -> impl ToTokens {
     let idents = find_idents_in_expr(path_expr);
     idents
         .iter()
-        .map(|i| build_label_type(i))
+        .map(build_label_type)
         .fold(quote!(::frunk_core::hlist::HNil), |acc, t| {
             quote! {
             ::frunk_core::path::Path<

@@ -162,11 +162,9 @@ where
     T: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        match *self {
-            Some(ref v) => match *other {
-                Some(ref v_other) => Some(v.combine(v_other)),
-                _ => self.clone(),
-            },
+        match (self, other) {
+            (Some(ref v), Some(ref v_other)) => Some(v.combine(v_other)),
+            (Some(_), _) => self.clone(),
             _ => other.clone(),
         }
     }
@@ -220,14 +218,7 @@ where
     T: Eq + Hash + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        let mut h = HashSet::new();
-        for i in self {
-            h.insert(i.clone());
-        }
-        for i in other {
-            h.insert(i.clone());
-        }
-        h
+        self.union(other).cloned().collect()
     }
 }
 
@@ -238,10 +229,7 @@ where
     V: Semigroup + Clone,
 {
     fn combine(&self, other: &Self) -> Self {
-        let mut h: HashMap<K, V> = HashMap::new();
-        for (k, v) in self {
-            h.insert(k.clone(), v.clone());
-        }
+        let mut h: HashMap<K, V> = self.clone();
         for (k, v) in other {
             let k_clone = k.clone();
             match h.entry(k_clone) {
