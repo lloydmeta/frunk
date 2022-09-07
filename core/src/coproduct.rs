@@ -410,8 +410,8 @@ impl<Untagged> Coproduct<Untagged> {
     /// let co2_nice: I32F32 = Coproduct::inject(42f32);
     ///
     /// // Compare this to the "hard way":
-    /// let co1_ugly: I32F32 = Coproduct::Inl(1i32);
-    /// let co2_ugly: I32F32 = Coproduct::Inr(Coproduct::Inl(42f32));
+    /// let co1_ugly: I32F32 = Coproduct::here(1i32);
+    /// let co2_ugly: I32F32 = Coproduct::there(Coproduct::here(42f32));
     ///
     /// assert_eq!(co1_nice, co1_ugly);
     /// assert_eq!(co2_nice, co2_ugly);
@@ -588,7 +588,7 @@ impl<Head, Tail> Coproduct<UntaggedCoproduct<Head, Tail>> {
     ///     };
     ///
     ///     // Now co is empty
-    ///     match co { /* unreachable */ }
+    ///     match frunk::coproduct::absurd(co) {}
     /// }
     ///
     /// assert_eq!(handle_i32_f32(I32F32::inject(3)), "integer!");
@@ -708,7 +708,7 @@ impl<Untagged> Coproduct<Untagged> {
     ///     };
     ///
     ///     // Now co is empty.
-    ///     match co { /* unreachable */ }
+    ///     match frunk::coproduct::absurd(co) {}
     /// }
     ///
     /// assert_eq!(handle_all(Coproduct::inject("hello")), "&str hello");
@@ -770,7 +770,7 @@ impl<Untagged> Coproduct<Untagged> {
     ///
     /// // Turbofish syntax for specifying the output type is also supported.
     /// // The Indices parameter should be left to type inference using `_`.
-    /// let embedded = co.embed::<I32BoolF32, _>();
+    /// let embedded = co.embed::<<I32BoolF32 as frunk::coproduct::Untagger>::Untagged, _>();
     /// assert_eq!(embedded, I32BoolF32::inject(true));
     /// # }
     /// ```
