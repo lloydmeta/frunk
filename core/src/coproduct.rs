@@ -140,6 +140,9 @@ where
 }
 
 pub trait Selector<S, I> {
+    /// # Safety
+    /// Getting a variant that isn't the active variant
+    /// will result in undefined behaviour.
     unsafe fn get(&self) -> &S;
 }
 
@@ -179,6 +182,9 @@ pub trait Taker<S, I> {
     /// (here, they are on the trait rather than the method)
     ///
     /// [inherent method]: enum.Coproduct.html#method.take
+    /// # Safety
+    /// If the desired type is not the active variant of the coproduct,
+    /// this function produces undefined behaviour.
     unsafe fn take(self) -> S;
 }
 
@@ -248,31 +254,34 @@ impl<T: IndexedClone + IndexedDrop> Clone for Coproduct<T> {
     fn clone(&self) -> Self {
         Self {
             tag: self.tag,
-            untagged: self.untagged.iclone(self.tag),
+            untagged: unsafe { self.untagged.iclone(self.tag) },
         }
     }
 }
 
 trait IndexedClone {
-    fn iclone(&self, i: u32) -> Self;
+    /// # Safety
+    /// The argument `i` must be the index of the active variant
+    /// of the UntaggedCoproduct.
+    unsafe fn iclone(&self, i: u32) -> Self;
 }
 
 impl<H: Clone, T: IndexedClone> IndexedClone for UntaggedCoproduct<H, T> {
-    fn iclone(&self, i: u32) -> Self {
+    unsafe fn iclone(&self, i: u32) -> Self {
         if i == 0 {
             UntaggedCoproduct {
-                head: unsafe { &self.head }.clone(),
+                head: self.head.clone(),
             }
         } else {
             UntaggedCoproduct {
-                tail: ManuallyDrop::new(unsafe { &self.tail }.iclone(i - 1)),
+                tail: ManuallyDrop::new(self.tail.iclone(i - 1)),
             }
         }
     }
 }
 
 impl IndexedClone for CNil {
-    fn iclone(&self, _: u32) -> Self {
+    unsafe fn iclone(&self, _: u32) -> Self {
         match *self {}
     }
 }
@@ -357,6 +366,10 @@ where
     type Remainder = UntaggedCoproduct<Hd, Tl::Remainder>;
 }
 
+/// # Safety
+/// This function is only safe to call if the variant removed
+/// is not active. Otherwise it can produce a boolean with
+/// the value 3, for example.
 unsafe fn remove<H, T, Index>(
     cp: UntaggedCoproduct<H, T>,
 ) -> <UntaggedCoproduct<H, T> as Drop1<Index>>::Remainder
