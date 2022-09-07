@@ -244,7 +244,7 @@ impl<T> Untagger for Coproduct<T> {
     type Untagged = T;
 }
 
-impl<Untagged: IndexedClone> Clone for Coproduct<Untagged> {
+impl<T: IndexedClone> Clone for Coproduct<T> {
     fn clone(&self) -> Self {
         Self {
             tag: self.tag,
@@ -276,6 +276,16 @@ impl IndexedClone for CNil {
         match *self {}
     }
 }
+
+impl<H: Copy, T: Copy> Clone for UntaggedCoproduct<H, T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<H: Copy, T: Copy> Copy for UntaggedCoproduct<H, T> {}
+
+impl<Untagged: Copy + IndexedClone> Copy for Coproduct<Untagged> {}
 
 impl<H: PartialEq, T: Comparer> PartialEq for Coproduct<UntaggedCoproduct<H, T>> {
     fn eq(&self, other: &Self) -> bool {
@@ -1258,22 +1268,22 @@ mod tests {
         let co2 = I32StrBool::inject("hello");
         let co3 = I32StrBool::inject(false);
 
-        let uninject_i32_co1: Result<i32, _> = co1.clone().uninject();
-        let uninject_str_co1: Result<&'static str, _> = co1.clone().uninject();
+        let uninject_i32_co1: Result<i32, _> = co1.uninject();
+        let uninject_str_co1: Result<&'static str, _> = co1.uninject();
         let uninject_bool_co1: Result<bool, _> = co1.uninject();
         assert_eq!(uninject_i32_co1, Ok(3));
         assert!(uninject_str_co1.is_err());
         assert!(uninject_bool_co1.is_err());
 
-        let uninject_i32_co2: Result<i32, _> = co2.clone().uninject();
-        let uninject_str_co2: Result<&'static str, _> = co2.clone().uninject();
+        let uninject_i32_co2: Result<i32, _> = co2.uninject();
+        let uninject_str_co2: Result<&'static str, _> = co2.uninject();
         let uninject_bool_co2: Result<bool, _> = co2.uninject();
         assert!(uninject_i32_co2.is_err());
         assert_eq!(uninject_str_co2, Ok("hello"));
         assert!(uninject_bool_co2.is_err());
 
-        let uninject_i32_co3: Result<i32, _> = co3.clone().uninject();
-        let uninject_str_co3: Result<&'static str, _> = co3.clone().uninject();
+        let uninject_i32_co3: Result<i32, _> = co3.uninject();
+        let uninject_str_co3: Result<&'static str, _> = co3.uninject();
         let uninject_bool_co3: Result<bool, _> = co3.uninject();
         assert!(uninject_i32_co3.is_err());
         assert!(uninject_str_co3.is_err());
