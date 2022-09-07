@@ -121,11 +121,16 @@ macro_rules! HList {
 /// ```
 #[macro_export]
 macro_rules! Coprod {
+    ($($tok:tt)*) => {$crate::coproduct::Coproduct<$crate::UntaggedCoprod!($($tok)*)>};
+}
+
+#[macro_export]
+macro_rules! UntaggedCoprod {
     () => { $crate::coproduct::CNil };
-    (...$Rest:ty) => { $Rest };
-    ($A:ty) => { $crate::Coprod![$A,] };
+    (...$Rest:ty) => { <$Rest as $crate::coproduct::Untagger>::Untagged };
+    ($A:ty) => { $crate::UntaggedCoprod![$A,] };
     ($A:ty, $($tok:tt)*) => {
-        $crate::coproduct::Coproduct<$A, $crate::Coprod![$($tok)*]>
+        $crate::coproduct::UntaggedCoproduct<$A, $crate::UntaggedCoprod![$($tok)*]>
     };
 }
 

@@ -71,9 +71,132 @@
 //! # }
 //! ```
 
+use core::mem::ManuallyDrop;
+
 use crate::hlist::{HCons, HNil};
 use crate::indices::{Here, There};
 use crate::traits::{Func, Poly, ToMut, ToRef};
+
+/// Coproduct that does not know what variant it currently holds.
+/// Note: contents must be manually dropped!
+
+// C representation is required to ensure that the same variant is represented
+// in exactly the same way in all coproducts.
+// See https://rust-lang.github.io/unsafe-code-guidelines/layout/unions.html
+#[repr(C)]
+pub union UntaggedCoproduct<H, T> {
+    head: ManuallyDrop<H>,
+    tail: ManuallyDrop<T>,
+}
+
+/// Phantom type for signature purposes only (has no value)
+///
+/// Used by the macro to terminate the Coproduct type signature
+#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum CNil {}
+
+pub trait IndexedDrop {
+    fn idrop(&mut self, i: usize);
+}
+
+impl IndexedDrop for CNil {
+    fn idrop(&mut self, _: usize) {}
+}
+
+impl<H, T: IndexedDrop> IndexedDrop for UntaggedCoproduct<H, T> {
+    fn idrop(&mut self, i: usize) {
+        if i == 0 {
+            unsafe { ManuallyDrop::drop(&mut self.head) }
+        } else {
+            unsafe { &mut self.tail }.idrop(i - 1)
+        }
+    }
+}
+
+pub trait Injector<InjectType, Index> {
+    fn inject(to_insert: InjectType) -> Self;
+}
+
+impl<I, Tail: IndexedDrop> Injector<I, Here> for UntaggedCoproduct<I, Tail> {
+    fn inject(to_insert: I) -> Self {
+        UntaggedCoproduct {
+            head: ManuallyDrop::new(to_insert),
+        }
+    }
+}
+
+impl<Head, I, Tail: IndexedDrop, TailIndex> Injector<I, There<TailIndex>>
+    for UntaggedCoproduct<Head, Tail>
+where
+    Tail: Injector<I, TailIndex>,
+{
+    fn inject(to_insert: I) -> Self {
+        let tail_inserted = <Tail as Injector<I, TailIndex>>::inject(to_insert);
+        UntaggedCoproduct {
+            tail: ManuallyDrop::new(tail_inserted),
+        }
+    }
+}
+
+pub trait Selector<S, I> {
+    unsafe fn get(&self) -> &S;
+}
+
+impl<Head, Tail: IndexedDrop> Selector<Head, Here> for UntaggedCoproduct<Head, Tail> {
+    unsafe fn get(&self) -> &Head {
+        &self.head
+    }
+}
+
+impl<Head, FromTail, Tail: IndexedDrop, TailIndex> Selector<FromTail, There<TailIndex>>
+    for UntaggedCoproduct<Head, Tail>
+where
+    Tail: Selector<FromTail, TailIndex>,
+{
+    unsafe fn get(&self) -> &FromTail {
+        self.tail.get()
+    }
+}
+
+/// Trait for retrieving a coproduct element by type
+///
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::take`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic
+/// Coproducts of unknown type. If you have a Coproduct of known type,
+/// then `co.take()` should "just work" even without the trait.
+///
+/// [`Coproduct::take`]: enum.Coproduct.html#method.take
+pub trait Taker<S, I> {
+    /// Retrieve an element from a coproduct by type, ignoring all others.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: enum.Coproduct.html#method.take
+    unsafe fn take(self) -> S;
+}
+
+impl<Head, Tail: IndexedDrop> Taker<Head, Here> for UntaggedCoproduct<Head, Tail> {
+    unsafe fn take(self) -> Head {
+        ManuallyDrop::into_inner(self.head)
+    }
+}
+
+impl<Head, FromTail, Tail: IndexedDrop, TailIndex> Taker<FromTail, There<TailIndex>>
+    for UntaggedCoproduct<Head, Tail>
+where
+    Tail: Taker<FromTail, TailIndex>,
+{
+    unsafe fn take(self) -> FromTail {
+        ManuallyDrop::into_inner(self.tail).take()
+    }
+}
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -94,24 +217,160 @@ use crate::traits::{Func, Poly, ToMut, ToRef};
 /// assert_eq!(get_from_1b, None);
 /// # }
 /// ```
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum Coproduct<H, T> {
-    /// Coproduct is either H or T, in this case, it is H
-    Inl(H),
-    /// Coproduct is either H or T, in this case, it is T
-    Inr(T),
+pub struct Coproduct<Untagged> {
+    tag: usize,
+    untagged: Untagged,
 }
 
-/// Phantom type for signature purposes only (has no value)
-///
-/// Used by the macro to terminate the Coproduct type signature
-#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum CNil {}
+pub fn absurd(x: Coproduct<CNil>) -> CNil {
+    match x.untagged {}
+}
+
+/* TODO put this impl on a safe wrapper
+impl<T: IndexedDrop> Drop for Coproduct<T> {
+    fn drop(&mut self) {
+        self.untagged.idrop(self.tag)
+    }
+}
+*/
+
+/// Used by the Coprod! macro to remove the wrapper from a coproduct.
+pub trait Untagger {
+    type Untagged;
+}
+
+impl<T> Untagger for Coproduct<T> {
+    type Untagged = T;
+}
+
+impl<Untagged: IndexedClone> Clone for Coproduct<Untagged> {
+    fn clone(&self) -> Self {
+        Self {
+            tag: self.tag,
+            untagged: self.untagged.iclone(self.tag),
+        }
+    }
+}
+
+trait IndexedClone {
+    fn iclone(&self, i: usize) -> Self;
+}
+
+impl<H: Clone, T: IndexedClone> IndexedClone for UntaggedCoproduct<H, T> {
+    fn iclone(&self, i: usize) -> Self {
+        if i == 0 {
+            UntaggedCoproduct {
+                head: unsafe { &self.head }.clone(),
+            }
+        } else {
+            UntaggedCoproduct {
+                tail: ManuallyDrop::new(unsafe { &self.tail }.iclone(i - 1)),
+            }
+        }
+    }
+}
+
+impl IndexedClone for CNil {
+    fn iclone(&self, _: usize) -> Self {
+        match *self {}
+    }
+}
+
+impl<H: PartialEq, T: Comparer> PartialEq for Coproduct<UntaggedCoproduct<H, T>> {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag == other.tag
+            && unsafe { UntaggedCoproduct::compare(self.tag, &self.untagged, &other.untagged) }
+    }
+}
+
+trait Comparer {
+    unsafe fn compare(i: usize, a: &Self, b: &Self) -> bool;
+}
+
+impl<H: PartialEq, T: Comparer> Comparer for UntaggedCoproduct<H, T> {
+    unsafe fn compare(i: usize, a: &Self, b: &Self) -> bool {
+        if i == 0 {
+            a.head == b.head
+        } else {
+            T::compare(i - 1, &a.tail, &b.tail)
+        }
+    }
+}
+
+impl Comparer for CNil {
+    unsafe fn compare(_: usize, a: &Self, _: &Self) -> bool {
+        match *a {}
+    }
+}
+
+impl<H, T> std::fmt::Debug for Coproduct<UntaggedCoproduct<H, T>> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Coproduct")
+            .field("tag", &self.tag)
+            .field("untagged", &"asd")
+            .finish()
+    }
+}
+
+pub trait Counter {
+    fn count() -> usize;
+}
+
+impl Counter for Here {
+    fn count() -> usize {
+        0
+    }
+}
+
+impl<N> Counter for There<N>
+where
+    N: Counter,
+{
+    fn count() -> usize {
+        N::count() + 1
+    }
+}
+
+pub trait Drop1<Index> {
+    type Remainder;
+}
+
+impl<H, T> Drop1<Here> for UntaggedCoproduct<H, T> {
+    type Remainder = T;
+}
+
+impl<Hd, Tl: IndexedDrop, N> Drop1<There<N>> for UntaggedCoproduct<Hd, Tl>
+where
+    Tl: Drop1<N>,
+{
+    type Remainder = UntaggedCoproduct<Hd, Tl::Remainder>;
+}
+
+unsafe fn remove<H, T, Index>(
+    cp: UntaggedCoproduct<H, T>,
+) -> <UntaggedCoproduct<H, T> as Drop1<Index>>::Remainder
+where
+    UntaggedCoproduct<H, T>: Drop1<Index>,
+{
+    #[repr(C)]
+    union Transmuter<T, Index>
+    where
+        T: Drop1<Index>,
+    {
+        before: ManuallyDrop<T>,
+        after: ManuallyDrop<T::Remainder>,
+    }
+    ManuallyDrop::into_inner(
+        Transmuter {
+            before: ManuallyDrop::new(cp),
+        }
+        .after,
+    )
+}
 
 // Inherent methods
-impl<Head, Tail> Coproduct<Head, Tail> {
+impl<Untagged> Coproduct<Untagged> {
     /// Instantiate a coproduct from an element.
     ///
     /// This is generally much nicer than nested usage of `Coproduct::{Inl, Inr}`.
@@ -162,9 +421,13 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     #[inline(always)]
     pub fn inject<T, Index>(to_insert: T) -> Self
     where
-        Self: CoprodInjector<T, Index>,
+        Index: Counter,
+        Untagged: Injector<T, Index>,
     {
-        CoprodInjector::inject(to_insert)
+        Coproduct {
+            tag: Index::count(),
+            untagged: Untagged::inject(to_insert),
+        }
     }
 
     /// Borrow an element from a coproduct by type.
@@ -193,9 +456,14 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     #[inline(always)]
     pub fn get<S, Index>(&self) -> Option<&S>
     where
-        Self: CoproductSelector<S, Index>,
+        Index: Counter,
+        Untagged: Selector<S, Index>,
     {
-        CoproductSelector::get(self)
+        if self.tag == Index::count() {
+            Some(unsafe { self.untagged.get() })
+        } else {
+            None
+        }
     }
 
     /// Retrieve an element from a coproduct by type, ignoring all others.
@@ -222,13 +490,35 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # }
     /// ```
     #[inline(always)]
-    pub fn take<T, Index>(self) -> Option<T>
+    pub fn take<T, Index: Counter>(self) -> Option<T>
     where
-        Self: CoproductTaker<T, Index>,
+        Untagged: Taker<T, Index>,
     {
-        CoproductTaker::take(self)
+        if self.tag == Index::count() {
+            Some(unsafe { self.untagged.take() })
+        } else {
+            None
+        }
     }
+}
 
+impl<Head, Tail> Coproduct<UntaggedCoproduct<Head, Tail>> {
+    pub fn here(x: Head) -> Self {
+        Self {
+            tag: 0,
+            untagged: UntaggedCoproduct {
+                head: ManuallyDrop::new(x),
+            },
+        }
+    }
+    pub fn there(x: Coproduct<Tail>) -> Self {
+        Self {
+            tag: x.tag + 1,
+            untagged: UntaggedCoproduct {
+                tail: ManuallyDrop::new(x.untagged),
+            },
+        }
+    }
     /// Attempt to extract a value from a coproduct (or get the remaining possibilities).
     ///
     /// By chaining calls to this, one can exhaustively match all variants of a coproduct.
@@ -295,13 +585,43 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), "float!");
     /// # }
     #[inline(always)]
-    pub fn uninject<T, Index>(self) -> Result<T, <Self as CoprodUninjector<T, Index>>::Remainder>
+    pub fn uninject<T, Index: Counter>(
+        self,
+    ) -> Result<T, Coproduct<<UntaggedCoproduct<Head, Tail> as Drop1<Index>>::Remainder>>
     where
-        Self: CoprodUninjector<T, Index>,
+        UntaggedCoproduct<Head, Tail>: Taker<T, Index> + Drop1<Index>,
     {
-        CoprodUninjector::uninject(self)
+        if self.tag == Index::count() {
+            Ok(unsafe { self.untagged.take() })
+        } else {
+            let rem = unsafe { remove(self.untagged) };
+            Err(if self.tag < Index::count() {
+                Coproduct {
+                    tag: self.tag,
+                    untagged: rem,
+                }
+            } else {
+                Coproduct {
+                    tag: self.tag - 1,
+                    untagged: rem,
+                }
+            })
+        }
     }
 
+    fn take_head(self) -> Result<Head, Coproduct<Tail>> {
+        if self.tag == 0 {
+            Ok(ManuallyDrop::into_inner(unsafe { self.untagged.head }))
+        } else {
+            Err(Coproduct {
+                tag: self.tag - 1,
+                untagged: ManuallyDrop::into_inner(unsafe { self.untagged.tail }),
+            })
+        }
+    }
+}
+
+impl<Untagged> Coproduct<Untagged> {
     /// Extract a subset of the possible types in a coproduct (or get the remaining possibilities)
     ///
     /// This is basically [`uninject`] on steroids.  It lets you remove a number
@@ -445,7 +765,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # }
     /// ```
     #[inline(always)]
-    pub fn embed<Targets, Indices>(self) -> Targets
+    pub fn embed<Targets, Indices>(self) -> Coproduct<Targets>
     where
         Self: CoproductEmbedder<Targets, Indices>,
     {
@@ -573,141 +893,6 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     }
 }
 
-/// Trait for instantiating a coproduct from an element
-///
-/// This trait is part of the implementation of the inherent static method
-/// [`Coproduct::inject`]. Please see that method for more information.
-///
-/// You only need to import this trait when working with generic
-/// Coproducts of unknown type. In most code, `Coproduct::inject` will
-/// "just work," with or without this trait.
-///
-/// [`Coproduct::inject`]: enum.Coproduct.html#method.inject
-pub trait CoprodInjector<InjectType, Index> {
-    /// Instantiate a coproduct from an element.
-    ///
-    /// Please see the [inherent static method] for more information.
-    ///
-    /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters.
-    /// (here, they are on the trait rather than the method)
-    ///
-    /// [inherent static method]: enum.Coproduct.html#method.inject
-    fn inject(to_insert: InjectType) -> Self;
-}
-
-impl<I, Tail> CoprodInjector<I, Here> for Coproduct<I, Tail> {
-    fn inject(to_insert: I) -> Self {
-        Coproduct::Inl(to_insert)
-    }
-}
-
-impl<Head, I, Tail, TailIndex> CoprodInjector<I, There<TailIndex>> for Coproduct<Head, Tail>
-where
-    Tail: CoprodInjector<I, TailIndex>,
-{
-    fn inject(to_insert: I) -> Self {
-        let tail_inserted = <Tail as CoprodInjector<I, TailIndex>>::inject(to_insert);
-        Coproduct::Inr(tail_inserted)
-    }
-}
-
-// For turning something into a Coproduct -->
-
-/// Trait for borrowing a coproduct element by type
-///
-/// This trait is part of the implementation of the inherent method
-/// [`Coproduct::get`]. Please see that method for more information.
-///
-/// You only need to import this trait when working with generic
-/// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.get()` should "just work" even without the trait.
-///
-/// [`Coproduct::get`]: enum.Coproduct.html#method.get
-pub trait CoproductSelector<S, I> {
-    /// Borrow an element from a coproduct by type.
-    ///
-    /// Please see the [inherent method] for more information.
-    ///
-    /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters.
-    /// (here, they are on the trait rather than the method)
-    ///
-    /// [inherent method]: enum.Coproduct.html#method.get
-    fn get(&self) -> Option<&S>;
-}
-
-impl<Head, Tail> CoproductSelector<Head, Here> for Coproduct<Head, Tail> {
-    fn get(&self) -> Option<&Head> {
-        use self::Coproduct::*;
-        match *self {
-            Inl(ref thing) => Some(thing),
-            _ => None, // Impossible
-        }
-    }
-}
-
-impl<Head, FromTail, Tail, TailIndex> CoproductSelector<FromTail, There<TailIndex>>
-    for Coproduct<Head, Tail>
-where
-    Tail: CoproductSelector<FromTail, TailIndex>,
-{
-    fn get(&self) -> Option<&FromTail> {
-        use self::Coproduct::*;
-        match *self {
-            Inr(ref rest) => rest.get(),
-            _ => None, // Impossible
-        }
-    }
-}
-
-/// Trait for retrieving a coproduct element by type
-///
-/// This trait is part of the implementation of the inherent method
-/// [`Coproduct::take`]. Please see that method for more information.
-///
-/// You only need to import this trait when working with generic
-/// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.take()` should "just work" even without the trait.
-///
-/// [`Coproduct::take`]: enum.Coproduct.html#method.take
-pub trait CoproductTaker<S, I> {
-    /// Retrieve an element from a coproduct by type, ignoring all others.
-    ///
-    /// Please see the [inherent method] for more information.
-    ///
-    /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters.
-    /// (here, they are on the trait rather than the method)
-    ///
-    /// [inherent method]: enum.Coproduct.html#method.take
-    fn take(self) -> Option<S>;
-}
-
-impl<Head, Tail> CoproductTaker<Head, Here> for Coproduct<Head, Tail> {
-    fn take(self) -> Option<Head> {
-        use self::Coproduct::*;
-        match self {
-            Inl(thing) => Some(thing),
-            _ => None, // Impossible
-        }
-    }
-}
-
-impl<Head, FromTail, Tail, TailIndex> CoproductTaker<FromTail, There<TailIndex>>
-    for Coproduct<Head, Tail>
-where
-    Tail: CoproductTaker<FromTail, TailIndex>,
-{
-    fn take(self) -> Option<FromTail> {
-        use self::Coproduct::*;
-        match self {
-            Inr(rest) => rest.take(),
-            _ => None, // Impossible
-        }
-    }
-}
-
 /// Trait for folding a coproduct into a single value.
 ///
 /// This trait is part of the implementation of the inherent method
@@ -731,136 +916,124 @@ pub trait CoproductFoldable<Folder, Output> {
     fn fold(self, f: Folder) -> Output;
 }
 
-impl<P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<CH, CTail>
+impl<P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<UntaggedCoproduct<CH, CTail>>
 where
     P: Func<CH, Output = R>,
-    CTail: CoproductFoldable<Poly<P>, R>,
+    Coproduct<CTail>: CoproductFoldable<Poly<P>, R>,
 {
     fn fold(self, f: Poly<P>) -> R {
-        use self::Coproduct::*;
-        match self {
-            Inl(r) => P::call(r),
-            Inr(rest) => rest.fold(f),
+        match self.take_head() {
+            Ok(x) => P::call(x),
+            Err(tail) => tail.fold(f),
         }
     }
 }
 
-impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R> for Coproduct<CH, CTail>
+impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R>
+    for Coproduct<UntaggedCoproduct<CH, CTail>>
 where
     F: FnOnce(CH) -> R,
-    CTail: CoproductFoldable<FTail, R>,
+    Coproduct<CTail>: CoproductFoldable<FTail, R>,
 {
     fn fold(self, f: HCons<F, FTail>) -> R {
-        use self::Coproduct::*;
         let f_head = f.head;
         let f_tail = f.tail;
-        match self {
-            Inl(r) => (f_head)(r),
-            Inr(rest) => rest.fold(f_tail),
+        match self.take_head() {
+            Ok(r) => (f_head)(r),
+            Err(rest) => rest.fold(f_tail),
         }
     }
 }
 
 /// This is literally impossible; CNil is not instantiable
-impl<F, R> CoproductFoldable<F, R> for CNil {
+impl<F, R> CoproductFoldable<F, R> for Coproduct<CNil> {
     fn fold(self, _: F) -> R {
         unreachable!()
     }
 }
 
-impl<'a, CH: 'a, CTail> ToRef<'a> for Coproduct<CH, CTail>
+impl<'a, H: 'a, T> ToRef<'a> for Coproduct<UntaggedCoproduct<H, T>>
 where
-    CTail: ToRef<'a>,
+    T: ToRef<'a>,
 {
-    type Output = Coproduct<&'a CH, <CTail as ToRef<'a>>::Output>;
+    type Output = Coproduct<<UntaggedCoproduct<H, T> as ToRef<'a>>::Output>;
+    fn to_ref(&'a self) -> Self::Output {
+        Coproduct {
+            tag: self.tag,
+            untagged: self.untagged.to_ref(),
+        }
+    }
+}
+
+impl<'a, H: 'a, T> ToRef<'a> for UntaggedCoproduct<H, T>
+where
+    T: ToRef<'a>,
+{
+    type Output = UntaggedCoproduct<&'a H, <T as ToRef<'a>>::Output>;
 
     #[inline(always)]
     fn to_ref(&'a self) -> Self::Output {
-        match *self {
-            Coproduct::Inl(ref r) => Coproduct::Inl(r),
-            Coproduct::Inr(ref rest) => Coproduct::Inr(rest.to_ref()),
+        union Transmuter<'a, H, T>
+        where
+            T: ToRef<'a>,
+        {
+            before: &'a UntaggedCoproduct<H, T>,
+            after: ManuallyDrop<UntaggedCoproduct<&'a H, T::Output>>,
         }
+        ManuallyDrop::into_inner(unsafe { Transmuter { before: self }.after })
     }
 }
 
 impl<'a> ToRef<'a> for CNil {
     type Output = CNil;
 
-    fn to_ref(&'a self) -> CNil {
+    fn to_ref(&'a self) -> Self::Output {
         match *self {}
     }
 }
 
-impl<'a, CH: 'a, CTail> ToMut<'a> for Coproduct<CH, CTail>
+impl<'a, H: 'a, T> ToMut<'a> for Coproduct<UntaggedCoproduct<H, T>>
 where
-    CTail: ToMut<'a>,
+    T: ToMut<'a>,
 {
-    type Output = Coproduct<&'a mut CH, <CTail as ToMut<'a>>::Output>;
+    type Output = Coproduct<<UntaggedCoproduct<H, T> as ToMut<'a>>::Output>;
+    fn to_mut(&'a mut self) -> Self::Output {
+        Coproduct {
+            tag: self.tag,
+            untagged: self.untagged.to_mut(),
+        }
+    }
+}
+
+impl<'a, H: 'a, T> ToMut<'a> for UntaggedCoproduct<H, T>
+where
+    T: ToMut<'a>,
+{
+    type Output = UntaggedCoproduct<&'a mut H, <T as ToMut<'a>>::Output>;
 
     #[inline(always)]
     fn to_mut(&'a mut self) -> Self::Output {
-        match *self {
-            Coproduct::Inl(ref mut r) => Coproduct::Inl(r),
-            Coproduct::Inr(ref mut rest) => Coproduct::Inr(rest.to_mut()),
+        union Transmuter<'a, H, T>
+        where
+            T: ToMut<'a>,
+        {
+            before: ManuallyDrop<&'a mut UntaggedCoproduct<H, T>>,
+            after: ManuallyDrop<UntaggedCoproduct<&'a mut H, T::Output>>,
         }
+        ManuallyDrop::into_inner(unsafe {
+            Transmuter {
+                before: ManuallyDrop::new(self),
+            }
+            .after
+        })
     }
 }
 
 impl<'a> ToMut<'a> for CNil {
     type Output = CNil;
 
-    fn to_mut(&'a mut self) -> CNil {
+    fn to_mut(&'a mut self) -> Self::Output {
         match *self {}
-    }
-}
-
-/// Trait for extracting a value from a coproduct in an exhaustive way.
-///
-/// This trait is part of the implementation of the inherent method
-/// [`Coproduct::uninject`]. Please see that method for more information.
-///
-/// You only need to import this trait when working with generic
-/// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.uninject()` should "just work" even without the trait.
-///
-/// [`Coproduct::uninject`]: enum.Coproduct.html#method.uninject
-pub trait CoprodUninjector<T, Idx>: CoprodInjector<T, Idx> {
-    type Remainder;
-
-    /// Attempt to extract a value from a coproduct (or get the remaining possibilities).
-    ///
-    /// Please see the [inherent method] for more information.
-    ///
-    /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters.
-    /// (here, they are on the trait rather than the method)
-    ///
-    /// [inherent method]: enum.Coproduct.html#method.uninject
-    fn uninject(self) -> Result<T, Self::Remainder>;
-}
-
-impl<Hd, Tl> CoprodUninjector<Hd, Here> for Coproduct<Hd, Tl> {
-    type Remainder = Tl;
-
-    fn uninject(self) -> Result<Hd, Tl> {
-        match self {
-            Coproduct::Inl(h) => Ok(h),
-            Coproduct::Inr(t) => Err(t),
-        }
-    }
-}
-
-impl<Hd, Tl, T, N> CoprodUninjector<T, There<N>> for Coproduct<Hd, Tl>
-where
-    Tl: CoprodUninjector<T, N>,
-{
-    type Remainder = Coproduct<Hd, Tl::Remainder>;
-
-    fn uninject(self) -> Result<T, Self::Remainder> {
-        match self {
-            Coproduct::Inl(h) => Err(Coproduct::Inl(h)),
-            Coproduct::Inr(t) => t.uninject().map_err(Coproduct::Inr),
-        }
     }
 }
 
@@ -889,31 +1062,32 @@ pub trait CoproductSubsetter<Targets, Indices>: Sized {
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
-impl<Choices, THead, TTail, NHead, NTail, Rem>
-    CoproductSubsetter<Coproduct<THead, TTail>, HCons<NHead, NTail>> for Choices
+impl<H, T, THead, TTail, NHead: Counter, NTail, Rem>
+    CoproductSubsetter<Coproduct<UntaggedCoproduct<THead, TTail>>, HCons<NHead, NTail>>
+    for Coproduct<UntaggedCoproduct<H, T>>
 where
-    Self: CoprodUninjector<THead, NHead, Remainder = Rem>,
-    Rem: CoproductSubsetter<TTail, NTail>,
+    UntaggedCoproduct<H, T>: Taker<THead, NHead> + Drop1<NHead, Remainder = Rem>,
+    Coproduct<Rem>: CoproductSubsetter<Coproduct<TTail>, NTail>,
 {
-    type Remainder = <Rem as CoproductSubsetter<TTail, NTail>>::Remainder;
+    type Remainder = <Coproduct<Rem> as CoproductSubsetter<Coproduct<TTail>, NTail>>::Remainder;
 
     /// Attempt to extract a value from a subset of the types.
-    fn subset(self) -> Result<Coproduct<THead, TTail>, Self::Remainder> {
-        match self.uninject() {
-            Ok(good) => Ok(Coproduct::Inl(good)),
-            Err(bads) => match bads.subset() {
-                Ok(goods) => Ok(Coproduct::Inr(goods)),
+    fn subset(self) -> Result<Coproduct<UntaggedCoproduct<THead, TTail>>, Self::Remainder> {
+        match self.uninject::<THead, NHead>() {
+            Ok(good) => Ok(Coproduct::here(good)),
+            Err(rest) => match rest.subset() {
+                Ok(goods) => Ok(Coproduct::there(goods)),
                 Err(bads) => Err(bads),
             },
         }
     }
 }
 
-impl<Choices> CoproductSubsetter<CNil, HNil> for Choices {
+impl<Choices> CoproductSubsetter<Coproduct<CNil>, HNil> for Choices {
     type Remainder = Self;
 
     #[inline(always)]
-    fn subset(self) -> Result<CNil, Self::Remainder> {
+    fn subset(self) -> Result<Coproduct<CNil>, Self::Remainder> {
         Err(self)
     }
 }
@@ -938,45 +1112,40 @@ pub trait CoproductEmbedder<Out, Indices> {
     /// (here, they are on the trait rather than the method)
     ///
     /// [inherent method]: enum.Coproduct.html#method.embed
-    fn embed(self) -> Out;
+    fn embed(self) -> Coproduct<Out>;
 }
 
-impl CoproductEmbedder<CNil, HNil> for CNil {
-    fn embed(self) -> CNil {
-        match self {
-        // impossible!
-    }
+impl CoproductEmbedder<CNil, HNil> for Coproduct<CNil> {
+    fn embed(self) -> Coproduct<CNil> {
+        match self.untagged {}
     }
 }
 
-impl<Head, Tail> CoproductEmbedder<Coproduct<Head, Tail>, HNil> for CNil
+impl<Head, Tail> CoproductEmbedder<UntaggedCoproduct<Head, Tail>, HNil> for Coproduct<CNil>
 where
-    CNil: CoproductEmbedder<Tail, HNil>,
+    Coproduct<CNil>: CoproductEmbedder<Tail, HNil>,
 {
-    fn embed(self) -> Coproduct<Head, Tail> {
-        match self {
-        // impossible!
-    }
+    fn embed(self) -> Coproduct<UntaggedCoproduct<Head, Tail>> {
+        match self.untagged {}
     }
 }
 
-impl<Head, Tail, Out, NHead, NTail> CoproductEmbedder<Out, HCons<NHead, NTail>>
-    for Coproduct<Head, Tail>
+impl<Head, Tail, Out, NHead: Counter, NTail> CoproductEmbedder<Out, HCons<NHead, NTail>>
+    for Coproduct<UntaggedCoproduct<Head, Tail>>
 where
-    Out: CoprodInjector<Head, NHead>,
-    Tail: CoproductEmbedder<Out, NTail>,
+    Out: Injector<Head, NHead>,
+    Coproduct<Tail>: CoproductEmbedder<Out, NTail>,
 {
-    fn embed(self) -> Out {
-        match self {
-            Coproduct::Inl(this) => Out::inject(this),
-            Coproduct::Inr(those) => those.embed(),
+    fn embed(self) -> Coproduct<Out> {
+        match self.take_head() {
+            Ok(this) => Coproduct::inject(this),
+            Err(those) => those.embed(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Coproduct::*;
     use super::*;
 
     #[test]
@@ -984,14 +1153,17 @@ mod tests {
         type I32StrBool = Coprod!(i32, &'static str, bool);
 
         let co1 = I32StrBool::inject(3);
-        assert_eq!(co1, Inl(3));
+        assert_eq!(co1, Coproduct::here(3));
         let get_from_1a: Option<&i32> = co1.get();
         let get_from_1b: Option<&bool> = co1.get();
         assert_eq!(get_from_1a, Some(&3));
         assert_eq!(get_from_1b, None);
 
         let co2 = I32StrBool::inject(false);
-        assert_eq!(co2, Inr(Inr(Inl(false))));
+        assert_eq!(
+            co2,
+            Coproduct::there(Coproduct::there(Coproduct::here(false)))
+        );
         let get_from_2a: Option<&i32> = co2.get();
         let get_from_2b: Option<&bool> = co2.get();
         assert_eq!(get_from_2a, None);
@@ -1086,22 +1258,22 @@ mod tests {
         let co2 = I32StrBool::inject("hello");
         let co3 = I32StrBool::inject(false);
 
-        let uninject_i32_co1: Result<i32, _> = co1.uninject();
-        let uninject_str_co1: Result<&'static str, _> = co1.uninject();
+        let uninject_i32_co1: Result<i32, _> = co1.clone().uninject();
+        let uninject_str_co1: Result<&'static str, _> = co1.clone().uninject();
         let uninject_bool_co1: Result<bool, _> = co1.uninject();
         assert_eq!(uninject_i32_co1, Ok(3));
         assert!(uninject_str_co1.is_err());
         assert!(uninject_bool_co1.is_err());
 
-        let uninject_i32_co2: Result<i32, _> = co2.uninject();
-        let uninject_str_co2: Result<&'static str, _> = co2.uninject();
+        let uninject_i32_co2: Result<i32, _> = co2.clone().uninject();
+        let uninject_str_co2: Result<&'static str, _> = co2.clone().uninject();
         let uninject_bool_co2: Result<bool, _> = co2.uninject();
         assert!(uninject_i32_co2.is_err());
         assert_eq!(uninject_str_co2, Ok("hello"));
         assert!(uninject_bool_co2.is_err());
 
-        let uninject_i32_co3: Result<i32, _> = co3.uninject();
-        let uninject_str_co3: Result<&'static str, _> = co3.uninject();
+        let uninject_i32_co3: Result<i32, _> = co3.clone().uninject();
+        let uninject_str_co3: Result<&'static str, _> = co3.clone().uninject();
         let uninject_bool_co3: Result<bool, _> = co3.uninject();
         assert!(uninject_i32_co3.is_err());
         assert!(uninject_str_co3.is_err());
@@ -1113,7 +1285,7 @@ mod tests {
         type I32StrBool = Coprod!(i32, &'static str, bool);
 
         // CNil can be extracted from anything.
-        let res: Result<CNil, _> = I32StrBool::inject(3).subset();
+        let res: Result<Coproduct<CNil>, _> = I32StrBool::inject(3).subset();
         assert!(res.is_err());
 
         if false {
@@ -1121,8 +1293,8 @@ mod tests {
             {
                 // ...including CNil.
                 #[allow(unused)]
-                let cnil: CNil = panic!();
-                let _res: Result<CNil, _> = cnil.subset();
+                let cnil: Coproduct<CNil> = panic!();
+                let _res: Result<Coproduct<CNil>, _> = cnil.subset();
                 let _ = res;
             }
         }
@@ -1131,11 +1303,11 @@ mod tests {
             // Order does not matter.
             let co = I32StrBool::inject(3);
             let res: Result<Coprod!(bool, i32), _> = co.subset();
-            assert_eq!(res, Ok(Coproduct::Inr(Coproduct::Inl(3))));
+            assert_eq!(res, Ok(Coproduct::there(Coproduct::here(3))));
 
             let co = I32StrBool::inject("4");
             let res: Result<Coprod!(bool, i32), _> = co.subset();
-            assert_eq!(res, Err(Coproduct::Inl("4")));
+            assert_eq!(res, Err(Coproduct::here("4")));
         }
     }
 
@@ -1146,11 +1318,11 @@ mod tests {
             #[allow(unreachable_code)]
             {
                 #[allow(unused)]
-                let cnil: CNil = panic!();
-                let _: CNil = cnil.embed();
+                let cnil: Coproduct<CNil> = panic!();
+                let _: Coproduct<CNil> = cnil.embed();
 
                 #[allow(unused)]
-                let cnil: CNil = panic!();
+                let cnil: Coproduct<CNil> = panic!();
                 let _: Coprod!(i32, bool) = cnil.embed();
             }
         }
@@ -1170,9 +1342,12 @@ mod tests {
             let out_a: Coprod!(A, B, C) = co_a.embed();
             let out_b: Coprod!(A, B, C) = co_b.embed();
             let out_c: Coprod!(A, B, C) = co_c.embed();
-            assert_eq!(out_a, Coproduct::Inl(A));
-            assert_eq!(out_b, Coproduct::Inr(Coproduct::Inl(B)));
-            assert_eq!(out_c, Coproduct::Inr(Coproduct::Inr(Coproduct::Inl(C))));
+            assert_eq!(out_a, Coproduct::here(A));
+            assert_eq!(out_b, Coproduct::there(Coproduct::here(B)));
+            assert_eq!(
+                out_c,
+                Coproduct::there(Coproduct::there(Coproduct::here(C)))
+            );
         }
 
         {
@@ -1184,8 +1359,8 @@ mod tests {
             let b2 = BBB::inject::<_, There<Here>>(B);
             let out1: ABC = b1.embed();
             let out2: ABC = b2.embed();
-            assert_eq!(out1, Coproduct::Inr(Coproduct::Inl(B)));
-            assert_eq!(out2, Coproduct::Inr(Coproduct::Inl(B)));
+            assert_eq!(out1, Coproduct::there(Coproduct::here(B)));
+            assert_eq!(out2, Coproduct::there(Coproduct::here(B)));
         }
     }
 }

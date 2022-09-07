@@ -252,7 +252,7 @@ fn test_sculpt_enum() {
     };
     let repr = match into_labelled_generic(value).subset() {
         Ok(repr) => repr,
-        Err(rem) => match rem {}, // should be unreachable
+        Err(rem) => match frunk::coproduct::absurd(rem) {}, // should be unreachable
     };
     let new_value: LabelledEnum2 = from_labelled_generic(repr);
 

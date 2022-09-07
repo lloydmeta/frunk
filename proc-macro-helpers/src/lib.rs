@@ -84,17 +84,17 @@ where
 {
     let mut result = quote! { ::frunk_core::coproduct::CNil };
     for item in items.into_iter().rev() {
-        result = quote! { ::frunk_core::coproduct::Coproduct<#item, #result> }
+        result = quote! { ::frunk_core::coproduct::UntaggedCoproduct<#item, #result> }
     }
-    result
+    quote! { ::frunk_core::coproduct::Coproduct<#result> }
 }
 
-/// Given an index and an expression or pattern, creates an AST for the corresponding Coproduct
-/// constructor, which may itself be used as an expression or a pattern.
+/// Given an index and an expression, creates an expression that builds a coproduct
+/// with the expression at that index.
 pub fn build_coprod_constr(index: usize, item: impl ToTokens) -> TokenStream2 {
-    let mut result = quote! { ::frunk_core::coproduct::Coproduct::Inl(#item) };
+    let mut result = quote! { ::frunk_core::coproduct::Coproduct::here(#item) };
     for _ in 0..index {
-        result = quote! { ::frunk_core::coproduct::Coproduct::Inr(#result) }
+        result = quote! { ::frunk_core::coproduct::Coproduct::there(#result) }
     }
     result
 }
@@ -105,7 +105,7 @@ pub fn build_coprod_constr(index: usize, item: impl ToTokens) -> TokenStream2 {
 pub fn build_coprod_unreachable_arm(length: usize, deref: bool) -> TokenStream2 {
     let mut result = quote! { _frunk_unreachable_ };
     for _ in 0..length {
-        result = quote! { ::frunk_core::coproduct::Coproduct::Inr(#result)}
+        result = quote! { ::frunk_core::coproduct::Coproduct::there(#result)}
     }
     if deref {
         quote! { #result => match *_frunk_unreachable_ {} }
@@ -429,6 +429,10 @@ impl VariantBindings {
             .enumerate()
             .map(|(index, variant)| build_coprod_constr(index, f(variant)))
             .collect()
+    }
+
+    pub fn build_coprod_pats<R: ToTokens>(&self, f: impl Fn(&VariantBinding) -> R) -> Vec<R> {
+        self.variants.iter().map(|variant| f(variant)).collect()
     }
 
     pub fn build_variant_constrs<R: ToTokens>(&self, f: impl Fn(&VariantBinding) -> R) -> Vec<R> {

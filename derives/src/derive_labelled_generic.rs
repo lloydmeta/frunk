@@ -88,8 +88,7 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
             let coprod_exprs =
                 &variant_bindings.build_coprod_constrs(VariantBinding::build_hlist_field_expr);
             let coprod_pats =
-                &variant_bindings.build_coprod_constrs(VariantBinding::build_hlist_field_pat);
-            let coprod_unreachable = &variant_bindings.build_coprod_unreachable_arm(false);
+                &variant_bindings.build_coprod_pats(VariantBinding::build_hlist_field_pat);
             let type_constrs1 =
                 &variant_bindings.build_variant_constrs(VariantBinding::build_type_constr);
             let type_constrs2 = type_constrs1;
@@ -119,12 +118,11 @@ pub fn impl_labelled_generic(input: TokenStream) -> impl ToTokens {
 
                     #[inline(always)]
                     fn from(r: Self::Repr) -> Self {
-                        match r {
+                        r.fold(hlist![
                             #(
-                                #coprod_pats => #name_it2 :: #type_constrs2,
+                                |#coprod_pats| #name_it2 :: #type_constrs2,
                             )*
-                            #coprod_unreachable
-                        }
+                        ])
                     }
                 }
             };
