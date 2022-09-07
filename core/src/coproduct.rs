@@ -97,15 +97,15 @@ pub union UntaggedCoproduct<H, T> {
 pub enum CNil {}
 
 pub trait IndexedDrop {
-    fn idrop(&mut self, i: usize);
+    fn idrop(&mut self, i: u32);
 }
 
 impl IndexedDrop for CNil {
-    fn idrop(&mut self, _: usize) {}
+    fn idrop(&mut self, _: u32) {}
 }
 
 impl<H, T: IndexedDrop> IndexedDrop for UntaggedCoproduct<H, T> {
-    fn idrop(&mut self, i: usize) {
+    fn idrop(&mut self, i: u32) {
         if i == 0 {
             unsafe { ManuallyDrop::drop(&mut self.head) }
         } else {
@@ -219,7 +219,7 @@ where
 /// ```
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Coproduct<Untagged> {
-    tag: usize,
+    tag: u32,
     untagged: Untagged,
 }
 
@@ -254,11 +254,11 @@ impl<T: IndexedClone> Clone for Coproduct<T> {
 }
 
 trait IndexedClone {
-    fn iclone(&self, i: usize) -> Self;
+    fn iclone(&self, i: u32) -> Self;
 }
 
 impl<H: Clone, T: IndexedClone> IndexedClone for UntaggedCoproduct<H, T> {
-    fn iclone(&self, i: usize) -> Self {
+    fn iclone(&self, i: u32) -> Self {
         if i == 0 {
             UntaggedCoproduct {
                 head: unsafe { &self.head }.clone(),
@@ -272,7 +272,7 @@ impl<H: Clone, T: IndexedClone> IndexedClone for UntaggedCoproduct<H, T> {
 }
 
 impl IndexedClone for CNil {
-    fn iclone(&self, _: usize) -> Self {
+    fn iclone(&self, _: u32) -> Self {
         match *self {}
     }
 }
@@ -295,11 +295,11 @@ impl<H: PartialEq, T: Comparer> PartialEq for Coproduct<UntaggedCoproduct<H, T>>
 }
 
 trait Comparer {
-    unsafe fn compare(i: usize, a: &Self, b: &Self) -> bool;
+    unsafe fn compare(i: u32, a: &Self, b: &Self) -> bool;
 }
 
 impl<H: PartialEq, T: Comparer> Comparer for UntaggedCoproduct<H, T> {
-    unsafe fn compare(i: usize, a: &Self, b: &Self) -> bool {
+    unsafe fn compare(i: u32, a: &Self, b: &Self) -> bool {
         if i == 0 {
             a.head == b.head
         } else {
@@ -309,7 +309,7 @@ impl<H: PartialEq, T: Comparer> Comparer for UntaggedCoproduct<H, T> {
 }
 
 impl Comparer for CNil {
-    unsafe fn compare(_: usize, a: &Self, _: &Self) -> bool {
+    unsafe fn compare(_: u32, a: &Self, _: &Self) -> bool {
         match *a {}
     }
 }
@@ -324,11 +324,11 @@ impl<H, T> std::fmt::Debug for Coproduct<UntaggedCoproduct<H, T>> {
 }
 
 pub trait Counter {
-    fn count() -> usize;
+    fn count() -> u32;
 }
 
 impl Counter for Here {
-    fn count() -> usize {
+    fn count() -> u32 {
         0
     }
 }
@@ -337,7 +337,7 @@ impl<N> Counter for There<N>
 where
     N: Counter,
 {
-    fn count() -> usize {
+    fn count() -> u32 {
         N::count() + 1
     }
 }
