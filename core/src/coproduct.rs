@@ -218,7 +218,7 @@ where
 /// # }
 /// ```
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Coproduct<Untagged> {
+pub struct Coproduct<Untagged: IndexedDrop> {
     tag: u32,
     untagged: Untagged,
 }
@@ -227,7 +227,7 @@ pub fn absurd(x: Coproduct<CNil>) -> CNil {
     match x.untagged {}
 }
 
-/* TODO put this impl on a safe wrapper
+/*
 impl<T: IndexedDrop> Drop for Coproduct<T> {
     fn drop(&mut self) {
         self.untagged.idrop(self.tag)
@@ -240,11 +240,11 @@ pub trait Untagger {
     type Untagged;
 }
 
-impl<T> Untagger for Coproduct<T> {
+impl<T: IndexedDrop> Untagger for Coproduct<T> {
     type Untagged = T;
 }
 
-impl<T: IndexedClone> Clone for Coproduct<T> {
+impl<T: IndexedClone + IndexedDrop> Clone for Coproduct<T> {
     fn clone(&self) -> Self {
         Self {
             tag: self.tag,
@@ -285,9 +285,9 @@ impl<H: Copy, T: Copy> Clone for UntaggedCoproduct<H, T> {
 
 impl<H: Copy, T: Copy> Copy for UntaggedCoproduct<H, T> {}
 
-impl<Untagged: Copy + IndexedClone> Copy for Coproduct<Untagged> {}
+impl<Untagged: Copy + IndexedClone + IndexedDrop> Copy for Coproduct<Untagged> {}
 
-impl<H: PartialEq, T: Comparer> PartialEq for Coproduct<UntaggedCoproduct<H, T>> {
+impl<H: PartialEq, T: Comparer + IndexedDrop> PartialEq for Coproduct<UntaggedCoproduct<H, T>> {
     fn eq(&self, other: &Self) -> bool {
         self.tag == other.tag
             && unsafe { UntaggedCoproduct::compare(self.tag, &self.untagged, &other.untagged) }
@@ -314,7 +314,7 @@ impl Comparer for CNil {
     }
 }
 
-impl<H, T> std::fmt::Debug for Coproduct<UntaggedCoproduct<H, T>> {
+impl<H, T: IndexedDrop> std::fmt::Debug for Coproduct<UntaggedCoproduct<H, T>> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Coproduct")
             .field("tag", &self.tag)
@@ -343,10 +343,10 @@ where
 }
 
 pub trait Drop1<Index> {
-    type Remainder;
+    type Remainder: IndexedDrop;
 }
 
-impl<H, T> Drop1<Here> for UntaggedCoproduct<H, T> {
+impl<H, T: IndexedDrop> Drop1<Here> for UntaggedCoproduct<H, T> {
     type Remainder = T;
 }
 
@@ -380,7 +380,7 @@ where
 }
 
 // Inherent methods
-impl<Untagged> Coproduct<Untagged> {
+impl<Untagged: IndexedDrop> Coproduct<Untagged> {
     /// Instantiate a coproduct from an element.
     ///
     /// This is generally much nicer than nested usage of `Coproduct::{Inl, Inr}`.
@@ -512,7 +512,7 @@ impl<Untagged> Coproduct<Untagged> {
     }
 }
 
-impl<Head, Tail> Coproduct<UntaggedCoproduct<Head, Tail>> {
+impl<Head, Tail: IndexedDrop> Coproduct<UntaggedCoproduct<Head, Tail>> {
     pub fn here(x: Head) -> Self {
         Self {
             tag: 0,
@@ -631,7 +631,7 @@ impl<Head, Tail> Coproduct<UntaggedCoproduct<Head, Tail>> {
     }
 }
 
-impl<Untagged> Coproduct<Untagged> {
+impl<Untagged: IndexedDrop> Coproduct<Untagged> {
     /// Extract a subset of the possible types in a coproduct (or get the remaining possibilities)
     ///
     /// This is basically [`uninject`] on steroids.  It lets you remove a number
@@ -775,7 +775,7 @@ impl<Untagged> Coproduct<Untagged> {
     /// # }
     /// ```
     #[inline(always)]
-    pub fn embed<Targets, Indices>(self) -> Coproduct<Targets>
+    pub fn embed<Targets: IndexedDrop, Indices>(self) -> Coproduct<Targets>
     where
         Self: CoproductEmbedder<Targets, Indices>,
     {
@@ -926,7 +926,8 @@ pub trait CoproductFoldable<Folder, Output> {
     fn fold(self, f: Folder) -> Output;
 }
 
-impl<P, R, CH, CTail> CoproductFoldable<Poly<P>, R> for Coproduct<UntaggedCoproduct<CH, CTail>>
+impl<P, R, CH, CTail: IndexedDrop> CoproductFoldable<Poly<P>, R>
+    for Coproduct<UntaggedCoproduct<CH, CTail>>
 where
     P: Func<CH, Output = R>,
     Coproduct<CTail>: CoproductFoldable<Poly<P>, R>,
@@ -939,7 +940,7 @@ where
     }
 }
 
-impl<F, R, FTail, CH, CTail> CoproductFoldable<HCons<F, FTail>, R>
+impl<F, R, FTail, CH, CTail: IndexedDrop> CoproductFoldable<HCons<F, FTail>, R>
     for Coproduct<UntaggedCoproduct<CH, CTail>>
 where
     F: FnOnce(CH) -> R,
@@ -962,11 +963,13 @@ impl<F, R> CoproductFoldable<F, R> for Coproduct<CNil> {
     }
 }
 
-impl<'a, H: 'a, T> ToRef<'a> for Coproduct<UntaggedCoproduct<H, T>>
+impl<'a, H: 'a, T: IndexedDrop, Out> ToRef<'a> for Coproduct<UntaggedCoproduct<H, T>>
 where
     T: ToRef<'a>,
+    UntaggedCoproduct<H, T>: ToRef<'a, Output = Out>,
+    Out: IndexedDrop,
 {
-    type Output = Coproduct<<UntaggedCoproduct<H, T> as ToRef<'a>>::Output>;
+    type Output = Coproduct<Out>;
     fn to_ref(&'a self) -> Self::Output {
         Coproduct {
             tag: self.tag,
@@ -1002,11 +1005,13 @@ impl<'a> ToRef<'a> for CNil {
     }
 }
 
-impl<'a, H: 'a, T> ToMut<'a> for Coproduct<UntaggedCoproduct<H, T>>
+impl<'a, H: 'a, T: IndexedDrop, Out> ToMut<'a> for Coproduct<UntaggedCoproduct<H, T>>
 where
     T: ToMut<'a>,
+    UntaggedCoproduct<H, T>: ToMut<'a, Output = Out>,
+    Out: IndexedDrop,
 {
-    type Output = Coproduct<<UntaggedCoproduct<H, T> as ToMut<'a>>::Output>;
+    type Output = Coproduct<Out>;
     fn to_mut(&'a mut self) -> Self::Output {
         Coproduct {
             tag: self.tag,
@@ -1072,12 +1077,13 @@ pub trait CoproductSubsetter<Targets, Indices>: Sized {
     fn subset(self) -> Result<Targets, Self::Remainder>;
 }
 
-impl<H, T, THead, TTail, NHead: Counter, NTail, Rem>
+impl<H, T: IndexedDrop, THead, TTail: IndexedDrop, NHead: Counter, NTail, Rem>
     CoproductSubsetter<Coproduct<UntaggedCoproduct<THead, TTail>>, HCons<NHead, NTail>>
     for Coproduct<UntaggedCoproduct<H, T>>
 where
     UntaggedCoproduct<H, T>: Taker<THead, NHead> + Drop1<NHead, Remainder = Rem>,
     Coproduct<Rem>: CoproductSubsetter<Coproduct<TTail>, NTail>,
+    Rem: IndexedDrop,
 {
     type Remainder = <Coproduct<Rem> as CoproductSubsetter<Coproduct<TTail>, NTail>>::Remainder;
 
@@ -1112,7 +1118,7 @@ impl<Choices> CoproductSubsetter<Coproduct<CNil>, HNil> for Choices {
 /// then `co.embed()` should "just work" even without the trait.
 ///
 /// [`Coproduct::embed`]: enum.Coproduct.html#method.embed
-pub trait CoproductEmbedder<Out, Indices> {
+pub trait CoproductEmbedder<Out: IndexedDrop, Indices> {
     /// Convert a coproduct into another that can hold its variants.
     ///
     /// Please see the [inherent method] for more information.
@@ -1131,7 +1137,8 @@ impl CoproductEmbedder<CNil, HNil> for Coproduct<CNil> {
     }
 }
 
-impl<Head, Tail> CoproductEmbedder<UntaggedCoproduct<Head, Tail>, HNil> for Coproduct<CNil>
+impl<Head, Tail: IndexedDrop> CoproductEmbedder<UntaggedCoproduct<Head, Tail>, HNil>
+    for Coproduct<CNil>
 where
     Coproduct<CNil>: CoproductEmbedder<Tail, HNil>,
 {
@@ -1143,7 +1150,8 @@ where
 impl<Head, Tail, Out, NHead: Counter, NTail> CoproductEmbedder<Out, HCons<NHead, NTail>>
     for Coproduct<UntaggedCoproduct<Head, Tail>>
 where
-    Out: Injector<Head, NHead>,
+    Out: Injector<Head, NHead> + IndexedDrop,
+    Tail: IndexedDrop,
     Coproduct<Tail>: CoproductEmbedder<Out, NTail>,
 {
     fn embed(self) -> Coproduct<Out> {
