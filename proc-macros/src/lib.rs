@@ -4,10 +4,8 @@
 //! # Examples
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core;
-//! # extern crate frunk_proc_macros;
 //! # use frunk_proc_macros::{path, Path};
+//! # use frunk::LabelledGeneric;
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct Dog<'a> {

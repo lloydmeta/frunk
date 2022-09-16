@@ -7,11 +7,9 @@
 # Examples
 
 ```
-#[macro_use]
-extern crate frunk;
-
 # fn main() {
 use frunk::Semigroup;
+use frunk_core::hlist;
 
 let t1 = (1, 2.5f32, String::from("hi"), Some(3));
 let t2 = (1, 2.5f32, String::from(" world"), None);
@@ -363,6 +361,7 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use frunk_core::hlist;
 
     macro_rules! semigroup_tests {
       ($($name:ident, $comb: expr => $expected: expr, $tr:ty)+) => {

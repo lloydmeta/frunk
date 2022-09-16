@@ -1,6 +1,4 @@
-#[macro_use] // for the hlist macro
-extern crate frunk;
-extern crate frunk_core;
+use frunk::{hlist, hlist_pat, Generic};
 
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {

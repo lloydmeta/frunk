@@ -1,8 +1,5 @@
-#[macro_use] // for the hlist macro
-extern crate frunk;
-extern crate frunk_core;
-
 use frunk::labelled::*;
+use frunk::{hlist, LabelledGeneric};
 
 #[derive(LabelledGeneric)]
 struct NewUser<'a> {

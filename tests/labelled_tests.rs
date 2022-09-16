@@ -1,20 +1,15 @@
-extern crate frunk;
-#[macro_use] // for the hlist macro
-extern crate frunk_core;
-extern crate time; //Time library
-
 use frunk::hlist::Sculptor;
 use frunk::labelled::chars::*;
 use frunk::labelled::Field;
 use frunk::labelled::Transmogrifier;
 use frunk::{from_labelled_generic, into_labelled_generic, transform_from};
 use frunk::{Coproduct, HCons, LabelledGeneric};
+use frunk_core::{field, hlist};
+use time::Tm;
 
 mod common;
 
 use crate::common::*;
-
-use self::time::*;
 
 #[test]
 fn test_struct_from_labelled_generic() {
@@ -34,6 +29,7 @@ fn test_struct_from_labelled_generic() {
     );
 }
 
+#[allow(clippy::type_complexity)]
 #[test]
 fn test_labelled_generic_names() {
     let u = NewUser {

@@ -8,12 +8,10 @@
 //! # Examples
 //!
 //! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
 //! # fn main() {
 //! use frunk::Validated;
-//! use frunk::prelude::*; // for .into_validated()
+//! use frunk::prelude::*;
+//! use frunk_core::{HList, hlist_pat};
 //!
 //! #[derive(PartialEq, Eq, Debug)]
 //! struct Person {
@@ -22,19 +20,19 @@
 //! }
 //!
 //! fn get_name() -> Result<String, String> {
-//!     Result::Ok("James".to_owned())
+//!     Ok("James".to_owned())
 //! }
 //!
 //! fn get_age() -> Result<i32, String> {
-//!     Result::Ok(32)
+//!     Ok(32)
 //! }
 //!
 //! let v: Validated<HList!(String, i32), String> = get_name().into_validated() + get_age();
 //! let person = v.into_result()
 //!                .map(|hlist_pat!(name, age)| {
 //!                     Person {
-//!                         name: name,
-//!                         age: age,
+//!                         name,
+//!                         age,
 //!                     }
 //!                 });
 //!
@@ -47,6 +45,7 @@
 //! ```
 
 use super::hlist::*;
+
 use std::ops::Add;
 
 /// A Validated is either an Ok holding an HList or an Err, holding a vector
@@ -72,7 +71,7 @@ where
     /// use frunk::Validated;
     /// use frunk::prelude::*;
     ///
-    /// let r1: Result<String, String> = Result::Ok(String::from("hello"));
+    /// let r1: Result<String, String> = Ok(String::from("hello"));
     /// let v = r1.into_validated();
     /// assert!(v.is_ok());
     /// ```
@@ -87,7 +86,7 @@ where
     /// ```
     /// use frunk::prelude::*;
     ///
-    /// let r1: Result<String, i32> = Result::Err(32);
+    /// let r1: Result<String, i32> = Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
     /// ```
@@ -97,18 +96,17 @@ where
 
     /// Turns this Validated into a Result.
     ///
-    /// If this Validated is Ok, it will become a Result::Ok, holding an HList of all the accumulated
-    /// results. Otherwise, it will become a Result::Err with a list of all accumulated errors.
+    /// If this Validated is Ok, it will become a Ok, holding an HList of all the accumulated
+    /// results. Otherwise, it will become a Err with a list of all accumulated errors.
     ///
     /// # Examples
     ///
     /// ```
-    /// #[macro_use] extern crate frunk;
-    ///
+    /// # fn main() {
+    /// use frunk_core::hlist_pat;
     /// use frunk::Validated;
     /// use frunk::prelude::*;
     ///
-    /// # fn main() {
     /// #[derive(PartialEq, Eq, Debug)]
     /// struct Person {
     ///     age: i32,
@@ -116,19 +114,19 @@ where
     /// }
     ///
     /// fn get_name() -> Result<String, String> {
-    ///     Result::Ok("James".to_owned())
+    ///     Ok("James".to_owned())
     /// }
     ///
     /// fn get_age() -> Result<i32, String> {
-    ///     Result::Ok(32)
+    ///     Ok(32)
     /// }
     ///
     /// let v = get_name().into_validated() + get_age();
     /// let person = v.into_result()
     ///                .map(|hlist_pat!(name, age)| {
     ///                     Person {
-    ///                         name: name,
-    ///                         age: age,
+    ///                         name,
+    ///                         age,
     ///                     }
     ///                 });
     ///
@@ -140,8 +138,8 @@ where
     /// # }
     pub fn into_result(self) -> Result<T, Vec<E>> {
         match self {
-            Validated::Ok(h) => Result::Ok(h),
-            Validated::Err(errors) => Result::Err(errors),
+            Validated::Ok(h) => Ok(h),
+            Validated::Err(errors) => Err(errors),
         }
     }
 }
@@ -155,7 +153,7 @@ pub trait IntoValidated<T, E> {
     /// ```
     /// use frunk::prelude::*; // IntoValidated is in the prelude
     ///
-    /// let r1: Result<String, i32> = Result::Err(32);
+    /// let r1: Result<String, i32> = Err(32);
     /// let v = r1.into_validated();
     /// assert!(v.is_err());
     /// ```
@@ -165,8 +163,8 @@ pub trait IntoValidated<T, E> {
 impl<T, E> IntoValidated<T, E> for Result<T, E> {
     fn into_validated(self) -> Validated<HCons<T, HNil>, E> {
         match self {
-            Result::Err(e) => Validated::Err(vec![e]),
-            Result::Ok(v) => Validated::Ok(HCons {
+            Err(e) => Validated::Err(vec![e]),
+            Ok(v) => Validated::Ok(HCons {
                 head: v,
                 tail: HNil,
             }),
@@ -179,13 +177,13 @@ impl<T, E> IntoValidated<T, E> for Result<T, E> {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// use frunk::Validated;
 /// use frunk::prelude::*;
+/// use frunk_core::hlist;
 ///
-/// let r1: Result<String, String> = Result::Ok(String::from("hello"));
-/// let r2: Result<i32, String> = Result::Ok(1);
+/// let r1: Result<String, String> = Ok(String::from("hello"));
+/// let r2: Result<i32, String> = Ok(1);
 /// let v = r1.into_validated() + r2;
 /// assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
 /// # }
@@ -209,13 +207,13 @@ where
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
 /// use frunk::Validated;
 /// use frunk::prelude::*;
+/// use frunk_core::hlist;
 ///
-/// let r1: Result<String, String> = Result::Ok(String::from("hello"));
-/// let r2: Result<i32, String> = Result::Ok(1);
+/// let r1: Result<String, String> = Ok(String::from("hello"));
+/// let r2: Result<i32, String> = Ok(1);
 /// let v1 = r1.into_validated();
 /// let v2 = r2.into_validated();
 /// let v3 = v1 + v2;
@@ -246,20 +244,21 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use frunk_core::{hlist, hlist_pat};
 
     #[test]
     fn test_adding_ok_results() {
-        let r1: Result<String, String> = Result::Ok(String::from("hello"));
-        let r2: Result<i32, String> = Result::Ok(1);
+        let r1: Result<String, String> = Ok(String::from("hello"));
+        let r2: Result<i32, String> = Ok(1);
         let v = r1.into_validated() + r2;
         assert_eq!(v, Validated::Ok(hlist!(String::from("hello"), 1)))
     }
 
     #[test]
     fn test_adding_validated_oks() {
-        let r1: Result<String, String> = Result::Ok(String::from("hello"));
-        let r2: Result<i32, String> = Result::Ok(1);
-        let r3: Result<i32, String> = Result::Ok(3);
+        let r1: Result<String, String> = Ok(String::from("hello"));
+        let r2: Result<i32, String> = Ok(1);
+        let r3: Result<i32, String> = Ok(3);
         let v1 = r1.into_validated();
         let v2 = r2.into_validated();
         let v3 = r3.into_validated();
@@ -269,8 +268,8 @@ mod tests {
 
     #[test]
     fn test_adding_err_results() {
-        let r1: Result<i16, String> = Result::Ok(1);
-        let r2: Result<i16, String> = Result::Err(String::from("NO!"));
+        let r1: Result<i16, String> = Ok(1);
+        let r2: Result<i16, String> = Err(String::from("NO!"));
         let v1 = r1.into_validated() + r2;
         assert!(v1.is_err());
         assert_eq!(v1, Validated::Err(vec!["NO!".to_owned()]))
@@ -292,29 +291,29 @@ mod tests {
     /// Our Errors
     #[derive(PartialEq, Eq, Debug)]
     pub enum Nope {
-        NameNope,
-        AgeNope,
-        EmailNope,
+        Name,
+        Age,
+        Email,
     }
 
     fn get_name(yah_nah: YahNah) -> Result<String, Nope> {
         match yah_nah {
-            YahNah::Yah => Result::Ok("James".to_owned()),
-            _ => Result::Err(Nope::NameNope),
+            YahNah::Yah => Ok("James".to_owned()),
+            _ => Err(Nope::Name),
         }
     }
 
     fn get_age(yah_nah: YahNah) -> Result<i32, Nope> {
         match yah_nah {
-            YahNah::Yah => Result::Ok(32),
-            _ => Result::Err(Nope::AgeNope),
+            YahNah::Yah => Ok(32),
+            _ => Err(Nope::Age),
         }
     }
 
     fn get_email(yah_nah: YahNah) -> Result<String, Nope> {
         match yah_nah {
-            YahNah::Yah => Result::Ok("hello@world.com".to_owned()),
-            _ => Result::Err(Nope::EmailNope),
+            YahNah::Yah => Ok("hello@world.com".to_owned()),
+            _ => Err(Nope::Email),
         }
     }
 
@@ -322,11 +321,9 @@ mod tests {
     fn test_to_result_ok() {
         let v =
             get_name(YahNah::Yah).into_validated() + get_age(YahNah::Yah) + get_email(YahNah::Yah);
-        let person = v.into_result().map(|hlist_pat!(name, age, email)| Person {
-            name: name,
-            age: age,
-            email: email,
-        });
+        let person =
+            v.into_result()
+                .map(|hlist_pat!(name, age, email)| Person { name, age, email });
 
         assert_eq!(
             person.unwrap(),
@@ -346,7 +343,7 @@ mod tests {
 
         assert_eq!(
             person.unwrap_err(),
-            vec![Nope::NameNope, Nope::AgeNope, Nope::EmailNope]
+            vec![Nope::Name, Nope::Age, Nope::Email]
         );
     }
 
@@ -356,6 +353,6 @@ mod tests {
             get_name(YahNah::Nah).into_validated() + get_age(YahNah::Yah) + get_email(YahNah::Nah);
         let person = v.into_result().map(|_| unimplemented!());
 
-        assert_eq!(person.unwrap_err(), vec![Nope::NameNope, Nope::EmailNope]);
+        assert_eq!(person.unwrap_err(), vec![Nope::Name, Nope::Email]);
     }
 }

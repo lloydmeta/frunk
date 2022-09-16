@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate frunk;
+use frunk_core::{hlist, Coprod};
 
 #[test]
 fn test_inject_coproduct() {

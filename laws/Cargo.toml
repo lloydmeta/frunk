@@ -1,6 +1,6 @@
 [package]
 name = "frunk_laws"
-edition = "2018"
+edition = "2021"
 version = "0.4.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_laws contains laws for algebras declared in Frunk."

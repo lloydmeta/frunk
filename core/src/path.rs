@@ -1,11 +1,9 @@
 //! Holds models, traits, and logic for generic traversal of models
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
-//! # extern crate frunk_proc_macros;
 //! # use frunk_proc_macros::path;
-//! # fn main() {//!
+//! # use frunk_derives::LabelledGeneric;
+//! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct Address<'a> {
 //!     name: &'a str,
@@ -42,12 +40,10 @@
 //! shape-dependent functions on LabelledGeneric types.
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
-//! # extern crate frunk_proc_macros;
 //! # use frunk_proc_macros::{path, Path};
 //! # use frunk_core::path::PathTraverser;
-//! # fn main() {//!
+//! # use frunk_derives::LabelledGeneric;
+//! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct Dog<'a> {
 //!     name: &'a str,

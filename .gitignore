@@ -9,3 +9,6 @@ benches-variable
 # VSCode:
 
 .vscode/
+
+# IntelliJ:
+.idea

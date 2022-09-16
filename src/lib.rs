@@ -18,11 +18,9 @@
 Here is a small taste of what Frunk has to offer:
 
 ```
-# #[macro_use] extern crate frunk;
-# #[macro_use] extern crate frunk_core;
 # fn main() {
 use frunk::prelude::*;
-use frunk::{self, monoid, Semigroup, Generic};
+use frunk::{self, hlist, hlist_pat, LabelledGeneric, monoid, Semigroup, Generic};
 
 // Combining Monoids
 let v = vec![Some(1), Some(3)];
@@ -121,9 +119,8 @@ assert_eq!(d_user.first_name, "Joe");
 //! Here is an example:
 //!
 //! ```rust
-//! # #[macro_use] extern crate frunk;
-//! # #[macro_use] extern crate frunk_core;
 //! # fn main() {
+//! use frunk::LabelledGeneric;
 //! use frunk::labelled::Transmogrifier;
 //!
 //! #[derive(LabelledGeneric)]
@@ -206,13 +203,6 @@ assert_eq!(d_user.first_name, "Joe");
 
 #[cfg(not(feature = "std"))]
 extern crate core as std;
-
-#[allow(unused_imports)]
-#[macro_use]
-extern crate frunk_core;
-#[allow(unused_imports)]
-#[macro_use]
-extern crate frunk_derives;
 
 pub mod monoid;
 pub mod semigroup;
