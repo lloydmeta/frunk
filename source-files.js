@@ -1,4 +1,4 @@
-var N = null;var sourcesIndex = {};
+var sourcesIndex = {};
 sourcesIndex["frunk"] = {"name":"","files":["lib.rs","monoid.rs","semigroup.rs","validated.rs"]};
 sourcesIndex["frunk_core"] = {"name":"","files":["coproduct.rs","generic.rs","hlist.rs","indices.rs","labelled.rs","lib.rs","macros.rs","path.rs","traits.rs","tuples.rs"]};
 sourcesIndex["frunk_derives"] = {"name":"","files":["derive_generic.rs","derive_labelled_generic.rs","lib.rs"]};
