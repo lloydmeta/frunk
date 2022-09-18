@@ -6,8 +6,7 @@
 //! # Examples
 //!
 //! ```rust
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core;
+//! use frunk::Generic;
 //!
 //! # fn main() {
 //! #[derive(Generic)]
@@ -50,8 +49,7 @@
 /// # Examples
 ///
 /// ```rust
-/// #[macro_use] extern crate frunk;
-/// #[macro_use] extern crate frunk_core;
+/// use frunk::Generic;
 ///
 /// # fn main() {
 /// #[derive(Generic)]

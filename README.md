@@ -52,8 +52,7 @@ Statically typed heterogeneous lists.
 
 First, let's enable `hlist`:
 ```rust
-#[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
-use frunk::{HNil, HCons};
+use frunk::{HNil, HCons, hlist};
 ```
 
 Some basics:
@@ -170,10 +169,6 @@ Here are some examples:
 #### HList ⇄ Struct
 
 ```rust
-#[macro_use] // for the hlist macro
-extern crate frunk;
-extern crate frunk_core;
-
 #[derive(Generic, Debug, PartialEq)]
 struct Person<'a> {
     first_name: &'a str,
@@ -308,9 +303,6 @@ As usual, the goal with Frunk is to do this:
 Here is an example:
 
 ```rust
-#[macro_use]
-extern crate frunk_core;
-
 use frunk::labelled::Transmogrifier;
 
 #[derive(LabelledGeneric)]
@@ -505,7 +497,6 @@ to take a look at `Coproduct`. In Rust, thanks to `enum`, you could potentially 
 want a sum type to do this, but there is a light-weight way of doing it through Frunk:
 
 ```rust
-#[macro_use] extern crate frunk; // for the Coprod! type macro
 use frunk::prelude::*; // for the fold method
 
 // Declare the types we want in our Coproduct
@@ -548,7 +539,6 @@ best by [the Cats project](http://typelevel.org/cats/datatypes/validated.html)).
 
 To use `Validated`, first:
 ```rust
-#[macro_use] extern crate frunk; // allows us to use the handy hlist! macro
 use frunk::prelude::*; // for Result::into_validated
 ```
 

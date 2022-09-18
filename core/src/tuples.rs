@@ -3,7 +3,9 @@
 //! documentation.
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core; use frunk_core::hlist::*; fn main() {
+//! # use frunk_core::hlist::*;
+//! # use frunk_core::{hlist, HList};
+//! # fn main() {
 //! let h = hlist![ 42f32, true, "hello" ];
 //! let t: (f32, bool, &str) = h.into();
 //! assert_eq!(t, (42f32, true, "hello"));
@@ -15,6 +17,7 @@
 //! ```
 
 use crate::generic::Generic;
+use crate::{hlist, HList};
 
 macro_rules! tup_def {
     ( $($dtype: ident),* ; ; ) => {};

@@ -3,10 +3,8 @@
 //! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
 //! # fn main() {
+//! # use frunk_core::Coprod;
 //! // For simplicity, assign our Coproduct type to a type alias
 //! // This is purely optional.
 //! type I32Bool = Coprod!(i32, bool);
@@ -40,7 +38,7 @@
 //! Or, if you want to "fold" over all possible values of a coproduct
 //!
 //! ```
-//! # #[macro_use] extern crate frunk;
+//! # use frunk_core::{hlist, poly_fn, Coprod};
 //! # fn main() {
 //! # type I32Bool = Coprod!(i32, bool);
 //! # let co1 = I32Bool::inject(3);
@@ -74,6 +72,8 @@
 use crate::hlist::{HCons, HNil};
 use crate::indices::{Here, There};
 use crate::traits::{Func, Poly, ToMut, ToRef};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -84,8 +84,9 @@ use crate::traits::{Func, Poly, ToMut, ToRef};
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::Coprod;
+///
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -130,9 +131,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -172,8 +173,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // You can let type inference find the desired type:
@@ -203,8 +205,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // You can let type inference find the desired type:
@@ -238,8 +241,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     /// type I32 = Coprod!(i32); // remainder after uninjecting f32
     /// type F32 = Coprod!(f32); // remainder after uninjecting i32
@@ -268,8 +272,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Chaining calls for an exhaustive match:
     ///
     /// ```rust
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // Be aware that this particular example could be
@@ -318,10 +323,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
-    /// use ::frunk::Coproduct;
-    ///
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -347,10 +351,10 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// with the advantage that it can remove more than one type at a time:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
-    /// use frunk::Coproduct;
-    ///
     /// # fn main() {
+    /// use frunk_core::{Coprod, hlist};
+    /// use frunk_core::coproduct::Coproduct;
+    ///
     /// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
     ///     co.fold(hlist![
     ///         |s| format!("&str {}", s),
@@ -429,8 +433,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type BoolI32 = Coprod!(bool, i32);
     ///
@@ -460,8 +465,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// consuming the coproduct:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; fn main() {
+    /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
@@ -484,8 +490,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// consuming the coproduct:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; fn main() {
+    /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// let mut co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
@@ -513,8 +520,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::{Coprod, hlist};
+    ///
     /// type I32F32StrBool = Coprod!(i32, f32, bool);
     ///
     /// let co1 = I32F32StrBool::inject(3);
@@ -534,9 +542,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// handlers for the types in your Coproduct.
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::{Poly, Func};
+    /// use frunk_core::Coprod;
     ///
     /// type I32F32StrBool = Coprod!(i32, f32, bool);
     ///
@@ -1040,7 +1048,7 @@ mod tests {
         let co1 = I32F32StrBool::inject(3);
         let folded = co1.fold(Poly(P));
 
-        assert_eq!(folded, false);
+        assert!(!folded);
     }
 
     #[test]
@@ -1117,7 +1125,7 @@ mod tests {
         assert!(res.is_err());
 
         if false {
-            #[allow(unreachable_code)]
+            #[allow(unreachable_code, clippy::diverging_sub_expression)]
             {
                 // ...including CNil.
                 #[allow(unused)]
@@ -1143,7 +1151,7 @@ mod tests {
     fn test_coproduct_embed() {
         // CNil can be embedded into any coproduct.
         if false {
-            #[allow(unreachable_code)]
+            #[allow(unreachable_code, clippy::diverging_sub_expression)]
             {
                 #[allow(unused)]
                 let cnil: CNil = panic!();
@@ -1175,6 +1183,7 @@ mod tests {
             assert_eq!(out_c, Coproduct::Inr(Coproduct::Inr(Coproduct::Inl(C))));
         }
 
+        #[allow(clippy::upper_case_acronyms)]
         {
             // Multiple variants can resolve to the same output w/o type annotations
             type ABC = Coprod!(A, B, C);

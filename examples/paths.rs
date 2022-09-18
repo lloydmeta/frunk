@@ -1,10 +1,4 @@
-#[macro_use]
-extern crate frunk;
-// for derives
-extern crate frunk_core;
-// for labelledgeneric
-extern crate frunk_proc_macros;
-
+use frunk::LabelledGeneric;
 use frunk_core::path::PathTraverser;
 use frunk_proc_macros::{path, Path};
 
@@ -54,7 +48,7 @@ fn main() {
 
     // Prints height as long as `A` has the right "shape" (e.g.
     // has `dimensions.height: usize` and `dimension.unit: SizeUnit)
-    fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A) -> ()
+    fn print_height<'a, A, HeightIdx, UnitIdx>(obj: &'a A)
     where
         &'a A: PathTraverser<Path!(dimensions.height), HeightIdx, TargetValue = &'a usize>
             + PathTraverser<Path!(dimensions.unit), UnitIdx, TargetValue = &'a SizeUnit>,

@@ -1,6 +1,6 @@
 [package]
 name = "frunk"
-edition = "2018"
+edition = "2021"
 version = "0.4.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Frunk provides developers with a number of functional programming tools like HList, Coproduct, Generic, LabelledGeneric, Validated, Monoid, Semigroup and friends."

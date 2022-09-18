@@ -4,35 +4,35 @@ use self::time::*;
 #[allow(unused_imports)]
 use frunk::*;
 
-#[derive(Generic, Debug, PartialEq)]
+#[derive(Generic, Debug, PartialEq, Eq)]
 pub struct Person<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
 }
 
-#[derive(Generic, Debug, PartialEq, Clone)]
+#[derive(Generic, Debug, PartialEq, Eq, Clone)]
 pub struct Strategist<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
 }
 
-#[derive(Generic, Debug, PartialEq)]
+#[derive(Generic, Debug, PartialEq, Eq)]
 pub struct President<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
 }
 
-#[derive(LabelledGeneric, Debug, PartialEq, Clone)]
+#[derive(LabelledGeneric, Debug, PartialEq, Eq, Clone)]
 pub struct NewUser<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
 }
 
-#[derive(LabelledGeneric, Generic, Debug, PartialEq, Clone)]
+#[derive(LabelledGeneric, Generic, Debug, PartialEq, Eq, Clone)]
 pub struct SavedUser<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
@@ -40,7 +40,7 @@ pub struct SavedUser<'a> {
 }
 
 #[allow(non_snake_case)]
-#[derive(LabelledGeneric, Generic, Debug, PartialEq)]
+#[derive(LabelledGeneric, Generic, Debug, PartialEq, Eq)]
 pub struct ApiUser<'a> {
     pub FirstName: &'a str,
     pub LastName: &'a str,
@@ -48,12 +48,12 @@ pub struct ApiUser<'a> {
 }
 
 #[allow(non_snake_case)]
-#[derive(LabelledGeneric, Debug, PartialEq)]
+#[derive(LabelledGeneric, Debug, PartialEq, Eq)]
 pub struct SuperLongField {
     pub abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789: i32,
 }
 
-#[derive(Generic, Debug, PartialEq)]
+#[derive(Generic, Debug, PartialEq, Eq)]
 pub struct TupleStruct<'a>(pub &'a str, pub i32);
 
 #[derive(LabelledGeneric)]
@@ -124,18 +124,18 @@ pub struct InternalUser<'a> {
     pub あ: bool,
 }
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub struct ExternalPhoneNumber {
     pub main: usize,
 }
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub struct ExternalAddress<'a> {
     pub name: &'a str,
     pub phone: ExternalPhoneNumber,
 }
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub struct ExternalUser<'a> {
     pub age: usize,
     pub address: ExternalAddress<'a>,
@@ -143,10 +143,10 @@ pub struct ExternalUser<'a> {
     pub あ: bool,
 }
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub struct TypeWrapper(pub String);
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub struct TypeWrapper2(pub String);
 
 #[derive(LabelledGeneric, PartialEq, Debug)]
@@ -155,14 +155,14 @@ pub struct Vec4f(pub f32, pub f32, pub f32, pub f32);
 #[derive(LabelledGeneric, PartialEq, Debug)]
 pub struct Vec3f(pub f32, pub f32, pub f32);
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub enum LabelledEnum1 {
     VariantA,
     VariantB(i32),
     VariantC { x: String, y: bool },
 }
 
-#[derive(LabelledGeneric, PartialEq, Debug)]
+#[derive(LabelledGeneric, PartialEq, Eq, Debug)]
 pub enum LabelledEnum2 {
     VariantA,
     VariantC { x: String, y: bool },

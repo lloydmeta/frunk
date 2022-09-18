@@ -8,8 +8,8 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*;
+//! # use frunk_core::{hlist, HList};
 //! # fn main() {
 //!
 //! let h = hlist![1, false, 42f32];
@@ -75,7 +75,3 @@ mod tuples;
 
 #[cfg(test)]
 mod test_structs;
-
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;

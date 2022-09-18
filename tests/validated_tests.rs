@@ -41,7 +41,7 @@ fn get_age(yah_nah: YahNah) -> Result<usize, Nope> {
 #[test]
 fn test_to_result_ok() {
     let v = get_name(YahNah::Yah).into_validated() + get_name(YahNah::Yah) + get_age(YahNah::Yah);
-    let person: Result<Person, _> = v.into_result().map(|h| frunk::from_generic(h)); // much simpler
+    let person: Result<Person, _> = v.into_result().map(frunk::from_generic); // much simpler
     assert_eq!(
         person.unwrap(),
         Person {

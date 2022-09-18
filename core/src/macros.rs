@@ -8,7 +8,8 @@
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::hlist;
+/// # fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -46,7 +47,8 @@ macro_rules! hlist {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::{hlist, hlist_pat};
+/// # fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![a1, a2, a3] = h;
 /// assert_eq!(a1, 13.5f32);
@@ -85,7 +87,8 @@ macro_rules! hlist_pat {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::{hlist, HList};
+/// # fn main() {
 /// let h: HList!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 ///
 /// // Use "...Tail" to append another HList type at the end.
@@ -110,8 +113,9 @@ macro_rules! HList {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::Coprod;
+///
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 ///
@@ -141,9 +145,8 @@ macro_rules! Coprod {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-
+/// use frunk_core::field;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -156,8 +159,8 @@ macro_rules! Coprod {
 ///   will be set to the stringified version of the type provided.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::field;
 /// enum first_name {}
 /// let labelled = field![first_name, "Joe"];
 /// assert_eq!(labelled.name, "first_name");
@@ -169,9 +172,8 @@ macro_rules! Coprod {
 ///   _and_ a custom name, passed as the last argument in the macro
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-///
+/// use frunk_core::field;
 /// # fn main() {
 /// // useful aliasing of our type-level string
 /// type age = (a, g, e);
@@ -211,8 +213,8 @@ macro_rules! field {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::{Coprod, poly_fn};
 /// type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
 ///
 /// let co1 = I32F32StrBool::inject("lollerskates");
@@ -297,6 +299,7 @@ macro_rules! poly_fn {
 
 #[cfg(test)]
 mod tests {
+    #[allow(clippy::diverging_sub_expression)]
     #[test]
     fn trailing_commas() {
         use crate::test_structs::unit_copy::{A, B};

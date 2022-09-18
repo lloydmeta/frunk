@@ -1,6 +1,6 @@
 [package]
 name = "frunk_proc_macros_impl"
-edition = "2018"
+edition = "2021"
 version = "0.1.0"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Proc macros inernal implementations for Frunk"

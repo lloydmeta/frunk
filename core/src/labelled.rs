@@ -17,11 +17,9 @@
 //! # Examples
 //!
 //! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
 //! # fn main() {
 //! use frunk::labelled::chars::*;
+//! use frunk_core::field;
 //!
 //! // Optionally alias our tuple that represents our type-level string
 //! type name = (n, a, m, e);
@@ -35,8 +33,9 @@
 //! have mismatched fields!
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! // required when using custom derives
+//! use frunk::LabelledGeneric;
+//!
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
@@ -69,10 +68,10 @@
 //! use the Transmogrifier trait.
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! // required when using custom derives
 //! # fn main() {
 //! use frunk::labelled::Transmogrifier;
+//! use frunk::LabelledGeneric;
 //!
 //! #[derive(LabelledGeneric)]
 //! struct InternalPhoneNumber {
@@ -150,6 +149,9 @@
 
 use crate::hlist::*;
 use crate::indices::*;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use ::std::fmt;
 use ::std::marker::PhantomData;
 
@@ -164,8 +166,7 @@ use ::std::marker::PhantomData;
 /// # Examples
 ///
 /// ```rust
-/// #[macro_use] extern crate frunk;
-/// #[macro_use] extern crate frunk_core;
+/// use frunk::LabelledGeneric;
 ///
 /// # fn main() {
 /// #[derive(LabelledGeneric)]
@@ -368,6 +369,7 @@ pub mod chars {
         //
         // Good thing I don't plan on adding reified labels. - Exp
         let a = 3;
+        #[allow(clippy::match_single_binding)]
         match a {
             a => assert_eq!(a, 3),
         }
@@ -382,9 +384,8 @@ pub mod chars {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-///
+/// use frunk_core::field;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -451,14 +452,12 @@ impl<T: fmt::Display> fmt::Debug for DebugAsDisplay<T> {
 /// # Examples
 ///
 /// ```
-/// #[macro_use] extern crate frunk; fn main() {
 /// use frunk::labelled::chars::*;
 /// use frunk::labelled::field_with_name;
 ///
 /// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
 /// assert_eq!(l.value, "joe");
 /// assert_eq!(l.name, "name");
-/// # }
 /// ```
 pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
     Field {
@@ -479,10 +478,10 @@ pub trait IntoUnlabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::labelled::chars::*;
     /// use frunk::labelled::IntoUnlabelled;
+    /// use frunk_core::{field, hlist};
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -532,10 +531,10 @@ pub trait IntoValueLabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::labelled::{ValueField, IntoValueLabelled};
     /// use frunk::labelled::chars::*;
+    /// use frunk_core::{field, hlist, HList};
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -638,9 +637,9 @@ where
 /// # Example
 ///
 /// ```
-/// #[macro_use] extern crate frunk;
-/// #[macro_use] extern crate frunk_core; // required when using custom derives
+/// // required when using custom derives
 /// # fn main() {
+/// use frunk::LabelledGeneric;
 /// use frunk::labelled::Transmogrifier;
 /// #[derive(LabelledGeneric)]
 /// struct InternalPhoneNumber {
@@ -963,8 +962,8 @@ mod tests {
         assert!(format!("{:?}", field).contains("name: age"));
         assert!(format!("{:?}", value_field).contains("name: age"));
         // :#? works
-        assert!(format!("{:#?}", field).contains("\n"));
-        assert!(format!("{:#?}", value_field).contains("\n"));
+        assert!(format!("{:#?}", field).contains('\n'));
+        assert!(format!("{:#?}", value_field).contains('\n'));
     }
 
     #[test]
