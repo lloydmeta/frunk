@@ -581,6 +581,30 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     }
 }
 
+impl<T> Coproduct<T, CNil> {
+    /// Extract the value from a coproduct with only one variant.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
+    /// type I32Only = Coprod!(i32);
+    /// let co = I32Only::inject(5);
+    ///
+    /// assert_eq!(co.extract(), 5);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn extract(self) -> T {
+        match self {
+            Coproduct::Inl(v) => v,
+            Coproduct::Inr(never) => match never {},
+        }
+    }
+}
+
 /// Trait for instantiating a coproduct from an element
 ///
 /// This trait is part of the implementation of the inherent static method
