@@ -1238,7 +1238,7 @@ where
     fn to_ref(&'a self) -> Self::Output {
         HCons {
             head: &self.head,
-            tail: (&self.tail).to_ref(),
+            tail: self.tail.to_ref(),
         }
     }
 }
