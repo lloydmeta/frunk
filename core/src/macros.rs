@@ -215,9 +215,9 @@ macro_rules! field {
 /// ```
 /// # fn main() {
 /// use frunk_core::{Coprod, poly_fn};
-/// type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
+/// type I32F32Str<'a> = Coprod!(i32, f32, &'a str);
 ///
-/// let co1 = I32F32StrBool::inject("lollerskates");
+/// let co1 = I32F32Str::inject("lollerskates");
 /// let folded = co1.fold(poly_fn!(
 ///   ['a] |x: &'a str| -> i8 { 1 },
 ///   |x: i32| -> i8 { 2 },
@@ -229,55 +229,55 @@ macro_rules! field {
 #[macro_export]
 macro_rules! poly_fn {
     // encountered first func w/ type params
-    ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/ type params, trailing comma on tparams
-    ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/o type params
-    (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, ~f $($rest)*
+       p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, ~f $($rest)*
     )};
 
     // encountered non-first func w/ type params
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block , )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block , )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
     // encountered non-first func w/ type params, trailing comma in tparams
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: block }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
     // encountered non-first func w/o type params
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
 
     // last w/ type params, for when there is no trailing comma on the funcs...
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
     // last w/ type params, for when there is a trailing comma in tparams, but no trailing comma on the funcs..
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
     // last w/o type params, for when there is no trailing comma on the funcs...
-    (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
 
     // unroll
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, )* ~f) => {{
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, )* ~f) => {{
         struct F;
         $(
             impl<$($pars,)*> $crate::traits::Func<$p_arg_typ> for F {
@@ -394,5 +394,15 @@ mod tests {
             ['a,] |x: &'a str| -> usize { x.len() },
         ));
         assert_eq!(h2, hlist![true, 3, "dummy", 6, false]);
+    }
+
+    #[test]
+    fn poly_fn_macro_multiline_bodies_test() {
+        let h = hlist![9000, 1, -1];
+        let h2 = h.map(poly_fn!(|x: i32| -> bool {
+            let a = if x > 100 { 1 } else { -1 };
+            a > 0
+        },));
+        assert_eq!(h2, hlist![true, false, false]);
     }
 }

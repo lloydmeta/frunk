@@ -1544,30 +1544,22 @@ mod tests {
 
         // Poly mapper
 
-        /* FIXME(bgr360): poly_fn! does not accept multiline bodies
-
-        let mut number = None;
-        let mut boolean = None;
-
         let mut mapper = poly_fn!(
             |n: i32| -> i32 {
-                number = Some(n);
+                // Poly doesn't support capturing values.
+                /* number = Some(n); */
                 n
             },
             |b: bool| -> bool {
-                boolean = Some(b);
+                // Poly doesn't support capturing values.
+                /* boolean = Some(b) */
                 b
             },
         );
 
-
         let co = I32Bool::inject(3);
         let co = co.map(&mut mapper);
         assert_eq!(co, I32Bool::inject(3));
-        assert_eq!(number, Some(3));
-        assert_eq!(boolean, None);
-
-        */
 
         // Fn mapper
 
