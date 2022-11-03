@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]:
 
+## [0.4.1]:
+- Documentation fix for `Hcons::sculpt` (https://github.com/lloydmeta/frunk/pull/194)
+- Optimise Semigroup for HashSet and HashMap (https://github.com/lloydmeta/frunk/pull/196)
+- Update to 2021 edition (https://github.com/lloydmeta/frunk/pull/200)
+- Add `extract` to get value out of 1-type coproduct (https://github.com/lloydmeta/frunk/pull/201)
+- Fix needless borrow (https://github.com/lloydmeta/frunk/pull/202)
+- Add `Coproduct::map` (https://github.com/lloydmeta/frunk/pull/204)
+
 ## [0.4.0]:
 - [Breaking change] Rename `Hlist!` type macro to `HList!` (https://github.com/lloydmeta/frunk/issues/132)
 - [Breaking change] Remove deprecated `HList.length()` (https://github.com/lloydmeta/frunk/issues/125)
