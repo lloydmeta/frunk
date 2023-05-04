@@ -5,7 +5,7 @@
 /// This lets us create implementations for our recursive traits that take the resulting
 /// Output reference type, without having to deal with strange, spurious overflows
 /// that sometimes occur when trying to implement a trait for &'a T (see this comment:
-/// https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198)
+/// <https://github.com/lloydmeta/frunk/pull/106#issuecomment-377927198>)
 ///
 /// This functionality is also provided as an inherent method [on HLists] and [on Coproducts].
 /// However, you may find this trait useful in generic contexts.
