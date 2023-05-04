@@ -621,6 +621,33 @@ macro_rules! gen_inherent_methods {
             {
                 HFoldRightable::foldr(self, folder, init)
             }
+
+            /// Extend the contents of this HList with another HList
+            ///
+            /// This exactly the same as the [`Add`][Add] impl.
+            ///
+            /// [Add]: struct.HCons.html#impl-Add%3CRHS%3E-for-HCons%3CH,+T%3E
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// use frunk_core::hlist;
+            ///
+            /// let first = hlist![0u8, 1u16];
+            /// let second = hlist![2u32, 3u64];
+            ///
+            /// assert_eq!(first.extend(second), hlist![0u8, 1u16, 2u32, 3u64]);
+            /// ```
+            pub fn extend<Other>(
+                self,
+                other: Other
+            ) -> <Self as Add<Other>>::Output
+            where
+                Self: Add<Other>,
+                Other: HList,
+            {
+                self + other
+            }
         }
     };
 }
@@ -1955,5 +1982,29 @@ mod tests {
 
         let x: H = hlist![(), 1337, 42.0, (), true].lift_into();
         assert_eq!(x, hlist![(), 1337, 42.0, (), true]);
+    }
+
+    #[test]
+    fn test_hcons_extend_hnil() {
+        let first = hlist![0];
+        let second = hlist![];
+
+        assert_eq!(first.extend(second), hlist![0]);
+    }
+
+    #[test]
+    fn test_hnil_extend_hcons() {
+        let first = hlist![];
+        let second = hlist![0];
+
+        assert_eq!(first.extend(second), hlist![0]);
+    }
+
+    #[test]
+    fn test_hnil_extend_hnil() {
+        let first = hlist![];
+        let second = hlist![];
+
+        assert_eq!(first.extend(second), hlist![]);
     }
 }
