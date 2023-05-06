@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["HFoldRightableOwned","A real `foldr` for the folder that must be owned to fold."]]};
+window.SIDEBAR_ITEMS = {"trait":["HFoldRightableOwned"]};

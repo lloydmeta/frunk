@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["left_identity","Left identity law"],["right_identity","Right identity law"]]};
+window.SIDEBAR_ITEMS = {"fn":["left_identity","right_identity"]};
