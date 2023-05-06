@@ -716,7 +716,7 @@ where
 /// ```
 ///
 /// Credit:
-/// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
+/// 1. Haskell "transmogrify" Github repo: <https://github.com/ivan-m/transmogrify>
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     /// Consume this current object and return an object of the Target type.
     ///

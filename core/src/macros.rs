@@ -42,7 +42,7 @@ macro_rules! hlist {
 
 /// Macro for pattern-matching on HLists.
 ///
-/// Taken from https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md
+/// Taken from <https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md>
 ///
 /// # Examples
 ///

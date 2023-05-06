@@ -14,7 +14,7 @@ readme = "README.md"
 travis-ci = { repository = "lloydmeta/frunk" }
 
 [dev-dependencies]
-time = "0.1.36"
+time = "0.3"
 
 [dependencies.frunk_core]
 path = "core"
