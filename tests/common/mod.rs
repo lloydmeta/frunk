@@ -88,7 +88,7 @@ pub struct NormalUserWithAudit<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
-    pub created_at: Tm,
+    pub created_at: OffsetDateTime,
 }
 
 #[derive(LabelledGeneric)]
@@ -96,7 +96,7 @@ pub struct JumbledUserWithAudit<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub age: usize,
-    pub created_at: Tm,
+    pub created_at: OffsetDateTime,
 }
 
 // Nested + Jumbled
