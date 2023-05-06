@@ -142,6 +142,8 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: std doc check
+        env:
+          RUSTDOCFLAGS: '-D warnings'
         with:
           command: doc
-          args: --all --no-deps
+          args: --all --no-deps  --document-private-items
