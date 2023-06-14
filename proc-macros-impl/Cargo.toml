@@ -15,7 +15,6 @@ travis-ci = { repository = "lloydmeta/frunk" }
 [dependencies]
 syn = "1"
 quote = "1"
-proc-macro-hack = "0.5"
 
 [lib]
 proc-macro = true

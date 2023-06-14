@@ -10,19 +10,17 @@
 extern crate frunk_core;
 extern crate frunk_proc_macro_helpers;
 extern crate proc_macro;
-extern crate proc_macro_hack;
 
 extern crate quote;
 extern crate syn;
 
 use frunk_proc_macro_helpers::*;
 use proc_macro::TokenStream;
-use proc_macro_hack::proc_macro_hack;
 use quote::quote;
 use syn::{parse_macro_input, Expr};
 
 /// Build a generic path that can be used for traversals
-#[proc_macro_hack]
+#[proc_macro]
 pub fn path(input: TokenStream) -> TokenStream {
     let expr = parse_macro_input!(input as Expr);
     let path_type = build_path_type(expr);
