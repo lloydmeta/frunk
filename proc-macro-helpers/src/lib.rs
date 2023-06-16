@@ -20,8 +20,8 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::ToTokens;
 use syn::spanned::Spanned;
 use syn::{
-    DeriveInput, Expr, Field, Fields, GenericParam, Generics, Ident, Lifetime, LifetimeDef, Member,
-    Variant,
+    DeriveInput, Expr, Field, Fields, GenericParam, Generics, Ident, Lifetime, LifetimeParam,
+    Member, Variant,
 };
 
 /// These are assumed to exist as enums in frunk_core::labelled
@@ -325,7 +325,7 @@ pub fn ref_generics(generics: &Generics) -> Generics {
 
     // instantiate a lifetime and lifetime def to add
     let ref_lifetime = Lifetime::new("'_frunk_ref_", Span::call_site());
-    let ref_lifetime_def = LifetimeDef::new(ref_lifetime.clone());
+    let ref_lifetime_def = LifetimeParam::new(ref_lifetime.clone());
 
     // Constrain the generic lifetimes present in the concrete type to the reference lifetime
     // of our implementation of LabelledGeneric for the reference case (& and &mut)
