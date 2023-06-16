@@ -4,7 +4,6 @@ var sourcesIndex = JSON.parse('{\
 "frunk_derives":["",[],["derive_generic.rs","derive_labelled_generic.rs","lib.rs"]],\
 "frunk_laws":["",[],["lib.rs","monoid_laws.rs","semigroup_laws.rs","wrapper.rs"]],\
 "frunk_proc_macro_helpers":["",[],["lib.rs"]],\
-"frunk_proc_macros":["",[],["lib.rs"]],\
-"frunk_proc_macros_impl":["",[],["lib.rs"]]\
+"frunk_proc_macros":["",[],["lib.rs"]]\
 }');
 createSourceSidebar();
