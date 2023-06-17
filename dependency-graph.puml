@@ -1,7 +1,6 @@
 @startuml
 participant core as c
 participant proc_macro_helpers as pmh
-participant proc_macro_impl as pmi
 participant proc_macros as pm
 participant derives as d
 participant frunk as f
@@ -13,12 +12,8 @@ c --> f: dev-dependency
 
 pmh -> c: dependency
 
-pmi -> c: dependency
-pmi -> pmh: dependency
-
 pm -> c: dependency
-pm -> pmi: dependency
-pm --> f: dev-dependency
+pm -> pmh: dependency
 
 d -> c: dependency
 d -> pmh: dependency
