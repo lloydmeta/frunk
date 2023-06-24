@@ -70,7 +70,14 @@ macro_rules! hlist_pat {
     () => { $crate::hlist::HNil };
     (...) => { _ };
     (...$rest:pat) => { $rest };
+    (_) => { $crate::hlist_pat![_,] };
     ($a:pat) => { $crate::hlist_pat![$a,] };
+    (_, $($tok:tt)*) => {
+        $crate::hlist::HCons {
+            tail: $crate::hlist_pat![$($tok)*],
+            ..
+        }
+    };
     ($a:pat, $($tok:tt)*) => {
         $crate::hlist::HCons {
             head: $a,
@@ -404,5 +411,14 @@ mod tests {
             a > 0
         },));
         assert_eq!(h2, hlist![true, false, false]);
+    }
+
+    #[test]
+    #[deny(clippy::unneeded_field_pattern)]
+    fn unneeded_field_pattern() {
+        let hlist_pat![_, _] = hlist![1, 2];
+        let hlist_pat![foo, _, baz] = hlist!["foo", "bar", "baz"];
+        assert_eq!(foo, "foo");
+        assert_eq!(baz, "baz");
     }
 }
