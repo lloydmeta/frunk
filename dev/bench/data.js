@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687010298744,
+  "lastUpdate": 1687646768260,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -7799,6 +7799,258 @@ window.BENCHMARK_DATA = {
             "name": "error_result_into_validated",
             "value": 49,
             "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "figsoda@pm.me",
+            "name": "figsoda",
+            "username": "figsoda"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8543fa8c4f8c5ca1146ae36ddbd1bcf48e28593f",
+          "message": "avoid clippy::unneeded_field_pattern (#216)\n\n* avoid clippy::unneeded_field_pattern\r\n\r\n* run clippy with --tests in CI",
+          "timestamp": "2023-06-25T07:44:45+09:00",
+          "tree_id": "603c22b5ffb619b5755402e6ebc59bc876529a9e",
+          "url": "https://github.com/lloydmeta/frunk/commit/8543fa8c4f8c5ca1146ae36ddbd1bcf48e28593f"
+        },
+        "date": 1687646765662,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 66,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 91,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 67,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 86,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 4,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 43,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 57,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 599,
+            "range": "± 13",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 569,
+            "range": "± 16",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 287,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 24,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 112,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 34,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 34,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
