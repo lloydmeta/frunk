@@ -24,7 +24,7 @@ jobs:
         name: clippy
         with:
           command: clippy
-          args: --all -- -D warnings
+          args: --all --tests -- -D warnings
 
   check:
     name: Check
