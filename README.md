@@ -162,6 +162,15 @@ assert_eq!(remainder, hlist![true]);
 `Generic` is a way of representing a type in ... a generic way. By coding around `Generic`, you can to write functions
 that abstract over types and arity, but still have the ability to recover your original type afterwards. This can be a fairly powerful thing.
 
+#### Setup
+
+In order to derive the trait `Generic` (or `LabelledGeneric`) you will have to add `frunk_core` dependency
+
+```toml
+[dependencies]
+frunk_core = { version = "$version" }
+```
+
 Frunk comes out of the box with a nice custom `Generic` derivation so that boilerplate is kept to a minimum.
 
 Here are some examples:
