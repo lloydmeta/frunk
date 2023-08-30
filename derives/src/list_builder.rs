@@ -14,8 +14,8 @@ struct ArgPair {
 }
 
 impl ArgPair {
-    /// ```
-    /// #[derive(ListBuild]
+    /// ```ignore
+    /// #[derive(ListBuild)]
     /// struct Foo {
     ///   foo: u8,
     ///   #[list_build_ignore]
