@@ -48,6 +48,41 @@ pub fn Path(input: TokenStream) -> TokenStream {
     //    println!("ast: [{}]", ast);
     TokenStream::from(ast)
 }
+
+
+/// Constructs a struct using an `HList`.
+///
+/// This trait allows you to create an instance of a struct from an HList. You keep the
+/// remaining items in the `HList` after `DerivedListBuild::hl_new(...)`
+///
+/// # Examples
+///
+/// ```
+/// use frunk::hlist::HList;
+/// use frunk::hlist;
+///
+/// #[derive(Debug, Eq, PartialEq, frunk::hlist::ListBuild)]
+/// struct ListConstructed {
+///     field0: bool,
+///     field1: u8,
+///     #[list_build_ignore]
+///     fn_built: &'static str,
+/// }
+///
+/// // Create a struct manually for comparison
+/// let manually_made = ListConstructed {
+///     field0: true,
+///     field1: 3,
+///     fn_built: "passed_in",
+/// };
+///
+/// // Use `hl_new` to construct a struct and remaining HList
+/// let (built, list): (ListConstructed, HList!(u32)) = 
+///     ListConstructed::hl_new(hlist![true, 3u8, 42u32], "passed_in");
+///
+/// assert_eq!(built, manually_made);
+/// assert_eq!(list, hlist![42u32]);
+/// ```
 #[proc_macro_derive(ListBuild)]
 pub fn list_build(item: TokenStream) -> TokenStream {
     list_builder::list_build_inner(item)
