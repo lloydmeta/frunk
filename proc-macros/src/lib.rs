@@ -19,6 +19,8 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Expr};
 
+mod list_builder;
+
 /// Build a generic path that can be used for traversals
 #[proc_macro]
 pub fn path(input: TokenStream) -> TokenStream {
@@ -45,4 +47,8 @@ pub fn Path(input: TokenStream) -> TokenStream {
     };
     //    println!("ast: [{}]", ast);
     TokenStream::from(ast)
+}
+#[proc_macro_derive(ListBuild)]
+pub fn list_build(item: TokenStream) -> TokenStream {
+    list_builder::list_build_inner(item)
 }
