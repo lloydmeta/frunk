@@ -3,8 +3,8 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput,
-    GenericParam, Generics, Ident, Stmt,
+    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput, GenericParam,
+    Generics, Ident, Stmt,
 };
 
 mod type_helpers;
@@ -15,12 +15,14 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     // get the fields: the list-built fields, and the manually-built fields
     let (input, annotated_fields, non_annotated_fields) = parse_fields(input);
 
-    
     let block = gen_stmts(
-        &annotated_fields.iter().map(|ArgPair{ident, ..}| ident.clone()).collect(),
+        &annotated_fields
+            .iter()
+            .map(|ArgPair { ident, .. }| ident.clone())
+            .collect(),
         &non_annotated_fields
             .iter()
-            .map(|ArgPair{ident, ..}| ident.clone())
+            .map(|ArgPair { ident, .. }| ident.clone())
             .collect::<Vec<_>>()[..],
     );
 
@@ -30,15 +32,16 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     if annotated_fields.len() == 0 {
         panic!("redundant builder annotations");
     }
-    let types = annotated_fields.iter().map(|ArgPair{ tp, .. }| tp.clone()).collect::<Vec<_>>();
+    let types = annotated_fields
+        .iter()
+        .map(|ArgPair { tp, .. }| tp.clone())
+        .collect::<Vec<_>>();
 
     // make all where-clauses
     let lines: Vec<WhereLine> = WhereLine::gen_lines_top(&types[..]);
 
     // Take the last clause and absorb that to make the ret-val
     let ret = WhereLine::absorb(lines.last().expect("last line").clone());
-
-
 
     let fn_ident = syn::Ident::new("hl_new", proc_macro2::Span::call_site());
     let output: syn::ReturnType = syn::ReturnType::Type(
@@ -88,20 +91,14 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
         impl #struct_ident {
             #fun
         }
-    }.into()
+    }
+    .into()
 }
 /// collects the field name/type pairs, splitting them according to fields being built by the list
 /// or as args passed into the constructor
-fn parse_fields(
-    mut input: DeriveInput,
-) -> (
-    DeriveInput,
-    Vec<ArgPair>,
-    Vec<ArgPair>,
-) {
+fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<ArgPair>, Vec<ArgPair>) {
     let mut list_built = Vec::new();
     let mut ignored_fields = Vec::new();
-
 
     if let syn::Data::Struct(syn::DataStruct {
         fields: syn::Fields::Named(named),
@@ -122,13 +119,14 @@ fn parse_fields(
             } else {
                 list_built.push((field_ident, field_type).into());
                 // Remove the hl_field attribute
-                field.attrs.retain(|attr| !attr.path().is_ident("list_build_ignore"));
+                field
+                    .attrs
+                    .retain(|attr| !attr.path().is_ident("list_build_ignore"));
             }
         }
     }
     (input, list_built, ignored_fields)
 }
-
 
 // `<L0, L1, ..., L(N-1)>` for the `fn hl_new<L1, ...>`
 fn make_generic_params(count: usize) -> Punctuated<GenericParam, Comma> {
@@ -137,11 +135,12 @@ fn make_generic_params(count: usize) -> Punctuated<GenericParam, Comma> {
         .collect::<Vec<String>>()
         .join(", ");
     let gens = format!("<{}>", gens);
-    syn::parse_str::<Generics>(&gens).expect("parsing the make_generic_params").params
+    syn::parse_str::<Generics>(&gens)
+        .expect("parsing the make_generic_params")
+        .params
 }
 
-
-// generates a line of code for each field that needs a value plucked out of the constructor list. 
+// generates a line of code for each field that needs a value plucked out of the constructor list.
 // ```ignore
 // let (list_built0, l1) = frunk::hlist::Plucker::pluck(l0);
 // ```
@@ -177,4 +176,3 @@ fn gen_stmts(fields: &Vec<Ident>, args: &[Ident]) -> Block {
         brace_token: Default::default(),
     }
 }
-

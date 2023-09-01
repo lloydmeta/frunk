@@ -46,4 +46,3 @@ pub fn Path(input: TokenStream) -> TokenStream {
     //    println!("ast: [{}]", ast);
     TokenStream::from(ast)
 }
-

@@ -81,7 +81,7 @@ pub fn labelled_generic(input: TokenStream) -> TokenStream {
 /// };
 ///
 /// // Use `hl_new` to construct a struct and remaining HList
-/// let (built, list): (ListConstructed, HList!(u32)) = 
+/// let (built, list): (ListConstructed, HList!(u32)) =
 ///     ListConstructed::hl_new(hlist![true, 3u8, 42u32], "passed_in");
 ///
 /// assert_eq!(built, manually_made);
