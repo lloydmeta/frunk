@@ -53,7 +53,7 @@ impl WhereLine {
     }
 
     /// Does the "absorption" needed for the next line for each gen_lines_recur
-    /// Tn: Pn -> <Tn as Pn>::Remainder
+    /// `Tn: Pn` -> `<Tn as Pn>::Remainder`
     pub(crate) fn absorb(self) -> syn::Type {
         let WhereLine { tp, pred } = self;
         let pred = pred.0;
