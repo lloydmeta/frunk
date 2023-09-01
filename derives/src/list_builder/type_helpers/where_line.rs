@@ -48,7 +48,7 @@ impl WhereLine {
     /// L0: Plucker<tp, L1>
     fn gen_base(tp: &syn::Type) -> Self {
         let pred =
-            syn::parse2(quote! {frunk::hlist::Plucker<#tp, L1>}).expect("quote the base plucker");
+            syn::parse2(quote! {::frunk::hlist::Plucker<#tp, L1>}).expect("quote the base plucker");
         // Create the WhereLine
         WhereLine {
             tp: syn::parse2(quote! {L0}).expect("quote the L0"),

@@ -155,7 +155,7 @@ fn gen_stmts(fields: &Vec<Ident>, args: &[Ident]) -> Block {
         let next_list = syn::Ident::new(&format!("l{}", next_list), Span::call_site());
         let list_n_tok = syn::Ident::new(&format!("l{}", list_n), Span::call_site());
         let stmt: Stmt = syn::parse2(quote! {
-            let (#id, #next_list) = frunk::hlist::Plucker::pluck(#list_n_tok);
+            let (#id, #next_list) = ::frunk::hlist::Plucker::pluck(#list_n_tok);
         })
         .expect("");
         stmts.push(stmt);
