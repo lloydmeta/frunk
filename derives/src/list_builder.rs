@@ -3,9 +3,11 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput, GenericParam,
-    Generics, Ident, Stmt,
+    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput,
+    GenericParam, Generics, Ident, Stmt,
 };
+#[cfg(feature = "nightly")]
+use syn::spanned::Spanned;
 
 mod type_helpers;
 use type_helpers::{ArgPair, PredicateVec, WhereLine};
@@ -16,10 +18,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     let (input, annotated_fields, non_annotated_fields) = parse_fields(input);
 
     let block = gen_stmts(
-        &annotated_fields
-            .iter()
-            .map(|ArgPair { ident, .. }| ident.clone())
-            .collect(),
+        &annotated_fields,
         &non_annotated_fields
             .iter()
             .map(|ArgPair { ident, .. }| ident.clone())
@@ -34,7 +33,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     }
     let types = annotated_fields
         .iter()
-        .map(|ArgPair { tp, .. }| tp.clone())
+        .map(|(ArgPair { tp, .. }, _)| tp.clone())
         .collect::<Vec<_>>();
 
     // make all where-clauses
@@ -96,7 +95,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
 }
 /// collects the field name/type pairs, splitting them according to fields being built by the list
 /// or as args passed into the constructor
-fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<ArgPair>, Vec<ArgPair>) {
+fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<( ArgPair, Option<syn::Expr> )>, Vec<ArgPair>) {
     let mut list_built = Vec::new();
     let mut ignored_fields = Vec::new();
 
@@ -106,23 +105,55 @@ fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<ArgPair>, Vec<ArgPa
     }) = &mut input.data
     {
         for field in &mut named.named {
-            let ignored = field
+            // ignored and pluck-type are mutually exclusive...
+            if field
+                .attrs
+                .iter()
+                .filter(|attr| {
+                    let id = attr.path().get_ident().map(|id| quote! {#id}.to_string());
+                    id == Some("list_build_ignore".to_string()) || id == Some("plucker".to_string())
+                })
+                .count()
+                > 1
+            {
+                #[cfg(feature = "nightly")]
+                field
+                    .span()
+                    .unwrap()
+                    .error("Redundant pluck-type on ignored field")
+                    .emit();
+
+                eprintln!("field {} is annotated with a pluck-specification and a build-ignore", quote!{ #field });
+            }
+
+            let ignored_field = field
                 .attrs
                 .iter()
                 .any(|attr| attr.path().is_ident("list_build_ignore"));
 
-            let field_ident = field.ident.clone().expect("field ident"); // Assuming named fields
-            let field_type = field.ty.clone(); // Type
+            let mut map_expr: Option<syn::Expr> = None;
+            let arg_parser = |input: syn::parse::ParseStream| {
+                let ty: syn::Type = input.parse().expect("type here");
+                // Check for comma for additional arguments
+                let _ = input.parse::<Option<syn::Token![,]>>().expect("comma here");
+                let _ = input.parse::<syn::Ident>().expect("'map' here");
+                input.parse::<syn::Token![=]>().expect("equalse sign here");
+                map_expr = Some(input.parse().expect("parsing expression"));
+                Ok(ty)
 
-            if ignored {
-                ignored_fields.push((field_ident, field_type).into());
+            };
+            let ty = field
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("plucker"))
+                .map(|atr| atr.parse_args_with(arg_parser).expect("mapping with arg parser"))
+                .unwrap_or(field.ty.clone());
+
+            if ignored_field {
+                ignored_fields.push((field.ident.clone().expect("field_ident"), ty).into());
             } else {
-                list_built.push((field_ident, field_type).into());
-                // Remove the hl_field attribute
-                field
-                    .attrs
-                    .retain(|attr| !attr.path().is_ident("list_build_ignore"));
-            }
+                list_built.push(((field.ident.clone().expect("field_ident"), ty).into(), map_expr));
+            };
         }
     }
     (input, list_built, ignored_fields)
@@ -146,29 +177,40 @@ fn make_generic_params(count: usize) -> Punctuated<GenericParam, Comma> {
 // ```
 // ...and for the fileds ignored, just moves from the function argument to the rusulting structs
 // field
-fn gen_stmts(fields: &Vec<Ident>, args: &[Ident]) -> Block {
+fn gen_stmts(fields: &Vec<(ArgPair, Option<syn::Expr>)>, args: &[Ident]) -> Block {
     let mut list_n = 0;
     let mut stmts: Vec<Stmt> = vec![];
     // Generate the "let (field, lX) = lY.pluck();" statements
-    for id in fields {
+    for (arg_pair, expr) in fields {
         let next_list = list_n + 1;
         let next_list = syn::Ident::new(&format!("l{}", next_list), Span::call_site());
         let list_n_tok = syn::Ident::new(&format!("l{}", list_n), Span::call_site());
-        let stmt: Stmt = syn::parse2(quote! {
-            let (#id, #next_list) = ::frunk::hlist::Plucker::pluck(#list_n_tok);
-        })
-        .expect("");
+        let field_name = &arg_pair.ident;
+        let plucking = quote! {
+            let (#field_name, #next_list) = frunk::hlist::Plucker::pluck(#list_n_tok);
+        };
+
+
+        let stmt: Stmt = syn::parse2(plucking.clone())
+            .unwrap_or_else(|_| panic!("Failed to parse statement: {}", plucking.to_string()));
+
         stmts.push(stmt);
+        if let Some(expr) = expr {
+            let mapping = quote!{
+                let #field_name = #expr;
+            };
+            stmts.push(syn::parse2(mapping).unwrap());
+        };
         list_n += 1;
     }
 
     // Generate the "Self { fields... }" part of the block
-    let all_fields = [&fields[..], args].concat();
+    let all_fields = [&fields.iter().map(|(field, _)| field.ident.clone()).collect::<Vec<_>>()[..], args].concat();
     let list_n_ident = syn::Ident::new(&format!("l{}", list_n), proc_macro2::Span::call_site());
     let self_stmt: Stmt = syn::parse2(quote! {
         return (Self { #(#all_fields,)* }, #list_n_ident);
     })
-    .expect("");
+    .expect("generating the Self...");
     stmts.push(self_stmt);
 
     Block {
@@ -176,3 +218,4 @@ fn gen_stmts(fields: &Vec<Ident>, args: &[Ident]) -> Block {
         brace_token: Default::default(),
     }
 }
+

@@ -1,5 +1,6 @@
 #![recursion_limit = "128"]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
+#![cfg_attr(feature = "nightly", feature(proc_macro_diagnostic))]
 //! Frunk Derives
 //!
 //! This library holds logic for the nice custom derives in Frunk.
@@ -87,7 +88,7 @@ pub fn labelled_generic(input: TokenStream) -> TokenStream {
 /// assert_eq!(built, manually_made);
 /// assert_eq!(list, hlist![42u32]);
 /// ```
-#[proc_macro_derive(ListBuild, attributes(list_build_ignore))]
+#[proc_macro_derive(ListBuild, attributes(list_build_ignore, plucker))]
 pub fn list_build(item: TokenStream) -> TokenStream {
     list_builder::list_build_inner(item)
 }

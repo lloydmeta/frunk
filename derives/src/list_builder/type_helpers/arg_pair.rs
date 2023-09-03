@@ -1,7 +1,7 @@
 // struct field or function argument
 pub(crate) struct ArgPair {
-    ident: syn::Ident,
-    tp: syn::Type,
+    pub(crate) ident: syn::Ident,
+    pub(crate) tp: syn::Type,
 }
 
 impl ArgPair {
