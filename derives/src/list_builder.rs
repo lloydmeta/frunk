@@ -10,25 +10,27 @@ use syn::{
 use syn::spanned::Spanned;
 
 mod type_helpers;
-use type_helpers::{ArgPair, PredicateVec, WhereLine};
+use type_helpers::{ArgPair, PredicateVec, WhereLine, Annotation};
+
+use self::type_helpers::AnnoErr;
 
 pub fn list_build_inner(item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
     // get the fields: the list-built fields, and the manually-built fields
-    let (input, annotated_fields, non_annotated_fields) = parse_fields(input);
+    let (input, list_built_fields, ignored_fields) = parse_fields(input);
 
     let block = gen_stmts(
-        &annotated_fields,
-        &non_annotated_fields,
+        &list_built_fields,
+        &ignored_fields,
     );
 
     // hl_new args include the injected list, and values for the non-list built args
-    let args = ArgPair::make_args(non_annotated_fields);
+    let args = ArgPair::make_args(ignored_fields);
 
-    if annotated_fields.len() == 0 {
+    if list_built_fields.len() == 0 {
         panic!("redundant builder annotations");
     }
-    let types = annotated_fields
+    let types = list_built_fields
         .iter()
         .map(|(ArgPair { tp, .. }, _)| tp.clone())
         .collect::<Vec<_>>();
@@ -60,7 +62,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
         ident: fn_ident,
         generics: Generics {
             where_clause: Some(PredicateVec::from(lines).into()),
-            params: make_generic_params(annotated_fields.len()),
+            params: make_generic_params(list_built_fields.len()),
             ..Default::default()
         },
         inputs: Punctuated::from_iter(args),
@@ -101,56 +103,24 @@ fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<( ArgPair, Option<s
         ..
     }) = &mut input.data
     {
-        for field in &mut named.named {
+        for field in &named.named {
             // ignored and pluck-type are mutually exclusive...
-            if field
-                .attrs
-                .iter()
-                .filter(|attr| {
-                    let id = attr.path().get_ident().map(|id| quote! {#id}.to_string());
-                    id == Some("list_build_ignore".to_string()) || id == Some("plucker".to_string())
-                })
-                .count()
-                > 1
-            {
-                #[cfg(feature = "nightly")]
-                field
-                    .span()
-                    .unwrap()
-                    .error("Redundant pluck-type on ignored field")
-                    .emit();
-
-                eprintln!("field {} is annotated with a pluck-specification and a build-ignore", quote!{ #field });
-            }
-
-            let ignored_field = field
-                .attrs
-                .iter()
-                .any(|attr| attr.path().is_ident("list_build_ignore"));
-
-            let mut map_expr: Option<syn::Expr> = None;
-            let arg_parser = |input: syn::parse::ParseStream| {
-                let ty: syn::Type = input.parse().expect("type here");
-                // Check for comma for additional arguments
-                let _ = input.parse::<Option<syn::Token![,]>>().expect("comma here");
-                let _ = input.parse::<syn::Ident>().expect("'map' here");
-                input.parse::<syn::Token![=]>().expect("equalse sign here");
-                map_expr = Some(input.parse().expect("parsing expression"));
-                Ok(ty)
-
+            match Annotation::try_from(&field.attrs[..]) {
+                Ok(Annotation::Plucker { ty, map }) => list_built.push(((field.ident.clone().expect("field_ident"), ty).into(), Some(map))),
+                Ok(Annotation::Ignore) => ignored_fields.push((field.ident.clone().expect("field_ident"), field.ty.clone()).into()),
+                Err(AnnoErr::NoMatch) => todo!(),
+                Err(AnnoErr::XOR) => {
+                    #[cfg(feature = "nightly")]
+                    field
+                        .span()
+                        .unwrap()
+                        .error("Redundant pluck-type on ignored field")
+                        .emit();
+                    #[cfg(not(feature = "nightly"))]
+                    panic!("don't ignore fields with pluckers");
+                }
             };
-            let ty = field
-                .attrs
-                .iter()
-                .find(|attr| attr.path().is_ident("plucker"))
-                .map(|atr| atr.parse_args_with(arg_parser).expect("mapping with arg parser"))
-                .unwrap_or(field.ty.clone());
 
-            if ignored_field {
-                ignored_fields.push((field.ident.clone().expect("field_ident"), ty).into());
-            } else {
-                list_built.push(((field.ident.clone().expect("field_ident"), ty).into(), map_expr));
-            };
         }
     }
     (input, list_built, ignored_fields)
@@ -203,7 +173,7 @@ fn gen_stmts(fields: &[(ArgPair, Option<syn::Expr>)], args: &[ArgPair]) -> Block
 
     // Generate the "Self { fields... }" part of the block
     let args = args.iter().map(|ArgPair{ ident, .. }| ident.clone()).collect::<Vec<_>>();
-    let all_fields = [&fields.iter().map(|(field, _)| &field.ident.clone()).collect::<Vec<_>>(), &args].concat();
+    let all_fields = [&fields.iter().map(|(field, _)| field.ident.clone()).collect::<Vec<_>>()[..], &args[..]].concat();
     let list_n_ident = syn::Ident::new(&format!("l{}", list_n), proc_macro2::Span::call_site());
     let self_stmt: Stmt = syn::parse2(quote! {
         return (Self { #(#all_fields,)* }, #list_n_ident);
