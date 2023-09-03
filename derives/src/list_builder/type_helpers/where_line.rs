@@ -75,7 +75,6 @@ impl From<WhereLine> for syn::WherePredicate {
         syn::parse2(predicate).expect("whereline to pred")
     }
 }
-/// each line in the where predicate is the type-binding, and the trait it must impl
 
 /// shim allowing PredicateVec::from(line_vec).into() where a `syn::WhereClause` is needed
 pub(crate) struct PredicateVec {

@@ -1,5 +1,6 @@
 use proc_macro2::Span;
 
+/// Shim to allow a type-conversions fom a type + LN pair into a paramater bound
 #[derive(Clone)]
 pub(crate) struct PluckParam(pub(crate) syn::TypeParamBound);
 impl From<(syn::Type, u8)> for PluckParam {

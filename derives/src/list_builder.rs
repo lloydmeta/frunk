@@ -4,7 +4,7 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::{
     parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput,
-    GenericParam, Generics, Ident, Stmt,
+    GenericParam, Generics, Stmt,
 };
 #[cfg(feature = "nightly")]
 use syn::spanned::Spanned;
@@ -19,10 +19,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
 
     let block = gen_stmts(
         &annotated_fields,
-        &non_annotated_fields
-            .iter()
-            .map(|ArgPair { ident, .. }| ident.clone())
-            .collect::<Vec<_>>()[..],
+        &non_annotated_fields,
     );
 
     // hl_new args include the injected list, and values for the non-list built args
@@ -37,7 +34,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
         .collect::<Vec<_>>();
 
     // make all where-clauses
-    let lines: Vec<WhereLine> = WhereLine::gen_lines_top(&types[..]);
+    let lines: Vec<WhereLine> = WhereLine::gen_lines_top(&types);
 
     // Take the last clause and absorb that to make the ret-val
     let ret = WhereLine::absorb(lines.last().expect("last line").clone());
@@ -177,7 +174,7 @@ fn make_generic_params(count: usize) -> Punctuated<GenericParam, Comma> {
 // ```
 // ...and for the fileds ignored, just moves from the function argument to the rusulting structs
 // field
-fn gen_stmts(fields: &Vec<(ArgPair, Option<syn::Expr>)>, args: &[Ident]) -> Block {
+fn gen_stmts(fields: &[(ArgPair, Option<syn::Expr>)], args: &[ArgPair]) -> Block {
     let mut list_n = 0;
     let mut stmts: Vec<Stmt> = vec![];
     // Generate the "let (field, lX) = lY.pluck();" statements
@@ -205,7 +202,8 @@ fn gen_stmts(fields: &Vec<(ArgPair, Option<syn::Expr>)>, args: &[Ident]) -> Bloc
     }
 
     // Generate the "Self { fields... }" part of the block
-    let all_fields = [&fields.iter().map(|(field, _)| field.ident.clone()).collect::<Vec<_>>()[..], args].concat();
+    let args = args.iter().map(|ArgPair{ ident, .. }| ident.clone()).collect::<Vec<_>>();
+    let all_fields = [&fields.iter().map(|(field, _)| &field.ident.clone()).collect::<Vec<_>>(), &args].concat();
     let list_n_ident = syn::Ident::new(&format!("l{}", list_n), proc_macro2::Span::call_site());
     let self_stmt: Stmt = syn::parse2(quote! {
         return (Self { #(#all_fields,)* }, #list_n_ident);
