@@ -1,12 +1,11 @@
-
 pub(crate) enum Annotation {
-    Plucker{ty: syn::Type, map: syn::Expr},
+    Plucker { ty: syn::Type, map: syn::Expr },
     Ignore,
 }
 
 pub(crate) enum AnnoErr {
     XOR,
-    NoMatch
+    NoMatch,
 }
 impl core::convert::TryFrom<&[syn::Attribute]> for Annotation {
     type Error = AnnoErr;
@@ -20,18 +19,16 @@ impl core::convert::TryFrom<&[syn::Attribute]> for Annotation {
             return Err(AnnoErr::XOR);
         }
         Ok(fst)
-
     }
 }
 impl TryFrom<&syn::Attribute> for Annotation {
     type Error = ();
 
     fn try_from(attr: &syn::Attribute) -> Result<Self, Self::Error> {
-        match attr.path().get_ident().map(|id| quote!{#id}.to_string()) {
+        match attr.path().get_ident().map(|id| quote! {#id}.to_string()) {
             Some(ref s) if s == "plucker" => {
                 let arg_parser = |input: syn::parse::ParseStream| {
                     // Eg, with the arg: u8, map=core::convert::From::from(arg_name)
-
 
                     // consume leading type
                     let ty: syn::Type = input.parse().expect("type here");
@@ -48,17 +45,15 @@ impl TryFrom<&syn::Attribute> for Annotation {
                     // parse in the expression
                     let mapping = input.parse().expect("parsing expression");
                     Ok((ty, mapping))
-
                 };
 
-                let (ty, map) = attr.parse_args_with(arg_parser).expect("mapping with arg parser");
-                Ok(Annotation::Plucker{ty, map})
+                let (ty, map) = attr
+                    .parse_args_with(arg_parser)
+                    .expect("mapping with arg parser");
+                Ok(Annotation::Plucker { ty, map })
             }
             Some(ref s) if s == "list_build_ignore" => Ok(Self::Ignore),
-            _ => Err(())
-
+            _ => Err(()),
         }
-
     }
 }
-

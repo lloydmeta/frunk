@@ -2,15 +2,15 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput,
-    GenericParam, Generics, Stmt,
-};
 #[cfg(feature = "nightly")]
 use syn::spanned::Spanned;
+use syn::{
+    parse_macro_input, punctuated::Punctuated, token::Comma, Block, DeriveInput, GenericParam,
+    Generics, Stmt,
+};
 
 mod type_helpers;
-use type_helpers::{ArgPair, PredicateVec, WhereLine, Annotation};
+use type_helpers::{Annotation, ArgPair, PredicateVec, WhereLine};
 
 use self::type_helpers::AnnoErr;
 
@@ -19,10 +19,7 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     // get the fields: the list-built fields, and the manually-built fields
     let (input, list_built_fields, ignored_fields) = parse_fields(input);
 
-    let block = gen_stmts(
-        &list_built_fields,
-        &ignored_fields,
-    );
+    let block = gen_stmts(&list_built_fields, &ignored_fields);
 
     // hl_new args include the injected list, and values for the non-list built args
     let args = ArgPair::make_args(ignored_fields);
@@ -41,47 +38,16 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
     // Take the last clause and absorb that to make the ret-val
     let ret = WhereLine::absorb(lines.last().expect("last line").clone());
 
-    let fn_ident = syn::Ident::new("hl_new", proc_macro2::Span::call_site());
-    let output: syn::ReturnType = syn::ReturnType::Type(
-        syn::token::RArrow::default(),
-        Box::new(syn::Type::Tuple(syn::TypeTuple {
-            paren_token: syn::token::Paren::default(),
-            elems: {
-                let mut punctuated = Punctuated::new();
-                punctuated.push(syn::Type::Path(syn::TypePath {
-                    qself: None,
-                    path: syn::parse_str("Self").expect("parseing Self"),
-                }));
-                punctuated.push(ret);
-                punctuated
-            },
-        })),
-    );
-    // tie all the signature details together
-    let sig = syn::Signature {
-        ident: fn_ident,
-        generics: Generics {
-            where_clause: Some(PredicateVec::from(lines).into()),
-            params: make_generic_params(list_built_fields.len()),
-            ..Default::default()
-        },
-        inputs: Punctuated::from_iter(args),
-
-        output,
-        constness: None,
-        asyncness: None,
-        unsafety: None,
-        abi: None,
-        variadic: None,
-        fn_token: Default::default(),
-        paren_token: Default::default(),
-    };
+    let output = quote! { -> (Self, #ret) };
+    let where_clause: syn::WhereClause = PredicateVec::from(lines.clone()).into();
+    let gens = make_generic_params(list_built_fields.len());
     let struct_ident = input.clone().ident;
-    let fun = syn::ItemFn {
-        attrs: vec![],
-        vis: syn::Visibility::Inherited,
-        sig,
-        block: Box::new(block),
+    let fun = quote! {
+        fn hl_new<#gens>(#(#args),*) #output
+        #where_clause
+        {
+            #block
+        }
     };
 
     // et, voile! en a des code magnifique!
@@ -94,7 +60,9 @@ pub fn list_build_inner(item: TokenStream) -> TokenStream {
 }
 /// collects the field name/type pairs, splitting them according to fields being built by the list
 /// or as args passed into the constructor
-fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<( ArgPair, Option<syn::Expr> )>, Vec<ArgPair>) {
+fn parse_fields(
+    mut input: DeriveInput,
+) -> (DeriveInput, Vec<(ArgPair, Option<syn::Expr>)>, Vec<ArgPair>) {
     let mut list_built = Vec::new();
     let mut ignored_fields = Vec::new();
 
@@ -106,8 +74,12 @@ fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<( ArgPair, Option<s
         for field in &named.named {
             // ignored and pluck-type are mutually exclusive...
             match Annotation::try_from(&field.attrs[..]) {
-                Ok(Annotation::Plucker { ty, map }) => list_built.push(((field.ident.clone().expect("field_ident"), ty).into(), Some(map))),
-                Ok(Annotation::Ignore) => ignored_fields.push((field.ident.clone().expect("field_ident"), field.ty.clone()).into()),
+                Ok(Annotation::Plucker { ty, map }) => list_built.push((
+                    (field.ident.clone().expect("field_ident"), ty).into(),
+                    Some(map),
+                )),
+                Ok(Annotation::Ignore) => ignored_fields
+                    .push((field.ident.clone().expect("field_ident"), field.ty.clone()).into()),
                 Err(AnnoErr::NoMatch) => todo!(),
                 Err(AnnoErr::XOR) => {
                     #[cfg(feature = "nightly")]
@@ -120,7 +92,6 @@ fn parse_fields(mut input: DeriveInput) -> (DeriveInput, Vec<( ArgPair, Option<s
                     panic!("don't ignore fields with pluckers");
                 }
             };
-
         }
     }
     (input, list_built, ignored_fields)
@@ -157,13 +128,12 @@ fn gen_stmts(fields: &[(ArgPair, Option<syn::Expr>)], args: &[ArgPair]) -> Block
             let (#field_name, #next_list) = frunk::hlist::Plucker::pluck(#list_n_tok);
         };
 
-
         let stmt: Stmt = syn::parse2(plucking.clone())
             .unwrap_or_else(|_| panic!("Failed to parse statement: {}", plucking.to_string()));
 
         stmts.push(stmt);
         if let Some(expr) = expr {
-            let mapping = quote!{
+            let mapping = quote! {
                 let #field_name = #expr;
             };
             stmts.push(syn::parse2(mapping).unwrap());
@@ -172,8 +142,18 @@ fn gen_stmts(fields: &[(ArgPair, Option<syn::Expr>)], args: &[ArgPair]) -> Block
     }
 
     // Generate the "Self { fields... }" part of the block
-    let args = args.iter().map(|ArgPair{ ident, .. }| ident.clone()).collect::<Vec<_>>();
-    let all_fields = [&fields.iter().map(|(field, _)| field.ident.clone()).collect::<Vec<_>>()[..], &args[..]].concat();
+    let args = args
+        .iter()
+        .map(|ArgPair { ident, .. }| ident.clone())
+        .collect::<Vec<_>>();
+    let all_fields = [
+        &fields
+            .iter()
+            .map(|(field, _)| field.ident.clone())
+            .collect::<Vec<_>>()[..],
+        &args[..],
+    ]
+    .concat();
     let list_n_ident = syn::Ident::new(&format!("l{}", list_n), proc_macro2::Span::call_site());
     let self_stmt: Stmt = syn::parse2(quote! {
         return (Self { #(#all_fields,)* }, #list_n_ident);
@@ -186,4 +166,3 @@ fn gen_stmts(fields: &[(ArgPair, Option<syn::Expr>)], args: &[ArgPair]) -> Block
         brace_token: Default::default(),
     }
 }
-
