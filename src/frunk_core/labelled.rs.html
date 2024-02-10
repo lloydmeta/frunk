@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/labelled.rs`."><title>labelled.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../frunk_core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/labelled.rs`."><title>labelled.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1233,9 +1234,9 @@
 //!
 //! // Optionally alias our tuple that represents our type-level string
 //! type name = (n, a, m, e);
-//! let labelled = field![name, &quot;Lloyd&quot;];
-//! assert_eq!(labelled.name, &quot;name&quot;);
-//! assert_eq!(labelled.value, &quot;Lloyd&quot;)
+//! let labelled = field![name, "Lloyd"];
+//! assert_eq!(labelled.name, "name");
+//! assert_eq!(labelled.value, "Lloyd")
 //! # }
 //! ```
 //!
@@ -1248,23 +1249,23 @@
 //!
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
-//! struct NewUser&lt;&#39;a&gt; {
-//!     first_name: &amp;&#39;a str,
-//!     last_name: &amp;&#39;a str,
+//! struct NewUser&lt;'a&gt; {
+//!     first_name: &amp;'a str,
+//!     last_name: &amp;'a str,
 //!     age: usize,
 //! }
 //!
 //! // Notice that the fields are mismatched in terms of ordering
 //! // *and* also in terms of the number of fields.
 //! #[derive(LabelledGeneric)]
-//! struct ShortUser&lt;&#39;a&gt; {
-//!     last_name: &amp;&#39;a str,
-//!     first_name: &amp;&#39;a str,
+//! struct ShortUser&lt;'a&gt; {
+//!     last_name: &amp;'a str,
+//!     first_name: &amp;'a str,
 //! }
 //!
 //! let n_user = NewUser {
-//!     first_name: &quot;Joe&quot;,
-//!     last_name: &quot;Blow&quot;,
+//!     first_name: "Joe",
+//!     last_name: "Blow",
 //!     age: 30,
 //! };
 //!
@@ -1291,17 +1292,17 @@
 //! }
 //!
 //! #[derive(LabelledGeneric)]
-//! struct InternalAddress&lt;&#39;a&gt; {
+//! struct InternalAddress&lt;'a&gt; {
 //!     is_whitelisted: bool,
-//!     name: &amp;&#39;a str,
+//!     name: &amp;'a str,
 //!     phone: InternalPhoneNumber,
 //! }
 //!
 //! #[derive(LabelledGeneric)]
-//! struct InternalUser&lt;&#39;a&gt; {
-//!     name: &amp;&#39;a str,
+//! struct InternalUser&lt;'a&gt; {
+//!     name: &amp;'a str,
 //!     age: usize,
-//!     address: InternalAddress&lt;&#39;a&gt;,
+//!     address: InternalAddress&lt;'a&gt;,
 //!     is_banned: bool,
 //! }
 //!
@@ -1311,24 +1312,24 @@
 //! }
 //!
 //! #[derive(LabelledGeneric, PartialEq, Debug)]
-//! struct ExternalAddress&lt;&#39;a&gt; {
-//!     name: &amp;&#39;a str,
+//! struct ExternalAddress&lt;'a&gt; {
+//!     name: &amp;'a str,
 //!     phone: ExternalPhoneNumber,
 //! }
 //!
 //! #[derive(LabelledGeneric, PartialEq, Debug)]
-//! struct ExternalUser&lt;&#39;a&gt; {
+//! struct ExternalUser&lt;'a&gt; {
 //!     age: usize,
-//!     address: ExternalAddress&lt;&#39;a&gt;,
-//!     name: &amp;&#39;a str,
+//!     address: ExternalAddress&lt;'a&gt;,
+//!     name: &amp;'a str,
 //! }
 //!
 //! let internal_user = InternalUser {
-//!     name: &quot;John&quot;,
+//!     name: "John",
 //!     age: 10,
 //!     address: InternalAddress {
 //!         is_whitelisted: true,
-//!         name: &quot;somewhere out there&quot;,
+//!         name: "somewhere out there",
 //!         phone: InternalPhoneNumber {
 //!             main: 1234,
 //!             secondary: None,
@@ -1343,10 +1344,10 @@
 //! let external_user: ExternalUser = internal_user.transmogrify();
 //!
 //! let expected_external_user = ExternalUser {
-//!     name: &quot;John&quot;,
+//!     name: "John",
 //!     age: 10,
 //!     address: ExternalAddress {
-//!         name: &quot;somewhere out there&quot;,
+//!         name: "somewhere out there",
 //!         phone: ExternalPhoneNumber {
 //!             main: 1234,
 //!         },
@@ -1359,7 +1360,7 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::hlist::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::indices::<span class="kw-2">*</span>;
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span>::std::fmt;
@@ -1380,23 +1381,23 @@
 ///
 /// # fn main() {
 /// #[derive(LabelledGeneric)]
-/// struct NewUser&lt;&#39;a&gt; {
-///     first_name: &amp;&#39;a str,
-///     last_name: &amp;&#39;a str,
+/// struct NewUser&lt;'a&gt; {
+///     first_name: &amp;'a str,
+///     last_name: &amp;'a str,
 ///     age: usize,
 /// }
 ///
 /// // Notice that the fields are mismatched in terms of ordering
 /// #[derive(LabelledGeneric)]
-/// struct SavedUser&lt;&#39;a&gt; {
-///     last_name: &amp;&#39;a str,
+/// struct SavedUser&lt;'a&gt; {
+///     last_name: &amp;'a str,
 ///     age: usize,
-///     first_name: &amp;&#39;a str,
+///     first_name: &amp;'a str,
 /// }
 ///
 /// let n_user = NewUser {
-///     first_name: &quot;Joe&quot;,
-///     last_name: &quot;Blow&quot;,
+///     first_name: "Joe",
+///     last_name: "Blow",
 ///     age: 30,
 /// };
 ///
@@ -1411,8 +1412,8 @@
     <span class="doccomment">/// Convert a value to its representation type `Repr`.
     </span><span class="kw">fn </span>into(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Repr;
 
-    <span class="doccomment">/// Convert a value&#39;s labelled representation type `Repr`
-    /// to the values&#39;s type.
+    <span class="doccomment">/// Convert a value's labelled representation type `Repr`
+    /// to the values's type.
     </span><span class="kw">fn </span>from(repr: <span class="self">Self</span>::Repr) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Convert from one type to another using a type with the same
@@ -1430,9 +1431,9 @@
     <span class="doccomment">/// Converts from another type A into Self assuming that A and Self have
     /// labelled generic representations that can be sculpted into each other.
     ///
-    /// Note that this method tosses away the &quot;remainder&quot; of the sculpted representation. In other
+    /// Note that this method tosses away the "remainder" of the sculpted representation. In other
     /// words, anything that is not needed from A gets tossed out.
-    </span><span class="attr">#[deprecated(note = <span class="string">&quot;obsolete, transform_from instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(note = <span class="string">"obsolete, transform_from instead"</span>)]
     </span><span class="kw">fn </span>sculpted_convert_from&lt;A, Indices&gt;(a: A) -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>A: LabelledGeneric,
@@ -1447,7 +1448,7 @@
     /// `Self` have labelled generic representations that can be sculpted into
     /// each other.
     ///
-    /// Note that this method tosses away the &quot;remainder&quot; of the sculpted
+    /// Note that this method tosses away the "remainder" of the sculpted
     /// representation. In other words, anything that is not needed from `Src`
     /// gets tossed out.
     </span><span class="attr">#[inline(always)]
@@ -1514,9 +1515,9 @@
 <span class="doccomment">/// Converts from one type into another assuming that their labelled generic representations
 /// can be sculpted into each other.
 ///
-/// The &quot;Indices&quot; type parameter allows the compiler to figure out that the two representations
+/// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
-</span><span class="attr">#[deprecated(note = <span class="string">&quot;obsolete, transform_from instead&quot;</span>)]
+</span><span class="attr">#[deprecated(note = <span class="string">"obsolete, transform_from instead"</span>)]
 </span><span class="kw">pub fn </span>sculpted_convert_from&lt;A, B, Indices&gt;(a: A) -&gt; B
 <span class="kw">where
     </span>A: LabelledGeneric,
@@ -1529,7 +1530,7 @@
 <span class="doccomment">/// Converts from one type into another assuming that their labelled generic representations
 /// can be sculpted into each other.
 ///
-/// The &quot;Indices&quot; type parameter allows the compiler to figure out that the two representations
+/// The "Indices" type parameter allows the compiler to figure out that the two representations
 /// can indeed be morphed into each other.
 </span><span class="kw">pub fn </span>transform_from&lt;Src, Dst, Indices&gt;(src: Src) -&gt; Dst
 <span class="kw">where
@@ -1577,7 +1578,7 @@
         <span class="comment">// Rust forbids variable bindings that shadow unit structs,
         // so unit struct characters would cause a lot of trouble.
         //
-        // Good thing I don&#39;t plan on adding reified labels. - Exp
+        // Good thing I don't plan on adding reified labels. - Exp
         </span><span class="kw">let </span>a = <span class="number">3</span>;
         <span class="attr">#[allow(clippy::match_single_binding)]
         </span><span class="kw">match </span>a {
@@ -1587,7 +1588,7 @@
 }
 
 <span class="doccomment">/// A Label contains a type-level Name, a runtime value, and
-/// a reference to a `&amp;&#39;static str` name.
+/// a reference to a `&amp;'static str` name.
 ///
 /// To construct one, use the `field!` macro.
 ///
@@ -1597,25 +1598,25 @@
 /// use frunk::labelled::chars::*;
 /// use frunk_core::field;
 /// # fn main() {
-/// let labelled = field![(n,a,m,e), &quot;joe&quot;];
-/// assert_eq!(labelled.name, &quot;name&quot;);
-/// assert_eq!(labelled.value, &quot;joe&quot;)
+/// let labelled = field![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 </span><span class="kw">pub struct </span>Field&lt;Name, Type&gt; {
     name_type_holder: PhantomData&lt;Name&gt;,
-    <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+    <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     <span class="kw">pub </span>value: Type,
 }
 
-<span class="doccomment">/// A version of Field that doesn&#39;t have a type-level label, just a
+<span class="doccomment">/// A version of Field that doesn't have a type-level label, just a
 /// value-level one
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
 </span><span class="kw">pub struct </span>ValueField&lt;Type&gt; {
-    <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+    <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str,
     <span class="kw">pub </span>value: Type,
 }
 
@@ -1624,10 +1625,10 @@
     </span>Type: fmt::Debug,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Field&quot;</span>)
+        f.debug_struct(<span class="string">"Field"</span>)
             <span class="comment">// show name without quotes
-            </span>.field(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span>DebugAsDisplay(<span class="kw-2">&amp;</span><span class="self">self</span>.name))
-            .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
+            </span>.field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span>DebugAsDisplay(<span class="kw-2">&amp;</span><span class="self">self</span>.name))
+            .field(<span class="string">"value"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
             .finish()
     }
 }
@@ -1637,10 +1638,10 @@
     </span>Type: fmt::Debug,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ValueField&quot;</span>)
+        f.debug_struct(<span class="string">"ValueField"</span>)
             <span class="comment">// show name without quotes
-            </span>.field(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span>DebugAsDisplay(<span class="kw-2">&amp;</span><span class="self">self</span>.name))
-            .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
+            </span>.field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span>DebugAsDisplay(<span class="kw-2">&amp;</span><span class="self">self</span>.name))
+            .field(<span class="string">"value"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
             .finish()
     }
 }
@@ -1656,7 +1657,7 @@
 
 <span class="doccomment">/// Returns a new Field for a given value and custom name.
 ///
-/// If you don&#39;t want to provide a custom name and want to rely on the type you provide
+/// If you don't want to provide a custom name and want to rely on the type you provide
 /// to build a name, then please use the field! macro.
 ///
 /// # Examples
@@ -1665,11 +1666,11 @@
 /// use frunk::labelled::chars::*;
 /// use frunk::labelled::field_with_name;
 ///
-/// let l = field_with_name::&lt;(n,a,m,e),_&gt;(&quot;name&quot;, &quot;joe&quot;);
-/// assert_eq!(l.value, &quot;joe&quot;);
-/// assert_eq!(l.name, &quot;name&quot;);
+/// let l = field_with_name::&lt;(n,a,m,e),_&gt;("name", "joe");
+/// assert_eq!(l.value, "joe");
+/// assert_eq!(l.name, "name");
 /// ```
-</span><span class="kw">pub fn </span>field_with_name&lt;Label, Value&gt;(name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, value: Value) -&gt; Field&lt;Label, Value&gt; {
+</span><span class="kw">pub fn </span>field_with_name&lt;Label, Value&gt;(name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, value: Value) -&gt; Field&lt;Label, Value&gt; {
     Field {
         name_type_holder: PhantomData,
         name,
@@ -1694,13 +1695,13 @@
     /// use frunk_core::{field, hlist};
     ///
     /// let labelled_hlist = hlist![
-    ///     field!((n, a, m, e), &quot;joe&quot;),
+    ///     field!((n, a, m, e), "joe"),
     ///     field!((a, g, e), 3)
     /// ];
     ///
     /// let unlabelled = labelled_hlist.into_unlabelled();
     ///
-    /// assert_eq!(unlabelled, hlist![&quot;joe&quot;, 3])
+    /// assert_eq!(unlabelled, hlist!["joe", 3])
     /// # }
     /// ```
     </span><span class="kw">fn </span>into_unlabelled(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output;
@@ -1747,7 +1748,7 @@
     /// use frunk_core::{field, hlist, HList};
     ///
     /// let labelled_hlist = hlist![
-    ///     field!((n, a, m, e), &quot;joe&quot;),
+    ///     field!((n, a, m, e), "joe"),
     ///     field!((a, g, e), 3)
     /// ];
     /// // Notice the lack of type-level names
@@ -1757,11 +1758,11 @@
     ///   value_labelled,
     ///   hlist![
     ///     ValueField {
-    ///       name: &quot;name&quot;,
-    ///       value: &quot;joe&quot;,
+    ///       name: "name",
+    ///       value: "joe",
     ///     },
     ///     ValueField {
-    ///       name: &quot;age&quot;,
+    ///       name: "age",
     ///       value: 3,
     ///     },
     /// ]);
@@ -1839,9 +1840,9 @@
 
 <span class="doccomment">/// Trait for transmogrifying a `Source` type into a `Target` type.
 ///
-/// What is &quot;transmogrifying&quot;? In this context, it means to convert some data of type `A`
-/// into data of type `B`, in a typesafe, recursive way, as long as `A` and `B` are &quot;similarly-shaped&quot;.
-/// In other words, as long as `B`&#39;s fields and their subfields are subsets of `A`&#39;s fields and
+/// What is "transmogrifying"? In this context, it means to convert some data of type `A`
+/// into data of type `B`, in a typesafe, recursive way, as long as `A` and `B` are "similarly-shaped".
+/// In other words, as long as `B`'s fields and their subfields are subsets of `A`'s fields and
 /// their respective subfields, then `A` can be turned into `B`.
 ///
 /// # Example
@@ -1859,17 +1860,17 @@
 /// }
 ///
 /// #[derive(LabelledGeneric)]
-/// struct InternalAddress&lt;&#39;a&gt; {
+/// struct InternalAddress&lt;'a&gt; {
 ///     is_whitelisted: bool,
-///     name: &amp;&#39;a str,
+///     name: &amp;'a str,
 ///     phone: InternalPhoneNumber,
 /// }
 ///
 /// #[derive(LabelledGeneric)]
-/// struct InternalUser&lt;&#39;a&gt; {
-///     name: &amp;&#39;a str,
+/// struct InternalUser&lt;'a&gt; {
+///     name: &amp;'a str,
 ///     age: usize,
-///     address: InternalAddress&lt;&#39;a&gt;,
+///     address: InternalAddress&lt;'a&gt;,
 ///     is_banned: bool,
 /// }
 ///
@@ -1879,24 +1880,24 @@
 /// }
 ///
 /// #[derive(LabelledGeneric, PartialEq, Debug)]
-/// struct ExternalAddress&lt;&#39;a&gt; {
-///     name: &amp;&#39;a str,
+/// struct ExternalAddress&lt;'a&gt; {
+///     name: &amp;'a str,
 ///     phone: ExternalPhoneNumber,
 /// }
 ///
 /// #[derive(LabelledGeneric, PartialEq, Debug)]
-/// struct ExternalUser&lt;&#39;a&gt; {
+/// struct ExternalUser&lt;'a&gt; {
 ///     age: usize,
-///     address: ExternalAddress&lt;&#39;a&gt;,
-///     name: &amp;&#39;a str,
+///     address: ExternalAddress&lt;'a&gt;,
+///     name: &amp;'a str,
 /// }
 ///
 /// let internal_user = InternalUser {
-///     name: &quot;John&quot;,
+///     name: "John",
 ///     age: 10,
 ///     address: InternalAddress {
 ///         is_whitelisted: true,
-///         name: &quot;somewhere out there&quot;,
+///         name: "somewhere out there",
 ///         phone: InternalPhoneNumber {
 ///             main: 1234,
 ///             secondary: None,
@@ -1911,10 +1912,10 @@
 /// let external_user: ExternalUser = internal_user.transmogrify();
 ///
 /// let expected_external_user = ExternalUser {
-///     name: &quot;John&quot;,
+///     name: "John",
 ///     age: 10,
 ///     address: ExternalAddress {
-///         name: &quot;somewhere out there&quot;,
+///         name: "somewhere out there",
 ///         phone: ExternalPhoneNumber {
 ///             main: 1234,
 ///         },
@@ -1926,7 +1927,7 @@
 /// ```
 ///
 /// Credit:
-/// 1. Haskell &quot;transmogrify&quot; Github repo: &lt;https://github.com/ivan-m/transmogrify&gt;
+/// 1. Haskell "transmogrify" Github repo: &lt;https://github.com/ivan-m/transmogrify&gt;
 </span><span class="kw">pub trait </span>Transmogrifier&lt;Target, TransmogrifyIndexIndices&gt; {
     <span class="doccomment">/// Consume this current object and return an object of the Target type.
     ///
@@ -1943,7 +1944,7 @@
 }
 
 <span class="doccomment">/// Implementations of `Transmogrifier` that allow recursion through stdlib container types.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">mod </span>std {
     <span class="kw">use </span><span class="kw">super</span>::MappingIndicesWrapper;
     <span class="kw">use super</span>::{Field, Transmogrifier};
@@ -2142,18 +2143,18 @@
     </span><span class="kw">fn </span>test_label_new_building() {
         <span class="kw">let </span>l1 = <span class="macro">field!</span>(abc, <span class="number">3</span>);
         <span class="macro">assert_eq!</span>(l1.value, <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(l1.name, <span class="string">&quot;abc&quot;</span>);
+        <span class="macro">assert_eq!</span>(l1.name, <span class="string">"abc"</span>);
         <span class="kw">let </span>l2 = <span class="macro">field!</span>((a, b, c), <span class="number">3</span>);
         <span class="macro">assert_eq!</span>(l2.value, <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(l2.name, <span class="string">&quot;abc&quot;</span>);
+        <span class="macro">assert_eq!</span>(l2.name, <span class="string">"abc"</span>);
 
         <span class="comment">// test named
-        </span><span class="kw">let </span>l3 = <span class="macro">field!</span>(abc, <span class="number">3</span>, <span class="string">&quot;nope&quot;</span>);
+        </span><span class="kw">let </span>l3 = <span class="macro">field!</span>(abc, <span class="number">3</span>, <span class="string">"nope"</span>);
         <span class="macro">assert_eq!</span>(l3.value, <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(l3.name, <span class="string">&quot;nope&quot;</span>);
-        <span class="kw">let </span>l4 = <span class="macro">field!</span>((a, b, c), <span class="number">3</span>, <span class="string">&quot;nope&quot;</span>);
+        <span class="macro">assert_eq!</span>(l3.name, <span class="string">"nope"</span>);
+        <span class="kw">let </span>l4 = <span class="macro">field!</span>((a, b, c), <span class="number">3</span>, <span class="string">"nope"</span>);
         <span class="macro">assert_eq!</span>(l4.value, <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(l4.name, <span class="string">&quot;nope&quot;</span>);
+        <span class="macro">assert_eq!</span>(l4.name, <span class="string">"nope"</span>);
     }
 
     <span class="attr">#[test]
@@ -2168,42 +2169,42 @@
         <span class="kw">let </span>field = <span class="macro">field!</span>(age, <span class="number">3</span>);
         <span class="kw">let </span><span class="macro">hlist_pat!</span>[value_field] = <span class="macro">hlist!</span>[field].into_value_labelled();
 
-        <span class="comment">// names don&#39;t have quotation marks
-        </span><span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, field).contains(<span class="string">&quot;name: age&quot;</span>));
-        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, value_field).contains(<span class="string">&quot;name: age&quot;</span>));
+        <span class="comment">// names don't have quotation marks
+        </span><span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, field).contains(<span class="string">"name: age"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, value_field).contains(<span class="string">"name: age"</span>));
         <span class="comment">// :#? works
-        </span><span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:#?}&quot;</span>, field).contains(<span class="string">&#39;\n&#39;</span>));
-        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:#?}&quot;</span>, value_field).contains(<span class="string">&#39;\n&#39;</span>));
+        </span><span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{:#?}"</span>, field).contains(<span class="string">'\n'</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{:#?}"</span>, value_field).contains(<span class="string">'\n'</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_anonymous_record_usage() {
-        <span class="kw">let </span>record = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>((a, g, e), <span class="number">30</span>)];
+        <span class="kw">let </span>record = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>((a, g, e), <span class="number">30</span>)];
         <span class="kw">let </span>(name, <span class="kw">_</span>): (Field&lt;name, <span class="kw">_</span>&gt;, <span class="kw">_</span>) = record.pluck();
-        <span class="macro">assert_eq!</span>(name.value, <span class="string">&quot;Joe&quot;</span>)
+        <span class="macro">assert_eq!</span>(name.value, <span class="string">"Joe"</span>)
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_unlabelling() {
-        <span class="kw">let </span>labelled_hlist = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>((a, g, e), <span class="number">3</span>)];
+        <span class="kw">let </span>labelled_hlist = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>((a, g, e), <span class="number">3</span>)];
         <span class="kw">let </span>unlabelled = labelled_hlist.into_unlabelled();
-        <span class="macro">assert_eq!</span>(unlabelled, <span class="macro">hlist!</span>[<span class="string">&quot;joe&quot;</span>, <span class="number">3</span>])
+        <span class="macro">assert_eq!</span>(unlabelled, <span class="macro">hlist!</span>[<span class="string">"joe"</span>, <span class="number">3</span>])
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_value_labelling() {
-        <span class="kw">let </span>labelled_hlist = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>((a, g, e), <span class="number">3</span>)];
+        <span class="kw">let </span>labelled_hlist = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>((a, g, e), <span class="number">3</span>)];
         <span class="kw">let </span>value_labelled: <span class="macro">HList!</span>[ValueField&lt;<span class="kw-2">&amp;</span>str&gt;, ValueField&lt;isize&gt;] =
             labelled_hlist.into_value_labelled();
         <span class="kw">let </span><span class="macro">hlist_pat!</span>(f1, f2) = value_labelled;
-        <span class="macro">assert_eq!</span>(f1.name, <span class="string">&quot;name&quot;</span>);
-        <span class="macro">assert_eq!</span>(f2.name, <span class="string">&quot;age&quot;</span>);
+        <span class="macro">assert_eq!</span>(f1.name, <span class="string">"name"</span>);
+        <span class="macro">assert_eq!</span>(f2.name, <span class="string">"age"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_name() {
-        <span class="kw">let </span>labelled = <span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>);
-        <span class="macro">assert_eq!</span>(labelled.name, <span class="string">&quot;name&quot;</span>)
+        <span class="kw">let </span>labelled = <span class="macro">field!</span>(name, <span class="string">"joe"</span>);
+        <span class="macro">assert_eq!</span>(labelled.name, <span class="string">"name"</span>)
     }
 
     <span class="attr">#[test]
@@ -2214,20 +2215,20 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_transmogrify_hcons_sculpting_super_simple() {
-        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
+        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
         <span class="kw">type </span>Target = <span class="macro">HList!</span>[Field&lt;age, i32&gt;];
-        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
+        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
         <span class="kw">let </span>t_hcons: Target = hcons.transmogrify();
         <span class="macro">assert_eq!</span>(t_hcons, <span class="macro">hlist!</span>(<span class="macro">field!</span>(age, <span class="number">3</span>)));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_transmogrify_hcons_sculpting_somewhat_simple() {
-        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
-        <span class="kw">type </span>Target = <span class="macro">HList!</span>[Field&lt;is_admin, bool&gt;, Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;];
-        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
+        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
+        <span class="kw">type </span>Target = <span class="macro">HList!</span>[Field&lt;is_admin, bool&gt;, Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;];
+        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
         <span class="kw">let </span>t_hcons: Target = hcons.transmogrify();
-        <span class="macro">assert_eq!</span>(t_hcons, <span class="macro">hlist!</span>(<span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>)));
+        <span class="macro">assert_eq!</span>(t_hcons, <span class="macro">hlist!</span>(<span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="macro">field!</span>(name, <span class="string">"joe"</span>)));
     }
 
     <span class="attr">#[test]
@@ -2262,36 +2263,36 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_transmogrify_hcons_sculpting_required_simple() {
-        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
-        <span class="kw">type </span>Target = <span class="macro">HList!</span>[Field&lt;is_admin, bool&gt;, Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, Field&lt;age, i32&gt;];
-        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
+        <span class="kw">type </span>Source = <span class="macro">HList!</span>[Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;, Field&lt;age, i32&gt;, Field&lt;is_admin, bool&gt;];
+        <span class="kw">type </span>Target = <span class="macro">HList!</span>[Field&lt;is_admin, bool&gt;, Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;, Field&lt;age, i32&gt;];
+        <span class="kw">let </span>hcons: Source = <span class="macro">hlist!</span>(<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">3</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>));
         <span class="kw">let </span>t_hcons: Target = hcons.transmogrify();
         <span class="macro">assert_eq!</span>(
             t_hcons,
-            <span class="macro">hlist!</span>(<span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">3</span>))
+            <span class="macro">hlist!</span>(<span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">3</span>))
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_transmogrify_identical_transform_labelled_fields() {
         <span class="kw">type </span>Source = <span class="macro">HList!</span>[
-            Field&lt;name,  <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;,
+            Field&lt;name,  <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;,
             Field&lt;age, i32&gt;,
             Field&lt;is_admin, bool&gt;
         ];
         <span class="kw">type </span>Target = Source;
-        <span class="kw">let </span>source: Source = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">32</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>)];
+        <span class="kw">let </span>source: Source = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">32</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>)];
         <span class="kw">let </span>target: Target = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;joe&quot;</span>), <span class="macro">field!</span>(age, <span class="number">32</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>)]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"joe"</span>), <span class="macro">field!</span>(age, <span class="number">32</span>), <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>)]
         )
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_transmogrify_through_containers() {
         <span class="kw">type </span>SourceOuter&lt;T&gt; = <span class="macro">HList!</span>[
-            Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;,
+            Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;,
             Field&lt;inner, T&gt;,
         ];
         <span class="kw">type </span>SourceInner = <span class="macro">HList!</span>[
@@ -2299,7 +2300,7 @@
             Field&lt;age, i32&gt;,
         ];
         <span class="kw">type </span>TargetOuter&lt;T&gt; = <span class="macro">HList!</span>[
-            Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;,
+            Field&lt;name, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;,
             Field&lt;inner, T&gt;,
         ];
         <span class="kw">type </span>TargetInner = <span class="macro">HList!</span>[
@@ -2316,11 +2317,11 @@
         <span class="comment">// Vec -&gt; Vec
         </span><span class="kw">let </span>(source_inner, target_inner) = create_inner();
         <span class="kw">let </span>source: SourceOuter&lt;Vec&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, <span class="macro">vec!</span>[source_inner])];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, <span class="macro">vec!</span>[source_inner])];
         <span class="kw">let </span>target: TargetOuter&lt;Vec&lt;TargetInner&gt;&gt; = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, <span class="macro">vec!</span>[target_inner])]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, <span class="macro">vec!</span>[target_inner])]
         );
 
         <span class="comment">// LInkedList -&gt; LinkedList
@@ -2336,11 +2337,11 @@
             list
         };
         <span class="kw">let </span>source: SourceOuter&lt;LinkedList&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, source_inner)];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, source_inner)];
         <span class="kw">let </span>target: TargetOuter&lt;LinkedList&lt;TargetInner&gt;&gt; = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, target_inner)]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, target_inner)]
         );
 
         <span class="comment">// VecDeque -&gt; VecDeque
@@ -2356,11 +2357,11 @@
             list
         };
         <span class="kw">let </span>source: SourceOuter&lt;VecDeque&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, source_inner)];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, source_inner)];
         <span class="kw">let </span>target: TargetOuter&lt;VecDeque&lt;TargetInner&gt;&gt; = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, target_inner)]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, target_inner)]
         );
 
         <span class="comment">// Option -&gt; Option
@@ -2368,27 +2369,27 @@
         <span class="kw">let </span>source_inner = <span class="prelude-val">Some</span>(source_inner);
         <span class="kw">let </span>target_inner = <span class="prelude-val">Some</span>(target_inner);
         <span class="kw">let </span>source: SourceOuter&lt;<span class="prelude-ty">Option</span>&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, source_inner)];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, source_inner)];
         <span class="kw">let </span>target: TargetOuter&lt;<span class="prelude-ty">Option</span>&lt;TargetInner&gt;&gt; = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, target_inner)]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, target_inner)]
         );
         <span class="kw">let </span>source: SourceOuter&lt;<span class="prelude-ty">Option</span>&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, <span class="prelude-val">None</span>)];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, <span class="prelude-val">None</span>)];
         <span class="kw">let </span>target: TargetOuter&lt;<span class="prelude-ty">Option</span>&lt;TargetInner&gt;&gt; = source.transmogrify();
-        <span class="macro">assert_eq!</span>(target, <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, <span class="prelude-val">None</span>)]);
+        <span class="macro">assert_eq!</span>(target, <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, <span class="prelude-val">None</span>)]);
 
         <span class="comment">// Box -&gt; Box
         </span><span class="kw">let </span>(source_inner, target_inner) = create_inner();
         <span class="kw">let </span>source_inner = Box::new(source_inner);
         <span class="kw">let </span>target_inner = Box::new(target_inner);
         <span class="kw">let </span>source: SourceOuter&lt;Box&lt;SourceInner&gt;&gt; =
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, source_inner)];
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, source_inner)];
         <span class="kw">let </span>target: TargetOuter&lt;Box&lt;TargetInner&gt;&gt; = source.transmogrify();
         <span class="macro">assert_eq!</span>(
             target,
-            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">&quot;Joe&quot;</span>), <span class="macro">field!</span>(inner, target_inner)]
+            <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>(inner, target_inner)]
         );
     }
 

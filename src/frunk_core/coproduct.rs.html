@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/coproduct.rs`."><title>coproduct.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../frunk_core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/coproduct.rs`."><title>coproduct.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1582,7 +1583,7 @@
 <a href="#1582" id="1582">1582</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Module that holds Coproduct data structures, traits, and implementations
 //!
-//! Think of &quot;Coproduct&quot; as ad-hoc enums; allowing you to do something like this
+//! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
 //! # fn main() {
@@ -1617,7 +1618,7 @@
 //! # }
 //! ```
 //!
-//! Or, if you want to &quot;fold&quot; over all possible values of a coproduct
+//! Or, if you want to "fold" over all possible values of a coproduct
 //!
 //! ```
 //! # use frunk_core::{hlist, poly_fn, Coprod};
@@ -1631,30 +1632,30 @@
 //! //
 //! // to_ref borrows every item so that we can fold without consuming the coproduct.
 //! assert_eq!(
-//!     co1.to_ref().fold(hlist![|&amp;i| format!(&quot;i32 {}&quot;, i),
-//!                              |&amp;b| unreachable!() /* we know this won&#39;t happen for co1 */ ]),
-//!     &quot;i32 3&quot;.to_string());
+//!     co1.to_ref().fold(hlist![|&amp;i| format!("i32 {}", i),
+//!                              |&amp;b| unreachable!() /* we know this won't happen for co1 */ ]),
+//!     "i32 3".to_string());
 //! assert_eq!(
-//!     co2.to_ref().fold(hlist![|&amp;i| unreachable!() /* we know this won&#39;t happen for co2 */,
-//!                              |&amp;b| String::from(if b { &quot;t&quot; } else { &quot;f&quot; })]),
-//!     &quot;t&quot;.to_string());
+//!     co2.to_ref().fold(hlist![|&amp;i| unreachable!() /* we know this won't happen for co2 */,
+//!                              |&amp;b| String::from(if b { "t" } else { "f" })]),
+//!     "t".to_string());
 //!
 //! // Here, we use the poly_fn! macro to declare a polymorphic function to avoid caring
 //! // about the order in which declare handlers for the types in our coproduct
 //! let folded = co1.fold(
 //!       poly_fn![
-//!         |_b: bool| -&gt; String { unreachable!() }, /* we know this won&#39;t happen for co1 */
-//!         |i:  i32 | -&gt; String { format!(&quot;i32 {}&quot;, i) },
+//!         |_b: bool| -&gt; String { unreachable!() }, /* we know this won't happen for co1 */
+//!         |i:  i32 | -&gt; String { format!("i32 {}", i) },
 //!       ]
 //!      );
-//! assert_eq!(folded, &quot;i32 3&quot;.to_string());
+//! assert_eq!(folded, "i32 3".to_string());
 //! # }
 //! ```
 
 </span><span class="kw">use </span><span class="kw">crate</span>::hlist::{HCons, HNil};
 <span class="kw">use </span><span class="kw">crate</span>::indices::{Here, There};
 <span class="kw">use </span><span class="kw">crate</span>::traits::{Func, Poly, ToMut, ToRef};
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="doccomment">/// Enum type representing a Coproduct. Think of this as a Result, but capable
@@ -1678,7 +1679,7 @@
 /// # }
 /// ```
 </span><span class="attr">#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub enum </span>Coproduct&lt;H, T&gt; {
     <span class="doccomment">/// Coproduct is either H or T, in this case, it is H
     </span>Inl(H),
@@ -1690,7 +1691,7 @@
 ///
 /// Used by the macro to terminate the Coproduct type signature
 </span><span class="attr">#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub enum </span>CNil {}
 
 <span class="comment">// Inherent methods
@@ -1723,7 +1724,7 @@
     /// let co1_nice: I32F32 = Coproduct::inject(1i32);
     /// let co2_nice: I32F32 = Coproduct::inject(42f32);
     ///
-    /// // Compare this to the &quot;hard way&quot;:
+    /// // Compare this to the "hard way":
     /// let co1_ugly: I32F32 = Coproduct::Inl(1i32);
     /// let co2_ugly: I32F32 = Coproduct::Inr(Coproduct::Inl(42f32));
     ///
@@ -1861,16 +1862,16 @@
     ///
     /// // Be aware that this particular example could be
     /// // written far more succinctly using `fold`.
-    /// fn handle_i32_f32(co: I32F32) -&gt; &amp;&#39;static str {
+    /// fn handle_i32_f32(co: I32F32) -&gt; &amp;'static str {
     ///     // Remove i32 from the coproduct
     ///     let co = match co.uninject::&lt;i32, _&gt;() {
-    ///         Ok(x) =&gt; return &quot;integer!&quot;,
+    ///         Ok(x) =&gt; return "integer!",
     ///         Err(co) =&gt; co,
     ///     };
     ///
     ///     // Remove f32 from the coproduct
     ///     let co = match co.uninject::&lt;f32, _&gt;() {
-    ///         Ok(x) =&gt; return &quot;float!&quot;,
+    ///         Ok(x) =&gt; return "float!",
     ///         Err(co) =&gt; co,
     ///     };
     ///
@@ -1878,8 +1879,8 @@
     ///     match co { /* unreachable */ }
     /// }
     ///
-    /// assert_eq!(handle_i32_f32(I32F32::inject(3)), &quot;integer!&quot;);
-    /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), &quot;float!&quot;);
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3)), "integer!");
+    /// assert_eq!(handle_i32_f32(I32F32::inject(3.0)), "float!");
     /// # }
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>uninject&lt;T, Index&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, &lt;<span class="self">Self </span><span class="kw">as </span>CoprodUninjector&lt;T, Index&gt;&gt;::Remainder&gt;
@@ -1924,7 +1925,7 @@
     /// assert!(co1.subset::&lt;Coprod!(i32, f32), _&gt;().is_ok());
     /// assert!(co2.subset::&lt;Coprod!(i32, f32), _&gt;().is_err());
     ///
-    /// // Order doesn&#39;t matter.
+    /// // Order doesn't matter.
     /// assert!(co1.subset::&lt;Coprod!(f32, i32), _&gt;().is_ok());
     /// # }
     /// ```
@@ -1937,21 +1938,21 @@
     /// use frunk_core::{Coprod, hlist};
     /// use frunk_core::coproduct::Coproduct;
     ///
-    /// fn handle_stringly_things(co: Coprod!(&amp;&#39;static str, String)) -&gt; String {
+    /// fn handle_stringly_things(co: Coprod!(&amp;'static str, String)) -&gt; String {
     ///     co.fold(hlist![
-    ///         |s| format!(&quot;&amp;str {}&quot;, s),
-    ///         |s| format!(&quot;String {}&quot;, s),
+    ///         |s| format!("&amp;str {}", s),
+    ///         |s| format!("String {}", s),
     ///     ])
     /// }
     ///
     /// fn handle_countly_things(co: Coprod!(u32)) -&gt; String {
     ///     co.fold(hlist![
-    ///         |n| vec![&quot;.&quot;; n as usize].concat(),
+    ///         |n| vec!["."; n as usize].concat(),
     ///     ])
     /// }
     ///
-    /// fn handle_all(co: Coprod!(String, u32, &amp;&#39;static str)) -&gt; String {
-    ///     // co is currently Coprod!(String, u32, &amp;&#39;static str)
+    /// fn handle_all(co: Coprod!(String, u32, &amp;'static str)) -&gt; String {
+    ///     // co is currently Coprod!(String, u32, &amp;'static str)
     ///     let co = match co.subset().map(handle_stringly_things) {
     ///         Ok(s) =&gt; return s,
     ///         Err(co) =&gt; co,
@@ -1967,9 +1968,9 @@
     ///     match co { /* unreachable */ }
     /// }
     ///
-    /// assert_eq!(handle_all(Coproduct::inject(&quot;hello&quot;)), &quot;&amp;str hello&quot;);
-    /// assert_eq!(handle_all(Coproduct::inject(String::from(&quot;World!&quot;))), &quot;String World!&quot;);
-    /// assert_eq!(handle_all(Coproduct::inject(4)), &quot;....&quot;);
+    /// assert_eq!(handle_all(Coproduct::inject("hello")), "&amp;str hello");
+    /// assert_eq!(handle_all(Coproduct::inject(String::from("World!"))), "String World!");
+    /// assert_eq!(handle_all(Coproduct::inject(4)), "....");
     /// # }
     /// ```
     </span><span class="attr">#[inline(always)]
@@ -2057,9 +2058,9 @@
     /// # }
     /// ```
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>to_ref&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output
+    </span><span class="kw">pub fn </span>to_ref&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output
     <span class="kw">where
-        </span><span class="self">Self</span>: ToRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+        </span><span class="self">Self</span>: ToRef&lt;<span class="lifetime">'a</span>&gt;,
     {
         ToRef::to_ref(<span class="self">self</span>)
     }
@@ -2082,9 +2083,9 @@
     /// # }
     /// ```
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>to_mut&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToMut&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output
+    </span><span class="kw">pub fn </span>to_mut&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToMut&lt;<span class="lifetime">'a</span>&gt;&gt;::Output
     <span class="kw">where
-        </span><span class="self">Self</span>: ToMut&lt;<span class="lifetime">&#39;a</span>&gt;,
+        </span><span class="self">Self</span>: ToMut&lt;<span class="lifetime">'a</span>&gt;,
     {
         ToMut::to_mut(<span class="self">self</span>)
     }
@@ -2111,11 +2112,11 @@
     /// let co2 = I32F32Bool::inject(true);
     /// let co3 = I32F32Bool::inject(42f32);
     ///
-    /// let folder = hlist![|&amp;i| format!(&quot;int {}&quot;, i),
-    ///                     |&amp;f| format!(&quot;float {}&quot;, f),
-    ///                     |&amp;b| (if b { &quot;t&quot; } else { &quot;f&quot; }).to_string()];
+    /// let folder = hlist![|&amp;i| format!("int {}", i),
+    ///                     |&amp;f| format!("float {}", f),
+    ///                     |&amp;b| (if b { "t" } else { "f" }).to_string()];
     ///
-    /// assert_eq!(co1.to_ref().fold(folder), &quot;int 3&quot;.to_string());
+    /// assert_eq!(co1.to_ref().fold(folder), "int 3".to_string());
     /// # }
     /// ```
     ///
@@ -2178,7 +2179,7 @@
     /// use frunk::{hlist, Coprod};
     ///
     /// type I32F32Bool = Coprod!(i32, f32, bool);
-    /// type BoolStrU8 = Coprod!(bool, &amp;&#39;static str, u8);
+    /// type BoolStrU8 = Coprod!(bool, &amp;'static str, u8);
     ///
     /// let co1 = I32F32Bool::inject(3);
     /// let co2 = I32F32Bool::inject(42f32);
@@ -2186,12 +2187,12 @@
     ///
     /// let mapper = hlist![
     ///     |n| n &gt; 0,
-    ///     |f| if f == 42f32 { &quot;😀&quot; } else { &quot;🤨&quot; },
+    ///     |f| if f == 42f32 { "😀" } else { "🤨" },
     ///     |b| if b { 1u8 } else { 0u8 },
     /// ];
     ///
     /// assert_eq!(co1.map(&amp;mapper), BoolStrU8::inject(true));
-    /// assert_eq!(co2.map(&amp;mapper), BoolStrU8::inject(&quot;😀&quot;));
+    /// assert_eq!(co2.map(&amp;mapper), BoolStrU8::inject("😀"));
     /// assert_eq!(co3.map(&amp;mapper), BoolStrU8::inject(1u8));
     /// ```
     ///
@@ -2273,7 +2274,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. In most code, `Coproduct::inject` will
-/// &quot;just work,&quot; with or without this trait.
+/// "just work," with or without this trait.
 ///
 /// [`Coproduct::inject`]: enum.Coproduct.html#method.inject
 </span><span class="kw">pub trait </span>CoprodInjector&lt;InjectType, Index&gt; {
@@ -2314,7 +2315,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.get()` should &quot;just work&quot; even without the trait.
+/// then `co.get()` should "just work" even without the trait.
 ///
 /// [`Coproduct::get`]: enum.Coproduct.html#method.get
 </span><span class="kw">pub trait </span>CoproductSelector&lt;S, I&gt; {
@@ -2361,7 +2362,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.take()` should &quot;just work&quot; even without the trait.
+/// then `co.take()` should "just work" even without the trait.
 ///
 /// [`Coproduct::take`]: enum.Coproduct.html#method.take
 </span><span class="kw">pub trait </span>CoproductTaker&lt;S, I&gt; {
@@ -2408,7 +2409,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts or Folders of unknown type. If the type of everything is known,
-/// then `co.fold(folder)` should &quot;just work&quot; even without the trait.
+/// then `co.fold(folder)` should "just work" even without the trait.
 ///
 /// [`Coproduct::fold`]: enum.Coproduct.html#method.fold
 </span><span class="kw">pub trait </span>CoproductFoldable&lt;Folder, Output&gt; {
@@ -2461,14 +2462,14 @@
     }
 }
 
-<span class="doccomment">/// Trait for mapping over a coproduct&#39;s variants.
+<span class="doccomment">/// Trait for mapping over a coproduct's variants.
 ///
 /// This trait is part of the implementation of the inherent method
 /// [`Coproduct::map`]. Please see that method for more information.
 ///
 /// You only need to import this trait when working with generic Coproducts or
 /// mappers of unknown type. If the type of everything is known, then
-/// `co.map(mapper)` should &quot;just work&quot; even without the trait.
+/// `co.map(mapper)` should "just work" even without the trait.
 </span><span class="kw">pub trait </span>CoproductMappable&lt;Mapper&gt; {
     <span class="kw">type </span>Output;
 
@@ -2502,16 +2503,16 @@
 }
 
 <span class="doccomment">/// Implementation for mapping a Coproduct using a `&amp;hlist!`.
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, F, R, MapperTail, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HCons&lt;F, MapperTail&gt;&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, F, R, MapperTail, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;F, MapperTail&gt;&gt;
     <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
     </span>F: Fn(CH) -&gt; R,
-    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MapperTail&gt;,
+    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>MapperTail&gt;,
 {
-    <span class="kw">type </span>Output = Coproduct&lt;R, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MapperTail&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = Coproduct&lt;R, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>MapperTail&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>map(<span class="self">self</span>, mapper: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HCons&lt;F, MapperTail&gt;) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>map(<span class="self">self</span>, mapper: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;F, MapperTail&gt;) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="self">self </span>{
             Coproduct::Inl(l) =&gt; Coproduct::Inl((mapper.head)(l)),
             Coproduct::Inr(rest) =&gt; Coproduct::Inr(rest.map(<span class="kw-2">&amp;</span>mapper.tail)),
@@ -2520,16 +2521,16 @@
 }
 
 <span class="doccomment">/// Implementation for mapping a Coproduct using a `&amp;mut hlist!`.
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, F, R, MapperTail, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HCons&lt;F, MapperTail&gt;&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, F, R, MapperTail, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HCons&lt;F, MapperTail&gt;&gt;
     <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
     </span>F: FnMut(CH) -&gt; R,
-    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>MapperTail&gt;,
+    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>MapperTail&gt;,
 {
-    <span class="kw">type </span>Output = Coproduct&lt;R, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>MapperTail&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = Coproduct&lt;R, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>MapperTail&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>map(<span class="self">self</span>, mapper: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HCons&lt;F, MapperTail&gt;) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>map(<span class="self">self</span>, mapper: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HCons&lt;F, MapperTail&gt;) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="self">self </span>{
             Coproduct::Inl(l) =&gt; Coproduct::Inl((mapper.head)(l)),
             Coproduct::Inr(rest) =&gt; Coproduct::Inr(rest.map(<span class="kw-2">&amp;mut </span>mapper.tail)),
@@ -2555,16 +2556,16 @@
 }
 
 <span class="doccomment">/// Implementation for mapping a Coproduct using a `&amp;poly_fn!`.
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, P, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Poly&lt;P&gt;&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, P, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Poly&lt;P&gt;&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
     </span>P: Func&lt;CH&gt;,
-    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Poly&lt;P&gt;&gt;,
+    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Poly&lt;P&gt;&gt;,
 {
     <span class="kw">type </span>Output =
-        Coproduct&lt;&lt;P <span class="kw">as </span>Func&lt;CH&gt;&gt;::Output, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Poly&lt;P&gt;&gt;&gt;::Output&gt;;
+        Coproduct&lt;&lt;P <span class="kw">as </span>Func&lt;CH&gt;&gt;::Output, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Poly&lt;P&gt;&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>map(<span class="self">self</span>, poly: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Poly&lt;P&gt;) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>map(<span class="self">self</span>, poly: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Poly&lt;P&gt;) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="self">self </span>{
             Coproduct::Inl(l) =&gt; Coproduct::Inl(P::call(l)),
             Coproduct::Inr(rest) =&gt; Coproduct::Inr(rest.map(poly)),
@@ -2573,16 +2574,16 @@
 }
 
 <span class="doccomment">/// Implementation for mapping a Coproduct using a `&amp;mut poly_fn!`.
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, P, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, P, CH, CTail&gt; CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
     </span>P: Func&lt;CH&gt;,
-    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt;,
+    CTail: CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt;,
 {
     <span class="kw">type </span>Output =
-        Coproduct&lt;&lt;P <span class="kw">as </span>Func&lt;CH&gt;&gt;::Output, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt;&gt;::Output&gt;;
+        Coproduct&lt;&lt;P <span class="kw">as </span>Func&lt;CH&gt;&gt;::Output, &lt;CTail <span class="kw">as </span>CoproductMappable&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Poly&lt;P&gt;&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>map(<span class="self">self</span>, poly: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Poly&lt;P&gt;) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>map(<span class="self">self</span>, poly: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Poly&lt;P&gt;) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="self">self </span>{
             Coproduct::Inl(l) =&gt; Coproduct::Inl(P::call(l)),
             Coproduct::Inr(rest) =&gt; Coproduct::Inr(rest.map(poly)),
@@ -2618,14 +2619,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, CH: <span class="lifetime">&#39;a</span>, CTail&gt; ToRef&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, CH: <span class="lifetime">'a</span>, CTail&gt; ToRef&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
-    </span>CTail: ToRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>CTail: ToRef&lt;<span class="lifetime">'a</span>&gt;,
 {
-    <span class="kw">type </span>Output = Coproduct&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CH, &lt;CTail <span class="kw">as </span>ToRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = Coproduct&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>CH, &lt;CTail <span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             Coproduct::Inl(<span class="kw-2">ref </span>r) =&gt; Coproduct::Inl(r),
             Coproduct::Inr(<span class="kw-2">ref </span>rest) =&gt; Coproduct::Inr(rest.to_ref()),
@@ -2633,22 +2634,22 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToRef&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CNil {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToRef&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>CNil {
     <span class="kw">type </span>Output = CNil;
 
-    <span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; CNil {
+    <span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; CNil {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{}
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, CH: <span class="lifetime">&#39;a</span>, CTail&gt; ToMut&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, CH: <span class="lifetime">'a</span>, CTail&gt; ToMut&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Coproduct&lt;CH, CTail&gt;
 <span class="kw">where
-    </span>CTail: ToMut&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>CTail: ToMut&lt;<span class="lifetime">'a</span>&gt;,
 {
-    <span class="kw">type </span>Output = Coproduct&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>CH, &lt;CTail <span class="kw">as </span>ToMut&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = Coproduct&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>CH, &lt;CTail <span class="kw">as </span>ToMut&lt;<span class="lifetime">'a</span>&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             Coproduct::Inl(<span class="kw-2">ref mut </span>r) =&gt; Coproduct::Inl(r),
             Coproduct::Inr(<span class="kw-2">ref mut </span>rest) =&gt; Coproduct::Inr(rest.to_mut()),
@@ -2656,10 +2657,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToMut&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CNil {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToMut&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>CNil {
     <span class="kw">type </span>Output = CNil;
 
-    <span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; CNil {
+    <span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; CNil {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{}
     }
 }
@@ -2671,7 +2672,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.uninject()` should &quot;just work&quot; even without the trait.
+/// then `co.uninject()` should "just work" even without the trait.
 ///
 /// [`Coproduct::uninject`]: enum.Coproduct.html#method.uninject
 </span><span class="kw">pub trait </span>CoprodUninjector&lt;T, Idx&gt;: CoprodInjector&lt;T, Idx&gt; {
@@ -2721,7 +2722,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.subset()` should &quot;just work&quot; even without the trait.
+/// then `co.subset()` should "just work" even without the trait.
 ///
 /// [`Coproduct::subset`]: enum.Coproduct.html#method.subset
 </span><span class="kw">pub trait </span>CoproductSubsetter&lt;Targets, Indices&gt;: Sized {
@@ -2775,7 +2776,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// Coproducts of unknown type. If you have a Coproduct of known type,
-/// then `co.embed()` should &quot;just work&quot; even without the trait.
+/// then `co.embed()` should "just work" even without the trait.
 ///
 /// [`Coproduct::embed`]: enum.Coproduct.html#method.embed
 </span><span class="kw">pub trait </span>CoproductEmbedder&lt;Out, Indices&gt; {
@@ -2831,7 +2832,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_coproduct_inject() {
-        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, bool);
+        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, bool);
 
         <span class="kw">let </span>co1 = I32StrBool::inject(<span class="number">3</span>);
         <span class="macro">assert_eq!</span>(co1, Inl(<span class="number">3</span>));
@@ -2849,18 +2850,18 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>test_coproduct_fold_consuming() {
         <span class="kw">type </span>I32F32StrBool = <span class="macro">Coprod!</span>(i32, f32, bool);
 
         <span class="kw">let </span>co1 = I32F32StrBool::inject(<span class="number">3</span>);
         <span class="kw">let </span>folded = co1.fold(<span class="macro">hlist!</span>[
-            |i| <span class="macro">format!</span>(<span class="string">&quot;int {}&quot;</span>, i),
-            |f| <span class="macro">format!</span>(<span class="string">&quot;float {}&quot;</span>, f),
-            |b| (<span class="kw">if </span>b { <span class="string">&quot;t&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;f&quot; </span>}).to_string(),
+            |i| <span class="macro">format!</span>(<span class="string">"int {}"</span>, i),
+            |f| <span class="macro">format!</span>(<span class="string">"float {}"</span>, f),
+            |b| (<span class="kw">if </span>b { <span class="string">"t" </span>} <span class="kw">else </span>{ <span class="string">"f" </span>}).to_string(),
         ]);
 
-        <span class="macro">assert_eq!</span>(folded, <span class="string">&quot;int 3&quot;</span>.to_string());
+        <span class="macro">assert_eq!</span>(folded, <span class="string">"int 3"</span>.to_string());
     }
 
     <span class="attr">#[test]
@@ -2894,7 +2895,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>test_coproduct_fold_non_consuming() {
         <span class="kw">type </span>I32F32Bool = <span class="macro">Coprod!</span>(i32, f32, bool);
 
@@ -2904,54 +2905,54 @@
 
         <span class="macro">assert_eq!</span>(
             co1.to_ref().fold(<span class="macro">hlist!</span>[
-                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">&quot;int {}&quot;</span>, i),
-                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">&quot;float {}&quot;</span>, f),
-                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">&quot;t&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;f&quot; </span>}).to_string(),
+                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">"int {}"</span>, i),
+                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">"float {}"</span>, f),
+                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">"t" </span>} <span class="kw">else </span>{ <span class="string">"f" </span>}).to_string(),
             ]),
-            <span class="string">&quot;int 3&quot;</span>.to_string()
+            <span class="string">"int 3"</span>.to_string()
         );
         <span class="macro">assert_eq!</span>(
             co2.to_ref().fold(<span class="macro">hlist!</span>[
-                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">&quot;int {}&quot;</span>, i),
-                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">&quot;float {}&quot;</span>, f),
-                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">&quot;t&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;f&quot; </span>}).to_string(),
+                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">"int {}"</span>, i),
+                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">"float {}"</span>, f),
+                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">"t" </span>} <span class="kw">else </span>{ <span class="string">"f" </span>}).to_string(),
             ]),
-            <span class="string">&quot;t&quot;</span>.to_string()
+            <span class="string">"t"</span>.to_string()
         );
         <span class="macro">assert_eq!</span>(
             co3.to_ref().fold(<span class="macro">hlist!</span>[
-                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">&quot;int {}&quot;</span>, i),
-                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">&quot;float {}&quot;</span>, f),
-                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">&quot;t&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;f&quot; </span>}).to_string(),
+                |<span class="kw-2">&amp;</span>i| <span class="macro">format!</span>(<span class="string">"int {}"</span>, i),
+                |<span class="kw-2">&amp;</span>f| <span class="macro">format!</span>(<span class="string">"float {}"</span>, f),
+                |<span class="kw-2">&amp;</span>b| (<span class="kw">if </span>b { <span class="string">"t" </span>} <span class="kw">else </span>{ <span class="string">"f" </span>}).to_string(),
             ]),
-            <span class="string">&quot;float 42&quot;</span>.to_string()
+            <span class="string">"float 42"</span>.to_string()
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_coproduct_uninject() {
-        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, bool);
+        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, bool);
 
         <span class="kw">let </span>co1 = I32StrBool::inject(<span class="number">3</span>);
-        <span class="kw">let </span>co2 = I32StrBool::inject(<span class="string">&quot;hello&quot;</span>);
+        <span class="kw">let </span>co2 = I32StrBool::inject(<span class="string">"hello"</span>);
         <span class="kw">let </span>co3 = I32StrBool::inject(<span class="bool-val">false</span>);
 
         <span class="kw">let </span>uninject_i32_co1: <span class="prelude-ty">Result</span>&lt;i32, <span class="kw">_</span>&gt; = co1.uninject();
-        <span class="kw">let </span>uninject_str_co1: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw">_</span>&gt; = co1.uninject();
+        <span class="kw">let </span>uninject_str_co1: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw">_</span>&gt; = co1.uninject();
         <span class="kw">let </span>uninject_bool_co1: <span class="prelude-ty">Result</span>&lt;bool, <span class="kw">_</span>&gt; = co1.uninject();
         <span class="macro">assert_eq!</span>(uninject_i32_co1, <span class="prelude-val">Ok</span>(<span class="number">3</span>));
         <span class="macro">assert!</span>(uninject_str_co1.is_err());
         <span class="macro">assert!</span>(uninject_bool_co1.is_err());
 
         <span class="kw">let </span>uninject_i32_co2: <span class="prelude-ty">Result</span>&lt;i32, <span class="kw">_</span>&gt; = co2.uninject();
-        <span class="kw">let </span>uninject_str_co2: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw">_</span>&gt; = co2.uninject();
+        <span class="kw">let </span>uninject_str_co2: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw">_</span>&gt; = co2.uninject();
         <span class="kw">let </span>uninject_bool_co2: <span class="prelude-ty">Result</span>&lt;bool, <span class="kw">_</span>&gt; = co2.uninject();
         <span class="macro">assert!</span>(uninject_i32_co2.is_err());
-        <span class="macro">assert_eq!</span>(uninject_str_co2, <span class="prelude-val">Ok</span>(<span class="string">&quot;hello&quot;</span>));
+        <span class="macro">assert_eq!</span>(uninject_str_co2, <span class="prelude-val">Ok</span>(<span class="string">"hello"</span>));
         <span class="macro">assert!</span>(uninject_bool_co2.is_err());
 
         <span class="kw">let </span>uninject_i32_co3: <span class="prelude-ty">Result</span>&lt;i32, <span class="kw">_</span>&gt; = co3.uninject();
-        <span class="kw">let </span>uninject_str_co3: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw">_</span>&gt; = co3.uninject();
+        <span class="kw">let </span>uninject_str_co3: <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw">_</span>&gt; = co3.uninject();
         <span class="kw">let </span>uninject_bool_co3: <span class="prelude-ty">Result</span>&lt;bool, <span class="kw">_</span>&gt; = co3.uninject();
         <span class="macro">assert!</span>(uninject_i32_co3.is_err());
         <span class="macro">assert!</span>(uninject_str_co3.is_err());
@@ -2960,7 +2961,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_coproduct_subset() {
-        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, bool);
+        <span class="kw">type </span>I32StrBool = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, bool);
 
         <span class="comment">// CNil can be extracted from anything.
         </span><span class="kw">let </span>res: <span class="prelude-ty">Result</span>&lt;CNil, <span class="kw">_</span>&gt; = I32StrBool::inject(<span class="number">3</span>).subset();
@@ -2983,9 +2984,9 @@
             <span class="kw">let </span>res: <span class="prelude-ty">Result</span>&lt;<span class="macro">Coprod!</span>(bool, i32), <span class="kw">_</span>&gt; = co.subset();
             <span class="macro">assert_eq!</span>(res, <span class="prelude-val">Ok</span>(Coproduct::Inr(Coproduct::Inl(<span class="number">3</span>))));
 
-            <span class="kw">let </span>co = I32StrBool::inject(<span class="string">&quot;4&quot;</span>);
+            <span class="kw">let </span>co = I32StrBool::inject(<span class="string">"4"</span>);
             <span class="kw">let </span>res: <span class="prelude-ty">Result</span>&lt;<span class="macro">Coprod!</span>(bool, i32), <span class="kw">_</span>&gt; = co.subset();
-            <span class="macro">assert_eq!</span>(res, <span class="prelude-val">Err</span>(Coproduct::Inl(<span class="string">&quot;4&quot;</span>)));
+            <span class="macro">assert_eq!</span>(res, <span class="prelude-val">Err</span>(Coproduct::Inl(<span class="string">"4"</span>)));
         }
     }
 
@@ -3043,9 +3044,9 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_coproduct_map_ref() {
         <span class="kw">type </span>I32Bool = <span class="macro">Coprod!</span>(i32, bool);
-        <span class="kw">type </span>I32BoolRef&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>bool);
+        <span class="kw">type </span>I32BoolRef&lt;<span class="lifetime">'a</span>&gt; = <span class="macro">Coprod!</span>(i32, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>bool);
 
-        <span class="kw">fn </span>map_it(co: <span class="kw-2">&amp;</span>I32Bool) -&gt; I32BoolRef&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>map_it(co: <span class="kw-2">&amp;</span>I32Bool) -&gt; I32BoolRef&lt;<span class="lifetime">'_</span>&gt; {
             <span class="comment">// For some reason rustc complains about lifetimes if you try to
             // inline the closure literal into the hlist 🤷.
             </span><span class="kw">let </span>map_bool: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>bool) -&gt; <span class="kw-2">&amp;</span>bool = |b| b;
@@ -3088,14 +3089,14 @@
 
         </span><span class="kw">type </span>StrStr = <span class="macro">Coprod!</span>(String, String);
 
-        <span class="kw">let </span>captured = String::from(<span class="string">&quot;!&quot;</span>);
-        <span class="kw">let </span>mapper = |s: String| <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, s, <span class="kw-2">&amp;</span>captured);
+        <span class="kw">let </span>captured = String::from(<span class="string">"!"</span>);
+        <span class="kw">let </span>mapper = |s: String| <span class="macro">format!</span>(<span class="string">"{}{}"</span>, s, <span class="kw-2">&amp;</span>captured);
 
-        <span class="kw">let </span>co = StrStr::Inl(String::from(<span class="string">&quot;hi&quot;</span>));
+        <span class="kw">let </span>co = StrStr::Inl(String::from(<span class="string">"hi"</span>));
         <span class="kw">let </span>co = co.map(<span class="kw-2">&amp;</span>mapper);
         <span class="kw">let </span>co = co.map(<span class="kw-2">&amp;</span>mapper);
 
-        <span class="macro">assert_eq!</span>(co, StrStr::Inl(String::from(<span class="string">&quot;hi!!&quot;</span>)));
+        <span class="macro">assert_eq!</span>(co, StrStr::Inl(String::from(<span class="string">"hi!!"</span>)));
     }
 
     <span class="attr">#[test]
@@ -3128,12 +3129,12 @@
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>mapper = <span class="macro">poly_fn!</span>(
             |n: i32| -&gt; i32 {
-                <span class="comment">// Poly doesn&#39;t support capturing values.
+                <span class="comment">// Poly doesn't support capturing values.
                 /* number = Some(n); */
                 </span>n
             },
             |b: bool| -&gt; bool {
-                <span class="comment">// Poly doesn&#39;t support capturing values.
+                <span class="comment">// Poly doesn't support capturing values.
                 /* boolean = Some(b) */
                 </span>b
             },
@@ -3149,17 +3150,17 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>captured = String::new();
         <span class="kw">let </span><span class="kw-2">mut </span>mapper = |s: String| {
-            <span class="kw">let </span>s = <span class="macro">format!</span>(<span class="string">&quot;{s}!&quot;</span>);
+            <span class="kw">let </span>s = <span class="macro">format!</span>(<span class="string">"{s}!"</span>);
             captured.push_str(<span class="kw-2">&amp;</span>s);
             s
         };
 
-        <span class="kw">let </span>co = StrStr::Inl(String::from(<span class="string">&quot;hi&quot;</span>));
+        <span class="kw">let </span>co = StrStr::Inl(String::from(<span class="string">"hi"</span>));
         <span class="kw">let </span>co = co.map(<span class="kw-2">&amp;mut </span>mapper);
         <span class="kw">let </span>co = co.map(<span class="kw-2">&amp;mut </span>mapper);
 
-        <span class="macro">assert_eq!</span>(co, StrStr::Inl(String::from(<span class="string">&quot;hi!!&quot;</span>)));
-        <span class="macro">assert_eq!</span>(captured, String::from(<span class="string">&quot;hi!hi!!&quot;</span>));
+        <span class="macro">assert_eq!</span>(co, StrStr::Inl(String::from(<span class="string">"hi!!"</span>)));
+        <span class="macro">assert_eq!</span>(captured, String::from(<span class="string">"hi!hi!!"</span>));
     }
 }
 </code></pre></div></section></main></body></html>

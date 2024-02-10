@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/macros.rs`."><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../frunk_core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/macros.rs`."><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -434,21 +435,21 @@
 /// ```
 /// # use frunk_core::hlist;
 /// # fn main() {
-/// let h = hlist![13.5f32, &quot;hello&quot;, Some(41)];
+/// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
-/// assert_eq!(h2, &quot;hello&quot;);
+/// assert_eq!(h2, "hello");
 /// assert_eq!(h3, Some(41));
 ///
 /// // Also works when you have trailing commas
-/// let h4 = hlist![&quot;yo&quot;,];
-/// let h5 = hlist![13.5f32, &quot;hello&quot;, Some(41),];
-/// assert_eq!(h4, hlist![&quot;yo&quot;]);
-/// assert_eq!(h5, hlist![13.5f32, &quot;hello&quot;, Some(41)]);
+/// let h4 = hlist!["yo",];
+/// let h5 = hlist![13.5f32, "hello", Some(41),];
+/// assert_eq!(h4, hlist!["yo"]);
+/// assert_eq!(h5, hlist![13.5f32, "hello", Some(41)]);
 ///
-/// // Use &quot;...tail&quot; to append an existing list at the end
+/// // Use "...tail" to append an existing list at the end
 /// let h6 = hlist![12, ...h5];
-/// assert_eq!(h6, hlist![12, 13.5f32, &quot;hello&quot;, Some(41)]);
+/// assert_eq!(h6, hlist![12, 13.5f32, "hello", Some(41)]);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
@@ -473,18 +474,18 @@
 /// ```
 /// # use frunk_core::{hlist, hlist_pat};
 /// # fn main() {
-/// let h = hlist![13.5f32, &quot;hello&quot;, Some(41)];
+/// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![a1, a2, a3] = h;
 /// assert_eq!(a1, 13.5f32);
-/// assert_eq!(a2, &quot;hello&quot;);
+/// assert_eq!(a2, "hello");
 /// assert_eq!(a3, Some(41));
 ///
-/// // Use &quot;...tail&quot; to match the rest of the list
+/// // Use "...tail" to match the rest of the list
 /// let hlist_pat![b_head, ...b_tail] = h;
 /// assert_eq!(b_head, 13.5f32);
-/// assert_eq!(b_tail, hlist![&quot;hello&quot;, Some(41)]);
+/// assert_eq!(b_tail, hlist!["hello", Some(41)]);
 ///
-/// // You can also use &quot;...&quot; to just ignore the rest.
+/// // You can also use "..." to just ignore the rest.
 /// let hlist_pat![c, ...] = h;
 /// assert_eq!(c, 13.5f32);
 /// # }
@@ -520,10 +521,10 @@
 /// ```
 /// # use frunk_core::{hlist, HList};
 /// # fn main() {
-/// let h: HList!(f32, &amp;str, Option&lt;i32&gt;) = hlist![13.5f32, &quot;hello&quot;, Some(41)];
+/// let h: HList!(f32, &amp;str, Option&lt;i32&gt;) = hlist![13.5f32, "hello", Some(41)];
 ///
-/// // Use &quot;...Tail&quot; to append another HList type at the end.
-/// let h: HList!(f32, ...HList!(&amp;str, Option&lt;i32&gt;)) = hlist![13.5f32, &quot;hello&quot;, Some(41)];
+/// // Use "...Tail" to append another HList type at the end.
+/// let h: HList!(f32, ...HList!(&amp;str, Option&lt;i32&gt;)) = hlist![13.5f32, "hello", Some(41)];
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
@@ -579,9 +580,9 @@
 /// use frunk::labelled::chars::*;
 /// use frunk_core::field;
 /// # fn main() {
-/// let labelled = field![(n,a,m,e), &quot;joe&quot;];
-/// assert_eq!(labelled.name, &quot;name&quot;);
-/// assert_eq!(labelled.value, &quot;joe&quot;)
+/// let labelled = field![(n,a,m,e), "joe"];
+/// assert_eq!(labelled.name, "name");
+/// assert_eq!(labelled.value, "joe")
 /// # }
 /// ```
 ///
@@ -593,9 +594,9 @@
 /// # fn main() {
 /// use frunk_core::field;
 /// enum first_name {}
-/// let labelled = field![first_name, &quot;Joe&quot;];
-/// assert_eq!(labelled.name, &quot;first_name&quot;);
-/// assert_eq!(labelled.value, &quot;Joe&quot;);
+/// let labelled = field![first_name, "Joe"];
+/// assert_eq!(labelled.name, "first_name");
+/// assert_eq!(labelled.value, "Joe");
 /// # }
 /// ```
 ///
@@ -608,8 +609,8 @@
 /// # fn main() {
 /// // useful aliasing of our type-level string
 /// type age = (a, g, e);
-/// let labelled = field![age, 30, &quot;Age&quot;];
-/// assert_eq!(labelled.name, &quot;Age&quot;);
+/// let labelled = field![age, 30, "Age"];
+/// assert_eq!(labelled.name, "Age");
 /// assert_eq!(labelled.value, 30);
 /// # }
 /// ```
@@ -636,9 +637,9 @@
 <span class="doccomment">/// Returns a polymorphic function for use with mapping/folding heterogeneous
 /// types.
 ///
-/// This macro is intended for use with simple scenarios, and doesn&#39;t handle
+/// This macro is intended for use with simple scenarios, and doesn't handle
 /// trait implementation bounds or where clauses (it might in the future when
-/// procedural macros land). If it doesn&#39;t work for you, simply implement
+/// procedural macros land). If it doesn't work for you, simply implement
 /// Func on your own.
 ///
 /// # Examples
@@ -646,11 +647,11 @@
 /// ```
 /// # fn main() {
 /// use frunk_core::{Coprod, poly_fn};
-/// type I32F32Str&lt;&#39;a&gt; = Coprod!(i32, f32, &amp;&#39;a str);
+/// type I32F32Str&lt;'a&gt; = Coprod!(i32, f32, &amp;'a str);
 ///
-/// let co1 = I32F32Str::inject(&quot;lollerskates&quot;);
+/// let co1 = I32F32Str::inject("lollerskates");
 /// let folded = co1.fold(poly_fn!(
-///   [&#39;a] |x: &amp;&#39;a str| -&gt; i8 { 1 },
+///   ['a] |x: &amp;'a str| -&gt; i8 { 1 },
 ///   |x: i32| -&gt; i8 { 2 },
 ///   |f: f32| -&gt; i8 { 3 },
 /// ));
@@ -786,7 +787,7 @@
     </span><span class="kw">fn </span>ellipsis_ignore() {
         <span class="kw">use </span><span class="kw">crate</span>::test_structs::unit_copy::{A, B, C, D, E};
 
-        <span class="comment">// &#39;...&#39; accepted locations
+        <span class="comment">// '...' accepted locations
         </span><span class="kw">let </span><span class="macro">hlist_pat!</span>[...] = <span class="macro">hlist!</span>[A, B, C, D, E];
         <span class="kw">let </span><span class="macro">hlist_pat!</span>[A, ...] = <span class="macro">hlist!</span>[A, B, C, D, E];
         <span class="kw">let </span><span class="macro">hlist_pat!</span>[A, B, ...] = <span class="macro">hlist!</span>[A, B, C, D, E];
@@ -794,22 +795,22 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>poly_fn_macro_test() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>, <span class="string">&quot;schmoe&quot;</span>, <span class="number">50</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>, <span class="string">"schmoe"</span>, <span class="number">50</span>];
         <span class="kw">let </span>h2 = h.map(<span class="macro">poly_fn!</span>(
             |x: i32| -&gt; bool { x &gt; <span class="number">100 </span>},
-            |_x: f32| -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str { <span class="string">&quot;dummy&quot; </span>},
-            [<span class="lifetime">&#39;a</span>] |x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str| -&gt; usize { x.len() }
+            |_x: f32| -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str { <span class="string">"dummy" </span>},
+            [<span class="lifetime">'a</span>] |x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str| -&gt; usize { x.len() }
         ));
-        <span class="macro">assert_eq!</span>(h2, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">&quot;dummy&quot;</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
+        <span class="macro">assert_eq!</span>(h2, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">"dummy"</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>poly_fn_macro_coproduct_test() {
-        <span class="kw">type </span>I32F32StrBool&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="macro">Coprod!</span>(i32, f32, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str);
+        <span class="kw">type </span>I32F32StrBool&lt;<span class="lifetime">'a</span>&gt; = <span class="macro">Coprod!</span>(i32, f32, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str);
 
-        <span class="kw">let </span>co1 = I32F32StrBool::inject(<span class="string">&quot;lollerskates&quot;</span>);
+        <span class="kw">let </span>co1 = I32F32StrBool::inject(<span class="string">"lollerskates"</span>);
         <span class="kw">let </span>folded = co1.fold(<span class="macro">poly_fn!</span>(
-            [<span class="lifetime">&#39;a</span>] |_x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str| -&gt; i8 { <span class="number">1 </span>},
+            [<span class="lifetime">'a</span>] |_x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str| -&gt; i8 { <span class="number">1 </span>},
             |_x: i32| -&gt; i8 { <span class="number">2 </span>},
             |_f: f32| -&gt; i8 { <span class="number">3 </span>},
         ));
@@ -818,13 +819,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>poly_fn_macro_trailing_commas_test() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>, <span class="string">&quot;schmoe&quot;</span>, <span class="number">50</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>, <span class="string">"schmoe"</span>, <span class="number">50</span>];
         <span class="kw">let </span>h2 = h.map(<span class="macro">poly_fn!</span>(
             |x: i32| -&gt; bool { x &gt; <span class="number">100 </span>},
-            |_x: f32| -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str { <span class="string">&quot;dummy&quot; </span>},
-            [<span class="lifetime">&#39;a</span>,] |x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str| -&gt; usize { x.len() },
+            |_x: f32| -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str { <span class="string">"dummy" </span>},
+            [<span class="lifetime">'a</span>,] |x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str| -&gt; usize { x.len() },
         ));
-        <span class="macro">assert_eq!</span>(h2, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">&quot;dummy&quot;</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
+        <span class="macro">assert_eq!</span>(h2, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">"dummy"</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
     }
 
     <span class="attr">#[test]
@@ -841,9 +842,9 @@
     #[deny(clippy::unneeded_field_pattern)]
     </span><span class="kw">fn </span>unneeded_field_pattern() {
         <span class="kw">let </span><span class="macro">hlist_pat!</span>[<span class="kw">_</span>, <span class="kw">_</span>] = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="number">2</span>];
-        <span class="kw">let </span><span class="macro">hlist_pat!</span>[foo, <span class="kw">_</span>, baz] = <span class="macro">hlist!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>];
-        <span class="macro">assert_eq!</span>(foo, <span class="string">&quot;foo&quot;</span>);
-        <span class="macro">assert_eq!</span>(baz, <span class="string">&quot;baz&quot;</span>);
+        <span class="kw">let </span><span class="macro">hlist_pat!</span>[foo, <span class="kw">_</span>, baz] = <span class="macro">hlist!</span>[<span class="string">"foo"</span>, <span class="string">"bar"</span>, <span class="string">"baz"</span>];
+        <span class="macro">assert_eq!</span>(foo, <span class="string">"foo"</span>);
+        <span class="macro">assert_eq!</span>(baz, <span class="string">"baz"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

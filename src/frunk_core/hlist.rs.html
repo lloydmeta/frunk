@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><title>hlist.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../frunk_core/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><title>hlist.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2019,15 +2020,15 @@
 //! # fn main() {
 //! use frunk_core::{hlist, HList, poly_fn};
 //!
-//! let h = hlist![1, &quot;hi&quot;];
+//! let h = hlist![1, "hi"];
 //! assert_eq!(h.len(), 2);
 //! let (a, b) = h.into_tuple2();
 //! assert_eq!(a, 1);
-//! assert_eq!(b, &quot;hi&quot;);
+//! assert_eq!(b, "hi");
 //!
 //! // Reverse
-//! let h1 = hlist![true, &quot;hi&quot;];
-//! assert_eq!(h1.into_reverse(), hlist![&quot;hi&quot;, true]);
+//! let h1 = hlist![true, "hi"];
+//! assert_eq!(h1.into_reverse(), hlist!["hi", true]);
 //!
 //! // foldr (foldl also available)
 //! let h2 = hlist![1, false, 42f32];
@@ -2039,7 +2040,7 @@
 //!     );
 //! assert_eq!(folded, 9001);
 //!
-//! let h3 = hlist![9000, &quot;joe&quot;, 41f32];
+//! let h3 = hlist![9000, "joe", 41f32];
 //! // Mapping over an HList with a polymorphic function,
 //! // declared using the poly_fn! macro (you can choose to impl
 //! // it manually)
@@ -2047,27 +2048,27 @@
 //!   poly_fn![
 //!     |f: f32|   -&gt; f32 { f + 1f32 },
 //!     |i: isize| -&gt; isize { i + 1 },
-//!     [&#39;a] |s: &amp;&#39;a str| -&gt; &amp;&#39;a str { s }
+//!     ['a] |s: &amp;'a str| -&gt; &amp;'a str { s }
 //!   ]);
-//! assert_eq!(mapped, hlist![9001, &quot;joe&quot;, 42f32]);
+//! assert_eq!(mapped, hlist![9001, "joe", 42f32]);
 //!
 //! // Plucking a value out by type
-//! let h4 = hlist![1, &quot;hello&quot;, true, 42f32];
+//! let h4 = hlist![1, "hello", true, 42f32];
 //! let (t, remainder): (bool, _) = h4.pluck();
 //! assert!(t);
-//! assert_eq!(remainder, hlist![1, &quot;hello&quot;, 42f32]);
+//! assert_eq!(remainder, hlist![1, "hello", 42f32]);
 //!
 //! // Resculpting an HList
-//! let h5 = hlist![9000, &quot;joe&quot;, 41f32, true];
+//! let h5 = hlist![9000, "joe", 41f32, true];
 //! let (reshaped, remainder2): (HList![f32, i32, &amp;str], _) = h5.sculpt();
-//! assert_eq!(reshaped, hlist![41f32, 9000, &quot;joe&quot;]);
+//! assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
 //! assert_eq!(remainder2, hlist![true]);
 //! # }
 //! ```
 
 </span><span class="kw">use </span><span class="kw">crate</span>::indices::{Here, Suffixed, There};
 <span class="kw">use </span><span class="kw">crate</span>::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span>std::ops::Add;
@@ -2099,7 +2100,7 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let h = hlist![1, &quot;hi&quot;];
+    /// let h = hlist![1, "hi"];
     /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
@@ -2137,7 +2138,7 @@
     /// assert_eq!(&lt;HList![i32, bool, f32]&gt;::static_len(), 3);
     /// # }
     /// ```
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.1.31&quot;</span>, note = <span class="string">&quot;Please use LEN instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.1.31"</span>, note = <span class="string">"Please use LEN instead"</span>)]
     </span><span class="kw">fn </span>static_len() -&gt; usize;
 
     <span class="doccomment">/// Prepends an item to the current HList
@@ -2148,12 +2149,12 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let h1 = hlist![1, &quot;hi&quot;];
+    /// let h1 = hlist![1, "hi"];
     /// let h2 = h1.prepend(true);
     /// let (a, (b, c)) = h2.into_tuple2();
     /// assert_eq!(a, true);
     /// assert_eq!(b, 1);
-    /// assert_eq!(c, &quot;hi&quot;);
+    /// assert_eq!(c, "hi");
     /// # }
     </span><span class="kw">fn </span>prepend&lt;H&gt;(<span class="self">self</span>, h: H) -&gt; HCons&lt;H, <span class="self">Self</span>&gt; {
         HCons {
@@ -2174,7 +2175,7 @@
 /// assert_eq!(h, 1);
 /// ```
 </span><span class="attr">#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>HNil;
 
 <span class="kw">impl </span>HList <span class="kw">for </span>HNil {
@@ -2187,7 +2188,7 @@
 <span class="doccomment">/// Represents the most basic non-empty HList. Its value is held in `head`
 /// while its tail is another HList.
 </span><span class="attr">#[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>HCons&lt;H, T&gt; {
     <span class="kw">pub </span>head: H,
     <span class="kw">pub </span>tail: T,
@@ -2210,9 +2211,9 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let h = hlist!(&quot;hi&quot;);
+    /// let h = hlist!("hi");
     /// let (h, tail) = h.pop();
-    /// assert_eq!(h, &quot;hi&quot;);
+    /// assert_eq!(h, "hi");
     /// assert_eq!(tail, hlist![]);
     /// # }
     /// ```
@@ -2231,9 +2232,9 @@
 /// # extern crate frunk; fn main() {
 /// use frunk::hlist::{HNil, h_cons};
 ///
-/// let h_list = h_cons(&quot;what&quot;, h_cons(1.23f32, HNil));
+/// let h_list = h_cons("what", h_cons(1.23f32, HNil));
 /// let (h1, h2) = h_list.into_tuple2();
-/// assert_eq!(h1, &quot;what&quot;);
+/// assert_eq!(h1, "what");
 /// assert_eq!(h2, 1.23f32);
 /// # }
 /// ```
@@ -2254,7 +2255,7 @@
             /// # fn main() {
             /// use frunk_core::hlist;
             ///
-            /// let h = hlist![1, &quot;hi&quot;];
+            /// let h = hlist![1, "hi"];
             /// assert_eq!(h.len(), 2);
             /// # }
             /// ```
@@ -2292,12 +2293,12 @@
             /// # fn main() {
             /// use frunk_core::hlist;
             ///
-            /// let h1 = hlist![1, &quot;hi&quot;];
+            /// let h1 = hlist![1, "hi"];
             /// let h2 = h1.prepend(true);
             /// let (a, (b, c)) = h2.into_tuple2();
             /// assert_eq!(a, true);
             /// assert_eq!(b, 1);
-            /// assert_eq!(c, &quot;hi&quot;);
+            /// assert_eq!(c, "hi");
             /// # }
             </span><span class="attr">#[inline(always)]
             </span><span class="kw">pub fn </span>prepend&lt;H&gt;(<span class="self">self</span>, h: H) -&gt; HCons&lt;H, <span class="self">Self</span>&gt;
@@ -2309,7 +2310,7 @@
             <span class="doccomment">/// Consume the current HList and return an HList with the requested shape.
             ///
             /// `sculpt` allows us to extract/reshape/sculpt the current HList into another shape,
-            /// provided that the requested shape&#39;s types are are contained within the current HList.
+            /// provided that the requested shape's types are are contained within the current HList.
             ///
             /// The `Indices` type parameter allows the compiler to figure out that `Ts`
             /// and `Self` can be morphed into each other.
@@ -2320,9 +2321,9 @@
             /// # fn main() {
             /// use frunk_core::{hlist, HList};
             ///
-            /// let h = hlist![9000, &quot;joe&quot;, 41f32, true];
+            /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (HList![f32, i32, &amp;str], _) = h.sculpt();
-            /// assert_eq!(reshaped, hlist![41f32, 9000, &quot;joe&quot;]);
+            /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
             /// assert_eq!(remainder, hlist![true]);
             /// # }
             /// ```
@@ -2344,8 +2345,8 @@
             /// assert_eq!(hlist![].into_reverse(), hlist![]);
             ///
             /// assert_eq!(
-            ///     hlist![1, &quot;hello&quot;, true, 42f32].into_reverse(),
-            ///     hlist![42f32, true, &quot;hello&quot;, 1],
+            ///     hlist![1, "hello", true, 42f32].into_reverse(),
+            ///     hlist![42f32, true, "hello", 1],
             /// )
             /// # }
             /// ```
@@ -2372,8 +2373,8 @@
             /// ```
             </span><span class="attr">#[inline(always)]
             #[allow(clippy::wrong_self_convention)]
-            </span><span class="kw">pub fn </span>to_ref&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output
-                <span class="kw">where </span><span class="self">Self</span>: ToRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+            </span><span class="kw">pub fn </span>to_ref&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output
+                <span class="kw">where </span><span class="self">Self</span>: ToRef&lt;<span class="lifetime">'a</span>&gt;,
             {
                 ToRef::to_ref(<span class="self">self</span>)
             }
@@ -2393,9 +2394,9 @@
             /// # }
             /// ```
             </span><span class="attr">#[inline(always)]
-            </span><span class="kw">pub fn </span>to_mut&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToMut&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output
+            </span><span class="kw">pub fn </span>to_mut&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; &lt;<span class="self">Self </span><span class="kw">as </span>ToMut&lt;<span class="lifetime">'a</span>&gt;&gt;::Output
             <span class="kw">where
-                </span><span class="self">Self</span>: ToMut&lt;<span class="lifetime">&#39;a</span>&gt;,
+                </span><span class="self">Self</span>: ToMut&lt;<span class="lifetime">'a</span>&gt;,
             {
                 ToMut::to_mut(<span class="self">self</span>)
             }
@@ -2463,12 +2464,12 @@
             /// assert_eq!(HNil.zip(HNil), HNil);
             ///
             /// let h1 = hlist![1, false, 42f32];
-            /// let h2 = hlist![true, &quot;foo&quot;, 2];
+            /// let h2 = hlist![true, "foo", 2];
             ///
             /// let zipped = h1.zip(h2);
             /// assert_eq!(zipped, hlist![
             ///     (1, true),
-            ///     (false, &quot;foo&quot;),
+            ///     (false, "foo"),
             ///     (42f32, 2),
             /// ]);
             /// # }
@@ -2580,7 +2581,7 @@
             /// reverse the list, while `foldr` will tend to preserve its order.
             ///
             /// The reason for this is because `foldr` performs what is known as
-            /// &quot;structural induction;&quot; it can be understood as follows:
+            /// "structural induction;" it can be understood as follows:
             ///
             /// * Write out the HList in terms of [`h_cons`] and [`HNil`].
             /// * Substitute each [`h_cons`] with a function,
@@ -2679,19 +2680,19 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let h = hlist![1i32, 2u32, &quot;hello&quot;, true, 42f32];
+    /// let h = hlist![1i32, 2u32, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the type you want.
     /// // You can help guide type inference when necessary by
     /// // using type annotations.
     /// let b: &amp;bool = h.get();
-    /// if !b { panic!(&quot;no way!&quot;) };
+    /// if !b { panic!("no way!") };
     ///
     /// // If space is tight, you can also use turbofish syntax.
     /// // The Index is still left to type inference by using `_`.
     /// match *h.get::&lt;u32, _&gt;() {
     ///     2 =&gt; { }
-    ///     _ =&gt; panic!(&quot;it can&#39;t be!!&quot;),
+    ///     _ =&gt; panic!("it can't be!!"),
     /// }
     /// # }
     /// ```
@@ -2716,7 +2717,7 @@
     /// // Type inference ensures we fetch the correct type.
     /// *h.get_mut() = false;
     /// *h.get_mut() = 2;
-    /// // *h.get_mut() = &quot;neigh&quot;;  // Won&#39;t compile.
+    /// // *h.get_mut() = "neigh";  // Won't compile.
     ///
     /// assert_eq!(h, hlist![2i32, false]);
     /// # }
@@ -2739,7 +2740,7 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let list = hlist![1, &quot;hello&quot;, true, 42f32];
+    /// let list = hlist![1, "hello", true, 42f32];
     ///
     /// // Often, type inference can figure out the target type.
     /// let (b, list): (bool, _) = list.pluck();
@@ -2750,8 +2751,8 @@
     /// let (s, list) = list.pluck::&lt;i32, _&gt;();
     ///
     /// // Each time we plucked, we got back a remainder.
-    /// // Let&#39;s check what&#39;s left:
-    /// assert_eq!(list, hlist![&quot;hello&quot;, 42.0])
+    /// // Let's check what's left:
+    /// assert_eq!(list, hlist!["hello", 42.0])
     /// # }
     /// ```
     </span><span class="attr">#[inline(always)]
@@ -2771,13 +2772,13 @@
     /// # fn main() {
     /// use frunk_core::hlist;
     ///
-    /// let h = hlist![1, &quot;hello&quot;, true, 42f32];
+    /// let h = hlist![1, "hello", true, 42f32];
     ///
     /// // We now have a much nicer pattern matching experience
     /// let (first,(second,(third, fourth))) = h.into_tuple2();
     ///
     /// assert_eq!(first ,       1);
-    /// assert_eq!(second, &quot;hello&quot;);
+    /// assert_eq!(second, "hello");
     /// assert_eq!(third ,    true);
     /// assert_eq!(fourth,   42f32);
     /// # }
@@ -2829,7 +2830,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists of unknown type. If you have an HList of known type,
-/// then `list.get()` should &quot;just work&quot; even without the trait.
+/// then `list.get()` should "just work" even without the trait.
 ///
 /// [`HCons::get`]: struct.HCons.html#method.get
 </span><span class="kw">pub trait </span>Selector&lt;S, I&gt; {
@@ -2886,7 +2887,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists of unknown type. If you have an HList of known type,
-/// then `list.pluck()` should &quot;just work&quot; even without the trait.
+/// then `list.pluck()` should "just work" even without the trait.
 ///
 /// [`HCons::pluck`]: struct.HCons.html#method.pluck
 </span><span class="kw">pub trait </span>Plucker&lt;Target, Index&gt; {
@@ -2943,7 +2944,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists of unknown type. If you have an HList of known type,
-/// then `list.sculpt()` should &quot;just work&quot; even without the trait.
+/// then `list.sculpt()` should "just work" even without the trait.
 ///
 /// [`HCons::sculpt`]: struct.HCons.html#method.sculpt
 </span><span class="kw">pub trait </span>Sculptor&lt;Target, Indices&gt; {
@@ -2963,7 +2964,7 @@
 
 <span class="doccomment">/// Implementation for when the target is an empty HList (HNil)
 ///
-/// Index type is HNil because we don&#39;t need an index for finding HNil
+/// Index type is HNil because we don't need an index for finding HNil
 </span><span class="kw">impl</span>&lt;Source&gt; Sculptor&lt;HNil, HNil&gt; <span class="kw">for </span>Source {
     <span class="kw">type </span>Remainder = Source;
 
@@ -2977,7 +2978,7 @@
 ///
 /// Indices is HCons&lt;IndexHead, IndexTail&gt; here because the compiler is being asked to figure out the
 /// Index for Plucking the first item of type THead out of Self and the rest (IndexTail) is for the
-/// Plucker&#39;s remainder induce.
+/// Plucker's remainder induce.
 </span><span class="kw">impl</span>&lt;THead, TTail, SHead, STail, IndexHead, IndexTail&gt;
     Sculptor&lt;HCons&lt;THead, TTail&gt;, HCons&lt;IndexHead, IndexTail&gt;&gt; <span class="kw">for </span>HCons&lt;SHead, STail&gt;
 <span class="kw">where
@@ -3044,7 +3045,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists or Mappers of unknown type. If the type of everything is known,
-/// then `list.map(f)` should &quot;just work&quot; even without the trait.
+/// then `list.map(f)` should "just work" even without the trait.
 ///
 /// [`HCons::map`]: struct.HCons.html#method.map
 </span><span class="kw">pub trait </span>HMappable&lt;Mapper&gt; {
@@ -3109,7 +3110,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists of unknown type. If the type of everything is known,
-/// then `list.zip(list2)` should &quot;just work&quot; even without the trait.
+/// then `list.zip(list2)` should "just work" even without the trait.
 ///
 /// [`HCons::zip`]: struct.HCons.html#method.zip
 </span><span class="kw">pub trait </span>HZippable&lt;Other&gt; {
@@ -3150,7 +3151,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists or Folders of unknown type. If the type of everything is known,
-/// then `list.foldr(f, init)` should &quot;just work&quot; even without the trait.
+/// then `list.foldr(f, init)` should "just work" even without the trait.
 ///
 /// [`HCons::foldr`]: struct.HCons.html#method.foldr
 </span><span class="kw">pub trait </span>HFoldRightable&lt;Folder, Init&gt; {
@@ -3255,24 +3256,24 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToRef&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>HNil {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToRef&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>HNil {
     <span class="kw">type </span>Output = HNil;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         HNil
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, H, Tail&gt; ToRef&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>HCons&lt;H, Tail&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, H, Tail&gt; ToRef&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>HCons&lt;H, Tail&gt;
 <span class="kw">where
-    </span>H: <span class="lifetime">&#39;a</span>,
-    Tail: ToRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>H: <span class="lifetime">'a</span>,
+    Tail: ToRef&lt;<span class="lifetime">'a</span>&gt;,
 {
-    <span class="kw">type </span>Output = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>H, &lt;Tail <span class="kw">as </span>ToRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>H, &lt;Tail <span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_ref(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         HCons {
             head: <span class="kw-2">&amp;</span><span class="self">self</span>.head,
             tail: <span class="self">self</span>.tail.to_ref(),
@@ -3280,24 +3281,24 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToMut&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>HNil {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToMut&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>HNil {
     <span class="kw">type </span>Output = HNil;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         HNil
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, H, Tail&gt; ToMut&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>HCons&lt;H, Tail&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, H, Tail&gt; ToMut&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>HCons&lt;H, Tail&gt;
 <span class="kw">where
-    </span>H: <span class="lifetime">&#39;a</span>,
-    Tail: ToMut&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>H: <span class="lifetime">'a</span>,
+    Tail: ToMut&lt;<span class="lifetime">'a</span>&gt;,
 {
-    <span class="kw">type </span>Output = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>H, &lt;Tail <span class="kw">as </span>ToMut&lt;<span class="lifetime">&#39;a</span>&gt;&gt;::Output&gt;;
+    <span class="kw">type </span>Output = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>H, &lt;Tail <span class="kw">as </span>ToMut&lt;<span class="lifetime">'a</span>&gt;&gt;::Output&gt;;
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+    </span><span class="kw">fn </span>to_mut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
         HCons {
             head: <span class="kw-2">&amp;mut </span><span class="self">self</span>.head,
             tail: <span class="self">self</span>.tail.to_mut(),
@@ -3312,7 +3313,7 @@
 ///
 /// You only need to import this trait when working with generic
 /// HLists or Mappers of unknown type. If the type of everything is known,
-/// then `list.foldl(f, acc)` should &quot;just work&quot; even without the trait.
+/// then `list.foldl(f, acc)` should "just work" even without the trait.
 ///
 /// [`HCons::foldl`]: struct.HCons.html#method.foldl
 </span><span class="kw">pub trait </span>HFoldLeftable&lt;Folder, Acc&gt; {
@@ -3400,7 +3401,7 @@
 /// This operation is not useful in generic contexts, so it is unlikely
 /// that you should ever need to import this trait. Do not worry;
 /// if you have an HList of known type, then `list.into_tuple2()`
-/// should &quot;just work,&quot; even without the trait.
+/// should "just work," even without the trait.
 ///
 /// [`HCons::into_tuple2`]: struct.HCons.html#method.into_tuple2
 </span><span class="kw">pub trait </span>IntoTuple2 {
@@ -3443,7 +3444,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 #[allow(clippy::from_over_into)]
 </span><span class="kw">impl</span>&lt;H, Tail&gt; Into&lt;Vec&lt;H&gt;&gt; <span class="kw">for </span>HCons&lt;H, Tail&gt;
 <span class="kw">where
@@ -3460,7 +3461,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 #[allow(clippy::from_over_into)]
 </span><span class="kw">impl</span>&lt;T&gt; Into&lt;Vec&lt;T&gt;&gt; <span class="kw">for </span>HNil {
     <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; Vec&lt;T&gt; {
@@ -3482,7 +3483,7 @@
 
 <span class="doccomment">/// Indexed type conversions of `T -&gt; Self` with index `I`.
 /// This is a generalized version of `From` which for example allows the caller
-/// to use default values for parts of `Self` and thus &quot;fill in the blanks&quot;.
+/// to use default values for parts of `Self` and thus "fill in the blanks".
 ///
 /// `LiftFrom` is the reciprocal of `LiftInto`.
 ///
@@ -3512,7 +3513,7 @@
 }
 
 <span class="doccomment">/// An indexed conversion that consumes `self`, and produces a `T`. To produce
-/// `T`, the index `I` may be used to for example &quot;fill in the blanks&quot;.
+/// `T`, the index `I` may be used to for example "fill in the blanks".
 /// `LiftInto` is the reciprocal of `LiftFrom`.
 ///
 /// ```
@@ -3593,10 +3594,10 @@
         <span class="kw">let </span>(h, <span class="kw">_</span>) = hlist1.pop();
         <span class="macro">assert_eq!</span>(h, <span class="number">1</span>);
 
-        <span class="kw">let </span>hlist2 = h_cons(<span class="string">&quot;hello&quot;</span>, h_cons(<span class="number">1</span>, HNil));
+        <span class="kw">let </span>hlist2 = h_cons(<span class="string">"hello"</span>, h_cons(<span class="number">1</span>, HNil));
         <span class="kw">let </span>(h2, tail2) = hlist2.pop();
         <span class="kw">let </span>(h1, <span class="kw">_</span>) = tail2.pop();
-        <span class="macro">assert_eq!</span>(h2, <span class="string">&quot;hello&quot;</span>);
+        <span class="macro">assert_eq!</span>(h2, <span class="string">"hello"</span>);
         <span class="macro">assert_eq!</span>(h1, <span class="number">1</span>);
     }
 
@@ -3613,21 +3614,21 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pluck() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;hello&quot;</span>, <span class="bool-val">true</span>, <span class="number">42f32</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>, <span class="bool-val">true</span>, <span class="number">42f32</span>];
         <span class="kw">let </span>(t, r): (f32, <span class="kw">_</span>) = h.pluck();
         <span class="macro">assert_eq!</span>(t, <span class="number">42f32</span>);
-        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;hello&quot;</span>, <span class="bool-val">true</span>])
+        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>, <span class="bool-val">true</span>])
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_hlist_macro() {
         <span class="macro">assert_eq!</span>(<span class="macro">hlist!</span>[], HNil);
-        <span class="kw">let </span>h: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
+        <span class="kw">let </span>h: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"2"</span>, <span class="number">3</span>];
         <span class="kw">let </span>(h1, tail1) = h.pop();
         <span class="macro">assert_eq!</span>(h1, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(tail1, <span class="macro">hlist!</span>[<span class="string">&quot;2&quot;</span>, <span class="number">3</span>]);
+        <span class="macro">assert_eq!</span>(tail1, <span class="macro">hlist!</span>[<span class="string">"2"</span>, <span class="number">3</span>]);
         <span class="kw">let </span>(h2, tail2) = tail1.pop();
-        <span class="macro">assert_eq!</span>(h2, <span class="string">&quot;2&quot;</span>);
+        <span class="macro">assert_eq!</span>(h2, <span class="string">"2"</span>);
         <span class="macro">assert_eq!</span>(tail2, <span class="macro">hlist!</span>[<span class="number">3</span>]);
         <span class="kw">let </span>(h3, tail3) = tail2.pop();
         <span class="macro">assert_eq!</span>(h3, <span class="number">3</span>);
@@ -3637,8 +3638,8 @@
     <span class="attr">#[test]
     #[allow(non_snake_case)]
     </span><span class="kw">fn </span>test_Hlist_macro() {
-        <span class="kw">let </span>h1: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
-        <span class="kw">let </span>h2: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32,) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;2&quot;</span>, <span class="number">3</span>];
+        <span class="kw">let </span>h1: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"2"</span>, <span class="number">3</span>];
+        <span class="kw">let </span>h2: <span class="macro">HList!</span>(i32, <span class="kw-2">&amp;</span>str, i32,) = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"2"</span>, <span class="number">3</span>];
         <span class="kw">let </span>h3: <span class="macro">HList!</span>(i32) = <span class="macro">hlist!</span>[<span class="number">1</span>];
         <span class="kw">let </span>h4: <span class="macro">HList!</span>(i32,) = <span class="macro">hlist!</span>[<span class="number">1</span>,];
         <span class="macro">assert_eq!</span>(h1, h2);
@@ -3647,38 +3648,38 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pattern_matching() {
-        <span class="kw">let </span><span class="macro">hlist_pat!</span>(one1) = <span class="macro">hlist!</span>[<span class="string">&quot;one&quot;</span>];
-        <span class="macro">assert_eq!</span>(one1, <span class="string">&quot;one&quot;</span>);
-        <span class="kw">let </span><span class="macro">hlist_pat!</span>(one2,) = <span class="macro">hlist!</span>[<span class="string">&quot;one&quot;</span>];
-        <span class="macro">assert_eq!</span>(one2, <span class="string">&quot;one&quot;</span>);
+        <span class="kw">let </span><span class="macro">hlist_pat!</span>(one1) = <span class="macro">hlist!</span>[<span class="string">"one"</span>];
+        <span class="macro">assert_eq!</span>(one1, <span class="string">"one"</span>);
+        <span class="kw">let </span><span class="macro">hlist_pat!</span>(one2,) = <span class="macro">hlist!</span>[<span class="string">"one"</span>];
+        <span class="macro">assert_eq!</span>(one2, <span class="string">"one"</span>);
 
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">5</span>, <span class="number">3.2f32</span>, <span class="bool-val">true</span>, <span class="string">&quot;blue&quot;</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">5</span>, <span class="number">3.2f32</span>, <span class="bool-val">true</span>, <span class="string">"blue"</span>];
         <span class="kw">let </span><span class="macro">hlist_pat!</span>(five, float, right, s) = h;
         <span class="macro">assert_eq!</span>(five, <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(float, <span class="number">3.2f32</span>);
         <span class="macro">assert!</span>(right);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;blue&quot;</span>);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"blue"</span>);
 
-        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">13.5f32</span>, <span class="string">&quot;hello&quot;</span>, <span class="prelude-val">Some</span>(<span class="number">41</span>)];
+        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">13.5f32</span>, <span class="string">"hello"</span>, <span class="prelude-val">Some</span>(<span class="number">41</span>)];
         <span class="kw">let </span><span class="macro">hlist_pat!</span>[a, b, c,] = h2;
         <span class="macro">assert_eq!</span>(a, <span class="number">13.5f32</span>);
-        <span class="macro">assert_eq!</span>(b, <span class="string">&quot;hello&quot;</span>);
+        <span class="macro">assert_eq!</span>(b, <span class="string">"hello"</span>);
         <span class="macro">assert_eq!</span>(c, <span class="prelude-val">Some</span>(<span class="number">41</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_add() {
-        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">&quot;hi&quot;</span>];
+        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">"hi"</span>];
         <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="number">32f32</span>];
         <span class="kw">let </span>combined = h1 + h2;
-        <span class="macro">assert_eq!</span>(combined, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">&quot;hi&quot;</span>, <span class="number">1</span>, <span class="number">32f32</span>])
+        <span class="macro">assert_eq!</span>(combined, <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">"hi"</span>, <span class="number">1</span>, <span class="number">32f32</span>])
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_into_reverse() {
-        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">&quot;hi&quot;</span>];
+        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="string">"hi"</span>];
         <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="number">32f32</span>];
-        <span class="macro">assert_eq!</span>(h1.into_reverse(), <span class="macro">hlist!</span>[<span class="string">&quot;hi&quot;</span>, <span class="bool-val">true</span>]);
+        <span class="macro">assert_eq!</span>(h1.into_reverse(), <span class="macro">hlist!</span>[<span class="string">"hi"</span>, <span class="bool-val">true</span>]);
         <span class="macro">assert_eq!</span>(h2.into_reverse(), <span class="macro">hlist!</span>[<span class="number">32f32</span>, <span class="number">1</span>]);
     }
 
@@ -3733,14 +3734,14 @@
             }
         }
 
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">0</span>..<span class="number">10</span>, <span class="number">0</span>..=<span class="number">10</span>, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="string">&#39;a&#39;</span>, <span class="string">&#39;b&#39;</span>, <span class="string">&#39;c&#39;</span>]];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">0</span>..<span class="number">10</span>, <span class="number">0</span>..=<span class="number">10</span>, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>]];
         <span class="macro">assert_eq!</span>(
             h.foldr(Poly(Dummynator), <span class="number">0</span>),
             (<span class="number">0</span>..<span class="number">10</span>)
                 .map(|d| d.dummy())
                 .chain((<span class="number">0</span>..=<span class="number">10</span>).map(|d| d.dummy()))
                 .chain([<span class="number">0_i32</span>, <span class="number">1</span>, <span class="number">2</span>].iter().map(|d| d.dummy()))
-                .chain([<span class="string">&#39;a&#39;</span>, <span class="string">&#39;b&#39;</span>, <span class="string">&#39;c&#39;</span>].iter().map(|d| d.dummy()))
+                .chain([<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>].iter().map(|d| d.dummy()))
                 .sum()
         );
     }
@@ -3792,73 +3793,73 @@
             }
         }
 
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">0</span>..<span class="number">10</span>, <span class="number">0</span>..=<span class="number">10</span>, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="string">&#39;a&#39;</span>, <span class="string">&#39;b&#39;</span>, <span class="string">&#39;c&#39;</span>]];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">0</span>..<span class="number">10</span>, <span class="number">0</span>..=<span class="number">10</span>, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>]];
         <span class="macro">assert_eq!</span>(
             h.foldl(Poly(Dummynator), <span class="number">0</span>),
             (<span class="number">0</span>..<span class="number">10</span>)
                 .map(|d| d.dummy())
                 .chain((<span class="number">0</span>..=<span class="number">10</span>).map(|d| d.dummy()))
                 .chain([<span class="number">0_i32</span>, <span class="number">1</span>, <span class="number">2</span>].iter().map(|d| d.dummy()))
-                .chain([<span class="string">&#39;a&#39;</span>, <span class="string">&#39;b&#39;</span>, <span class="string">&#39;c&#39;</span>].iter().map(|d| d.dummy()))
+                .chain([<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>].iter().map(|d| d.dummy()))
                 .sum()
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_map_consuming() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>];
         <span class="kw">let </span>mapped = h.map(<span class="macro">hlist!</span>[|n| n + <span class="number">1</span>, |s| s, |f| f + <span class="number">1f32</span>]);
-        <span class="macro">assert_eq!</span>(mapped, <span class="macro">hlist!</span>[<span class="number">9001</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">42f32</span>]);
+        <span class="macro">assert_eq!</span>(mapped, <span class="macro">hlist!</span>[<span class="number">9001</span>, <span class="string">"joe"</span>, <span class="number">42f32</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_poly_map_consuming() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>, <span class="string">&quot;schmoe&quot;</span>, <span class="number">50</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>, <span class="string">"schmoe"</span>, <span class="number">50</span>];
         <span class="kw">impl </span>Func&lt;i32&gt; <span class="kw">for </span>P {
             <span class="kw">type </span>Output = bool;
             <span class="kw">fn </span>call(args: i32) -&gt; <span class="self">Self</span>::Output {
                 args &gt; <span class="number">100
             </span>}
         }
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>P {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>P {
             <span class="kw">type </span>Output = usize;
-            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self</span>::Output {
+            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self</span>::Output {
                 args.len()
             }
         }
         <span class="kw">impl </span>Func&lt;f32&gt; <span class="kw">for </span>P {
-            <span class="kw">type </span>Output = <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+            <span class="kw">type </span>Output = <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
             <span class="kw">fn </span>call(<span class="kw">_</span>: f32) -&gt; <span class="self">Self</span>::Output {
-                <span class="string">&quot;dummy&quot;
+                <span class="string">"dummy"
             </span>}
         }
         <span class="kw">struct </span>P;
-        <span class="macro">assert_eq!</span>(h.map(Poly(P)), <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">&quot;dummy&quot;</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
+        <span class="macro">assert_eq!</span>(h.map(Poly(P)), <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">"dummy"</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_poly_map_non_consuming() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>, <span class="string">&quot;schmoe&quot;</span>, <span class="number">50</span>];
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>i32&gt; <span class="kw">for </span>P {
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>, <span class="string">"schmoe"</span>, <span class="number">50</span>];
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>i32&gt; <span class="kw">for </span>P {
             <span class="kw">type </span>Output = bool;
-            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>i32) -&gt; <span class="self">Self</span>::Output {
+            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>i32) -&gt; <span class="self">Self</span>::Output {
                 <span class="kw-2">*</span>args &gt; <span class="number">100
             </span>}
         }
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>P {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>P {
             <span class="kw">type </span>Output = usize;
-            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self</span>::Output {
+            <span class="kw">fn </span>call(args: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self</span>::Output {
                 args.len()
             }
         }
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>f32&gt; <span class="kw">for </span>P {
-            <span class="kw">type </span>Output = <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
-            <span class="kw">fn </span>call(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>f32) -&gt; <span class="self">Self</span>::Output {
-                <span class="string">&quot;dummy&quot;
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Func&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>f32&gt; <span class="kw">for </span>P {
+            <span class="kw">type </span>Output = <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
+            <span class="kw">fn </span>call(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>f32) -&gt; <span class="self">Self</span>::Output {
+                <span class="string">"dummy"
             </span>}
         }
         <span class="kw">struct </span>P;
-        <span class="macro">assert_eq!</span>(h.to_ref().map(Poly(P)), <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">&quot;dummy&quot;</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
+        <span class="macro">assert_eq!</span>(h.to_ref().map(Poly(P)), <span class="macro">hlist!</span>[<span class="bool-val">true</span>, <span class="number">3</span>, <span class="string">"dummy"</span>, <span class="number">6</span>, <span class="bool-val">false</span>]);
     }
 
     <span class="attr">#[test]
@@ -3877,40 +3878,40 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_map_non_consuming() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>];
         <span class="kw">let </span>mapped = h.to_ref().map(<span class="macro">hlist!</span>[|<span class="kw-2">&amp;</span>n| n + <span class="number">1</span>, |<span class="kw-2">&amp;</span>s| s, |<span class="kw-2">&amp;</span>f| f + <span class="number">1f32</span>]);
-        <span class="macro">assert_eq!</span>(mapped, <span class="macro">hlist!</span>[<span class="number">9001</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">42f32</span>]);
+        <span class="macro">assert_eq!</span>(mapped, <span class="macro">hlist!</span>[<span class="number">9001</span>, <span class="string">"joe"</span>, <span class="number">42f32</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_zip_easy() {
-        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>];
-        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="string">&quot;joe&quot;</span>, <span class="number">9001</span>, <span class="number">42f32</span>];
+        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>];
+        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="string">"joe"</span>, <span class="number">9001</span>, <span class="number">42f32</span>];
         <span class="kw">let </span>zipped = h1.zip(h2);
         <span class="macro">assert_eq!</span>(
             zipped,
-            <span class="macro">hlist!</span>[(<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>), (<span class="string">&quot;joe&quot;</span>, <span class="number">9001</span>), (<span class="number">41f32</span>, <span class="number">42f32</span>),]
+            <span class="macro">hlist!</span>[(<span class="number">9000</span>, <span class="string">"joe"</span>), (<span class="string">"joe"</span>, <span class="number">9001</span>), (<span class="number">41f32</span>, <span class="number">42f32</span>),]
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_zip_composes() {
-        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">&quot;1&quot;</span>, <span class="number">1.0</span>];
-        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">2</span>, <span class="string">&quot;2&quot;</span>, <span class="number">2.0</span>];
-        <span class="kw">let </span>h3 = <span class="macro">hlist!</span>[<span class="number">3</span>, <span class="string">&quot;3&quot;</span>, <span class="number">3.0</span>];
+        <span class="kw">let </span>h1 = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"1"</span>, <span class="number">1.0</span>];
+        <span class="kw">let </span>h2 = <span class="macro">hlist!</span>[<span class="number">2</span>, <span class="string">"2"</span>, <span class="number">2.0</span>];
+        <span class="kw">let </span>h3 = <span class="macro">hlist!</span>[<span class="number">3</span>, <span class="string">"3"</span>, <span class="number">3.0</span>];
         <span class="kw">let </span>zipped = h1.zip(h2).zip(h3);
         <span class="macro">assert_eq!</span>(
             zipped,
-            <span class="macro">hlist!</span>[((<span class="number">1</span>, <span class="number">2</span>), <span class="number">3</span>), ((<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>), <span class="string">&quot;3&quot;</span>), ((<span class="number">1.0</span>, <span class="number">2.0</span>), <span class="number">3.0</span>)],
+            <span class="macro">hlist!</span>[((<span class="number">1</span>, <span class="number">2</span>), <span class="number">3</span>), ((<span class="string">"1"</span>, <span class="string">"2"</span>), <span class="string">"3"</span>), ((<span class="number">1.0</span>, <span class="number">2.0</span>), <span class="number">3.0</span>)],
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_sculpt() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">&quot;joe&quot;</span>, <span class="number">41f32</span>];
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">9000</span>, <span class="string">"joe"</span>, <span class="number">41f32</span>];
         <span class="kw">let </span>(reshaped, remainder): (<span class="macro">HList!</span>(f32, i32), <span class="kw">_</span>) = h.sculpt();
         <span class="macro">assert_eq!</span>(reshaped, <span class="macro">hlist!</span>[<span class="number">41f32</span>, <span class="number">9000</span>]);
-        <span class="macro">assert_eq!</span>(remainder, <span class="macro">hlist!</span>[<span class="string">&quot;joe&quot;</span>])
+        <span class="macro">assert_eq!</span>(remainder, <span class="macro">hlist!</span>[<span class="string">"joe"</span>])
     }
 
     <span class="attr">#[test]
@@ -3919,19 +3920,19 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>test_single_func_foldl_consuming() {
         <span class="kw">use </span>std::collections::HashMap;
 
         <span class="kw">let </span>h = <span class="macro">hlist!</span>[
-            (<span class="string">&quot;one&quot;</span>, <span class="number">1</span>),
-            (<span class="string">&quot;two&quot;</span>, <span class="number">2</span>),
-            (<span class="string">&quot;three&quot;</span>, <span class="number">3</span>),
-            (<span class="string">&quot;four&quot;</span>, <span class="number">4</span>),
-            (<span class="string">&quot;five&quot;</span>, <span class="number">5</span>),
+            (<span class="string">"one"</span>, <span class="number">1</span>),
+            (<span class="string">"two"</span>, <span class="number">2</span>),
+            (<span class="string">"three"</span>, <span class="number">3</span>),
+            (<span class="string">"four"</span>, <span class="number">4</span>),
+            (<span class="string">"five"</span>, <span class="number">5</span>),
         ];
         <span class="kw">let </span>r = h.foldl(
-            |<span class="kw-2">mut </span>acc: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, isize&gt;, (k, v)| {
+            |<span class="kw-2">mut </span>acc: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, isize&gt;, (k, v)| {
                 acc.insert(k, v);
                 acc
             },
@@ -3939,11 +3940,11 @@
         );
         <span class="kw">let </span>expected: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = {
             <span class="macro">vec!</span>[
-                (<span class="string">&quot;one&quot;</span>, <span class="number">1</span>),
-                (<span class="string">&quot;two&quot;</span>, <span class="number">2</span>),
-                (<span class="string">&quot;three&quot;</span>, <span class="number">3</span>),
-                (<span class="string">&quot;four&quot;</span>, <span class="number">4</span>),
-                (<span class="string">&quot;five&quot;</span>, <span class="number">5</span>),
+                (<span class="string">"one"</span>, <span class="number">1</span>),
+                (<span class="string">"two"</span>, <span class="number">2</span>),
+                (<span class="string">"three"</span>, <span class="number">3</span>),
+                (<span class="string">"four"</span>, <span class="number">4</span>),
+                (<span class="string">"five"</span>, <span class="number">5</span>),
             ]
             .into_iter()
             .collect()
@@ -3959,7 +3960,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>test_into_vec() {
         <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
         <span class="kw">let </span>as_vec: Vec&lt;<span class="kw">_</span>&gt; = h.into();
