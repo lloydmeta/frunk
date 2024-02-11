@@ -71,31 +71,31 @@
 </span><span class="kw">pub struct </span>Wrapper&lt;A&gt;(A);
 
 <span class="kw">impl</span>&lt;A: Arbitrary + Ord + Clone&gt; Arbitrary <span class="kw">for </span>Wrapper&lt;Max&lt;A&gt;&gt; {
-    <span class="kw">fn </span>arbitrary&lt;G: Gen&gt;(g: <span class="kw-2">&amp;mut </span>G) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>arbitrary(g: <span class="kw-2">&amp;mut </span>Gen) -&gt; <span class="self">Self </span>{
         Wrapper(Max(Arbitrary::arbitrary(g)))
     }
 }
 
 <span class="kw">impl</span>&lt;A: Arbitrary + Ord + Clone&gt; Arbitrary <span class="kw">for </span>Wrapper&lt;Min&lt;A&gt;&gt; {
-    <span class="kw">fn </span>arbitrary&lt;G: Gen&gt;(g: <span class="kw-2">&amp;mut </span>G) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>arbitrary(g: <span class="kw-2">&amp;mut </span>Gen) -&gt; <span class="self">Self </span>{
         Wrapper(Min(Arbitrary::arbitrary(g)))
     }
 }
 
 <span class="kw">impl</span>&lt;A: Arbitrary&gt; Arbitrary <span class="kw">for </span>Wrapper&lt;All&lt;A&gt;&gt; {
-    <span class="kw">fn </span>arbitrary&lt;G: Gen&gt;(g: <span class="kw-2">&amp;mut </span>G) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>arbitrary(g: <span class="kw-2">&amp;mut </span>Gen) -&gt; <span class="self">Self </span>{
         Wrapper(All(Arbitrary::arbitrary(g)))
     }
 }
 
 <span class="kw">impl</span>&lt;A: Arbitrary&gt; Arbitrary <span class="kw">for </span>Wrapper&lt;Any&lt;A&gt;&gt; {
-    <span class="kw">fn </span>arbitrary&lt;G: Gen&gt;(g: <span class="kw-2">&amp;mut </span>G) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>arbitrary(g: <span class="kw-2">&amp;mut </span>Gen) -&gt; <span class="self">Self </span>{
         Wrapper(Any(Arbitrary::arbitrary(g)))
     }
 }
 
 <span class="kw">impl</span>&lt;A: Arbitrary&gt; Arbitrary <span class="kw">for </span>Wrapper&lt;Product&lt;A&gt;&gt; {
-    <span class="kw">fn </span>arbitrary&lt;G: Gen&gt;(g: <span class="kw-2">&amp;mut </span>G) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>arbitrary(g: <span class="kw-2">&amp;mut </span>Gen) -&gt; <span class="self">Self </span>{
         Wrapper(Product(Arbitrary::arbitrary(g)))
     }
 }
