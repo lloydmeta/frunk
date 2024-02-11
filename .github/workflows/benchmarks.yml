@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup toolchain update nightly && rustup default nightly
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - name: run benchmark
         run: cargo +nightly bench | tee benchmark_output.txt
       - name: store benchmark result
