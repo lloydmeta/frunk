@@ -14,31 +14,31 @@ use quickcheck::*;
 pub struct Wrapper<A>(A);
 
 impl<A: Arbitrary + Ord + Clone> Arbitrary for Wrapper<Max<A>> {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         Wrapper(Max(Arbitrary::arbitrary(g)))
     }
 }
 
 impl<A: Arbitrary + Ord + Clone> Arbitrary for Wrapper<Min<A>> {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         Wrapper(Min(Arbitrary::arbitrary(g)))
     }
 }
 
 impl<A: Arbitrary> Arbitrary for Wrapper<All<A>> {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         Wrapper(All(Arbitrary::arbitrary(g)))
     }
 }
 
 impl<A: Arbitrary> Arbitrary for Wrapper<Any<A>> {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         Wrapper(Any(Arbitrary::arbitrary(g)))
     }
 }
 
 impl<A: Arbitrary> Arbitrary for Wrapper<Product<A>> {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         Wrapper(Product(Arbitrary::arbitrary(g)))
     }
 }
