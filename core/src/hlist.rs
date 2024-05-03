@@ -102,7 +102,7 @@ pub trait HList: Sized {
     /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
-    #[deprecated(since = "0.5.0", note = "Please use Len::USIZE instead")]
+    #[deprecated(since = "0.5.0", note = "Please use <Self as HList>::Len::[USIZE | U8 | U32 | ... ] instead")]
     #[inline]
     fn len(&self) -> usize {
         <Self::Len as Unsigned>::USIZE
@@ -266,6 +266,9 @@ macro_rules! gen_inherent_methods {
             pub fn len(&self) -> usize
             where Self: HList,
             {
+                // this is how it's done at the type-level
+                // <Self as HList>::Len::USIZE
+                #[allow(deprecated)]
                 HList::len(self)
             }
 
@@ -286,6 +289,8 @@ macro_rules! gen_inherent_methods {
             where Self: HList,
             {
                 HList::is_empty(self)
+                // this is how it's done at the type-level
+                // <<<Self as HList>::Len as typenum::IsEqual<typenum::U0>>::Output as typenum::Bit>::BOOL
             }
 
             /// Prepend an item to the current HList
