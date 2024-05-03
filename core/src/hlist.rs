@@ -59,6 +59,8 @@ use crate::indices::{Here, Suffixed, There};
 use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use typenum::bit::B1;
+use typenum::{Unsigned, UInt, UTerm};
 
 use std::ops::Add;
 
@@ -67,8 +69,7 @@ use std::ops::Add;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
+    /// The type-level encapsulation of the lists length, using `typenum` under the hood.
     ///
     /// # Examples
     /// ```
@@ -76,10 +77,15 @@ pub trait HList: Sized {
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
-    /// assert_eq!(<HList![i32, bool, f32]>::LEN, 3);
+    /// fn foo<T: typenum::IsEqual<U3>>() {}
+    /// let _ = foo::<HList![(), i32, bool]::Len>();
+    /// let byte: u32 = HList![bool, &str, String]::Len::UINT32;
+    ///
+    ///
+    /// assert_eq!(<HList![i32, bool, f32]>::Len, 3);
     /// # }
     /// ```
-    const LEN: usize;
+    type Len: Unsigned;
 
     /// Returns the length of a given HList
     ///
@@ -93,9 +99,10 @@ pub trait HList: Sized {
     /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
+    #[deprecated(since = "0.5.0", note = "Please use Len::USIZE instead")]
     #[inline]
     fn len(&self) -> usize {
-        Self::LEN
+        <Self::Len as Unsigned>::USIZE
     }
 
     /// Returns whether a given HList is empty
@@ -112,7 +119,7 @@ pub trait HList: Sized {
     /// ```
     #[inline]
     fn is_empty(&self) -> bool {
-        Self::LEN == 0
+        <Self::Len as Unsigned>::USIZE == 0
     }
 
     /// Returns the length of a given HList type without making use of any references, or
@@ -127,7 +134,7 @@ pub trait HList: Sized {
     /// assert_eq!(<HList![i32, bool, f32]>::static_len(), 3);
     /// # }
     /// ```
-    #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
+    #[deprecated(since = "0.1.31", note = "Please use Len::USIZE instead")]
     fn static_len() -> usize;
 
     /// Prepends an item to the current HList
@@ -168,9 +175,9 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
-    const LEN: usize = 0;
+    type Len = typenum::U0;
     fn static_len() -> usize {
-        Self::LEN
+        <Self::Len as Unsigned>::USIZE
     }
 }
 
@@ -183,10 +190,14 @@ pub struct HCons<H, T> {
     pub tail: T,
 }
 
-impl<H, T: HList> HList for HCons<H, T> {
-    const LEN: usize = 1 + <T as HList>::LEN;
+impl<H, T: HList> HList for HCons<H, T> 
+where 
+    <T as HList>::Len: Add<typenum::U1>,
+    <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned
+{
+    type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
     fn static_len() -> usize {
-        Self::LEN
+        <Self::Len as Unsigned>::USIZE
     }
 }
 
@@ -1123,6 +1134,8 @@ impl HZippable<HNil> for HNil {
 impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
 where
     T1: HZippable<T2>,
+    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<UInt<UTerm, B1>>,
+    <<<T1 as HZippable<T2>>::Zipped as HList>::Len as Add<UInt<UTerm, B1>>>::Output: Unsigned,
 {
     type Zipped = HCons<(H1, H2), T1::Zipped>;
     fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
@@ -1438,11 +1451,13 @@ where
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
+    <Tail as HList>::Len: Add<UInt<UTerm, B1>>,
+    <<Tail as HList>::Len as Add<UInt<UTerm, B1>>>::Output: Unsigned,
 {
     fn into(self) -> Vec<H> {
         let h = self.head;
         let t = self.tail;
-        let mut v = Vec::with_capacity(<Self as HList>::LEN);
+        let mut v = Vec::with_capacity(<<Self as HList>::Len as Unsigned>::USIZE);
         v.push(h);
         let mut t_vec: Vec<H> = t.into();
         v.append(&mut t_vec);
@@ -1905,7 +1920,7 @@ mod tests {
 
     #[test]
     fn test_len_const() {
-        assert_eq!(<HList![usize, &str, f32] as HList>::LEN, 3);
+        assert_eq!(<HList![usize, &str, f32] as HList>::Len::USIZE, 3);
     }
 
     #[test]
