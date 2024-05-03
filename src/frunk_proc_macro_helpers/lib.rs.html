@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `proc-macro-helpers/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_proc_macro_helpers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `proc-macro-helpers/src/lib.rs`."><title>lib.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_proc_macro_helpers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0 (9b00956e5 2024-04-29)" data-channel="1.78.0" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../frunk_proc_macro_helpers/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -496,9 +497,9 @@
     </span>L::Item: ToTokens,
     L::IntoIter: DoubleEndedIterator,
 {
-    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote! </span>{ ::frunk_core::hlist::HNil };
+    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote!</span> { ::frunk_core::hlist::HNil };
     <span class="kw">for </span>item <span class="kw">in </span>items.into_iter().rev() {
-        result = <span class="macro">quote! </span>{ ::frunk_core::hlist::HCons&lt;#item, #result&gt; }
+        result = <span class="macro">quote!</span> { ::frunk_core::hlist::HCons&lt;#item, #result&gt; }
     }
     result
 }
@@ -510,9 +511,9 @@
     </span>L::Item: ToTokens,
     L::IntoIter: DoubleEndedIterator,
 {
-    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote! </span>{ ::frunk_core::hlist::HNil };
+    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote!</span> { ::frunk_core::hlist::HNil };
     <span class="kw">for </span>item <span class="kw">in </span>items.into_iter().rev() {
-        result = <span class="macro">quote! </span>{ ::frunk_core::hlist::HCons { head: #item, tail: #result }}
+        result = <span class="macro">quote!</span> { ::frunk_core::hlist::HCons { head: #item, tail: #result }}
     }
     result
 }
@@ -524,9 +525,9 @@
     </span>L::Item: ToTokens,
     L::IntoIter: DoubleEndedIterator,
 {
-    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote! </span>{ ::frunk_core::coproduct::CNil };
+    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote!</span> { ::frunk_core::coproduct::CNil };
     <span class="kw">for </span>item <span class="kw">in </span>items.into_iter().rev() {
-        result = <span class="macro">quote! </span>{ ::frunk_core::coproduct::Coproduct&lt;#item, #result&gt; }
+        result = <span class="macro">quote!</span> { ::frunk_core::coproduct::Coproduct&lt;#item, #result&gt; }
     }
     result
 }
@@ -534,9 +535,9 @@
 <span class="doccomment">/// Given an index and an expression or pattern, creates an AST for the corresponding Coproduct
 /// constructor, which may itself be used as an expression or a pattern.
 </span><span class="kw">pub fn </span>build_coprod_constr(index: usize, item: <span class="kw">impl </span>ToTokens) -&gt; TokenStream2 {
-    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote! </span>{ ::frunk_core::coproduct::Coproduct::Inl(#item) };
+    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote!</span> { ::frunk_core::coproduct::Coproduct::Inl(#item) };
     <span class="kw">for _ in </span><span class="number">0</span>..index {
-        result = <span class="macro">quote! </span>{ ::frunk_core::coproduct::Coproduct::Inr(#result) }
+        result = <span class="macro">quote!</span> { ::frunk_core::coproduct::Coproduct::Inr(#result) }
     }
     result
 }
@@ -545,28 +546,28 @@
 /// the CNil case in order to work around limitations in the compiler's exhaustiveness
 /// checking.
 </span><span class="kw">pub fn </span>build_coprod_unreachable_arm(length: usize, deref: bool) -&gt; TokenStream2 {
-    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote! </span>{ _frunk_unreachable_ };
+    <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="macro">quote!</span> { _frunk_unreachable_ };
     <span class="kw">for _ in </span><span class="number">0</span>..length {
-        result = <span class="macro">quote! </span>{ ::frunk_core::coproduct::Coproduct::Inr(#result)}
+        result = <span class="macro">quote!</span> { ::frunk_core::coproduct::Coproduct::Inr(#result)}
     }
     <span class="kw">if </span>deref {
-        <span class="macro">quote! </span>{ #result =&gt; <span class="kw">match </span><span class="kw-2">*</span>_frunk_unreachable_ {} }
+        <span class="macro">quote!</span> { #result =&gt; <span class="kw">match </span><span class="kw-2">*</span>_frunk_unreachable_ {} }
     } <span class="kw">else </span>{
-        <span class="macro">quote! </span>{ #result =&gt; <span class="kw">match </span>_frunk_unreachable_ {} }
+        <span class="macro">quote!</span> { #result =&gt; <span class="kw">match </span>_frunk_unreachable_ {} }
     }
 }
 
 <span class="kw">pub fn </span>build_field_type(name: <span class="kw-2">&amp;</span>Ident, inner_type: <span class="kw">impl </span>ToTokens) -&gt; TokenStream2 {
     <span class="kw">let </span>label_type = build_label_type(name);
-    <span class="macro">quote! </span>{ ::frunk_core::labelled::Field&lt;#label_type, #inner_type&gt; }
+    <span class="macro">quote!</span> { ::frunk_core::labelled::Field&lt;#label_type, #inner_type&gt; }
 }
 <span class="kw">pub fn </span>build_field_expr(name: <span class="kw-2">&amp;</span>Ident, inner_expr: <span class="kw">impl </span>ToTokens) -&gt; TokenStream2 {
     <span class="kw">let </span>label_type = build_label_type(name);
     <span class="kw">let </span>literal_name = name.to_string();
-    <span class="macro">quote! </span>{ ::frunk_core::labelled::field_with_name::&lt;#label_type, <span class="kw">_</span>&gt;(#literal_name, #inner_expr) }
+    <span class="macro">quote!</span> { ::frunk_core::labelled::field_with_name::&lt;#label_type, <span class="kw">_</span>&gt;(#literal_name, #inner_expr) }
 }
 <span class="kw">pub fn </span>build_field_pat(inner_pat: <span class="kw">impl </span>ToTokens) -&gt; TokenStream2 {
-    <span class="macro">quote! </span>{ ::frunk_core::labelled::Field { value: #inner_pat, .. } }
+    <span class="macro">quote!</span> { ::frunk_core::labelled::Field { value: #inner_pat, .. } }
 }
 
 <span class="doccomment">/// Given an Ident returns an AST for its type level representation based on the
@@ -580,10 +581,10 @@
     <span class="kw">let </span>name_as_tokens: Vec&lt;<span class="kw">_</span>&gt; = name_as_idents
         .iter()
         .map(|ident| {
-            <span class="macro">quote! </span>{ ::frunk_core::labelled::chars::#ident }
+            <span class="macro">quote!</span> { ::frunk_core::labelled::chars::#ident }
         })
         .collect();
-    <span class="macro">quote! </span>{ (#(#name_as_tokens),<span class="kw-2">*</span>) }
+    <span class="macro">quote!</span> { (#(#name_as_tokens),<span class="kw-2">*</span>) }
 }
 
 <span class="doccomment">/// Given a char, encodes it as a vector of Ident
@@ -620,7 +621,7 @@
         .iter()
         .map(build_label_type)
         .fold(<span class="macro">quote!</span>(::frunk_core::hlist::HNil), |acc, t| {
-            <span class="macro">quote! </span>{
+            <span class="macro">quote!</span> {
             ::frunk_core::path::Path&lt;
                 ::frunk_core::hlist::HCons&lt;
                    #t,
@@ -674,27 +675,27 @@
 <span class="kw">impl </span>FieldBinding {
     <span class="kw">pub fn </span>build_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>ty = <span class="kw-2">&amp;</span><span class="self">self</span>.field.ty;
-        <span class="macro">quote! </span>{ #ty }
+        <span class="macro">quote!</span> { #ty }
     }
     <span class="kw">pub fn </span>build_type_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>ty = <span class="kw-2">&amp;</span><span class="self">self</span>.field.ty;
-        <span class="macro">quote! </span>{ <span class="kw-2">&amp;</span><span class="lifetime">'_frunk_ref_ </span>#ty }
+        <span class="macro">quote!</span> { <span class="kw-2">&amp;</span><span class="lifetime">'_frunk_ref_ </span>#ty }
     }
     <span class="kw">pub fn </span>build_type_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>ty = <span class="kw-2">&amp;</span><span class="self">self</span>.field.ty;
-        <span class="macro">quote! </span>{ <span class="kw-2">&amp;</span><span class="lifetime">'_frunk_ref_ </span><span class="kw-2">mut </span>#ty }
+        <span class="macro">quote!</span> { <span class="kw-2">&amp;</span><span class="lifetime">'_frunk_ref_ </span><span class="kw-2">mut </span>#ty }
     }
     <span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>binding = <span class="kw-2">&amp;</span><span class="self">self</span>.binding;
-        <span class="macro">quote! </span>{ #binding }
+        <span class="macro">quote!</span> { #binding }
     }
     <span class="kw">pub fn </span>build_pat_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>binding = <span class="kw-2">&amp;</span><span class="self">self</span>.binding;
-        <span class="macro">quote! </span>{ <span class="kw-2">ref </span>#binding }
+        <span class="macro">quote!</span> { <span class="kw-2">ref </span>#binding }
     }
     <span class="kw">pub fn </span>build_pat_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>binding = <span class="kw-2">&amp;</span><span class="self">self</span>.binding;
-        <span class="macro">quote! </span>{ <span class="kw-2">ref mut </span>#binding }
+        <span class="macro">quote!</span> { <span class="kw-2">ref mut </span>#binding }
     }
     <span class="kw">pub fn </span>build_field_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         build_field_type(<span class="kw-2">&amp;</span><span class="self">self</span>.binding, <span class="self">self</span>.build_type())
@@ -747,8 +748,8 @@
     </span><span class="kw">pub fn </span>build_type_constr&lt;R: ToTokens&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>FieldBinding) -&gt; R) -&gt; TokenStream2 {
         <span class="kw">let </span>bindings: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.fields.iter().map(f).collect();
         <span class="kw">match </span><span class="self">self</span>.type_ {
-            StructType::Named =&gt; <span class="macro">quote! </span>{ { #(#bindings,)* } },
-            StructType::Tuple =&gt; <span class="macro">quote! </span>{ ( #(#bindings,)* ) },
+            StructType::Named =&gt; <span class="macro">quote!</span> { { #(#bindings,)* } },
+            StructType::Tuple =&gt; <span class="macro">quote!</span> { ( #(#bindings,)* ) },
             StructType::Unit =&gt; TokenStream2::new(),
         }
     }
@@ -794,17 +795,17 @@
     <span class="kw">pub fn </span>build_type_constr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.name;
         <span class="kw">let </span>constr = <span class="self">self</span>.fields.build_type_constr(FieldBinding::build);
-        <span class="macro">quote! </span>{ #name #constr }
+        <span class="macro">quote!</span> { #name #constr }
     }
     <span class="kw">pub fn </span>build_type_pat_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.name;
         <span class="kw">let </span>constr = <span class="self">self</span>.fields.build_type_constr(FieldBinding::build_pat_ref);
-        <span class="macro">quote! </span>{ #name #constr }
+        <span class="macro">quote!</span> { #name #constr }
     }
     <span class="kw">pub fn </span>build_type_pat_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.name;
         <span class="kw">let </span>constr = <span class="self">self</span>.fields.build_type_constr(FieldBinding::build_pat_mut);
-        <span class="macro">quote! </span>{ #name #constr }
+        <span class="macro">quote!</span> { #name #constr }
     }
     <span class="kw">pub fn </span>build_hlist_field_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
         build_field_type(
