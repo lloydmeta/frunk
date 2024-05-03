@@ -20,4 +20,4 @@ proc-macro2 = "1"
 [dependencies.frunk_core]
 path = "../core"
 default-features = false
-version = "0.4.2"
+version = "0.5.0"
