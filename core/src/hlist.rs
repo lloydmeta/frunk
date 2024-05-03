@@ -74,15 +74,18 @@ pub trait HList: Sized {
     /// # Examples
     /// ```
     /// # fn main() {
+    /// use typenum::Unsigned;
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
-    /// fn foo<T: typenum::IsEqual<U3>>() {}
-    /// let _ = foo::<HList![(), i32, bool]::Len>();
-    /// let byte: u32 = HList![bool, &str, String]::Len::UINT32;
+    /// type LenThree = HList![bool, (), u8];
+    /// fn foo<T: typenum::IsEqual<typenum::U3>>() {}
+    ///
+    /// let _ = foo::<<LenThree as HList>::Len>();
+    /// let byte: u8 = <<LenThree as HList>::Len>::U8;
     ///
     ///
-    /// assert_eq!(<HList![i32, bool, f32]>::Len, 3);
+    /// assert_eq!(<LenThree as HList>::Len::USIZE, 3);
     /// # }
     /// ```
     type Len: Unsigned;
