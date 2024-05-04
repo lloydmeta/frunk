@@ -60,7 +60,7 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[doc(cfg(feature = "typenum"))]
+#[cfg_attr(feature = "nightly", doc(cfg(feature = "typenum")))]
 #[cfg(feature = "typenum")]
 pub use typenum;
 #[cfg(feature = "typenum")]
@@ -73,7 +73,7 @@ use std::ops::Add;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
-    #[doc(cfg(feature = "typenum"))]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "typenum")))]
     /// The type-level encapsulation of the lists length, using `typenum` under the hood.
     ///
     /// # Examples
@@ -1510,6 +1510,7 @@ where
     }
 }
 
+#[cfg_attr(feature = "nightly", doc(cfg(feature = "std")))]
 #[cfg(feature = "std")]
 #[allow(clippy::from_over_into)]
 impl<T> Into<Vec<T>> for HNil {
