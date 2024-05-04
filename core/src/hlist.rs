@@ -60,7 +60,9 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "typenum")]
 pub use typenum;
+#[cfg(feature = "typenum")]
 use typenum::{U0, bit::B1, Add1, Unsigned};
 
 use std::ops::Add;
@@ -101,6 +103,7 @@ pub trait HList: Sized {
     /// assert_eq!(<LenThree as HList>::Len::U8, 3u8);
     /// # }
     /// ```
+    #[cfg(feature = "typenum")]
     type Len: Unsigned;
 
     /// Length as a usize const generic. Is equivilent to `<Self as HList>::LEN::USIZE`
@@ -178,6 +181,7 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
+    #[cfg(feature = "typenum")]
     type Len = U0;
 
     const LEN: usize = 0;
@@ -192,12 +196,18 @@ pub struct HCons<H, T> {
     pub tail: T,
 }
 
+#[cfg(feature = "typenum")]
 impl<H, T: HList> HList for HCons<H, T>
 where 
     <T as HList>::Len: Add<B1>,
     <<T as HList>::Len as Add<B1>>::Output: Unsigned
 {
     type Len = <<T as HList>::Len as Add<B1>>::Output;
+    const LEN: usize = 1 + <T as HList>::LEN;
+}
+#[cfg(not(feature = "typenum"))]
+impl<H, T: HList> HList for HCons<H, T>
+{
     const LEN: usize = 1 + <T as HList>::LEN;
 }
 
@@ -1136,22 +1146,20 @@ impl HZippable<HNil> for HNil {
     }
 }
 
-//#[cfg(feature = "typenum")]
-//impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
-//where
-//    T1: HZippable<T2>,
-//    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<B1>,
-//    Add1<<<T1 as HZippable<T2>>::Zipped as HList>::Len>: Unsigned,
-//{
-//    type Zipped = HCons<(H1, H2), T1::Zipped>;
-//    fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
-//        HCons {
-//            head: (self.head, other.head),
-//            tail: self.tail.zip(other.tail),
-//        }
-//    }
-//}
-// #[cfg(not(feature = "typenum"))]
+#[cfg(not(feature = "typenum"))]
+impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
+where
+    T1: HZippable<T2>,
+{
+    type Zipped = HCons<(H1, H2), T1::Zipped>;
+    fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
+        HCons {
+            head: (self.head, other.head),
+            tail: self.tail.zip(other.tail),
+        }
+    }
+}
+#[cfg(feature = "typenum")]
 impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
 where
     T1: HZippable<T2>,
@@ -1472,8 +1480,6 @@ where
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
-    <Tail as HList>::Len: Add<B1>,
-    Add1<<Tail as HList>::Len>: Unsigned
 {
     fn into(self) -> Vec<H> {
         let h = self.head;
@@ -1941,7 +1947,7 @@ mod tests {
 
     #[test]
     fn test_len_const() {
-        // #[cfg(feature = "typenum")]
+        #[cfg(feature = "typenum")]
         assert_eq!(<HList![usize, &str, f32] as HList>::Len::USIZE, 3);
         assert_eq!(<HList![usize, &str, f32] as HList>::LEN, 3);
     }
