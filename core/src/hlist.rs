@@ -59,8 +59,9 @@ use crate::indices::{Here, Suffixed, There};
 use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use typenum::bit::B1;
-use typenum::{UInt, UTerm, Unsigned};
+
+use typenum::{Add1, bit::B1, Unsigned};
+pub use typenum;
 
 
 use std::ops::Add;
@@ -75,7 +76,7 @@ pub trait HList: Sized {
     /// # Examples
     /// ```
     /// # fn main() {
-    /// use frunk_core::typenum::Unsigned;
+    /// use frunk_core::hlist::typenum::Unsigned;
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
@@ -83,7 +84,7 @@ pub trait HList: Sized {
     /// type LenTwo = HList![bool, ()];
     ///
     /// // Attach a constraint that ensures constraints are met at type-check time
-    /// fn type_len_constraint<T: typenum::IsLessThan<typenum::U3>>() {}
+    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3>>() {}
     ///
     ///
     /// 
@@ -194,10 +195,10 @@ pub struct HCons<H, T> {
 
 impl<H, T: HList> HList for HCons<H, T>
 where
-    <T as HList>::Len: Add<typenum::U1>,
-    <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned,
+    <T as HList>::Len: Add<B1>,
+    Add1<<T as HList>::Len>: Unsigned,
 {
-    type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
+    type Len = Add1<<T as HList>::Len>;
     const LEN: usize = 0;
 }
 
@@ -1139,8 +1140,8 @@ impl HZippable<HNil> for HNil {
 impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
 where
     T1: HZippable<T2>,
-    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<UInt<UTerm, B1>>,
-    <<<T1 as HZippable<T2>>::Zipped as HList>::Len as Add<UInt<UTerm, B1>>>::Output: Unsigned,
+    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<B1>,
+    Add1<<<T1 as HZippable<T2>>::Zipped as HList>::Len>: Unsigned,
 {
     type Zipped = HCons<(H1, H2), T1::Zipped>;
     fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
@@ -1456,8 +1457,8 @@ where
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
-    <Tail as HList>::Len: Add<UInt<UTerm, B1>>,
-    <<Tail as HList>::Len as Add<UInt<UTerm, B1>>>::Output: Unsigned,
+    <Tail as HList>::Len: Add<B1>,
+    Add1<<Tail as HList>::Len>: Unsigned,
 {
     fn into(self) -> Vec<H> {
         let h = self.head;
