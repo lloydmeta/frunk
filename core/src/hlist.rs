@@ -193,12 +193,12 @@ pub struct HCons<H, T> {
 }
 
 impl<H, T: HList> HList for HCons<H, T>
-where
+where 
     <T as HList>::Len: Add<B1>,
-    Add1<<T as HList>::Len>: Unsigned,
+    <<T as HList>::Len as Add<B1>>::Output: Unsigned
 {
-    type Len = Add1<<T as HList>::Len>;
-    const LEN: usize = 0;
+    type Len = <<T as HList>::Len as Add<B1>>::Output;
+    const LEN: usize = 1 + <T as HList>::LEN;
 }
 
 impl<H, T> HCons<H, T> {
