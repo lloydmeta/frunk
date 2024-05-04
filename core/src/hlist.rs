@@ -60,7 +60,7 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use typenum::bit::B1;
-use typenum::{Unsigned, UInt, UTerm};
+use typenum::{UInt, UTerm, Unsigned};
 
 use std::ops::Add;
 
@@ -102,7 +102,10 @@ pub trait HList: Sized {
     /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
-    #[deprecated(since = "0.5.0", note = "Please use <Self as HList>::Len::[USIZE | U8 | U32 | ... ] instead")]
+    #[deprecated(
+        since = "0.5.0",
+        note = "Please use <Self as HList>::Len::[USIZE | U8 | U32 | ... ] instead"
+    )]
     #[inline]
     fn len(&self) -> usize {
         <Self::Len as Unsigned>::USIZE
@@ -193,10 +196,10 @@ pub struct HCons<H, T> {
     pub tail: T,
 }
 
-impl<H, T: HList> HList for HCons<H, T> 
-where 
+impl<H, T: HList> HList for HCons<H, T>
+where
     <T as HList>::Len: Add<typenum::U1>,
-    <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned
+    <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned,
 {
     type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
     fn static_len() -> usize {
