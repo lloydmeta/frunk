@@ -60,6 +60,7 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[doc(cfg(feature = "typenum"))]
 #[cfg(feature = "typenum")]
 pub use typenum;
 #[cfg(feature = "typenum")]
@@ -72,6 +73,7 @@ use std::ops::Add;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
+    #[doc(cfg(feature = "typenum"))]
     /// The type-level encapsulation of the lists length, using `typenum` under the hood.
     ///
     /// # Examples
@@ -272,9 +274,6 @@ macro_rules! gen_inherent_methods {
             pub fn len(&self) -> usize
             where Self: HList,
             {
-                // this is how it's done at the type-level
-                // <Self as HList>::Len::USIZE
-                #[allow(deprecated)]
                 HList::len(self)
             }
 
@@ -295,8 +294,6 @@ macro_rules! gen_inherent_methods {
             where Self: HList,
             {
                 HList::is_empty(self)
-                // this is how it's done at the type-level
-                // <<<Self as HList>::Len as typenum::IsEqual<typenum::U0>>::Output as typenum::Bit>::BOOL
             }
 
             /// Prepend an item to the current HList
@@ -1474,6 +1471,7 @@ where
     }
 }
 
+#[cfg_attr(feature = "nightly", doc(cfg(feature = "std")))]
 #[cfg(feature = "typenum")]
 #[cfg(feature = "std")]
 #[allow(clippy::from_over_into)]
@@ -1494,6 +1492,7 @@ where
     }
 }
 #[cfg(not(feature = "typenum"))]
+#[cfg_attr(feature = "nightly", doc(cfg(feature = "std")))]
 #[cfg(feature = "std")]
 #[allow(clippy::from_over_into)]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>

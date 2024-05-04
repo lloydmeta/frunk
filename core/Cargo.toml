@@ -16,6 +16,7 @@ travis-ci = { repository = "lloydmeta/frunk" }
 default = ["std"]
 std = []
 typenum = ["dep:typenum"]
+nightly = []
 
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
