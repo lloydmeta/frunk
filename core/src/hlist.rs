@@ -1475,12 +1475,34 @@ where
     }
 }
 
+#[cfg(feature = "typenum")]
+#[cfg(feature = "std")]
+#[allow(clippy::from_over_into)]
+impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
+where
+    Tail: Into<Vec<H>> + HList,
+    <Tail as HList>::Len: Add<B1>,
+    Add1<<Tail as HList>::Len>: Unsigned
+{
+
+    fn into(self) -> Vec<H>  {
+        let h = self.head;
+        let t = self.tail;
+        let mut v = Vec::with_capacity(<Self as HList>::LEN);
+        v.push(h);
+        let mut t_vec: Vec<H> = t.into();
+        v.append(&mut t_vec);
+        v
+    }
+}
+#[cfg(not(feature = "typenum"))]
 #[cfg(feature = "std")]
 #[allow(clippy::from_over_into)]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
 {
+
     fn into(self) -> Vec<H> {
         let h = self.head;
         let t = self.tail;
