@@ -63,7 +63,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "typenum")]
 pub use typenum;
 #[cfg(feature = "typenum")]
-use typenum::{U0, bit::B1, Add1, Unsigned};
+use typenum::{bit::B1, Add1, Unsigned, U0};
 
 use std::ops::Add;
 
@@ -198,16 +198,15 @@ pub struct HCons<H, T> {
 
 #[cfg(feature = "typenum")]
 impl<H, T: HList> HList for HCons<H, T>
-where 
+where
     <T as HList>::Len: Add<B1>,
-    <<T as HList>::Len as Add<B1>>::Output: Unsigned
+    <<T as HList>::Len as Add<B1>>::Output: Unsigned,
 {
     type Len = <<T as HList>::Len as Add<B1>>::Output;
     const LEN: usize = 1 + <T as HList>::LEN;
 }
 #[cfg(not(feature = "typenum"))]
-impl<H, T: HList> HList for HCons<H, T>
-{
+impl<H, T: HList> HList for HCons<H, T> {
     const LEN: usize = 1 + <T as HList>::LEN;
 }
 
@@ -1482,10 +1481,9 @@ impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
     <Tail as HList>::Len: Add<B1>,
-    Add1<<Tail as HList>::Len>: Unsigned
+    Add1<<Tail as HList>::Len>: Unsigned,
 {
-
-    fn into(self) -> Vec<H>  {
+    fn into(self) -> Vec<H> {
         let h = self.head;
         let t = self.tail;
         let mut v = Vec::with_capacity(<Self as HList>::LEN);
@@ -1502,7 +1500,6 @@ impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
 {
-
     fn into(self) -> Vec<H> {
         let h = self.head;
         let t = self.tail;
