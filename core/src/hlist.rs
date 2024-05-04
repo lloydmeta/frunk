@@ -61,7 +61,7 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 use serde::{Deserialize, Serialize};
 
 pub use typenum;
-use typenum::{bit::B1, Add1, Unsigned};
+use typenum::{U0, bit::B1, Add1, Unsigned};
 
 use std::ops::Add;
 
@@ -120,7 +120,7 @@ pub trait HList: Sized {
     /// ```
     #[inline]
     fn len(&self) -> usize {
-        <Self::Len as Unsigned>::USIZE
+        Self::LEN
     }
 
     /// Returns whether a given HList is empty
@@ -137,7 +137,7 @@ pub trait HList: Sized {
     /// ```
     #[inline]
     fn is_empty(&self) -> bool {
-        <Self::Len as Unsigned>::USIZE == 0
+        Self::LEN == 0
     }
 
     /// Prepends an item to the current HList
@@ -178,7 +178,7 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
-    type Len = typenum::U0;
+    type Len = U0;
 
     const LEN: usize = 0;
 }
@@ -1136,6 +1136,22 @@ impl HZippable<HNil> for HNil {
     }
 }
 
+//#[cfg(feature = "typenum")]
+//impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
+//where
+//    T1: HZippable<T2>,
+//    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<B1>,
+//    Add1<<<T1 as HZippable<T2>>::Zipped as HList>::Len>: Unsigned,
+//{
+//    type Zipped = HCons<(H1, H2), T1::Zipped>;
+//    fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
+//        HCons {
+//            head: (self.head, other.head),
+//            tail: self.tail.zip(other.tail),
+//        }
+//    }
+//}
+// #[cfg(not(feature = "typenum"))]
 impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
 where
     T1: HZippable<T2>,
@@ -1457,12 +1473,12 @@ impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
     Tail: Into<Vec<H>> + HList,
     <Tail as HList>::Len: Add<B1>,
-    Add1<<Tail as HList>::Len>: Unsigned,
+    Add1<<Tail as HList>::Len>: Unsigned
 {
     fn into(self) -> Vec<H> {
         let h = self.head;
         let t = self.tail;
-        let mut v = Vec::with_capacity(<<Self as HList>::Len as Unsigned>::USIZE);
+        let mut v = Vec::with_capacity(<Self as HList>::LEN);
         v.push(h);
         let mut t_vec: Vec<H> = t.into();
         v.append(&mut t_vec);
@@ -1925,7 +1941,9 @@ mod tests {
 
     #[test]
     fn test_len_const() {
+        // #[cfg(feature = "typenum")]
         assert_eq!(<HList![usize, &str, f32] as HList>::Len::USIZE, 3);
+        assert_eq!(<HList![usize, &str, f32] as HList>::LEN, 3);
     }
 
     #[test]
