@@ -102,10 +102,6 @@ pub trait HList: Sized {
     /// assert_eq!(h.len(), 2);
     /// # }
     /// ```
-    #[deprecated(
-        since = "0.5.0",
-        note = "Please use <Self as HList>::Len::[USIZE | U8 | U32 | ... ] instead"
-    )]
     #[inline]
     fn len(&self) -> usize {
         <Self::Len as Unsigned>::USIZE
@@ -127,21 +123,6 @@ pub trait HList: Sized {
     fn is_empty(&self) -> bool {
         <Self::Len as Unsigned>::USIZE == 0
     }
-
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
-    ///
-    /// # Examples
-    /// ```
-    /// # fn main() {
-    /// use frunk::prelude::*;
-    /// use frunk_core::HList;
-    ///
-    /// assert_eq!(<HList![i32, bool, f32]>::static_len(), 3);
-    /// # }
-    /// ```
-    #[deprecated(since = "0.1.31", note = "Please use Len::USIZE instead")]
-    fn static_len() -> usize;
 
     /// Prepends an item to the current HList
     ///
@@ -182,9 +163,6 @@ pub struct HNil;
 
 impl HList for HNil {
     type Len = typenum::U0;
-    fn static_len() -> usize {
-        <Self::Len as Unsigned>::USIZE
-    }
 }
 
 /// Represents the most basic non-empty HList. Its value is held in `head`
@@ -202,9 +180,6 @@ where
     <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned,
 {
     type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
-    fn static_len() -> usize {
-        <Self::Len as Unsigned>::USIZE
-    }
 }
 
 impl<H, T> HCons<H, T> {
