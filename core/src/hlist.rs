@@ -60,9 +60,8 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use typenum::{Add1, bit::B1, Unsigned};
 pub use typenum;
-
+use typenum::{bit::B1, Add1, Unsigned};
 
 use std::ops::Add;
 
@@ -87,7 +86,7 @@ pub trait HList: Sized {
     /// fn type_len_constraint<T: typenum::IsLess<typenum::U3>>() {}
     ///
     ///
-    /// 
+    ///
     /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
     /// // let _ = type_len_constraint::<<LenThree as HList>::Len>();
     ///
