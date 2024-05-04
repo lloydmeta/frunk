@@ -62,6 +62,7 @@ use serde::{Deserialize, Serialize};
 use typenum::bit::B1;
 use typenum::{UInt, UTerm, Unsigned};
 
+
 use std::ops::Add;
 
 /// Typeclass for HList-y behaviour
@@ -74,22 +75,35 @@ pub trait HList: Sized {
     /// # Examples
     /// ```
     /// # fn main() {
-    /// use typenum::Unsigned;
+    /// use frunk_core::typenum::Unsigned;
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
     /// type LenThree = HList![bool, (), u8];
-    /// fn foo<T: typenum::IsEqual<typenum::U3>>() {}
+    /// type LenTwo = HList![bool, ()];
     ///
-    /// let _ = foo::<<LenThree as HList>::Len>();
+    /// // Attach a constraint that ensures constraints are met at type-check time
+    /// fn type_len_constraint<T: typenum::IsLessThan<typenum::U3>>() {}
+    ///
+    ///
+    /// 
+    /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
+    /// // let _ = type_len_constraint::<<LenThree as HList>::Len>();
+    ///
+    /// // ...this works, though
+    /// let _ = type_len_constraint::<<LenTwo as HList>::Len>();
+    ///
+    /// // Pull out the length of the list in the word-size of your choosing.
     /// let byte: u8 = <<LenThree as HList>::Len>::U8;
+    /// let u_16: u16 = <<LenThree as HList>::Len>::U16;
     ///
     ///
-    /// assert_eq!(<LenThree as HList>::Len::USIZE, 3);
+    /// assert_eq!(<LenThree as HList>::Len::U8, 3u8);
     /// # }
     /// ```
     type Len: Unsigned;
 
+    /// Length as a usize const generic. Is equivilent to `<Self as HList>::LEN::USIZE`
     const LEN: usize;
 
     /// Returns the length of a given HList
@@ -184,7 +198,6 @@ where
     <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned,
 {
     type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
-
     const LEN: usize = 0;
 }
 
