@@ -90,6 +90,8 @@ pub trait HList: Sized {
     /// ```
     type Len: Unsigned;
 
+    const LEN: usize;
+
     /// Returns the length of a given HList
     ///
     /// # Examples
@@ -163,6 +165,8 @@ pub struct HNil;
 
 impl HList for HNil {
     type Len = typenum::U0;
+
+    const LEN: usize = 0;
 }
 
 /// Represents the most basic non-empty HList. Its value is held in `head`
@@ -180,6 +184,8 @@ where
     <<T as HList>::Len as Add<typenum::U1>>::Output: Unsigned,
 {
     type Len = <<T as HList>::Len as Add<typenum::U1>>::Output;
+
+    const LEN: usize = 0;
 }
 
 impl<H, T> HCons<H, T> {
