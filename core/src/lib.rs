@@ -1,8 +1,3 @@
-// This feature allows `cargo +nightly doc --F $GATED_FEATURES` to include
-// said features as well as show that they are behind a feature gate, like so:
-// #[doc(cfg(feature = "$GATED_FEATURE"))]
-// ...without adding nightly requirement to non-doc builds
-#![cfg_attr(feature = "nightly", feature(doc_cfg))]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk Core
 //!

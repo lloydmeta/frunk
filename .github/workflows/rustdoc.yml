@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
           override: true
 
       - uses: Swatinem/rust-cache@v2
@@ -23,8 +23,8 @@ jobs:
       - uses: actions-rs/cargo@v1
         name: build docs
         with:
-          command: +nightly doc
-          args: --all --no-deps --features nightly,typenum
+          command: doc
+          args: --all --no-deps --features typenum
 
       - uses: peaceiris/actions-gh-pages@v4
         name: push docs
