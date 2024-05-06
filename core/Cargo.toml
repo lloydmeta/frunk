@@ -19,7 +19,7 @@ typenum = ["dep:typenum"]
 
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
-typenum = { version = "1.17.0", optional = true, default-features = false, features = ["no_std"] }
+typenum = { version = "1.17.0", optional = true }
 
 [dev-dependencies.frunk_derives]
 path = "../derives"
