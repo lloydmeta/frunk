@@ -15,7 +15,7 @@ travis-ci = { repository = "lloydmeta/frunk" }
 [dependencies.frunk]
 path = ".."
 default-features = false
-version = "0.4.2"
+version = "0.5.0"
 
 [dependencies]
 quickcheck = "1.0.3"

@@ -146,4 +146,4 @@ jobs:
           RUSTDOCFLAGS: '-D warnings'
         with:
           command: doc
-          args: --all --no-deps  --document-private-items
+          args: --all --no-deps  --document-private-items --features typenum

@@ -24,7 +24,7 @@ jobs:
         name: build docs
         with:
           command: doc
-          args: --all --no-deps
+          args: --all --no-deps --features typenum
 
       - uses: peaceiris/actions-gh-pages@v4
         name: push docs

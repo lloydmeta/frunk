@@ -60,6 +60,11 @@ use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "typenum")]
+pub use typenum;
+#[cfg(feature = "typenum")]
+use typenum::{bit::B1, Add1, Unsigned, U0};
+
 use std::ops::Add;
 
 /// Typeclass for HList-y behaviour
@@ -67,18 +72,58 @@ use std::ops::Add;
 /// An HList is a heterogeneous list, one that is statically typed at compile time. In simple terms,
 /// it is just an arbitrarily-nested Tuple2.
 pub trait HList: Sized {
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
+    /// The type-level encapsulation of the lists length, using `typenum` under the hood.
     ///
     /// # Examples
     /// ```
     /// # fn main() {
+    /// use frunk_core::hlist::typenum::{self, Unsigned };
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
-    /// assert_eq!(<HList![i32, bool, f32]>::LEN, 3);
+    /// type LenThree = HList![bool, (), u8];
+    /// type LenTwo = HList![bool, ()];
+    ///
+    /// // Attach a constraint that ensures constraints are met at type-check time
+    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3, Output = typenum::True>>() {}
+    ///
+    ///
+    ///
+    /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
+    /// // let _fail = type_len_constraint::<<LenThree as HList>::Len>();
+    /// let _is_good = type_len_constraint::<<LenTwo   as HList>::Len>();
+    ///
+    /// // Pull out the length of the list in the word-size of your choosing.
+    /// let byte: u8 = <<LenThree as HList>::Len>::U8;
+    /// let u_16: u16 = <<LenThree as HList>::Len>::U16;
+    ///
+    ///
+    /// assert_eq!(<LenThree as HList>::Len::U8, 3u8);
     /// # }
     /// ```
+    ///
+    /// ```compile_fail
+    /// # fn main() {
+    /// use frunk_core::hlist::typenum::{self, Unsigned };
+    /// use frunk::prelude::*;
+    /// use frunk_core::HList;
+    ///
+    /// type LenThree = HList![bool, (), u8];
+    /// type LenTwo = HList![bool, ()];
+    ///
+    /// // Attach a constraint that ensures constraints are met at type-check time
+    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3, Output = typenum::True>>() {}
+    ///
+    ///
+    ///
+    /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
+    /// let _ = type_len_constraint::<<LenThree as HList>::Len>();
+    /// # }
+    /// ```
+    #[cfg(feature = "typenum")]
+    type Len: Unsigned;
+
+    /// Length as a usize const generic. Is equivilent to `<Self as HList>::LEN::USIZE`
     const LEN: usize;
 
     /// Returns the length of a given HList
@@ -114,21 +159,6 @@ pub trait HList: Sized {
     fn is_empty(&self) -> bool {
         Self::LEN == 0
     }
-
-    /// Returns the length of a given HList type without making use of any references, or
-    /// in fact, any values at all.
-    ///
-    /// # Examples
-    /// ```
-    /// # fn main() {
-    /// use frunk::prelude::*;
-    /// use frunk_core::HList;
-    ///
-    /// assert_eq!(<HList![i32, bool, f32]>::static_len(), 3);
-    /// # }
-    /// ```
-    #[deprecated(since = "0.1.31", note = "Please use LEN instead")]
-    fn static_len() -> usize;
 
     /// Prepends an item to the current HList
     ///
@@ -168,10 +198,10 @@ pub trait HList: Sized {
 pub struct HNil;
 
 impl HList for HNil {
+    #[cfg(feature = "typenum")]
+    type Len = U0;
+
     const LEN: usize = 0;
-    fn static_len() -> usize {
-        Self::LEN
-    }
 }
 
 /// Represents the most basic non-empty HList. Its value is held in `head`
@@ -183,11 +213,18 @@ pub struct HCons<H, T> {
     pub tail: T,
 }
 
+#[cfg(feature = "typenum")]
+impl<H, T: HList> HList for HCons<H, T>
+where
+    <T as HList>::Len: Add<B1>,
+    <<T as HList>::Len as Add<B1>>::Output: Unsigned,
+{
+    type Len = <<T as HList>::Len as Add<B1>>::Output;
+    const LEN: usize = 1 + <T as HList>::LEN;
+}
+#[cfg(not(feature = "typenum"))]
 impl<H, T: HList> HList for HCons<H, T> {
     const LEN: usize = 1 + <T as HList>::LEN;
-    fn static_len() -> usize {
-        Self::LEN
-    }
 }
 
 impl<H, T> HCons<H, T> {
@@ -1120,9 +1157,25 @@ impl HZippable<HNil> for HNil {
     }
 }
 
+#[cfg(not(feature = "typenum"))]
 impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
 where
     T1: HZippable<T2>,
+{
+    type Zipped = HCons<(H1, H2), T1::Zipped>;
+    fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
+        HCons {
+            head: (self.head, other.head),
+            tail: self.tail.zip(other.tail),
+        }
+    }
+}
+#[cfg(feature = "typenum")]
+impl<H1, T1, H2, T2> HZippable<HCons<H2, T2>> for HCons<H1, T1>
+where
+    T1: HZippable<T2>,
+    <<T1 as HZippable<T2>>::Zipped as HList>::Len: Add<B1>,
+    Add1<<<T1 as HZippable<T2>>::Zipped as HList>::Len>: Unsigned,
 {
     type Zipped = HCons<(H1, H2), T1::Zipped>;
     fn zip(self, other: HCons<H2, T2>) -> Self::Zipped {
@@ -1433,6 +1486,26 @@ where
     }
 }
 
+#[cfg(feature = "typenum")]
+#[cfg(feature = "std")]
+#[allow(clippy::from_over_into)]
+impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
+where
+    Tail: Into<Vec<H>> + HList,
+    <Tail as HList>::Len: Add<B1>,
+    Add1<<Tail as HList>::Len>: Unsigned,
+{
+    fn into(self) -> Vec<H> {
+        let h = self.head;
+        let t = self.tail;
+        let mut v = Vec::with_capacity(<Self as HList>::LEN);
+        v.push(h);
+        let mut t_vec: Vec<H> = t.into();
+        v.append(&mut t_vec);
+        v
+    }
+}
+#[cfg(not(feature = "typenum"))]
 #[cfg(feature = "std")]
 #[allow(clippy::from_over_into)]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
@@ -1905,6 +1978,8 @@ mod tests {
 
     #[test]
     fn test_len_const() {
+        #[cfg(feature = "typenum")]
+        assert_eq!(<HList![usize, &str, f32] as HList>::Len::USIZE, 3);
         assert_eq!(<HList![usize, &str, f32] as HList>::LEN, 3);
     }
 
