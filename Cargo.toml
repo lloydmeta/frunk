@@ -45,6 +45,7 @@ default = ["validated", "proc-macros"]
 validated = ["std"]
 proc-macros = ["frunk_proc_macros"]
 std = ["frunk_core/std"]
+typenum = ["frunk_core/typenum"]
 
 [profile.bench]
 opt-level = 3
