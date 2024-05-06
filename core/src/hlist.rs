@@ -77,7 +77,7 @@ pub trait HList: Sized {
     /// # Examples
     /// ```
     /// # fn main() {
-    /// use frunk_core::hlist::typenum::Unsigned;
+    /// use frunk_core::hlist::typenum::{self, Unsigned };
     /// use frunk::prelude::*;
     /// use frunk_core::HList;
     ///
@@ -85,15 +85,13 @@ pub trait HList: Sized {
     /// type LenTwo = HList![bool, ()];
     ///
     /// // Attach a constraint that ensures constraints are met at type-check time
-    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3>>() {}
+    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3, Output = typenum::True>>() {}
     ///
     ///
     ///
     /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
-    /// // let _ = type_len_constraint::<<LenThree as HList>::Len>();
-    ///
-    /// // ...this works, though
-    /// let _ = type_len_constraint::<<LenTwo as HList>::Len>();
+    /// // let _fail = type_len_constraint::<<LenThree as HList>::Len>();
+    /// let _is_good = type_len_constraint::<<LenTwo   as HList>::Len>();
     ///
     /// // Pull out the length of the list in the word-size of your choosing.
     /// let byte: u8 = <<LenThree as HList>::Len>::U8;
@@ -101,6 +99,25 @@ pub trait HList: Sized {
     ///
     ///
     /// assert_eq!(<LenThree as HList>::Len::U8, 3u8);
+    /// # }
+    /// ```
+    ///
+    /// ```compile_fail
+    /// # fn main() {
+    /// use frunk_core::hlist::typenum::{self, Unsigned };
+    /// use frunk::prelude::*;
+    /// use frunk_core::HList;
+    ///
+    /// type LenThree = HList![bool, (), u8];
+    /// type LenTwo = HList![bool, ()];
+    ///
+    /// // Attach a constraint that ensures constraints are met at type-check time
+    /// fn type_len_constraint<T: typenum::IsLess<typenum::U3, Output = typenum::True>>() {}
+    ///
+    ///
+    ///
+    /// // Won't compile: the length of LenThree doesn't meet the less-than-3 requirement
+    /// let _ = type_len_constraint::<<LenThree as HList>::Len>();
     /// # }
     /// ```
     #[cfg(feature = "typenum")]
