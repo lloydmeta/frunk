@@ -41,10 +41,15 @@ version = "0.5.0"
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
 
 [features]
-default = ["validated", "proc-macros"]
-validated = ["std"]
+default = ["validated", "proc-macros", "alloc"]
+validated = ["alloc"]
 proc-macros = ["frunk_proc_macros"]
-std = ["frunk_core/std"]
+std = ["alloc", "serde?/std"]
+alloc = ["frunk_core/alloc", "serde?/alloc"]
+
+[[example]]
+name = "paths"
+required-features = ["proc-macros"]
 
 [profile.bench]
 opt-level = 3

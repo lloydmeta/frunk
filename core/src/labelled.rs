@@ -152,8 +152,8 @@ use crate::indices::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use ::std::fmt;
-use ::std::marker::PhantomData;
+use core::fmt;
+use core::marker::PhantomData;
 
 /// A trait that converts from a type to a labelled generic representation.
 ///
@@ -733,11 +733,13 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 }
 
 /// Implementations of `Transmogrifier` that allow recursion through stdlib container types.
-#[cfg(feature = "std")]
-mod std {
+#[cfg(feature = "alloc")]
+mod _alloc {
     use super::MappingIndicesWrapper;
     use super::{Field, Transmogrifier};
-    use std::collections::{LinkedList, VecDeque};
+    use alloc::collections::{LinkedList, VecDeque};
+    use alloc::vec::Vec;
+    use alloc::boxed::Box;
 
     macro_rules! transmogrify_seq {
         ($container:ident) => {
@@ -914,7 +916,9 @@ where
 mod tests {
     use super::chars::*;
     use super::*;
-    use ::std::collections::{LinkedList, VecDeque};
+    use alloc::collections::{LinkedList, VecDeque};
+    use alloc::{boxed::Box, vec::Vec, format, vec};
+
 
     // Set up some aliases
     #[allow(non_camel_case_types)]

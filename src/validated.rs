@@ -46,7 +46,8 @@
 
 use super::hlist::*;
 
-use std::ops::Add;
+use core::ops::Add;
+use alloc::{vec, vec::Vec};
 
 /// A Validated is either an Ok holding an HList or an Err, holding a vector
 /// of collected errors.
@@ -245,6 +246,7 @@ where
 mod tests {
     use super::*;
     use frunk_core::{hlist, hlist_pat};
+    use alloc::{borrow::ToOwned, string::String};
 
     #[test]
     fn test_adding_ok_results() {

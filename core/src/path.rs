@@ -108,8 +108,8 @@
 use super::hlist::*;
 use super::labelled::*;
 
-use std::marker::PhantomData;
-use std::ops::Add;
+use core::marker::PhantomData;
+use core::ops::Add;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Path<T>(PhantomData<T>);

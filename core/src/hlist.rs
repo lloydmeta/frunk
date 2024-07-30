@@ -59,8 +59,10 @@ use crate::indices::{Here, Suffixed, There};
 use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 
-use std::ops::Add;
+use core::ops::Add;
 
 /// Typeclass for HList-y behaviour
 ///
@@ -432,7 +434,7 @@ macro_rules! gen_inherent_methods {
             /// # }
             /// ```
             #[inline(always)]
-            pub fn map<F>(self,mapper: F) -> <Self as HMappable<F>>::Output
+            pub fn map<F>(self, mapper: F) -> <Self as HMappable<F>>::Output
             where Self: HMappable<F>,
             {
                 HMappable::map(self, mapper)
@@ -1433,7 +1435,7 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[allow(clippy::from_over_into)]
 impl<H, Tail> Into<Vec<H>> for HCons<H, Tail>
 where
@@ -1450,7 +1452,7 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[allow(clippy::from_over_into)]
 impl<T> Into<Vec<T>> for HNil {
     fn into(self) -> Vec<T> {
@@ -1576,6 +1578,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use alloc::vec;
 
     #[test]
     fn test_hcons() {
@@ -1909,7 +1913,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn test_single_func_foldl_consuming() {
         use std::collections::HashMap;
 
@@ -1949,7 +1952,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_into_vec() {
         let h = hlist![1, 2, 3, 4, 5];
         let as_vec: Vec<_> = h.into();

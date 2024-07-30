@@ -1247,6 +1247,9 @@ mod tests {
     use super::Coproduct::*;
     use super::*;
 
+    use std::string::{String, ToString};
+    use std::format;
+
     #[test]
     fn test_coproduct_inject() {
         type I32StrBool = Coprod!(i32, &'static str, bool);
@@ -1267,7 +1270,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn test_coproduct_fold_consuming() {
         type I32F32StrBool = Coprod!(i32, f32, bool);
 
@@ -1312,7 +1314,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn test_coproduct_fold_non_consuming() {
         type I32F32Bool = Coprod!(i32, f32, bool);
 

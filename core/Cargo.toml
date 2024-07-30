@@ -13,8 +13,8 @@ keywords = ["Frunk", "HList", "Generic", "Coproduct", "LabelledGeneric"]
 travis-ci = { repository = "lloydmeta/frunk" }
 
 [features]
-default = ["std"]
-std = []
+default = ["alloc"]
+alloc = ["serde?/alloc"]
 
 [dependencies]
 serde = { version = "^1.0", optional = true, features = [ "derive" ] }
