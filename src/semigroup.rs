@@ -1,7 +1,9 @@
 //! Module for holding the Semigroup typeclass definition and typeclass instances
 //!
 //! You can, for example, combine tuples.
-#![cfg_attr(feature = "alloc", doc = r#"
+#![cfg_attr(
+    feature = "alloc",
+    doc = r#"
 # Examples
 
 ```
@@ -27,18 +29,18 @@ assert_eq!(h1.combine(&h2), h3)
 ```"#
 )]
 
-use frunk_core::hlist::*;
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, string::String, vec::Vec};
 use core::cell::*;
 use core::cmp::Ordering;
+#[cfg(feature = "alloc")]
+use core::hash::Hash;
+use core::ops::{BitAnd, BitOr, Deref};
+use frunk_core::hlist::*;
 #[cfg(feature = "std")]
 use std::collections::hash_map::Entry;
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
-#[cfg(feature = "alloc")]
-use core::hash::Hash;
-#[cfg(feature = "alloc")]
-use alloc::{string::String, vec::Vec, boxed::Box};
-use core::ops::{BitAnd, BitOr, Deref};
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
@@ -362,9 +364,9 @@ tuple_impls! {
 mod tests {
     use super::*;
     #[cfg(feature = "alloc")]
-    use frunk_core::hlist;
-    #[cfg(feature = "alloc")]
     use alloc::{borrow::ToOwned, vec};
+    #[cfg(feature = "alloc")]
+    use frunk_core::hlist;
 
     macro_rules! semigroup_tests {
       ($($name:ident, $comb: expr => $expected: expr, $tr:ty)+) => {

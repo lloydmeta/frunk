@@ -57,10 +57,10 @@
 
 use crate::indices::{Here, Suffixed, There};
 use crate::traits::{Func, IntoReverse, Poly, ToMut, ToRef};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use core::ops::Add;
 

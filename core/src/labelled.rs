@@ -737,9 +737,9 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 mod _alloc {
     use super::MappingIndicesWrapper;
     use super::{Field, Transmogrifier};
+    use alloc::boxed::Box;
     use alloc::collections::{LinkedList, VecDeque};
     use alloc::vec::Vec;
-    use alloc::boxed::Box;
 
     macro_rules! transmogrify_seq {
         ($container:ident) => {
@@ -917,8 +917,7 @@ mod tests {
     use super::chars::*;
     use super::*;
     use alloc::collections::{LinkedList, VecDeque};
-    use alloc::{boxed::Box, vec::Vec, format, vec};
-
+    use alloc::{boxed::Box, format, vec, vec::Vec};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]

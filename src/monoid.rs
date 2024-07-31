@@ -299,7 +299,7 @@ mod tests {
     use super::*;
 
     #[cfg(feature = "alloc")]
-    use alloc::{vec, borrow::ToOwned};
+    use alloc::{borrow::ToOwned, vec};
 
     #[test]
     fn test_combine_n() {

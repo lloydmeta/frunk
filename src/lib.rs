@@ -1,5 +1,4 @@
 #![no_std]
-
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk: generic functional programming toolbelt for Rust
 //!

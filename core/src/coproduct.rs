@@ -1247,8 +1247,8 @@ mod tests {
     use super::Coproduct::*;
     use super::*;
 
-    use std::string::{String, ToString};
     use std::format;
+    use std::string::{String, ToString};
 
     #[test]
     fn test_coproduct_inject() {
