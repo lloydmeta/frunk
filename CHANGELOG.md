@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]:
+
+## [0.4.3]:
 - avoid clippy::unneeded_field_pattern (https://github.com/lloydmeta/frunk/pull/216)
+- rework #![no_std] support, switch on alloc (https://github.com/lloydmeta/frunk/pull/236)
 
 ## [0.4.2]:
 - Removed `proc-macro-hack` machinery (`proc-macros-impl`) (https://github.com/lloydmeta/frunk/pull/214)
