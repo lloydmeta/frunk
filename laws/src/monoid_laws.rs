@@ -66,39 +66,33 @@ mod tests {
     use crate::wrapper::*;
     use frunk::semigroup::*;
     use quickcheck::quickcheck;
-    #[cfg(feature = "std")]
     use std::collections::{HashMap, HashSet};
 
     #[test]
-    #[cfg(feature = "std")]
     fn string_id_prop() {
         quickcheck(left_identity as fn(String) -> bool);
         quickcheck(right_identity as fn(String) -> bool);
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn option_id_prop() {
         quickcheck(left_identity as fn(Option<String>) -> bool);
         quickcheck(right_identity as fn(Option<String>) -> bool);
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn vec_id_prop() {
         quickcheck(left_identity as fn(Vec<String>) -> bool);
         quickcheck(right_identity as fn(Vec<String>) -> bool);
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn hashset_id_prop() {
         quickcheck(left_identity as fn(HashSet<i32>) -> bool);
         quickcheck(right_identity as fn(HashSet<i32>) -> bool);
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn hashmap_id_prop() {
         quickcheck(left_identity as fn(HashMap<i32, String>) -> bool);
         quickcheck(right_identity as fn(HashMap<i32, String>) -> bool);

@@ -2,7 +2,7 @@
 //!
 //! You can, for example, combine tuples.
 #![cfg_attr(
-    feature = "std",
+    feature = "alloc",
     doc = r#"
 # Examples
 
@@ -29,16 +29,18 @@ assert_eq!(h1.combine(&h2), h3)
 ```"#
 )]
 
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, string::String, vec::Vec};
+use core::cell::*;
+use core::cmp::Ordering;
+#[cfg(feature = "alloc")]
+use core::hash::Hash;
+use core::ops::{BitAnd, BitOr, Deref};
 use frunk_core::hlist::*;
-use std::cell::*;
-use std::cmp::Ordering;
 #[cfg(feature = "std")]
 use std::collections::hash_map::Entry;
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
-#[cfg(feature = "std")]
-use std::hash::Hash;
-use std::ops::{BitAnd, BitOr, Deref};
 
 /// Wrapper type for types that are ordered and can have a Max combination
 #[derive(PartialEq, Debug, Eq, Clone, Copy, PartialOrd, Ord, Hash)]
@@ -168,14 +170,14 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T: Semigroup> Semigroup for Box<T> {
     fn combine(&self, other: &Self) -> Self {
         Box::new(self.deref().combine(other.deref()))
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl Semigroup for String {
     fn combine(&self, other: &Self) -> Self {
         let mut cloned = self.clone();
@@ -184,7 +186,7 @@ impl Semigroup for String {
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T: Clone> Semigroup for Vec<T> {
     fn combine(&self, other: &Self) -> Self {
         let mut v = self.clone();
@@ -361,6 +363,9 @@ tuple_impls! {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "alloc")]
+    use alloc::{borrow::ToOwned, vec};
+    #[cfg(feature = "alloc")]
     use frunk_core::hlist;
 
     macro_rules! semigroup_tests {
@@ -393,7 +398,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_string() {
         let v1 = String::from("Hello");
         let v2 = String::from(" world");
@@ -401,7 +406,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_vec_i32() {
         let v1 = vec![1, 2, 3];
         let v2 = vec![4, 5, 6];
@@ -506,7 +511,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_combine_hlist() {
         let h1 = hlist![Some(1), 3.3, 53i64, "hello".to_owned()];
         let h2 = hlist![Some(2), 1.2, 1i64, " world".to_owned()];

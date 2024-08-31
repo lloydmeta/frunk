@@ -42,35 +42,29 @@ mod tests {
     use super::*;
     use crate::wrapper::*;
     use quickcheck::quickcheck;
-    #[cfg(feature = "std")]
     use std::collections::{HashMap, HashSet};
 
     #[test]
-    #[cfg(feature = "std")]
     fn string_prop() {
         quickcheck(associativity as fn(String, String, String) -> bool)
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn option_prop() {
         quickcheck(associativity as fn(Option<String>, Option<String>, Option<String>) -> bool)
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn vec_prop() {
         quickcheck(associativity as fn(Vec<i8>, Vec<i8>, Vec<i8>) -> bool)
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn hashset_prop() {
         quickcheck(associativity as fn(HashSet<i8>, HashSet<i8>, HashSet<i8>) -> bool)
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn hashmap_prop() {
         quickcheck(
             associativity

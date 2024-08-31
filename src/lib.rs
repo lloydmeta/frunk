@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk: generic functional programming toolbelt for Rust
 //!
@@ -13,7 +13,7 @@
 //!   6. Monoid
 //!
 #![cfg_attr(
-    feature = "std",
+    feature = "alloc",
     doc = r#"
 Here is a small taste of what Frunk has to offer:
 
@@ -201,8 +201,11 @@ assert_eq!(d_user.first_name, "Joe");
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
-#[cfg(not(feature = "std"))]
-extern crate core as std;
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[cfg(any(feature = "std", test))]
+extern crate std;
 
 pub mod monoid;
 pub mod semigroup;
