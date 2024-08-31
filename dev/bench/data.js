@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714732906941,
+  "lastUpdate": 1725109630101,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -10079,6 +10079,258 @@ window.BENCHMARK_DATA = {
             "name": "validated_to_result",
             "value": 1,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "np@nathanperry.dev",
+            "name": "Nathan Perry",
+            "username": "mammothbane"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "93c4db74fac719764e3ce841f5169550efd1bb60",
+          "message": "rework #![no_std] support, switch on `alloc` (#236)\n\n* rework #![no_std] support, switch on `alloc`\r\n\r\nMost of the uses of `std` in the crate are of `Vec`, `String`, and\r\n`Box`, which are in `alloc`, which is available on `#![no_std]`\r\nplatforms via `extern crate alloc;`. This commit adjusts these uses to\r\nuse `alloc` directly and adds an `\"alloc\"` feature flag to control them.\r\nThe notable exceptions still requiring a `std` flag are `HashMap` and\r\n`HashSet` (I'm working on a separate change to add `BTree{Map,Set}`\r\nsupport for `#![no_std]` envs). `frunk_core` no longer needs a `std`\r\nflag: it has been removed.\r\n\r\nThe reimport of `core` as `std` (see #220 for historical explanation) is\r\nconverted to direct usage of `core` everywhere.\r\n\r\nRemoved `#[cfg(feature = \"std\")]` condition from `frunk_laws` and made\r\nit depend on `frunk/std` -- it depends on `quickcheck`, which requires\r\n`std`.\r\n\r\nAdded `#[cfg(test)] extern crate std;` to `#![no_std]` crates, as `std`\r\nis required to run the libtest harness.\r\n\r\nTested working against all the combinations of feature flags I could\r\nthink of.\r\n\r\n* bump minor version, unremove frunk_core/std and mark deprecated\r\n\r\n* fix rustfmt",
+          "timestamp": "2024-08-31T22:05:50+09:00",
+          "tree_id": "27d2b7335bc5fc2290e617b578decfb3a65a3671",
+          "url": "https://github.com/lloydmeta/frunk/commit/93c4db74fac719764e3ce841f5169550efd1bb60"
+        },
+        "date": 1725109628193,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 0.77,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1.55,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1.55,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2.47,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 0.77,
+            "range": "± 0.13",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1.55,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 0.77,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1.55,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1.55,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 60.5,
+            "range": "± 1.22",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 74.18,
+            "range": "± 0.86",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 2615.34,
+            "range": "± 34.57",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 2691.97,
+            "range": "± 29.75",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 0.77,
+            "range": "± 0.67",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 0.77,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 12.99,
+            "range": "± 0.10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 2.35,
+            "range": "± 0.04",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 35.09,
+            "range": "± 0.26",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 52.06,
+            "range": "± 1.04",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 604.52,
+            "range": "± 5.87",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 440.17,
+            "range": "± 4.77",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 247.28,
+            "range": "± 4.53",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 34.66,
+            "range": "± 0.92",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 112.82,
+            "range": "± 3.61",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 27.85,
+            "range": "± 0.14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 30.25,
+            "range": "± 0.17",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 1.24,
+            "range": "± 0.01",
             "unit": "ns/iter"
           }
         ]
