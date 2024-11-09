@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1725110628003,
+  "lastUpdate": 1731162519842,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -10577,6 +10577,258 @@ window.BENCHMARK_DATA = {
             "name": "ok_result_into_validated",
             "value": 1.08,
             "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 1.24,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "lloydmeta@users.noreply.github.com",
+            "name": "Lloyd",
+            "username": "lloydmeta"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ffba8cfa144b8ed02942271a3ea45006100cd029",
+          "message": "Add a test to check that LabelledGeneric works with keyword fields (#238)\n\nChecks that derives works and transmogrifying works.\r\n\r\nSigned-off-by: lloydmeta <lloydmeta@gmail.com>",
+          "timestamp": "2024-11-09T23:27:46+09:00",
+          "tree_id": "0eb4ae4948dab78157d4d055240c6f49b1fd05db",
+          "url": "https://github.com/lloydmeta/frunk/commit/ffba8cfa144b8ed02942271a3ea45006100cd029"
+        },
+        "date": 1731162518208,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 0.77,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2.47,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 61,
+            "range": "± 0.56",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 75.11,
+            "range": "± 0.76",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 2609.23,
+            "range": "± 29.34",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 2562.98,
+            "range": "± 27.33",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 0.77,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0.62,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 0.77,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 13.3,
+            "range": "± 0.03",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 2.35,
+            "range": "± 0.07",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 35.18,
+            "range": "± 0.26",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 53.66,
+            "range": "± 0.60",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 618.24,
+            "range": "± 11.16",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 442.53,
+            "range": "± 4.70",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 225.54,
+            "range": "± 120.80",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 36.87,
+            "range": "± 6.04",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 101.47,
+            "range": "± 29.73",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 27.89,
+            "range": "± 1.05",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 30.31,
+            "range": "± 0.53",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1.54,
+            "range": "± 0.05",
             "unit": "ns/iter"
           },
           {
