@@ -260,3 +260,20 @@ fn test_sculpt_enum() {
         }
     );
 }
+
+#[test]
+fn test_transmogrify_keyword_field_structs() {
+    let value = HasKeyword1 { r#type: 3 };
+    let result: HasKeyword2 = value.transmogrify();
+    assert_eq!(3, result.r#type);
+}
+
+#[test]
+fn test_transmogrify_keyword_field_embedder_structs() {
+    let value = {
+        let embedded = HasKeyword1 { r#type: 3 };
+        HasKeyword1Embedder { r#true: embedded }
+    };
+    let result: HasKeyword2Embedder = value.transmogrify();
+    assert_eq!(3, result.r#true.r#type);
+}
