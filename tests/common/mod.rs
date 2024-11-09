@@ -53,6 +53,26 @@ pub struct SuperLongField {
     pub abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789: i32,
 }
 
+#[derive(LabelledGeneric)]
+pub struct HasKeyword1 {
+    pub r#type: i32,
+}
+
+#[derive(LabelledGeneric)]
+pub struct HasKeyword2 {
+    pub r#type: i32,
+}
+
+#[derive(LabelledGeneric)]
+pub struct HasKeyword1Embedder {
+    pub r#true: HasKeyword1,
+}
+
+#[derive(LabelledGeneric)]
+pub struct HasKeyword2Embedder {
+    pub r#true: HasKeyword2,
+}
+
 #[derive(Generic, Debug, PartialEq, Eq)]
 pub struct TupleStruct<'a>(pub &'a str, pub i32);
 
