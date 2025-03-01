@@ -951,7 +951,7 @@ where
             <&'a Tail as Plucker<&'a FromTail, TailIndex>>::Remainder,
         ) = <&'a Tail as Plucker<&'a FromTail, TailIndex>>::pluck(&self.tail);
         (
-            &target,
+            target,
             HCons {
                 head: &self.head,
                 tail: tail_remainder,
