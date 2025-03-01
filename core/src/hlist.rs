@@ -928,6 +928,38 @@ where
     }
 }
 
+/// Implementation when target is reference and  the pluck target is in head
+impl<'a, T, Tail> Plucker<&'a T, Here> for &'a HCons<T, Tail> {
+    type Remainder = &'a Tail;
+
+    fn pluck(self) -> (&'a T, Self::Remainder) {
+        (&self.head, &self.tail)
+    }
+}
+
+/// Implementation when target is reference the pluck target is in the tail
+impl<'a, Head, Tail, FromTail, TailIndex> Plucker<&'a FromTail, There<TailIndex>>
+    for &'a HCons<Head, Tail>
+where
+    &'a Tail: Plucker<&'a FromTail, TailIndex>,
+{
+    type Remainder = HCons<&'a Head, <&'a Tail as Plucker<&'a FromTail, TailIndex>>::Remainder>;
+
+    fn pluck(self) -> (&'a FromTail, Self::Remainder) {
+        let (target, tail_remainder): (
+            &'a FromTail,
+            <&'a Tail as Plucker<&'a FromTail, TailIndex>>::Remainder,
+        ) = <&'a Tail as Plucker<&'a FromTail, TailIndex>>::pluck(&self.tail);
+        (
+            &target,
+            HCons {
+                head: &self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 /// Trait for pulling out some subset of an HList, using type inference.
 ///
 /// This trait is part of the implementation of the inherent method
