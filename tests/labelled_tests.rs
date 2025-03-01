@@ -4,7 +4,6 @@ use frunk::labelled::Field;
 use frunk::labelled::Transmogrifier;
 use frunk::{from_labelled_generic, into_labelled_generic, transform_from};
 use frunk::{Coproduct, HCons, LabelledGeneric};
-use frunk_core::labelled::ByNameFieldPlucker;
 use frunk_core::{field, hlist};
 use time::OffsetDateTime;
 
@@ -277,31 +276,4 @@ fn test_transmogrify_keyword_field_embedder_structs() {
     };
     let result: HasKeyword2Embedder = value.transmogrify();
     assert_eq!(3, result.r#true.r#type);
-}
-#[test]
-fn test_pluck_by_name() {
-    let u = NewUser {
-        first_name: "Humpty",
-        last_name: "Drumpty",
-        age: 3,
-    };
-    let h = into_labelled_generic(u);
-    let first_name: (Field<(f, i, r, s, t, __, n, a, m, e), _>, _) = h.pluck_by_name();
-    assert_eq!(first_name.0.value, "Humpty");
-    let age: (Field<(a, g, e), _>, _) = h.pluck_by_name();
-    assert_eq!(age.0.value, 3);
-}
-
-#[test]
-fn test_pluck_by_name_ref() {
-    let u = NewUser {
-        first_name: "Humpty",
-        last_name: "Drumpty",
-        age: 3,
-    };
-    let h = &into_labelled_generic(u);
-    let first_name: (Field<(f, i, r, s, t, __, n, a, m, e), _>, _) = h.pluck_by_name();
-    assert_eq!(first_name.0.value, &"Humpty");
-    let age: (Field<(a, g, e), _>, _) = h.pluck_by_name();
-    assert_eq!(age.0.value, &3);
 }

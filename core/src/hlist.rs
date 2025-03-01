@@ -929,11 +929,11 @@ where
 }
 
 /// Implementation when target is reference and  the pluck target is in head
-impl<'a, T, Tail> Plucker<&'a T, Here> for &'a HCons<T, Tail> {
-    type Remainder = &'a Tail;
+impl<'a, T, Tail: ToRef<'a>> Plucker<&'a T, Here> for &'a HCons<T, Tail> {
+    type Remainder = <Tail as ToRef<'a>>::Output;
 
     fn pluck(self) -> (&'a T, Self::Remainder) {
-        (&self.head, &self.tail)
+        (&self.head, self.tail.to_ref())
     }
 }
 
@@ -1611,6 +1611,7 @@ where
 mod tests {
     use super::*;
 
+    use alloc::string::ToString;
     use alloc::vec;
 
     #[test]
@@ -1639,10 +1640,18 @@ mod tests {
 
     #[test]
     fn test_pluck() {
-        let h = hlist![1, "hello", true, 42f32];
-        let (t, r): (f32, _) = h.pluck();
+        let h = hlist![1, "hello".to_string(), true, 42f32];
+        let (t, r): (f32, _) = h.clone().pluck();
         assert_eq!(t, 42f32);
-        assert_eq!(r, hlist![1, "hello", true])
+        assert_eq!(r, hlist![1, "hello".to_string(), true]);
+    }
+
+    #[test]
+    fn test_ref_pluck() {
+        let h = &hlist![1, "hello".to_string(), true, 42f32];
+        let (t, r): (&f32, _) = h.pluck();
+        assert_eq!(t, &42f32);
+        assert_eq!(r, hlist![&1, &"hello".to_string(), &true]);
     }
 
     #[test]

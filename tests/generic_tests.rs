@@ -1,9 +1,4 @@
-use frunk::{
-    convert_from, from_generic,
-    hlist::Plucker,
-    indices::{Here, There},
-    into_generic,
-};
+use frunk::{convert_from, from_generic, into_generic};
 use frunk_core::hlist;
 
 mod common;
@@ -89,32 +84,4 @@ fn test_mixed_conversions_round_trip() {
     // let au2 = <ApiUser as LabelledGeneric>::convert_from(u); <-- will fail at compile time
     let u_again: SavedUser = convert_from(au);
     assert_eq!(u_again, before)
-}
-
-#[test]
-fn test_pluck() {
-    let u = Person {
-        first_name: "Humpty",
-        last_name: "Drumpty",
-        age: 3,
-    };
-    let h = into_generic(u);
-    let first_name = Plucker::<_, Here>::pluck(h);
-    assert_eq!(first_name.0, "Humpty");
-    let age = Plucker::<_, There<There<Here>>>::pluck(h);
-    assert_eq!(age.0, 3);
-}
-
-#[test]
-fn test_pluck_ref() {
-    let u = Person {
-        first_name: "Humpty",
-        last_name: "Drumpty",
-        age: 3,
-    };
-    let h = &into_generic(u);
-    let first_name = Plucker::<_, Here>::pluck(h);
-    assert_eq!(first_name.0, &"Humpty");
-    let age = Plucker::<_, There<There<Here>>>::pluck(h);
-    assert_eq!(age.0, &3);
 }

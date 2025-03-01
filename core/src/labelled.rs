@@ -149,6 +149,7 @@
 
 use crate::hlist::*;
 use crate::indices::*;
+use crate::traits::ToRef;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -628,14 +629,14 @@ where
 }
 
 /// Implementation when target is reference and the pluck target key is in the head.
-impl<'a, K, V, Tail> ByNameFieldPlucker<K, Here> for &'a HCons<Field<K, V>, Tail> {
+impl<'a, K, V, Tail: ToRef<'a>> ByNameFieldPlucker<K, Here> for &'a HCons<Field<K, V>, Tail> {
     type TargetValue = &'a V;
-    type Remainder = &'a Tail;
+    type Remainder = <Tail as ToRef<'a>>::Output;
 
     #[inline(always)]
     fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
         let field = field_with_name(self.head.name, &self.head.value);
-        (field, &self.tail)
+        (field, self.tail.to_ref())
     }
 }
 
@@ -951,7 +952,7 @@ mod tests {
     use super::chars::*;
     use super::*;
     use alloc::collections::{LinkedList, VecDeque};
-    use alloc::{boxed::Box, format, vec, vec::Vec};
+    use alloc::{boxed::Box, format, string::ToString, vec, vec::Vec};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -1008,6 +1009,32 @@ mod tests {
         let record = hlist![field!(name, "Joe"), field!((a, g, e), 30)];
         let (name, _): (Field<name, _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
+    }
+
+    #[test]
+    fn test_pluck_by_name() {
+        let record = hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.clone().pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![field!(is_admin, true), field!((a, g, e), 30),]);
+    }
+
+    #[test]
+    fn test_ref_pluck_by_name() {
+        let record = &hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![&field!(is_admin, true), &field!((a, g, e), 30),]);
     }
 
     #[test]
