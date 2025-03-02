@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]:
+- Implement Plucker/ByNameFieldPlucker for &HList (https://github.com/lloydmeta/frunk/pull/240)
 
 ## [0.4.3]:
 - avoid clippy::unneeded_field_pattern (https://github.com/lloydmeta/frunk/pull/216)
