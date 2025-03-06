@@ -149,6 +149,7 @@
 
 use crate::hlist::*;
 use crate::indices::*;
+use crate::traits::ToRef;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -627,6 +628,40 @@ where
     }
 }
 
+/// Implementation when target is reference and the pluck target key is in the head.
+impl<'a, K, V, Tail: ToRef<'a>> ByNameFieldPlucker<K, Here> for &'a HCons<Field<K, V>, Tail> {
+    type TargetValue = &'a V;
+    type Remainder = <Tail as ToRef<'a>>::Output;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let field = field_with_name(self.head.name, &self.head.value);
+        (field, self.tail.to_ref())
+    }
+}
+
+/// Implementation when target is reference and the pluck target key is in the tail.
+impl<'a, Head, Tail, K, TailIndex> ByNameFieldPlucker<K, There<TailIndex>> for &'a HCons<Head, Tail>
+where
+    &'a Tail: ByNameFieldPlucker<K, TailIndex>,
+{
+    type TargetValue = <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::TargetValue;
+    type Remainder = HCons<&'a Head, <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::Remainder>;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let (target, tail_remainder) =
+            <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::pluck_by_name(&self.tail);
+        (
+            target,
+            HCons {
+                head: &self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 /// Trait for transmogrifying a `Source` type into a `Target` type.
 ///
 /// What is "transmogrifying"? In this context, it means to convert some data of type `A`
@@ -917,7 +952,7 @@ mod tests {
     use super::chars::*;
     use super::*;
     use alloc::collections::{LinkedList, VecDeque};
-    use alloc::{boxed::Box, format, vec, vec::Vec};
+    use alloc::{boxed::Box, format, string::ToString, vec, vec::Vec};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -974,6 +1009,32 @@ mod tests {
         let record = hlist![field!(name, "Joe"), field!((a, g, e), 30)];
         let (name, _): (Field<name, _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
+    }
+
+    #[test]
+    fn test_pluck_by_name() {
+        let record = hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.clone().pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![field!(is_admin, true), field!((a, g, e), 30),]);
+    }
+
+    #[test]
+    fn test_ref_pluck_by_name() {
+        let record = &hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![&field!(is_admin, true), &field!((a, g, e), 30),]);
     }
 
     #[test]

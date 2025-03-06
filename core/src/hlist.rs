@@ -928,6 +928,38 @@ where
     }
 }
 
+/// Implementation when target is reference and  the pluck target is in head
+impl<'a, T, Tail: ToRef<'a>> Plucker<&'a T, Here> for &'a HCons<T, Tail> {
+    type Remainder = <Tail as ToRef<'a>>::Output;
+
+    fn pluck(self) -> (&'a T, Self::Remainder) {
+        (&self.head, self.tail.to_ref())
+    }
+}
+
+/// Implementation when target is reference the pluck target is in the tail
+impl<'a, Head, Tail, FromTail, TailIndex> Plucker<&'a FromTail, There<TailIndex>>
+    for &'a HCons<Head, Tail>
+where
+    &'a Tail: Plucker<&'a FromTail, TailIndex>,
+{
+    type Remainder = HCons<&'a Head, <&'a Tail as Plucker<&'a FromTail, TailIndex>>::Remainder>;
+
+    fn pluck(self) -> (&'a FromTail, Self::Remainder) {
+        let (target, tail_remainder): (
+            &'a FromTail,
+            <&'a Tail as Plucker<&'a FromTail, TailIndex>>::Remainder,
+        ) = <&'a Tail as Plucker<&'a FromTail, TailIndex>>::pluck(&self.tail);
+        (
+            target,
+            HCons {
+                head: &self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 /// Trait for pulling out some subset of an HList, using type inference.
 ///
 /// This trait is part of the implementation of the inherent method
@@ -1579,6 +1611,7 @@ where
 mod tests {
     use super::*;
 
+    use alloc::string::ToString;
     use alloc::vec;
 
     #[test]
@@ -1607,10 +1640,18 @@ mod tests {
 
     #[test]
     fn test_pluck() {
-        let h = hlist![1, "hello", true, 42f32];
-        let (t, r): (f32, _) = h.pluck();
+        let h = hlist![1, "hello".to_string(), true, 42f32];
+        let (t, r): (f32, _) = h.clone().pluck();
         assert_eq!(t, 42f32);
-        assert_eq!(r, hlist![1, "hello", true])
+        assert_eq!(r, hlist![1, "hello".to_string(), true]);
+    }
+
+    #[test]
+    fn test_ref_pluck() {
+        let h = &hlist![1, "hello".to_string(), true, 42f32];
+        let (t, r): (&f32, _) = h.pluck();
+        assert_eq!(t, &42f32);
+        assert_eq!(r, hlist![&1, &"hello".to_string(), &true]);
     }
 
     #[test]
