@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1731162519842,
+  "lastUpdate": 1741258433850,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -10835,6 +10835,258 @@ window.BENCHMARK_DATA = {
             "name": "validated_to_result",
             "value": 1.24,
             "range": "± 0.01",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "account@kgtkr.net",
+            "name": "kgtkr",
+            "username": "kgtkr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6130a385cbb75136097144e31d041b732bec5b3d",
+          "message": "Implemented a reference version of Plucker/ByNameFieldPlucker (#240)\n\n* Implemented a reference version of Plucker/ByNameFieldPlucker\n\n* fixup! Implemented a reference version of Plucker/ByNameFieldPlucker\n\n* fix clippy\n\n* update CHANGELOG",
+          "timestamp": "2025-03-06T19:52:48+09:00",
+          "tree_id": "86205658dd85dd2815861874559555d255c91868",
+          "url": "https://github.com/lloydmeta/frunk/commit/6130a385cbb75136097144e31d041b732bec5b3d"
+        },
+        "date": 1741258431899,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 0.78,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2.49,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1.55,
+            "range": "± 0.03",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 58.54,
+            "range": "± 0.69",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 74.3,
+            "range": "± 1.72",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 2630.06,
+            "range": "± 37.99",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 2585.78,
+            "range": "± 32.64",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 0.78,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 0.78,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 13.06,
+            "range": "± 0.06",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 2.37,
+            "range": "± 0.42",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 31.79,
+            "range": "± 1.13",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0.31,
+            "range": "± 0.00",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 49.83,
+            "range": "± 0.73",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 602.71,
+            "range": "± 7.92",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 443.41,
+            "range": "± 11.14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 227.49,
+            "range": "± 3.45",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 34.83,
+            "range": "± 0.84",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 104.68,
+            "range": "± 1.38",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 27.98,
+            "range": "± 1.26",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 29.21,
+            "range": "± 0.72",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1.55,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 1.24,
+            "range": "± 0.00",
             "unit": "ns/iter"
           }
         ]
