@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><title>hlist.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/hlist.rs`."><title>hlist.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0 (4d91de4e4 2025-02-17)" data-channel="1.85.0" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">frunk_core/</div>hlist.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2011,7 +2012,47 @@
 <a href="#2011" id="2011">2011</a>
 <a href="#2012" id="2012">2012</a>
 <a href="#2013" id="2013">2013</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! Module that holds HList data structures, implementations, and typeclasses.
+<a href="#2014" id="2014">2014</a>
+<a href="#2015" id="2015">2015</a>
+<a href="#2016" id="2016">2016</a>
+<a href="#2017" id="2017">2017</a>
+<a href="#2018" id="2018">2018</a>
+<a href="#2019" id="2019">2019</a>
+<a href="#2020" id="2020">2020</a>
+<a href="#2021" id="2021">2021</a>
+<a href="#2022" id="2022">2022</a>
+<a href="#2023" id="2023">2023</a>
+<a href="#2024" id="2024">2024</a>
+<a href="#2025" id="2025">2025</a>
+<a href="#2026" id="2026">2026</a>
+<a href="#2027" id="2027">2027</a>
+<a href="#2028" id="2028">2028</a>
+<a href="#2029" id="2029">2029</a>
+<a href="#2030" id="2030">2030</a>
+<a href="#2031" id="2031">2031</a>
+<a href="#2032" id="2032">2032</a>
+<a href="#2033" id="2033">2033</a>
+<a href="#2034" id="2034">2034</a>
+<a href="#2035" id="2035">2035</a>
+<a href="#2036" id="2036">2036</a>
+<a href="#2037" id="2037">2037</a>
+<a href="#2038" id="2038">2038</a>
+<a href="#2039" id="2039">2039</a>
+<a href="#2040" id="2040">2040</a>
+<a href="#2041" id="2041">2041</a>
+<a href="#2042" id="2042">2042</a>
+<a href="#2043" id="2043">2043</a>
+<a href="#2044" id="2044">2044</a>
+<a href="#2045" id="2045">2045</a>
+<a href="#2046" id="2046">2046</a>
+<a href="#2047" id="2047">2047</a>
+<a href="#2048" id="2048">2048</a>
+<a href="#2049" id="2049">2049</a>
+<a href="#2050" id="2050">2050</a>
+<a href="#2051" id="2051">2051</a>
+<a href="#2052" id="2052">2052</a>
+<a href="#2053" id="2053">2053</a>
+<a href="#2054" id="2054">2054</a></pre></div><pre class="rust"><code><span class="doccomment">//! Module that holds HList data structures, implementations, and typeclasses.
 //!
 //! Typically, you would want to use the `hlist!` macro to make it easier
 //! for you to use HList.
@@ -2941,6 +2982,38 @@
     }
 }
 
+<span class="doccomment">/// Implementation when target is reference and  the pluck target is in head
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, Tail: ToRef&lt;<span class="lifetime">'a</span>&gt;&gt; Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T, Here&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;T, Tail&gt; {
+    <span class="kw">type </span>Remainder = &lt;Tail <span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output;
+
+    <span class="kw">fn </span>pluck(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T, <span class="self">Self</span>::Remainder) {
+        (<span class="kw-2">&amp;</span><span class="self">self</span>.head, <span class="self">self</span>.tail.to_ref())
+    }
+}
+
+<span class="doccomment">/// Implementation when target is reference the pluck target is in the tail
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, Head, Tail, FromTail, TailIndex&gt; Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, There&lt;TailIndex&gt;&gt;
+    <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;Head, Tail&gt;
+<span class="kw">where
+    </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail: Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, TailIndex&gt;,
+{
+    <span class="kw">type </span>Remainder = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Head, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, TailIndex&gt;&gt;::Remainder&gt;;
+
+    <span class="kw">fn </span>pluck(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, <span class="self">Self</span>::Remainder) {
+        <span class="kw">let </span>(target, tail_remainder): (
+            <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail,
+            &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, TailIndex&gt;&gt;::Remainder,
+        ) = &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>Plucker&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FromTail, TailIndex&gt;&gt;::pluck(<span class="kw-2">&amp;</span><span class="self">self</span>.tail);
+        (
+            target,
+            HCons {
+                head: <span class="kw-2">&amp;</span><span class="self">self</span>.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 <span class="doccomment">/// Trait for pulling out some subset of an HList, using type inference.
 ///
 /// This trait is part of the implementation of the inherent method
@@ -3592,6 +3665,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
+    <span class="kw">use </span>alloc::string::ToString;
     <span class="kw">use </span>alloc::vec;
 
     <span class="attr">#[test]
@@ -3620,10 +3694,18 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pluck() {
-        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>, <span class="bool-val">true</span>, <span class="number">42f32</span>];
-        <span class="kw">let </span>(t, r): (f32, <span class="kw">_</span>) = h.pluck();
+        <span class="kw">let </span>h = <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>.to_string(), <span class="bool-val">true</span>, <span class="number">42f32</span>];
+        <span class="kw">let </span>(t, r): (f32, <span class="kw">_</span>) = h.clone().pluck();
         <span class="macro">assert_eq!</span>(t, <span class="number">42f32</span>);
-        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>, <span class="bool-val">true</span>])
+        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>.to_string(), <span class="bool-val">true</span>]);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_ref_pluck() {
+        <span class="kw">let </span>h = <span class="kw-2">&amp;</span><span class="macro">hlist!</span>[<span class="number">1</span>, <span class="string">"hello"</span>.to_string(), <span class="bool-val">true</span>, <span class="number">42f32</span>];
+        <span class="kw">let </span>(t, r): (<span class="kw-2">&amp;</span>f32, <span class="kw">_</span>) = h.pluck();
+        <span class="macro">assert_eq!</span>(t, <span class="kw-2">&amp;</span><span class="number">42f32</span>);
+        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="kw-2">&amp;</span><span class="number">1</span>, <span class="kw-2">&amp;</span><span class="string">"hello"</span>.to_string(), <span class="kw-2">&amp;</span><span class="bool-val">true</span>]);
     }
 
     <span class="attr">#[test]

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/labelled.rs`."><title>labelled.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/labelled.rs`."><title>labelled.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frunk_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0 (4d91de4e4 2025-02-17)" data-channel="1.85.0" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">frunk_core/</div>labelled.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1211,7 +1212,67 @@
 <a href="#1211" id="1211">1211</a>
 <a href="#1212" id="1212">1212</a>
 <a href="#1213" id="1213">1213</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! This module holds the machinery behind LabelledGeneric.
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
+<a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
+<a href="#1251" id="1251">1251</a>
+<a href="#1252" id="1252">1252</a>
+<a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a></pre></div><pre class="rust"><code><span class="doccomment">//! This module holds the machinery behind LabelledGeneric.
 //!
 //! A `LabelledGeneric` instance is pretty much exactly the same as a `Generic`
 //! instance, except that the generic representation should contain information
@@ -1362,6 +1423,7 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::hlist::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::indices::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::traits::ToRef;
 <span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -1840,6 +1902,40 @@
     }
 }
 
+<span class="doccomment">/// Implementation when target is reference and the pluck target key is in the head.
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, Tail: ToRef&lt;<span class="lifetime">'a</span>&gt;&gt; ByNameFieldPlucker&lt;K, Here&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;Field&lt;K, V&gt;, Tail&gt; {
+    <span class="kw">type </span>TargetValue = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V;
+    <span class="kw">type </span>Remainder = &lt;Tail <span class="kw">as </span>ToRef&lt;<span class="lifetime">'a</span>&gt;&gt;::Output;
+
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>pluck_by_name(<span class="self">self</span>) -&gt; (Field&lt;K, <span class="self">Self</span>::TargetValue&gt;, <span class="self">Self</span>::Remainder) {
+        <span class="kw">let </span>field = field_with_name(<span class="self">self</span>.head.name, <span class="kw-2">&amp;</span><span class="self">self</span>.head.value);
+        (field, <span class="self">self</span>.tail.to_ref())
+    }
+}
+
+<span class="doccomment">/// Implementation when target is reference and the pluck target key is in the tail.
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, Head, Tail, K, TailIndex&gt; ByNameFieldPlucker&lt;K, There&lt;TailIndex&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HCons&lt;Head, Tail&gt;
+<span class="kw">where
+    </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail: ByNameFieldPlucker&lt;K, TailIndex&gt;,
+{
+    <span class="kw">type </span>TargetValue = &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>ByNameFieldPlucker&lt;K, TailIndex&gt;&gt;::TargetValue;
+    <span class="kw">type </span>Remainder = HCons&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Head, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>ByNameFieldPlucker&lt;K, TailIndex&gt;&gt;::Remainder&gt;;
+
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>pluck_by_name(<span class="self">self</span>) -&gt; (Field&lt;K, <span class="self">Self</span>::TargetValue&gt;, <span class="self">Self</span>::Remainder) {
+        <span class="kw">let </span>(target, tail_remainder) =
+            &lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Tail <span class="kw">as </span>ByNameFieldPlucker&lt;K, TailIndex&gt;&gt;::pluck_by_name(<span class="kw-2">&amp;</span><span class="self">self</span>.tail);
+        (
+            target,
+            HCons {
+                head: <span class="kw-2">&amp;</span><span class="self">self</span>.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 <span class="doccomment">/// Trait for transmogrifying a `Source` type into a `Target` type.
 ///
 /// What is "transmogrifying"? In this context, it means to convert some data of type `A`
@@ -2130,7 +2226,7 @@
     <span class="kw">use </span><span class="kw">super</span>::chars::<span class="kw-2">*</span>;
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span>alloc::collections::{LinkedList, VecDeque};
-    <span class="kw">use </span>alloc::{boxed::Box, format, vec, vec::Vec};
+    <span class="kw">use </span>alloc::{boxed::Box, format, string::ToString, vec, vec::Vec};
 
     <span class="comment">// Set up some aliases
     </span><span class="attr">#[allow(non_camel_case_types)]
@@ -2187,6 +2283,32 @@
         <span class="kw">let </span>record = <span class="macro">hlist!</span>[<span class="macro">field!</span>(name, <span class="string">"Joe"</span>), <span class="macro">field!</span>((a, g, e), <span class="number">30</span>)];
         <span class="kw">let </span>(name, <span class="kw">_</span>): (Field&lt;name, <span class="kw">_</span>&gt;, <span class="kw">_</span>) = record.pluck();
         <span class="macro">assert_eq!</span>(name.value, <span class="string">"Joe"</span>)
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_pluck_by_name() {
+        <span class="kw">let </span>record = <span class="macro">hlist!</span>[
+            <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>),
+            <span class="macro">field!</span>(name, <span class="string">"Joe"</span>.to_string()),
+            <span class="macro">field!</span>((a, g, e), <span class="number">30</span>),
+        ];
+
+        <span class="kw">let </span>(name, r): (Field&lt;name, <span class="kw">_</span>&gt;, <span class="kw">_</span>) = record.clone().pluck_by_name();
+        <span class="macro">assert_eq!</span>(name.value, <span class="string">"Joe"</span>);
+        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="macro">field!</span>((a, g, e), <span class="number">30</span>),]);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_ref_pluck_by_name() {
+        <span class="kw">let </span>record = <span class="kw-2">&amp;</span><span class="macro">hlist!</span>[
+            <span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>),
+            <span class="macro">field!</span>(name, <span class="string">"Joe"</span>.to_string()),
+            <span class="macro">field!</span>((a, g, e), <span class="number">30</span>),
+        ];
+
+        <span class="kw">let </span>(name, r): (Field&lt;name, <span class="kw">_</span>&gt;, <span class="kw">_</span>) = record.pluck_by_name();
+        <span class="macro">assert_eq!</span>(name.value, <span class="string">"Joe"</span>);
+        <span class="macro">assert_eq!</span>(r, <span class="macro">hlist!</span>[<span class="kw-2">&amp;</span><span class="macro">field!</span>(is_admin, <span class="bool-val">true</span>), <span class="kw-2">&amp;</span><span class="macro">field!</span>((a, g, e), <span class="number">30</span>),]);
     }
 
     <span class="attr">#[test]
