@@ -1239,9 +1239,9 @@ pub mod foldr_owned {
     /// the `HList`:
     ///
     /// 1. `foldl` calls `folder(head)` and then passes the ownership
-    ///     of the folder to the next recursive call.
+    ///    of the folder to the next recursive call.
     /// 2. `foldr` passes the ownership of the folder to the next recursive call,
-    ///     and then tries to call `folder(head)`; but the ownership is already gone!
+    ///    and then tries to call `folder(head)`; but the ownership is already gone!
     pub trait HFoldRightableOwned<Folder, Init>: HFoldRightable<Folder, Init> {
         fn real_foldr(self, folder: Folder, init: Init) -> (Self::Output, Folder);
     }
