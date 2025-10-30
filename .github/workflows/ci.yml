@@ -8,12 +8,13 @@ jobs:
     name: Basic sanity checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         name: formatting check
         with:
@@ -23,7 +24,7 @@ jobs:
         name: clippy
         with:
           command: clippy
-          args: --all -- -D warnings
+          args: --all --tests -- -D warnings
 
   check:
     name: Check
@@ -33,7 +34,7 @@ jobs:
         toolchain: [ stable, nightly ]
         use_std: [ y, n ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         name: thumbv6m-none-eabi toolchain setup
         if: ${{ matrix.use_std == 'y' }}
@@ -49,6 +50,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         name: thumbv6m-none-eabi check
         if: ${{ matrix.use_std == 'y' }}
@@ -69,7 +71,7 @@ jobs:
         toolchain: [ stable, nightly ]
         use_std: [ y, n ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         name: thumbv6m-none-eabi toolchain setup
         if: ${{ matrix.use_std == 'y' }}
@@ -85,6 +87,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         name: thumbv6m-none-eabi build
         if: ${{ matrix.use_std == 'y' }}
@@ -97,17 +100,11 @@ jobs:
         with:
           command: build
       - uses: actions-rs/cargo@v1
-        name: std build generic example
+        name: std build examples
         if: ${{ matrix.use_std == 'n' }}
         with:
           command: build
-          args: --example generic
-      - uses: actions-rs/cargo@v1
-        name: std build labelled example
-        if: ${{ matrix.use_std == 'n' }}
-        with:
-          command: build
-          args: --example labelled
+          args: --examples
 
   test:
     name: Test Suite
@@ -116,12 +113,13 @@ jobs:
       matrix:
         toolchain: [ stable, nightly ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         name: std test all
         with:
@@ -135,14 +133,17 @@ jobs:
       matrix:
         toolchain: [ stable, nightly ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         name: std doc check
+        env:
+          RUSTDOCFLAGS: '-D warnings'
         with:
           command: doc
-          args: --all --no-deps
+          args: --all --no-deps  --document-private-items

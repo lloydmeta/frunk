@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 //! Frunk Core
 //!
@@ -8,8 +8,8 @@
 //! # Examples
 //!
 //! ```
-//! # #[macro_use] extern crate frunk_core;
 //! # use frunk_core::hlist::*;
+//! # use frunk_core::{hlist, HList};
 //! # fn main() {
 //!
 //! let h = hlist![1, false, 42f32];
@@ -58,8 +58,11 @@
 //!   1. [Source on Github](https://github.com/lloydmeta/frunk)
 //!   2. [Crates.io page](https://crates.io/crates/frunk)
 
-#[cfg(not(feature = "std"))]
-extern crate core as std;
+#[cfg(test)]
+extern crate std;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 #[macro_use]
 mod macros;
@@ -75,7 +78,3 @@ mod tuples;
 
 #[cfg(test)]
 mod test_structs;
-
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;

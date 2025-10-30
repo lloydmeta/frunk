@@ -18,10 +18,10 @@ extern crate syn;
 use proc_macro::TokenStream;
 
 mod derive_generic;
-use derive_generic::impl_generic;
+use crate::derive_generic::impl_generic;
 
 mod derive_labelled_generic;
-use derive_labelled_generic::impl_labelled_generic;
+use crate::derive_labelled_generic::impl_labelled_generic;
 
 use quote::ToTokens;
 

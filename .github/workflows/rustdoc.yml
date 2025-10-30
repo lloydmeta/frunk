@@ -11,12 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
+
+      - uses: Swatinem/rust-cache@v2
 
       - uses: actions-rs/cargo@v1
         name: build docs
@@ -24,7 +26,7 @@ jobs:
           command: doc
           args: --all --no-deps
 
-      - uses: peaceiris/actions-gh-pages@v3
+      - uses: peaceiris/actions-gh-pages@v4
         name: push docs
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

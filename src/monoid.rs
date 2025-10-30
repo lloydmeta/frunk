@@ -11,7 +11,8 @@ their values are summed in the new map?
 # Examples
 
 ```
-use std::collections::HashMap;
+# extern crate std;
+# use std::collections::HashMap;
 use frunk::{monoid, Monoid};
 
 let vec_of_no_hashmaps: Vec<HashMap<i32, String>> = Vec::new();
@@ -37,10 +38,12 @@ assert_eq!(monoid::combine_all(&vec_of_hashes), h_expected);
 )]
 
 use super::semigroup::{All, Any, Product, Semigroup};
+#[cfg(feature = "alloc")]
+use alloc::{string::String, vec::Vec};
+#[cfg(feature = "std")]
+use core::hash::Hash;
 #[cfg(feature = "std")]
 use std::collections::*;
-#[cfg(feature = "std")]
-use std::hash::Hash;
 
 /// A Monoid is a Semigroup that has an empty/ zero value
 pub trait Monoid: Semigroup {
@@ -78,11 +81,14 @@ where
 
 /// Given a sequence of `xs`, combine them and return the total
 #[cfg_attr(
-    feature = "std",
+    feature = "alloc",
     doc = r#"
 # Examples
 
 ```
+# extern crate alloc;
+# use alloc::vec::Vec;
+# use alloc::string::String;
 use frunk::monoid::combine_all;
 
 assert_eq!(combine_all(&vec![Some(1), Some(3)]), Some(4));
@@ -99,7 +105,7 @@ where
     T: Monoid + Semigroup + Clone,
 {
     xs.iter()
-        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(&next))
+        .fold(<T as Monoid>::empty(), |acc, next| acc.combine(next))
 }
 
 impl<T> Monoid for Option<T>
@@ -111,14 +117,14 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl Monoid for String {
     fn empty() -> Self {
         String::new()
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 impl<T> Monoid for Vec<T>
 where
     T: Clone,
@@ -292,6 +298,9 @@ mod tests {
     use super::super::semigroup::{All, Any, Product};
     use super::*;
 
+    #[cfg(feature = "alloc")]
+    use alloc::{borrow::ToOwned, vec};
+
     #[test]
     fn test_combine_n() {
         assert_eq!(combine_n(&1, 0), 0);
@@ -301,7 +310,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_combine_all_basic() {
         assert_eq!(combine_all(&[1, 2, 3]), 6);
         assert_eq!(combine_all(&[] as &[i32]), 0);
@@ -383,7 +392,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
+    #[cfg(feature = "alloc")]
     fn test_combine_all_tuple() {
         let t1 = (1, 2.5f32, String::from("hi"), Some(3));
         let t2 = (1, 2.5f32, String::from(" world"), None);

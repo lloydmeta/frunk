@@ -1,9 +1,5 @@
 // Makes sure that the hlist macros in frunk_core are reexported by frunk
-
-#[macro_use]
-extern crate frunk;
-
-// NOTE: Deliberately no "extern crate frunk_core;"
+use frunk::{hlist, hlist_pat, HList};
 
 #[test]
 fn use_frunk_macros() {

@@ -1,6 +1,7 @@
 [package]
 name = "frunk_laws"
-version = "0.3.2"
+edition = "2021"
+version = "0.5.3"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "frunk_laws contains laws for algebras declared in Frunk."
 license = "MIT"
@@ -14,7 +15,8 @@ travis-ci = { repository = "lloydmeta/frunk" }
 [dependencies.frunk]
 path = ".."
 default-features = false
-version = "0.3.2"
+version = "0.4.4"
+features = ["std"]
 
 [dependencies]
-quickcheck = "0.6.1"
+quickcheck = "1.0.3"

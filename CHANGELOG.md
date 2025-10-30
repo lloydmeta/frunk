@@ -5,9 +5,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]:
+
+## [0.4.4]:
+- Implement Plucker/ByNameFieldPlucker for &HList (https://github.com/lloydmeta/frunk/pull/240)
+
+## [0.4.3]:
+- avoid clippy::unneeded_field_pattern (https://github.com/lloydmeta/frunk/pull/216)
+- rework #![no_std] support, switch on alloc (https://github.com/lloydmeta/frunk/pull/236)
+
+## [0.4.2]:
+- Removed `proc-macro-hack` machinery (`proc-macros-impl`) (https://github.com/lloydmeta/frunk/pull/214)
+- Add function for explicitly extending an hlist (https://github.com/lloydmeta/frunk/pull/209)
+
+## [0.4.1]:
+- Documentation fix for `Hcons::sculpt` (https://github.com/lloydmeta/frunk/pull/194)
+- Optimise Semigroup for HashSet and HashMap (https://github.com/lloydmeta/frunk/pull/196)
+- Update to 2021 edition (https://github.com/lloydmeta/frunk/pull/200)
+- Add `extract` to get value out of 1-type coproduct (https://github.com/lloydmeta/frunk/pull/201)
+- Fix needless borrow (https://github.com/lloydmeta/frunk/pull/202)
+- Add `Coproduct::map` (https://github.com/lloydmeta/frunk/pull/204)
+
+## [0.4.0]:
 - [Breaking change] Rename `Hlist!` type macro to `HList!` (https://github.com/lloydmeta/frunk/issues/132)
 - [Breaking change] Remove deprecated `HList.length()` (https://github.com/lloydmeta/frunk/issues/125)
 - [Breaking change] `HFoldRightable` rework: now `HFoldRightable::foldr` does not differ from `HFoldLeftable::foldl` in **calling**, like `std::iter::DoubleEndedIterator::rfold` does not differ from `std::iter::Iterator::fold`. Note: though `foldr` **behavior** wasn't changed, all old `foldr` calls would either stop compiling or produce wrong results (https://github.com/lloydmeta/frunk/issues/171)
+- [Breaking change] Bump quote, syn and proc-macro2 to 1 (https://github.com/lloydmeta/frunk/pull/183)
+- Fix unicode identifiers support https://github.com/lloydmeta/frunk/pull/186
 
 ## [0.3.2] - 2021-04-16
 - Allow folding hlist with a single Poly (https://github.com/lloydmeta/frunk/pull/170)

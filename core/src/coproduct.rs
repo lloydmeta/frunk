@@ -3,10 +3,8 @@
 //! Think of "Coproduct" as ad-hoc enums; allowing you to do something like this
 //!
 //! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
 //! # fn main() {
+//! # use frunk_core::Coprod;
 //! // For simplicity, assign our Coproduct type to a type alias
 //! // This is purely optional.
 //! type I32Bool = Coprod!(i32, bool);
@@ -40,7 +38,7 @@
 //! Or, if you want to "fold" over all possible values of a coproduct
 //!
 //! ```
-//! # #[macro_use] extern crate frunk;
+//! # use frunk_core::{hlist, poly_fn, Coprod};
 //! # fn main() {
 //! # type I32Bool = Coprod!(i32, bool);
 //! # let co1 = I32Bool::inject(3);
@@ -71,9 +69,11 @@
 //! # }
 //! ```
 
-use hlist::{HCons, HNil};
-use indices::{Here, There};
-use traits::{Func, Poly, ToMut, ToRef};
+use crate::hlist::{HCons, HNil};
+use crate::indices::{Here, There};
+use crate::traits::{Func, Poly, ToMut, ToRef};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Enum type representing a Coproduct. Think of this as a Result, but capable
 /// of supporting any arbitrary number of types instead of just 2.
@@ -84,8 +84,9 @@ use traits::{Func, Poly, ToMut, ToRef};
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::Coprod;
+///
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 /// let get_from_1a: Option<&i32> = co1.get();
@@ -130,9 +131,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -172,8 +173,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // You can let type inference find the desired type:
@@ -203,8 +205,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // You can let type inference find the desired type:
@@ -238,8 +241,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     /// type I32 = Coprod!(i32); // remainder after uninjecting f32
     /// type F32 = Coprod!(f32); // remainder after uninjecting i32
@@ -268,8 +272,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Chaining calls for an exhaustive match:
     ///
     /// ```rust
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32F32 = Coprod!(i32, f32);
     ///
     /// // Be aware that this particular example could be
@@ -318,10 +323,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// Basic usage:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
-    /// use ::frunk::Coproduct;
-    ///
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type I32F32 = Coprod!(i32, f32);
     ///
@@ -347,10 +351,10 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// with the advantage that it can remove more than one type at a time:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
-    /// use frunk::Coproduct;
-    ///
     /// # fn main() {
+    /// use frunk_core::{Coprod, hlist};
+    /// use frunk_core::coproduct::Coproduct;
+    ///
     /// fn handle_stringly_things(co: Coprod!(&'static str, String)) -> String {
     ///     co.fold(hlist![
     ///         |s| format!("&str {}", s),
@@ -429,8 +433,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
     /// type I32BoolF32 = Coprod!(i32, bool, f32);
     /// type BoolI32 = Coprod!(bool, i32);
     ///
@@ -460,8 +465,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// consuming the coproduct:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; fn main() {
+    /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// let co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
@@ -484,8 +490,9 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// consuming the coproduct:
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk; fn main() {
+    /// # fn main() {
     /// use frunk::Coproduct;
+    /// use frunk_core::Coprod;
     ///
     /// let mut co: Coprod!(i32, bool, String) = Coproduct::inject(true);
     ///
@@ -513,13 +520,14 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
-    /// type I32F32StrBool = Coprod!(i32, f32, bool);
+    /// use frunk_core::{Coprod, hlist};
     ///
-    /// let co1 = I32F32StrBool::inject(3);
-    /// let co2 = I32F32StrBool::inject(true);
-    /// let co3 = I32F32StrBool::inject(42f32);
+    /// type I32F32Bool = Coprod!(i32, f32, bool);
+    ///
+    /// let co1 = I32F32Bool::inject(3);
+    /// let co2 = I32F32Bool::inject(true);
+    /// let co3 = I32F32Bool::inject(42f32);
     ///
     /// let folder = hlist![|&i| format!("int {}", i),
     ///                     |&f| format!("float {}", f),
@@ -534,11 +542,11 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// handlers for the types in your Coproduct.
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::{Poly, Func};
+    /// use frunk_core::Coprod;
     ///
-    /// type I32F32StrBool = Coprod!(i32, f32, bool);
+    /// type I32F32Bool = Coprod!(i32, f32, bool);
     ///
     /// impl Func<i32> for P {
     ///     type Output = bool;
@@ -560,7 +568,7 @@ impl<Head, Tail> Coproduct<Head, Tail> {
     /// }
     /// struct P;
     ///
-    /// let co1 = I32F32StrBool::inject(3);
+    /// let co1 = I32F32Bool::inject(3);
     /// let folded = co1.fold(Poly(P));
     /// # }
     /// ```
@@ -570,6 +578,109 @@ impl<Head, Tail> Coproduct<Head, Tail> {
         Self: CoproductFoldable<Folder, Output>,
     {
         CoproductFoldable::fold(self, folder)
+    }
+
+    /// Apply a function to each variant of a Coproduct.
+    ///
+    /// The transforms some `Coprod!(A, B, C, ..., E)` into some
+    /// `Coprod!(T, U, V, ..., Z)`. A variety of types are supported for the
+    /// mapper argument:
+    ///
+    /// * An `hlist![]` of closures (one for each variant).
+    /// * A single closure (for mapping a Coproduct that is homogenous).
+    /// * A single [`Poly`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use frunk::{hlist, Coprod};
+    ///
+    /// type I32F32Bool = Coprod!(i32, f32, bool);
+    /// type BoolStrU8 = Coprod!(bool, &'static str, u8);
+    ///
+    /// let co1 = I32F32Bool::inject(3);
+    /// let co2 = I32F32Bool::inject(42f32);
+    /// let co3 = I32F32Bool::inject(true);
+    ///
+    /// let mapper = hlist![
+    ///     |n| n > 0,
+    ///     |f| if f == 42f32 { "😀" } else { "🤨" },
+    ///     |b| if b { 1u8 } else { 0u8 },
+    /// ];
+    ///
+    /// assert_eq!(co1.map(&mapper), BoolStrU8::inject(true));
+    /// assert_eq!(co2.map(&mapper), BoolStrU8::inject("😀"));
+    /// assert_eq!(co3.map(&mapper), BoolStrU8::inject(1u8));
+    /// ```
+    ///
+    /// Using a polymorphic function type has the advantage of not forcing you
+    /// to care about the order in which you declare handlers for the types in
+    /// your Coproduct.
+    ///
+    /// ```
+    /// use frunk::{poly_fn, Coprod};
+    ///
+    /// type I32F32Bool = Coprod!(i32, f32, bool);
+    ///
+    /// let co1 = I32F32Bool::inject(3);
+    /// let co2 = I32F32Bool::inject(42f32);
+    /// let co3 = I32F32Bool::inject(true);
+    ///
+    /// let mapper = poly_fn![
+    ///     |b: bool| -> bool { !b },
+    ///     |n: i32| -> i32 { n + 3 },
+    ///     |f: f32| -> f32 { -f },
+    /// ];
+    ///
+    /// assert_eq!(co1.map(&mapper), I32F32Bool::inject(6));
+    /// assert_eq!(co2.map(&mapper), I32F32Bool::inject(-42f32));
+    /// assert_eq!(co3.map(&mapper), I32F32Bool::inject(false));
+    /// ```
+    ///
+    /// You can also use a singular closure if the Coproduct variants are all
+    /// the same.
+    ///
+    /// ```
+    /// use frunk::Coprod;
+    ///
+    /// type IntInt = Coprod!(i32, i32);
+    /// type BoolBool = Coprod!(bool, bool);
+    ///
+    /// let mapper = |n| n > 0;
+    ///
+    /// let co = IntInt::Inl(42);
+    /// assert_eq!(co.map(mapper), BoolBool::Inl(true));
+    /// ```
+    #[inline(always)]
+    pub fn map<F>(self, mapper: F) -> <Self as CoproductMappable<F>>::Output
+    where
+        Self: CoproductMappable<F>,
+    {
+        CoproductMappable::map(self, mapper)
+    }
+}
+
+impl<T> Coproduct<T, CNil> {
+    /// Extract the value from a coproduct with only one variant.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() {
+    /// use frunk_core::Coprod;
+    ///
+    /// type I32Only = Coprod!(i32);
+    /// let co = I32Only::inject(5);
+    ///
+    /// assert_eq!(co.extract(), 5);
+    /// # }
+    /// ```
+    #[inline(always)]
+    pub fn extract(self) -> T {
+        match self {
+            Coproduct::Inl(v) => v,
+            Coproduct::Inr(never) => match never {},
+        }
     }
 }
 
@@ -765,6 +876,163 @@ where
 impl<F, R> CoproductFoldable<F, R> for CNil {
     fn fold(self, _: F) -> R {
         unreachable!()
+    }
+}
+
+/// Trait for mapping over a coproduct's variants.
+///
+/// This trait is part of the implementation of the inherent method
+/// [`Coproduct::map`]. Please see that method for more information.
+///
+/// You only need to import this trait when working with generic Coproducts or
+/// mappers of unknown type. If the type of everything is known, then
+/// `co.map(mapper)` should "just work" even without the trait.
+pub trait CoproductMappable<Mapper> {
+    type Output;
+
+    /// Use functions to map each variant of a coproduct.
+    ///
+    /// Please see the [inherent method] for more information.
+    ///
+    /// The only difference between that inherent method and this
+    /// trait method is the location of the type parameters.
+    /// (here, they are on the trait rather than the method)
+    ///
+    /// [inherent method]: Coproduct::map
+    fn map(self, f: Mapper) -> Self::Output;
+}
+
+/// Implementation for mapping a Coproduct using an `hlist!`.
+impl<F, R, MapperTail, CH, CTail> CoproductMappable<HCons<F, MapperTail>> for Coproduct<CH, CTail>
+where
+    F: FnOnce(CH) -> R,
+    CTail: CoproductMappable<MapperTail>,
+{
+    type Output = Coproduct<R, <CTail as CoproductMappable<MapperTail>>::Output>;
+
+    #[inline]
+    fn map(self, mapper: HCons<F, MapperTail>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl((mapper.head)(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(mapper.tail)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a `&hlist!`.
+impl<'a, F, R, MapperTail, CH, CTail> CoproductMappable<&'a HCons<F, MapperTail>>
+    for Coproduct<CH, CTail>
+where
+    F: Fn(CH) -> R,
+    CTail: CoproductMappable<&'a MapperTail>,
+{
+    type Output = Coproduct<R, <CTail as CoproductMappable<&'a MapperTail>>::Output>;
+
+    #[inline]
+    fn map(self, mapper: &'a HCons<F, MapperTail>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl((mapper.head)(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(&mapper.tail)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a `&mut hlist!`.
+impl<'a, F, R, MapperTail, CH, CTail> CoproductMappable<&'a mut HCons<F, MapperTail>>
+    for Coproduct<CH, CTail>
+where
+    F: FnMut(CH) -> R,
+    CTail: CoproductMappable<&'a mut MapperTail>,
+{
+    type Output = Coproduct<R, <CTail as CoproductMappable<&'a mut MapperTail>>::Output>;
+
+    #[inline]
+    fn map(self, mapper: &'a mut HCons<F, MapperTail>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl((mapper.head)(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(&mut mapper.tail)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a `poly_fn!`.
+impl<P, CH, CTail> CoproductMappable<Poly<P>> for Coproduct<CH, CTail>
+where
+    P: Func<CH>,
+    CTail: CoproductMappable<Poly<P>>,
+{
+    type Output = Coproduct<<P as Func<CH>>::Output, <CTail as CoproductMappable<Poly<P>>>::Output>;
+
+    #[inline]
+    fn map(self, poly: Poly<P>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl(P::call(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(poly)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a `&poly_fn!`.
+impl<'a, P, CH, CTail> CoproductMappable<&'a Poly<P>> for Coproduct<CH, CTail>
+where
+    P: Func<CH>,
+    CTail: CoproductMappable<&'a Poly<P>>,
+{
+    type Output =
+        Coproduct<<P as Func<CH>>::Output, <CTail as CoproductMappable<&'a Poly<P>>>::Output>;
+
+    #[inline]
+    fn map(self, poly: &'a Poly<P>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl(P::call(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(poly)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a `&mut poly_fn!`.
+impl<'a, P, CH, CTail> CoproductMappable<&'a mut Poly<P>> for Coproduct<CH, CTail>
+where
+    P: Func<CH>,
+    CTail: CoproductMappable<&'a mut Poly<P>>,
+{
+    type Output =
+        Coproduct<<P as Func<CH>>::Output, <CTail as CoproductMappable<&'a mut Poly<P>>>::Output>;
+
+    #[inline]
+    fn map(self, poly: &'a mut Poly<P>) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl(P::call(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(poly)),
+        }
+    }
+}
+
+/// Implementation for mapping a Coproduct using a single function that can
+/// handle all variants.
+impl<F, R, CH, CTail> CoproductMappable<F> for Coproduct<CH, CTail>
+where
+    F: FnMut(CH) -> R,
+    CTail: CoproductMappable<F>,
+{
+    type Output = Coproduct<R, <CTail as CoproductMappable<F>>::Output>;
+
+    #[inline]
+    fn map(self, mut f: F) -> Self::Output {
+        match self {
+            Coproduct::Inl(l) => Coproduct::Inl(f(l)),
+            Coproduct::Inr(rest) => Coproduct::Inr(rest.map(f)),
+        }
+    }
+}
+
+/// Base case map impl.
+impl<F> CoproductMappable<F> for CNil {
+    type Output = CNil;
+
+    #[inline(always)]
+    fn map(self, _: F) -> Self::Output {
+        match self {}
     }
 }
 
@@ -979,6 +1247,9 @@ mod tests {
     use super::Coproduct::*;
     use super::*;
 
+    use std::format;
+    use std::string::{String, ToString};
+
     #[test]
     fn test_coproduct_inject() {
         type I32StrBool = Coprod!(i32, &'static str, bool);
@@ -999,7 +1270,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn test_coproduct_fold_consuming() {
         type I32F32StrBool = Coprod!(i32, f32, bool);
 
@@ -1040,11 +1310,10 @@ mod tests {
         let co1 = I32F32StrBool::inject(3);
         let folded = co1.fold(Poly(P));
 
-        assert_eq!(folded, false);
+        assert!(!folded);
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn test_coproduct_fold_non_consuming() {
         type I32F32Bool = Coprod!(i32, f32, bool);
 
@@ -1117,12 +1386,12 @@ mod tests {
         assert!(res.is_err());
 
         if false {
-            #[allow(unreachable_code)]
+            #[allow(unreachable_code, clippy::diverging_sub_expression)]
             {
                 // ...including CNil.
                 #[allow(unused)]
                 let cnil: CNil = panic!();
-                let res: Result<CNil, _> = cnil.subset();
+                let _res: Result<CNil, _> = cnil.subset();
                 let _ = res;
             }
         }
@@ -1143,7 +1412,7 @@ mod tests {
     fn test_coproduct_embed() {
         // CNil can be embedded into any coproduct.
         if false {
-            #[allow(unreachable_code)]
+            #[allow(unreachable_code, clippy::diverging_sub_expression)]
             {
                 #[allow(unused)]
                 let cnil: CNil = panic!();
@@ -1175,6 +1444,7 @@ mod tests {
             assert_eq!(out_c, Coproduct::Inr(Coproduct::Inr(Coproduct::Inl(C))));
         }
 
+        #[allow(clippy::upper_case_acronyms)]
         {
             // Multiple variants can resolve to the same output w/o type annotations
             type ABC = Coprod!(A, B, C);
@@ -1187,5 +1457,127 @@ mod tests {
             assert_eq!(out1, Coproduct::Inr(Coproduct::Inl(B)));
             assert_eq!(out2, Coproduct::Inr(Coproduct::Inl(B)));
         }
+    }
+
+    #[test]
+    fn test_coproduct_map_ref() {
+        type I32Bool = Coprod!(i32, bool);
+        type I32BoolRef<'a> = Coprod!(i32, &'a bool);
+
+        fn map_it(co: &I32Bool) -> I32BoolRef<'_> {
+            // For some reason rustc complains about lifetimes if you try to
+            // inline the closure literal into the hlist 🤷.
+            let map_bool: fn(&bool) -> &bool = |b| b;
+
+            let mapper = hlist![|n: &i32| *n + 3, map_bool];
+
+            co.to_ref().map(mapper)
+        }
+
+        let co = I32Bool::inject(3);
+        let new = map_it(&co);
+        assert_eq!(new, I32BoolRef::inject(6))
+    }
+
+    #[test]
+    fn test_coproduct_map_with_ref_mapper() {
+        type I32Bool = Coprod!(i32, bool);
+
+        // HList mapper
+
+        let mapper = hlist![|n| n + 3, |b: bool| !b];
+
+        let co = I32Bool::inject(3);
+        let co = co.map(&mapper);
+        let co = co.map(&mapper);
+
+        assert_eq!(co, I32Bool::inject(9));
+
+        // Poly mapper
+
+        let mapper = poly_fn!(|n: i32| -> i32 { n + 3 }, |b: bool| -> bool { !b });
+
+        let co = I32Bool::inject(3);
+        let co = co.map(&mapper);
+        let co = co.map(&mapper);
+
+        assert_eq!(co, I32Bool::inject(9));
+
+        // Fn mapper
+
+        type StrStr = Coprod!(String, String);
+
+        let captured = String::from("!");
+        let mapper = |s: String| format!("{}{}", s, &captured);
+
+        let co = StrStr::Inl(String::from("hi"));
+        let co = co.map(&mapper);
+        let co = co.map(&mapper);
+
+        assert_eq!(co, StrStr::Inl(String::from("hi!!")));
+    }
+
+    #[test]
+    fn test_coproduct_map_with_mut_mapper() {
+        type I32Bool = Coprod!(i32, bool);
+
+        // HList mapper
+
+        let mut number = None;
+        let mut boolean = None;
+
+        let mut mapper = hlist![
+            |n: i32| {
+                number = Some(n);
+                n
+            },
+            |b: bool| {
+                boolean = Some(b);
+                b
+            },
+        ];
+
+        let co = I32Bool::inject(3);
+        let co = co.map(&mut mapper);
+        assert_eq!(co, I32Bool::inject(3));
+        assert_eq!(number, Some(3));
+        assert_eq!(boolean, None);
+
+        // Poly mapper
+
+        let mut mapper = poly_fn!(
+            |n: i32| -> i32 {
+                // Poly doesn't support capturing values.
+                /* number = Some(n); */
+                n
+            },
+            |b: bool| -> bool {
+                // Poly doesn't support capturing values.
+                /* boolean = Some(b) */
+                b
+            },
+        );
+
+        let co = I32Bool::inject(3);
+        let co = co.map(&mut mapper);
+        assert_eq!(co, I32Bool::inject(3));
+
+        // Fn mapper
+
+        type StrStr = Coprod!(String, String);
+
+        let mut captured = String::new();
+        let mut mapper = |s: String| {
+            let s = format!("{s}!");
+            captured.push_str(&s);
+            s
+        };
+
+        let co = StrStr::Inl(String::from("hi"));
+        let co = co.map(&mut mapper);
+        let co = co.map(&mut mapper);
+
+        assert_eq!(co, StrStr::Inl(String::from("hi!!")));
+        assert_eq!(captured, String::from("hi!hi!!"));
     }
 }

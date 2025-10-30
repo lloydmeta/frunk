@@ -11,7 +11,7 @@
 //!
 //! **...yet.** `;)`
 
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 // Largely lifted from https://github.com/Sgeo/hlist/blob/master/src/lib.rs#L30
 

@@ -1,6 +1,7 @@
 [package]
 name = "frunk_proc_macros"
-version = "0.0.5"
+edition = "2021"
+version = "0.1.4"
 authors = ["Lloyd <lloydmeta@gmail.com>"]
 description = "Proc macros for Frunk"
 license = "MIT"
@@ -11,20 +12,20 @@ keywords = ["Frunk", "macros"]
 [badges]
 travis-ci = { repository = "lloydmeta/frunk" }
 
-[dependencies.proc-macro-hack]
-version = "0.5"
+[dependencies]
+syn = "2"
+quote = "1"
+
+[lib]
+proc-macro = true
+
 
 [dependencies.frunk_core]
 path = "../core"
 default-features = false
-version = "0.3.2"
+version = "0.4.4"
 
-[dependencies.frunk_proc_macros_impl]
-path = "../proc-macros-impl"
+[dependencies.frunk_proc_macro_helpers]
+path = "../proc-macro-helpers"
 default-features = false
-version = "0.0.5"
-
-[dev-dependencies.frunk]
-path = "../."
-default-features = false
-version = "0.3.2"
+version = "0.1.4"

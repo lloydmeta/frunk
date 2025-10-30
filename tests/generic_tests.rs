@@ -1,11 +1,8 @@
-extern crate frunk;
-#[macro_use] // for the hlist macro
-extern crate frunk_core;
-
 use frunk::{convert_from, from_generic, into_generic};
+use frunk_core::hlist;
 
 mod common;
-use common::*;
+use crate::common::*;
 
 #[test]
 fn test_struct_from_generic() {

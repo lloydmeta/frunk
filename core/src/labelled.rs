@@ -17,11 +17,9 @@
 //! # Examples
 //!
 //! ```
-//! #[macro_use]
-//! extern crate frunk;
-//!
 //! # fn main() {
 //! use frunk::labelled::chars::*;
+//! use frunk_core::field;
 //!
 //! // Optionally alias our tuple that represents our type-level string
 //! type name = (n, a, m, e);
@@ -35,8 +33,9 @@
 //! have mismatched fields!
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! // required when using custom derives
+//! use frunk::LabelledGeneric;
+//!
 //! # fn main() {
 //! #[derive(LabelledGeneric)]
 //! struct NewUser<'a> {
@@ -69,10 +68,10 @@
 //! use the Transmogrifier trait.
 //!
 //! ```
-//! #[macro_use] extern crate frunk;
-//! #[macro_use] extern crate frunk_core; // required when using custom derives
+//! // required when using custom derives
 //! # fn main() {
 //! use frunk::labelled::Transmogrifier;
+//! use frunk::LabelledGeneric;
 //!
 //! #[derive(LabelledGeneric)]
 //! struct InternalPhoneNumber {
@@ -148,10 +147,14 @@
 //! # }
 //! ```
 
-use hlist::*;
-use indices::*;
-use std::fmt;
-use std::marker::PhantomData;
+use crate::hlist::*;
+use crate::indices::*;
+use crate::traits::ToRef;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+use core::fmt;
+use core::marker::PhantomData;
 
 /// A trait that converts from a type to a labelled generic representation.
 ///
@@ -164,8 +167,7 @@ use std::marker::PhantomData;
 /// # Examples
 ///
 /// ```rust
-/// #[macro_use] extern crate frunk;
-/// #[macro_use] extern crate frunk_core;
+/// use frunk::LabelledGeneric;
 ///
 /// # fn main() {
 /// #[derive(LabelledGeneric)]
@@ -358,7 +360,7 @@ pub mod chars {
         // all valid identifier characters
         a b c d e f g h i j k l m n o p q r s t u v w x y z
         A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-        _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 __
+        _1 _2 _3 _4 _5 _6 _7 _8 _9 _0 __ _uc uc_
     }
 
     #[test]
@@ -368,6 +370,7 @@ pub mod chars {
         //
         // Good thing I don't plan on adding reified labels. - Exp
         let a = 3;
+        #[allow(clippy::match_single_binding)]
         match a {
             a => assert_eq!(a, 3),
         }
@@ -382,9 +385,8 @@ pub mod chars {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-///
+/// use frunk_core::field;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -451,14 +453,12 @@ impl<T: fmt::Display> fmt::Debug for DebugAsDisplay<T> {
 /// # Examples
 ///
 /// ```
-/// #[macro_use] extern crate frunk; fn main() {
 /// use frunk::labelled::chars::*;
 /// use frunk::labelled::field_with_name;
 ///
 /// let l = field_with_name::<(n,a,m,e),_>("name", "joe");
 /// assert_eq!(l.value, "joe");
 /// assert_eq!(l.name, "name");
-/// # }
 /// ```
 pub fn field_with_name<Label, Value>(name: &'static str, value: Value) -> Field<Label, Value> {
     Field {
@@ -479,10 +479,10 @@ pub trait IntoUnlabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::labelled::chars::*;
     /// use frunk::labelled::IntoUnlabelled;
+    /// use frunk_core::{field, hlist};
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -532,10 +532,10 @@ pub trait IntoValueLabelled {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate frunk;
     /// # fn main() {
     /// use frunk::labelled::{ValueField, IntoValueLabelled};
     /// use frunk::labelled::chars::*;
+    /// use frunk_core::{field, hlist, HList};
     ///
     /// let labelled_hlist = hlist![
     ///     field!((n, a, m, e), "joe"),
@@ -628,6 +628,40 @@ where
     }
 }
 
+/// Implementation when target is reference and the pluck target key is in the head.
+impl<'a, K, V, Tail: ToRef<'a>> ByNameFieldPlucker<K, Here> for &'a HCons<Field<K, V>, Tail> {
+    type TargetValue = &'a V;
+    type Remainder = <Tail as ToRef<'a>>::Output;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let field = field_with_name(self.head.name, &self.head.value);
+        (field, self.tail.to_ref())
+    }
+}
+
+/// Implementation when target is reference and the pluck target key is in the tail.
+impl<'a, Head, Tail, K, TailIndex> ByNameFieldPlucker<K, There<TailIndex>> for &'a HCons<Head, Tail>
+where
+    &'a Tail: ByNameFieldPlucker<K, TailIndex>,
+{
+    type TargetValue = <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::TargetValue;
+    type Remainder = HCons<&'a Head, <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::Remainder>;
+
+    #[inline(always)]
+    fn pluck_by_name(self) -> (Field<K, Self::TargetValue>, Self::Remainder) {
+        let (target, tail_remainder) =
+            <&'a Tail as ByNameFieldPlucker<K, TailIndex>>::pluck_by_name(&self.tail);
+        (
+            target,
+            HCons {
+                head: &self.head,
+                tail: tail_remainder,
+            },
+        )
+    }
+}
+
 /// Trait for transmogrifying a `Source` type into a `Target` type.
 ///
 /// What is "transmogrifying"? In this context, it means to convert some data of type `A`
@@ -638,9 +672,9 @@ where
 /// # Example
 ///
 /// ```
-/// #[macro_use] extern crate frunk;
-/// #[macro_use] extern crate frunk_core; // required when using custom derives
+/// // required when using custom derives
 /// # fn main() {
+/// use frunk::LabelledGeneric;
 /// use frunk::labelled::Transmogrifier;
 /// #[derive(LabelledGeneric)]
 /// struct InternalPhoneNumber {
@@ -717,7 +751,7 @@ where
 /// ```
 ///
 /// Credit:
-/// 1. Haskell "transmogrify" Github repo: https://github.com/ivan-m/transmogrify
+/// 1. Haskell "transmogrify" Github repo: <https://github.com/ivan-m/transmogrify>
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     /// Consume this current object and return an object of the Target type.
     ///
@@ -734,11 +768,13 @@ impl<Key, SourceValue> Transmogrifier<SourceValue, IdentityTransMog> for Field<K
 }
 
 /// Implementations of `Transmogrifier` that allow recursion through stdlib container types.
-#[cfg(feature = "std")]
-mod std {
+#[cfg(feature = "alloc")]
+mod _alloc {
     use super::MappingIndicesWrapper;
     use super::{Field, Transmogrifier};
-    use std::collections::{LinkedList, VecDeque};
+    use alloc::boxed::Box;
+    use alloc::collections::{LinkedList, VecDeque};
+    use alloc::vec::Vec;
 
     macro_rules! transmogrify_seq {
         ($container:ident) => {
@@ -915,7 +951,8 @@ where
 mod tests {
     use super::chars::*;
     use super::*;
-    use std::collections::{LinkedList, VecDeque};
+    use alloc::collections::{LinkedList, VecDeque};
+    use alloc::{boxed::Box, format, string::ToString, vec, vec::Vec};
 
     // Set up some aliases
     #[allow(non_camel_case_types)]
@@ -963,8 +1000,8 @@ mod tests {
         assert!(format!("{:?}", field).contains("name: age"));
         assert!(format!("{:?}", value_field).contains("name: age"));
         // :#? works
-        assert!(format!("{:#?}", field).contains("\n"));
-        assert!(format!("{:#?}", value_field).contains("\n"));
+        assert!(format!("{:#?}", field).contains('\n'));
+        assert!(format!("{:#?}", value_field).contains('\n'));
     }
 
     #[test]
@@ -972,6 +1009,32 @@ mod tests {
         let record = hlist![field!(name, "Joe"), field!((a, g, e), 30)];
         let (name, _): (Field<name, _>, _) = record.pluck();
         assert_eq!(name.value, "Joe")
+    }
+
+    #[test]
+    fn test_pluck_by_name() {
+        let record = hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.clone().pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![field!(is_admin, true), field!((a, g, e), 30),]);
+    }
+
+    #[test]
+    fn test_ref_pluck_by_name() {
+        let record = &hlist![
+            field!(is_admin, true),
+            field!(name, "Joe".to_string()),
+            field!((a, g, e), 30),
+        ];
+
+        let (name, r): (Field<name, _>, _) = record.pluck_by_name();
+        assert_eq!(name.value, "Joe");
+        assert_eq!(r, hlist![&field!(is_admin, true), &field!((a, g, e), 30),]);
     }
 
     #[test]

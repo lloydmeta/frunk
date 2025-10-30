@@ -8,7 +8,8 @@
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::hlist;
+/// # fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let (h1, (h2, h3)) = h.into_tuple2();
 /// assert_eq!(h1, 13.5f32);
@@ -41,12 +42,13 @@ macro_rules! hlist {
 
 /// Macro for pattern-matching on HLists.
 ///
-/// Taken from https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md
+/// Taken from <https://github.com/tbu-/rust-rfcs/blob/master/text/0873-type-macros.md>
 ///
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::{hlist, hlist_pat};
+/// # fn main() {
 /// let h = hlist![13.5f32, "hello", Some(41)];
 /// let hlist_pat![a1, a2, a3] = h;
 /// assert_eq!(a1, 13.5f32);
@@ -68,7 +70,14 @@ macro_rules! hlist_pat {
     () => { $crate::hlist::HNil };
     (...) => { _ };
     (...$rest:pat) => { $rest };
+    (_) => { $crate::hlist_pat![_,] };
     ($a:pat) => { $crate::hlist_pat![$a,] };
+    (_, $($tok:tt)*) => {
+        $crate::hlist::HCons {
+            tail: $crate::hlist_pat![$($tok)*],
+            ..
+        }
+    };
     ($a:pat, $($tok:tt)*) => {
         $crate::hlist::HCons {
             head: $a,
@@ -85,7 +94,8 @@ macro_rules! hlist_pat {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk; fn main() {
+/// # use frunk_core::{hlist, HList};
+/// # fn main() {
 /// let h: HList!(f32, &str, Option<i32>) = hlist![13.5f32, "hello", Some(41)];
 ///
 /// // Use "...Tail" to append another HList type at the end.
@@ -110,8 +120,9 @@ macro_rules! HList {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::Coprod;
+///
 /// type I32Bool = Coprod!(i32, bool);
 /// let co1 = I32Bool::inject(3);
 ///
@@ -141,9 +152,8 @@ macro_rules! Coprod {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-
+/// use frunk_core::field;
 /// # fn main() {
 /// let labelled = field![(n,a,m,e), "joe"];
 /// assert_eq!(labelled.name, "name");
@@ -156,8 +166,8 @@ macro_rules! Coprod {
 ///   will be set to the stringified version of the type provided.
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
+/// use frunk_core::field;
 /// enum first_name {}
 /// let labelled = field![first_name, "Joe"];
 /// assert_eq!(labelled.name, "first_name");
@@ -169,9 +179,8 @@ macro_rules! Coprod {
 ///   _and_ a custom name, passed as the last argument in the macro
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// use frunk::labelled::chars::*;
-///
+/// use frunk_core::field;
 /// # fn main() {
 /// // useful aliasing of our type-level string
 /// type age = (a, g, e);
@@ -211,11 +220,11 @@ macro_rules! field {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate frunk;
 /// # fn main() {
-/// type I32F32StrBool<'a> = Coprod!(i32, f32, &'a str);
+/// use frunk_core::{Coprod, poly_fn};
+/// type I32F32Str<'a> = Coprod!(i32, f32, &'a str);
 ///
-/// let co1 = I32F32StrBool::inject("lollerskates");
+/// let co1 = I32F32Str::inject("lollerskates");
 /// let folded = co1.fold(poly_fn!(
 ///   ['a] |x: &'a str| -> i8 { 1 },
 ///   |x: i32| -> i8 { 2 },
@@ -227,55 +236,55 @@ macro_rules! field {
 #[macro_export]
 macro_rules! poly_fn {
     // encountered first func w/ type params
-    ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    ([$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/ type params, trailing comma on tparams
-    ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    ([$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, ~p  f~ ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, ~p  f~ ~f $($rest)*
     )};
     // encountered first func w/o type params
-    (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (|$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, ~f $($rest)*
+       p~ ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, ~f $($rest)*
     )};
 
     // encountered non-first func w/ type params
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block , )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block , )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block , $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
     // encountered non-first func w/ type params, trailing comma in tparams
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: block }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
     // encountered non-first func w/o type params
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, $($rest: tt)*)
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, $($rest: tt)*)
     => { $crate::poly_fn!(
-       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f $($rest)*
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f $($rest)*
     )};
 
     // last w/ type params, for when there is no trailing comma on the funcs...
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt),*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
     // last w/ type params, for when there is a trailing comma in tparams, but no trailing comma on the funcs..
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f [$($tparams: tt, )*] |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ {$body}, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ [$($tparams, )*] |$arg: $arg_typ| -> $ret_typ $body, $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
     // last w/o type params, for when there is no trailing comma on the funcs...
-    (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty { $f_body: expr }, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr })
+    (p~ $([$($pars: tt)*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$f_args: ident : $f_arg_typ: ty| -> $f_ret_typ: ty $f_body: block, )* ~f |$arg: ident : $arg_typ: ty| -> $ret_typ: ty $body: block)
     => { $crate::poly_fn!(
-       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ {$p_body}, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ {$body}, $(|$f_args: $f_arg_typ| -> $f_ret_typ {$f_body}, )* ~f
+       p~ $( [$($pars, )*] |$p_args: $p_arg_typ| -> $p_ret_typ $p_body, )* ~p  f~ |$arg: $arg_typ| -> $ret_typ $body, $(|$f_args: $f_arg_typ| -> $f_ret_typ $f_body, )* ~f
     )};
 
     // unroll
-    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty { $p_body: expr }, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty { $body: expr }, )* ~f) => {{
+    (p~ $([$($pars: tt, )*] |$p_args: ident : $p_arg_typ: ty| -> $p_ret_typ: ty $p_body: block, )* ~p f~ $(|$args: ident : $arg_typ: ty| -> $ret_typ: ty $body: block, )* ~f) => {{
         struct F;
         $(
             impl<$($pars,)*> $crate::traits::Func<$p_arg_typ> for F {
@@ -297,9 +306,10 @@ macro_rules! poly_fn {
 
 #[cfg(test)]
 mod tests {
+    #[allow(clippy::diverging_sub_expression)]
     #[test]
     fn trailing_commas() {
-        use test_structs::unit_copy::{A, B};
+        use crate::test_structs::unit_copy::{A, B};
 
         let hlist_pat![]: HList![] = hlist![];
         let hlist_pat![A]: HList![A] = hlist![A];
@@ -327,8 +337,8 @@ mod tests {
 
     #[test]
     fn ellipsis_tail() {
-        use coproduct::Coproduct;
-        use test_structs::unit_copy::{A, B, C};
+        use crate::coproduct::Coproduct;
+        use crate::test_structs::unit_copy::{A, B, C};
 
         // hlist: accepted locations, and consistency between macros
         let hlist_pat![...hlist_pat![C]]: HList![...HList![C]] = { hlist![...hlist![C]] };
@@ -350,7 +360,7 @@ mod tests {
 
     #[test]
     fn ellipsis_ignore() {
-        use test_structs::unit_copy::{A, B, C, D, E};
+        use crate::test_structs::unit_copy::{A, B, C, D, E};
 
         // '...' accepted locations
         let hlist_pat![...] = hlist![A, B, C, D, E];
@@ -391,5 +401,24 @@ mod tests {
             ['a,] |x: &'a str| -> usize { x.len() },
         ));
         assert_eq!(h2, hlist![true, 3, "dummy", 6, false]);
+    }
+
+    #[test]
+    fn poly_fn_macro_multiline_bodies_test() {
+        let h = hlist![9000, 1, -1];
+        let h2 = h.map(poly_fn!(|x: i32| -> bool {
+            let a = if x > 100 { 1 } else { -1 };
+            a > 0
+        },));
+        assert_eq!(h2, hlist![true, false, false]);
+    }
+
+    #[test]
+    #[deny(clippy::unneeded_field_pattern)]
+    fn unneeded_field_pattern() {
+        let hlist_pat![_, _] = hlist![1, 2];
+        let hlist_pat![foo, _, baz] = hlist!["foo", "bar", "baz"];
+        assert_eq!(foo, "foo");
+        assert_eq!(baz, "baz");
     }
 }
