@@ -4,6 +4,7 @@ use self::time::*;
 #[allow(unused_imports)]
 use frunk::*;
 
+#[allow(dead_code)] // Not actually dead -- used in tests but clippy can't find it
 #[derive(Generic, Debug, PartialEq, Eq)]
 pub struct Person<'a> {
     pub first_name: &'a str,
@@ -11,6 +12,7 @@ pub struct Person<'a> {
     pub age: usize,
 }
 
+#[allow(dead_code)] // Not actually dead -- used in tests but clippy can't find it
 #[derive(Generic, Debug, PartialEq, Eq, Clone)]
 pub struct Strategist<'a> {
     pub first_name: &'a str,
@@ -18,6 +20,7 @@ pub struct Strategist<'a> {
     pub age: usize,
 }
 
+#[allow(dead_code)] // Not actually dead -- used in tests but clippy can't find it
 #[derive(Generic, Debug, PartialEq, Eq)]
 pub struct President<'a> {
     pub first_name: &'a str,
@@ -73,6 +76,7 @@ pub struct HasKeyword2Embedder {
     pub r#true: HasKeyword2,
 }
 
+#[allow(dead_code)] // Not actually dead -- used in tests but clippy can't find it
 #[derive(Generic, Debug, PartialEq, Eq)]
 pub struct TupleStruct<'a>(pub &'a str, pub i32);
 
