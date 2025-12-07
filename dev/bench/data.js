@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1765090007015,
+  "lastUpdate": 1765090249044,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -11591,6 +11591,258 @@ window.BENCHMARK_DATA = {
             "name": "validated_to_result",
             "value": 0.62,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1efcf31fbdfa99d8972b632ecf9df46858d2925c",
+          "message": "Bump actions/checkout from 4 to 6 (#246)\n\nBumps [actions/checkout](https://github.com/actions/checkout) from 4 to 6.\n- [Release notes](https://github.com/actions/checkout/releases)\n- [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/actions/checkout/compare/v4...v6)\n\n---\nupdated-dependencies:\n- dependency-name: actions/checkout\n  dependency-version: '6'\n  dependency-type: direct:production\n  update-type: version-update:semver-major\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2025-12-07T15:49:57+09:00",
+          "tree_id": "f43c061bf3e4a9c2d92daba0da183af775698617",
+          "url": "https://github.com/lloydmeta/frunk/commit/1efcf31fbdfa99d8972b632ecf9df46858d2925c"
+        },
+        "date": 1765090246310,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 0.78,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2.48,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1.55,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 60.16,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 74.93,
+            "range": "± 1.1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 2680.43,
+            "range": "± 29.66",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 2826.44,
+            "range": "± 24.52",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 0.78,
+            "range": "± 0.03",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 0.78,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 13.04,
+            "range": "± 0.1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 2.36,
+            "range": "± 0.03",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0.31,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 1.55,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 32.51,
+            "range": "± 0.52",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0.31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 50.98,
+            "range": "± 0.68",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 622.51,
+            "range": "± 7.19",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 477.4,
+            "range": "± 10.82",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 247.45,
+            "range": "± 4.21",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 25.45,
+            "range": "± 0.09",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 104.6,
+            "range": "± 1.28",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 15.55,
+            "range": "± 0.09",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 31.99,
+            "range": "± 0.36",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1.24,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 0.62,
+            "range": "± 0.03",
             "unit": "ns/iter"
           }
         ]
