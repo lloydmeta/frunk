@@ -17,7 +17,6 @@
 //! ```
 
 use crate::generic::Generic;
-use crate::{hlist, HList};
 
 macro_rules! tup_def {
     ( $($dtype: ident),* ; ; ) => {};

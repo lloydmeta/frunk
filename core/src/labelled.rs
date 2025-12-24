@@ -195,6 +195,12 @@ use core::marker::PhantomData;
 /// // representation of the source object to that of the target type
 /// let s_user: SavedUser = frunk::transform_from(n_user); // done
 /// # }
+#[diagnostic::on_unimplemented(
+    message = "Cannot derive labelled generic representation for `{Self}`",
+    label = "LabelledGeneric not implemented",
+    note = "The type must have a LabelledGeneric instance to be used with transform_from or transmogrify.",
+    note = "Derive LabelledGeneric using #[derive(LabelledGeneric)] on your struct or enum."
+)]
 pub trait LabelledGeneric {
     /// The labelled generic representation type.
     type Repr;
