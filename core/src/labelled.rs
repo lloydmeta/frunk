@@ -195,6 +195,12 @@ use core::marker::PhantomData;
 /// // representation of the source object to that of the target type
 /// let s_user: SavedUser = frunk::transform_from(n_user); // done
 /// # }
+#[diagnostic::on_unimplemented(
+    message = "Cannot derive labelled generic representation for `{Self}`",
+    label = "LabelledGeneric not implemented",
+    note = "The type must have a LabelledGeneric instance to be used with transform_from or transmogrify.",
+    note = "Derive LabelledGeneric using #[derive(LabelledGeneric)] on your struct or enum."
+)]
 pub trait LabelledGeneric {
     /// The labelled generic representation type.
     type Repr;
@@ -586,6 +592,12 @@ where
 }
 
 /// Trait for plucking out a `Field` from a type by type-level `TargetKey`.
+#[diagnostic::on_unimplemented(
+    message = "Cannot find field with key `{TargetKey}` in `{Self}`",
+    label = "Field not found",
+    note = "The source type does not contain a field with the target key.",
+    note = "Make sure the field name exists in the source struct and matches exactly."
+)]
 pub trait ByNameFieldPlucker<TargetKey, Index> {
     type TargetValue;
     type Remainder;
@@ -752,6 +764,13 @@ where
 ///
 /// Credit:
 /// 1. Haskell "transmogrify" Github repo: <https://github.com/ivan-m/transmogrify>
+#[diagnostic::on_unimplemented(
+    message = "Cannot transmogrify `{Self}` into `{Target}`",
+    label = "Cannot convert this type into the target type",
+    note = "Transmogrify requires that the source and target types have compatible structures.",
+    note = "The source type must have all the fields needed for the target type, possibly in a different order or nested structure.",
+    note = "Check that field names match and types are compatible between the source and target."
+)]
 pub trait Transmogrifier<Target, TransmogrifyIndexIndices> {
     /// Consume this current object and return an object of the Target type.
     ///

@@ -970,6 +970,12 @@ where
 /// then `list.sculpt()` should "just work" even without the trait.
 ///
 /// [`HCons::sculpt`]: struct.HCons.html#method.sculpt
+#[diagnostic::on_unimplemented(
+    message = "Cannot sculpt `{Self}` into the target HList shape",
+    label = "Sculpture failed",
+    note = "The source HList must contain all the types needed for the target HList.",
+    note = "Make sure all required types are present in the source, possibly in a different order."
+)]
 pub trait Sculptor<Target, Indices> {
     type Remainder;
 
