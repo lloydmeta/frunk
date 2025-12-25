@@ -76,5 +76,7 @@ pub mod path;
 pub mod traits;
 mod tuples;
 
+pub mod utils;
+
 #[cfg(test)]
 mod test_structs;
