@@ -16,8 +16,9 @@ travis-ci = { repository = "lloydmeta/frunk" }
 proc-macro = true
 
 [dependencies]
-syn = "2"
+syn = { version = "2", features = ["full"] }
 quote = "1"
+proc-macro2 = "1.0.66"
 
 [dependencies.frunk_proc_macro_helpers]
 path = "../proc-macro-helpers"
