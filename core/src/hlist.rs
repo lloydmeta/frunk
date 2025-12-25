@@ -1422,6 +1422,137 @@ where
     }
 }
 
+mod folds_for_ref {
+    use super::{
+        foldr_owned::{self, HFoldRightableOwned},
+        Func, HCons, HFoldLeftable, HFoldRightable, HNil, Poly,
+    };
+
+    macro_rules! ref_fold_impls {
+        ($( $mut_:tt )?) => {
+            impl<F, Acc> HFoldLeftable<F, Acc> for & $( $mut_ )? HNil {
+                type Output = Acc;
+
+                fn foldl(self, _: F, acc: Acc) -> Self::Output {
+                    acc
+                }
+            }
+
+            impl<'a, F, R, FTail, H, Tail, Acc> HFoldLeftable<HCons<F, FTail>, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<FTail, R>,
+                F: FnOnce(Acc, &'a $( $mut_ )? H) -> R,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<FTail, R>>::Output;
+
+                fn foldl(self, folder: HCons<F, FTail>, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    tail.foldl(folder.tail, (folder.head)(acc, head))
+                }
+            }
+
+            impl<'a, P, R, H, Tail, Acc> HFoldLeftable<Poly<P>, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<Poly<P>, R>,
+                P: Func<(Acc, &'a $( $mut_ )? H), Output = R>,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<Poly<P>, R>>::Output;
+
+                fn foldl(self, poly: Poly<P>, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let r = P::call((acc, head));
+                    tail.foldl(poly, r)
+                }
+            }
+
+            impl<'a, F, H, Tail, Acc> HFoldLeftable<F, Acc> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldLeftable<F, Acc>,
+                F: Fn(Acc, &'a $( $mut_ )? H) -> Acc,
+            {
+                type Output = <&'a $( $mut_ )? Tail as HFoldLeftable<F, Acc>>::Output;
+
+                fn foldl(self, f: F, acc: Acc) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let acc = f(acc, head);
+                    tail.foldl(f, acc)
+                }
+            }
+
+            impl<F, Init> HFoldRightable<F, Init> for & $( $mut_ )? HNil {
+                type Output = Init;
+
+                fn foldr(self, _: F, i: Init) -> Self::Output {
+                    i
+                }
+            }
+
+            impl<'a, F, FolderHeadR, FolderTail, H, Tail, Init> HFoldRightable<HCons<F, FolderTail>, Init>
+                for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldRightable<FolderTail, Init>,
+                F: FnOnce(<&'a $( $mut_ )? Tail as HFoldRightable<FolderTail, Init>>::Output, &'a $( $mut_ )? H) -> FolderHeadR,
+            {
+                type Output = FolderHeadR;
+
+                fn foldr(self, folder: HCons<F, FolderTail>, init: Init) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let folded_tail = tail.foldr(folder.tail, init);
+                    (folder.head)(folded_tail, head)
+                }
+            }
+
+            impl<'a, P, R, H, Tail, Init> HFoldRightable<Poly<P>, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: HFoldRightable<Poly<P>, Init>,
+                P: Func<(<&'a $( $mut_ )? Tail as HFoldRightable<Poly<P>, Init>>::Output, &'a $( $mut_ )? H), Output = R>,
+            {
+                type Output = R;
+
+                fn foldr(self, poly: Poly<P>, init: Init) -> Self::Output {
+                    let HCons { head, tail } = self;
+                    let folded_tail = tail.foldr(poly, init);
+                    P::call((folded_tail, head))
+                }
+            }
+
+            impl<'a, F, R, H, Tail, Init> HFoldRightable<F, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                &'a $( $mut_ )? Tail: foldr_owned::HFoldRightableOwned<F, Init>,
+                F: Fn(<&'a $( $mut_ )? Tail as HFoldRightable<F, Init>>::Output, &'a $( $mut_ )? H) -> R,
+            {
+                type Output = R;
+
+                fn foldr(self, folder: F, init: Init) -> Self::Output {
+                    foldr_owned::HFoldRightableOwned::real_foldr(self, folder, init).0
+                }
+            }
+
+            impl<F, Init> HFoldRightableOwned<F, Init> for & $( $mut_ )? HNil {
+                fn real_foldr(self, f: F, i: Init) -> (Self::Output, F) {
+                    (i, f)
+                }
+            }
+
+            impl<'a, F, H, Tail, Init> HFoldRightableOwned<F, Init> for &'a $( $mut_ )? HCons<H, Tail>
+            where
+                Self: HFoldRightable<F, Init>,
+                &'a $( $mut_ )? Tail: HFoldRightableOwned<F, Init>,
+                F: Fn(<&'a $( $mut_ )? Tail as HFoldRightable<F, Init>>::Output, &'a $( $mut_ )? H) -> Self::Output,
+            {
+                fn real_foldr(self, folder: F, init: Init) -> (Self::Output, F) {
+                    let HCons { head, tail } = self;
+                    let (folded_tail, folder) = tail.real_foldr(folder, init);
+                    ((folder)(folded_tail, head), folder)
+                }
+            }
+        };
+    }
+
+    ref_fold_impls!();
+    ref_fold_impls!(mut);
+}
+
 /// Trait for transforming an HList into a nested tuple.
 ///
 /// This trait is part of the implementation of the inherent method
@@ -1712,7 +1843,7 @@ mod tests {
         let h1 = hlist![true, "hi"];
         let h2 = hlist![1, 32f32];
         let combined = h1 + h2;
-        assert_eq!(combined, hlist![true, "hi", 1, 32f32])
+        assert_eq!(combined, hlist![true, "hi", 1, 32f32]);
     }
 
     #[test]
@@ -1734,36 +1865,122 @@ mod tests {
             ],
             1f32,
         );
-        assert_eq!(folded, 9001)
+        assert_eq!(folded, 9001);
     }
 
     #[test]
     fn test_single_func_foldr_consuming() {
         let h = hlist![1, 2, 3];
-        let folded = h.foldr(&|acc, i| i * acc, 1);
-        assert_eq!(folded, 6)
+        let folded = h.foldr(|acc, i| i * acc, 1);
+        assert_eq!(folded, 6);
     }
 
-    #[test]
-    fn test_foldr_non_consuming() {
-        let h = hlist![1, false, 42f32];
-        let folder = hlist![
-            |acc, &i| i + acc,
-            |acc, &_| if acc > 42f32 { 9000 } else { 0 },
-            |acc, &f| f + acc
-        ];
-        let folded = h.to_ref().foldr(folder, 1f32);
-        assert_eq!(folded, 9001)
-    }
+    mod poly_fns {
+        use super::Func;
 
-    #[test]
-    fn test_poly_foldr_consuming() {
-        trait Dummy {
+        pub trait Dummy {
             fn dummy(&self) -> i32 {
                 1
             }
         }
         impl<T: ?Sized> Dummy for T {}
+
+        pub struct Refnator;
+        impl<'a, T: 'a> Func<(i32, &'a T)> for Refnator
+        where
+            &'a T: Dummy,
+        {
+            type Output = i32;
+            fn call(args: (i32, &'a T)) -> Self::Output {
+                let (init, i) = args;
+                init + i.dummy()
+            }
+        }
+
+        pub struct MutDefaultnator;
+        impl<'a, T: 'a> Func<(i32, &'a mut T)> for MutDefaultnator
+        where
+            T: Default,
+            &'a mut T: Dummy,
+        {
+            type Output = i32;
+            fn call(args: (i32, &'a mut T)) -> Self::Output {
+                let (init, i) = args;
+                let r = init + i.dummy();
+                std::mem::take(i);
+                r
+            }
+        }
+    }
+
+    #[test]
+    fn test_foldr_non_consuming() {
+        // fold by hlist
+        {
+            let mut h = hlist![1, false, 42f32];
+            let folder = hlist![
+                |acc, &i| i + acc,
+                |acc, &_| if acc > 42f32 { 9000 } else { 0 },
+                |acc, &f| f + acc
+            ];
+            let folded = (&h).foldr(folder, 1f32);
+            assert_eq!(folded, 9001);
+
+            let mutfolder = hlist![
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i + acc
+                },
+                |acc, b: &mut bool| {
+                    *b = !*b;
+                    if *b {
+                        acc as i32
+                    } else {
+                        0
+                    }
+                },
+                |acc, f: &mut _| {
+                    *f += 12.;
+                    *f + acc
+                }
+            ];
+            let mutfolded = (&mut h).foldr(mutfolder, 1f32);
+            assert_eq!(mutfolded, 57);
+            assert_eq!(h, hlist!(2, true, 54.));
+        }
+
+        // fold by single closure
+        {
+            let mut h = hlist![1, 2, 3];
+            let folded = (&h).foldr(|acc, &i| i * acc, 1);
+            assert_eq!(folded, 6);
+
+            let mutfolded = (&mut h).foldr(
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i * acc
+                },
+                1,
+            );
+            assert_eq!(mutfolded, 24);
+            assert_eq!(h, hlist!(2, 3, 4));
+        }
+
+        // fold by poly fn
+        {
+            let mut h = hlist!(42_i32, 'a');
+            let folded = (&h).foldr(Poly(poly_fns::Refnator), 3);
+            assert_eq!(folded, 5);
+
+            let mutfolded = (&mut h).foldr(Poly(poly_fns::MutDefaultnator), 4);
+            assert_eq!(mutfolded, 6);
+            assert_eq!(h, hlist!(i32::default(), char::default()));
+        }
+    }
+
+    #[test]
+    fn test_poly_foldr_consuming() {
+        use self::poly_fns::Dummy;
 
         struct Dummynator;
         impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
@@ -1802,27 +2019,74 @@ mod tests {
 
     #[test]
     fn test_foldl_non_consuming() {
-        let h = hlist![1, false, 42f32];
-        let folded = h.to_ref().foldl(
-            hlist![
-                |acc, &i| i + acc,
-                |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
-                |acc, &f| f + acc,
-            ],
-            1,
-        );
-        assert_eq!(42f32, folded);
-        assert_eq!((&h.head), &1);
+        // fold by hlist
+        {
+            let mut h = hlist![1, false, 42f32];
+            let folded = (&h).foldl(
+                hlist![
+                    |acc, &i| i + acc,
+                    |acc, b: &bool| if !b && acc > 42 { 9000f32 } else { 0f32 },
+                    |acc, &f| f + acc,
+                ],
+                1,
+            );
+            assert_eq!(42f32, folded);
+
+            let mutfolder = hlist![
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i + acc
+                },
+                |acc, b: &mut bool| {
+                    *b = !*b;
+                    if *b {
+                        acc as f32
+                    } else {
+                        0.
+                    }
+                },
+                |acc, f: &mut _| {
+                    *f += 12.;
+                    *f + acc
+                }
+            ];
+            let mutfolded = (&mut h).foldl(mutfolder, 1);
+            assert_eq!(mutfolded, 57.);
+            assert_eq!(h, hlist!(2, true, 54.));
+        }
+
+        // fold by single closure
+        {
+            let mut h = hlist![1, 2, 3];
+            let folded = (&h).foldl(|acc, &i| i * acc, 1);
+            assert_eq!(folded, 6);
+
+            let mutfolded = (&mut h).foldl(
+                |acc, i: &mut _| {
+                    *i += 1;
+                    *i * acc
+                },
+                1,
+            );
+            assert_eq!(mutfolded, 24);
+            assert_eq!(h, hlist!(2, 3, 4));
+        }
+
+        // fold by poly fn
+        {
+            let mut h = hlist!(42_i32, 'a');
+            let folded = (&h).foldl(Poly(poly_fns::Refnator), 3);
+            assert_eq!(folded, 5);
+
+            let mutfolded = (&mut h).foldl(Poly(poly_fns::MutDefaultnator), 4);
+            assert_eq!(mutfolded, 6);
+            assert_eq!(h, hlist!(i32::default(), char::default()));
+        }
     }
 
     #[test]
     fn test_poly_foldl_consuming() {
-        trait Dummy {
-            fn dummy(&self) -> i32 {
-                1
-            }
-        }
-        impl<T: ?Sized> Dummy for T {}
+        use self::poly_fns::Dummy;
 
         struct Dummynator;
         impl<T: Dummy, I: IntoIterator<Item = T>> Func<(i32, I)> for Dummynator {
