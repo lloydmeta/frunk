@@ -926,7 +926,6 @@ pub trait Projector<Targets, Indices> {
         Targets: 'a;
 
     /// Borrow multiple elements by type from an HList.
-    /// Each type must be unique.
     ///
     /// Please see the [inherent method] for more information.
     ///
