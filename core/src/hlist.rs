@@ -310,7 +310,7 @@ macro_rules! gen_inherent_methods {
             ///
             /// ```
             /// # fn main() {
-            /// use frunk_core::{hlist, HList};
+            /// use frunk_core::{hlist, HList, hlist_pat};
             ///
             /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (HList![f32, i32, &str], _) = h.sculpt();
@@ -318,42 +318,40 @@ macro_rules! gen_inherent_methods {
             /// assert_eq!(remainder, hlist![true]);
             /// # }
             /// ```
+            /// ```
+            /// // Also supports projecting references of a desired shape with 'to_ref' and 'to_mut'
+            /// # fn main() {
+            /// # use frunk_core::{hlist, HList};
+            /// let h = hlist![76u32, "hello world", false, 3.14f64];
+            /// let h_ref = h.to_ref();
+            /// let (reshaped_ref, remainder_ref): (HList![&u32, &bool], _) = h_ref.sculpt();
+            ///
+            /// assert_eq!(reshaped_ref, hlist![&76u32, &false]);
+            /// assert_eq!(remainder_ref, hlist![&"hello world", &3.14f64]);
+            ///
+            /// h.prepend(12i32); // original is unmoved
+            /// # }
+            /// ```
+            /// ```
+            /// # fn main () {
+            /// # use frunk_core::{hlist, HList, hlist_pat};
+            /// let mut h = hlist![76u32, "hello world", false, 3.14f64];
+            /// let h_mut_ref = h.to_mut();
+            ///
+            /// let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
+            /// let hlist_pat![u32_mut_ref, bool_mut_ref] = reshaped_mut_ref;
+            ///
+            /// *u32_mut_ref = 67;
+            /// *bool_mut_ref = true;
+            ///
+            /// assert_eq!(h, hlist![67u32, "hello world", true, 3.14f64]);
+            /// # }
+            /// ```
             #[inline(always)]
             pub fn sculpt<Ts, Indices>(self) -> (Ts, <Self as Sculptor<Ts, Indices>>::Remainder)
             where Self: Sculptor<Ts, Indices>,
             {
                 Sculptor::sculpt(self)
-            }
-
-            /// View the current list through a type-level “lens” of sorts, producing a new HList of shared references to selected elements.
-            ///
-            /// `project` allows us to select many components of a structure without moving or removing them,
-            /// but instead borrowing them from the original.
-            /// That is, provided that the requested types are contained wihtin the currnt HList.
-            ///
-            /// It also does not require the specified types to be in the same order as they are in the current hlist.
-            ///
-            /// # Examples
-            ///
-            /// ```
-            /// # fn main () {
-            /// use frunk_core::{hlist, HList, hlist_pat};
-            ///
-            /// let h = hlist![123u32, "hello world", true];
-            /// type S = HList![bool, u32];
-            ///
-            /// let projection: HList![&bool, &u32] = h.project::<S, _>();
-            /// let hlist_pat![bool_ref, u32_ref] = projection;
-            /// assert_eq!(bool_ref, &true);
-            /// assert_eq!(u32_ref, &123);
-            /// # }
-            /// ```
-            ///
-            #[inline(always)]
-            pub fn project<Ts, Indices>(&self) -> <Self as Projector<Ts, Indices>>::Projection<'_>
-            where Self: Projector<Ts, Indices>,
-            {
-                Projector::project(self)
             }
 
             /// Reverse the HList.
@@ -899,74 +897,6 @@ where
 
     fn get_mut(&mut self) -> &mut FromTail {
         self.tail.get_mut()
-    }
-}
-
-/// Trait for borrowing multiple HList elements by type
-///
-/// This trait is part of the implementation of the inherent method
-/// [`HCons::project`]. Please see that method for more information.
-///
-/// You only need to import this trait when working with generic
-/// HLists of unknown type. If you have an HList of known type,
-/// then `list.project()` should "just work" even without the trait.
-///
-/// [`HCons::project`]: struct.HCons.html#method.project
-#[diagnostic::on_unimplemented(
-    message = "Cannot project `{Self}` into the target HList shape",
-    label = "Projection failed",
-    note = "The source HList must contain all the types needed for the target HList.",
-    note = "Make sure all required types are present in the source"
-)]
-pub trait Projector<Targets, Indices> {
-    /// The projected view into the list
-    type Projection<'a>
-    where
-        Self: 'a,
-        Targets: 'a;
-
-    /// Borrow multiple elements by type from an HList.
-    ///
-    /// Please see the [inherent method] for more information.
-    ///
-    /// The only difference between that inherent method and this
-    /// trait method is the location of the type parameters
-    /// (here, they are on the trait rather than the method).
-    ///
-    /// [inherent method]: struct.HCons.html#method.project
-    fn project(&self) -> Self::Projection<'_>;
-}
-
-impl<Source> Projector<HNil, HNil> for Source {
-    type Projection<'a>
-        = HNil
-    where
-        Self: 'a,
-        HNil: 'a;
-
-    #[inline(always)]
-    fn project(&self) -> Self::Projection<'_> {
-        HNil
-    }
-}
-
-impl<THead, TTail, SHead, STail, IdxH, IdxT> Projector<HCons<THead, TTail>, HCons<IdxH, IdxT>>
-    for HCons<SHead, STail>
-where
-    HCons<SHead, STail>: Selector<THead, IdxH> + Projector<TTail, IdxT>,
-{
-    type Projection<'a>
-        = HCons<&'a THead, <HCons<SHead, STail> as Projector<TTail, IdxT>>::Projection<'a>>
-    where
-        Self: 'a,
-        HCons<THead, TTail>: 'a;
-
-    #[inline(always)]
-    fn project(&self) -> Self::Projection<'_> {
-        HCons {
-            head: self.get(),
-            tail: <HCons<SHead, STail> as Projector<TTail, IdxT>>::project(&self),
-        }
     }
 }
 
@@ -1716,7 +1646,6 @@ where
 mod tests {
     use super::*;
 
-    use alloc::string::String;
     use alloc::string::ToString;
     use alloc::vec;
 
@@ -2159,77 +2088,16 @@ mod tests {
     }
 
     #[test]
-    fn project_simple_type() {
-        let h = hlist![1u32, "hello world", true];
-        type S = HList![u32];
+    fn proejct_mut() {
+        let mut h = hlist![76u32, "hello world", false, 3.14f64];
+        let h_mut_ref = h.to_mut();
 
-        let projection: HList![&u32] = h.project::<S, _>();
-        let hlist_pat![value_ref] = projection;
+        let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
+        let hlist_pat![u32_mut, bool_mut] = reshaped_mut_ref;
 
-        assert_eq!(*value_ref, 1u32);
-    }
+        *u32_mut = 67;
+        *bool_mut = true;
 
-    #[test]
-    fn project_multiple_types() {
-        let h = hlist![1u32, "hello world", 42i64, true];
-        type S = HList![u32, i64];
-
-        let projection = h.project::<S, _>();
-        let hlist_pat![usize_ref, isize_ref] = projection;
-
-        assert_eq!(*usize_ref, 1u32);
-        assert_eq!(*isize_ref, 42i64);
-    }
-
-    #[test]
-    fn project_different_order() {
-        // this test also checks if target order is preserved
-        let h = hlist![1u32, "hello world", 42i64, true];
-        type S = HList![i64, u32]; // i64 and u32 appear in differing orders here than in H
-
-        let projection = h.project::<S, _>();
-        let hlist_pat![isize_ref, usize_ref] = projection;
-
-        assert_eq!(*isize_ref, 42i64);
-        assert_eq!(*usize_ref, 1u32);
-    }
-
-    // // This will intentionally not compile
-    // #[test]
-    // fn project_non_existant() {
-    //     let h = hlist![1u32, "hello world", 42i64, true];
-    //     type S = HList![i64, f32]; // <--- There is not 'f32' in our example HList
-
-    //     let projection = h.project_ref_ext::<S, _>(); // <--- therefore this method will not work
-    //     let hlist_pat![isize_ref, float_ref] = projection;
-
-    //     assert_eq!(*isize_ref, 42i64);
-    //     assert_eq!(*float_ref, 8f32);
-    // }
-
-    #[test]
-    fn borrowed_values_are_refs() {
-        let h = hlist![String::from("hello world")];
-        type S = HList![String];
-
-        let _projection = h.project::<S, _>();
-
-        // h is not moved by projection
-        h.prepend(true);
-    }
-
-    #[test]
-    fn massive_test() {
-        let h = hlist![1u32, 12f64, 99i64, String::from("hello world"), true];
-        type S = HList![String, bool, i64, u32, f64];
-
-        let projection = h.project::<S, _>();
-        let hlist_pat![string, bool, int64, un32, float64] = projection;
-
-        assert_eq!(*string, "hello world".to_string());
-        assert_eq!(*bool, true);
-        assert_eq!(*int64, 99i64);
-        assert_eq!(*un32, 1u32);
-        assert_eq!(*float64, 12f64);
+        assert_eq!(h, hlist![67u32, "hello world", true, 3.14f64]);
     }
 }
