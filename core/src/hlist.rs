@@ -310,12 +310,43 @@ macro_rules! gen_inherent_methods {
             ///
             /// ```
             /// # fn main() {
-            /// use frunk_core::{hlist, HList};
+            /// use frunk_core::{hlist, HList, hlist_pat};
             ///
             /// let h = hlist![9000, "joe", 41f32, true];
             /// let (reshaped, remainder): (HList![f32, i32, &str], _) = h.sculpt();
             /// assert_eq!(reshaped, hlist![41f32, 9000, "joe"]);
             /// assert_eq!(remainder, hlist![true]);
+            /// # }
+            /// ```
+            /// ```
+            /// // Also supports projecting references of a desired shape with 'to_ref' and 'to_mut'
+            /// # fn main() {
+            /// # use frunk_core::{hlist, HList};
+            /// let h = hlist![76u32, "hello world", false, 27f64];
+            /// let h_ref = h.to_ref();
+            /// let (reshaped_ref, remainder_ref): (HList![&u32, &bool], _) = h_ref.sculpt();
+            ///
+            /// assert_eq!(reshaped_ref, hlist![&76u32, &false]);
+            /// assert_eq!(remainder_ref, hlist![&"hello world", &27f64]);
+            ///
+            /// h.prepend(12i32); // original is unmoved
+            /// # }
+            /// ```
+            /// ```
+            /// # fn main () {
+            /// # use frunk_core::{hlist, HList, hlist_pat};
+            /// let mut h = hlist![76u32, "hello world", false, 27f64];
+            /// let h_mut_ref = h.to_mut();
+            ///
+            /// let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
+            /// let hlist_pat![u32_mut_ref, bool_mut_ref] = reshaped_mut_ref;
+            ///
+            /// *u32_mut_ref = 67;
+            /// *bool_mut_ref = true;
+            ///
+            /// assert_eq!(h, hlist![67u32, "hello world", true, 27f64]);
+            ///
+            /// h.prepend(12i32); // original is unmoved
             /// # }
             /// ```
             #[inline(always)]
@@ -2056,5 +2087,19 @@ mod tests {
         let second = hlist![];
 
         assert_eq!(first.extend(second), hlist![]);
+    }
+
+    #[test]
+    fn test_project_mut() {
+        let mut h = hlist![76u32, "hello world", false, 27f64];
+        let h_mut_ref = h.to_mut();
+
+        let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
+        let hlist_pat![u32_mut, bool_mut] = reshaped_mut_ref;
+
+        *u32_mut = 67;
+        *bool_mut = true;
+
+        assert_eq!(h, hlist![67u32, "hello world", true, 27f64]);
     }
 }
