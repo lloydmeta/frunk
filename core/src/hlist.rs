@@ -2091,7 +2091,7 @@ mod tests {
 
     #[test]
     fn test_project_mut() {
-        let mut h = hlist![76u32, "hello world", false, 3.14f64];
+        let mut h = hlist![76u32, "hello world", false, 27f64];
         let h_mut_ref = h.to_mut();
 
         let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
@@ -2100,6 +2100,6 @@ mod tests {
         *u32_mut = 67;
         *bool_mut = true;
 
-        assert_eq!(h, hlist![67u32, "hello world", true, 3.14f64]);
+        assert_eq!(h, hlist![67u32, "hello world", true, 27f64]);
     }
 }
