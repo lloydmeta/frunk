@@ -2088,7 +2088,7 @@ mod tests {
     }
 
     #[test]
-    fn proejct_mut() {
+    fn test_project_mut() {
         let mut h = hlist![76u32, "hello world", false, 3.14f64];
         let h_mut_ref = h.to_mut();
 
