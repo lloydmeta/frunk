@@ -322,12 +322,12 @@ macro_rules! gen_inherent_methods {
             /// // Also supports projecting references of a desired shape with 'to_ref' and 'to_mut'
             /// # fn main() {
             /// # use frunk_core::{hlist, HList};
-            /// let h = hlist![76u32, "hello world", false, 3.14f64];
+            /// let h = hlist![76u32, "hello world", false, 27f64];
             /// let h_ref = h.to_ref();
             /// let (reshaped_ref, remainder_ref): (HList![&u32, &bool], _) = h_ref.sculpt();
             ///
             /// assert_eq!(reshaped_ref, hlist![&76u32, &false]);
-            /// assert_eq!(remainder_ref, hlist![&"hello world", &3.14f64]);
+            /// assert_eq!(remainder_ref, hlist![&"hello world", &27f64]);
             ///
             /// h.prepend(12i32); // original is unmoved
             /// # }
@@ -335,7 +335,7 @@ macro_rules! gen_inherent_methods {
             /// ```
             /// # fn main () {
             /// # use frunk_core::{hlist, HList, hlist_pat};
-            /// let mut h = hlist![76u32, "hello world", false, 3.14f64];
+            /// let mut h = hlist![76u32, "hello world", false, 27f64];
             /// let h_mut_ref = h.to_mut();
             ///
             /// let (reshaped_mut_ref, _): (HList![&mut u32, &mut bool], _) = h_mut_ref.sculpt();
@@ -344,7 +344,9 @@ macro_rules! gen_inherent_methods {
             /// *u32_mut_ref = 67;
             /// *bool_mut_ref = true;
             ///
-            /// assert_eq!(h, hlist![67u32, "hello world", true, 3.14f64]);
+            /// assert_eq!(h, hlist![67u32, "hello world", true, 27f64]);
+            ///
+            /// h.prepend(12i32); // original is unmoved
             /// # }
             /// ```
             #[inline(always)]
