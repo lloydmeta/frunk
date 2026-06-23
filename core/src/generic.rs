@@ -31,6 +31,9 @@
 //! let d_person: DomainPerson = frunk::convert_from(a_person); // done
 //! # }
 
+use crate::coproduct::Coproduct;
+use crate::hlist::HNil;
+
 /// A trait that converts from a type to a generic representation.
 ///
 /// For the most part, you should be using the derivation that is available
@@ -117,6 +120,74 @@ pub trait Generic {
         Mapper: FnOnce(Inter) -> Inter,
     {
         Self::convert_from(mapper(Inter::convert_from(self)))
+    }
+}
+
+type UnaryVariant<T> = crate::HList!(T);
+type GenericOptionRepr<T> = crate::Coprod!(HNil, UnaryVariant<T>);
+type GenericResultRepr<T, E> = crate::Coprod!(UnaryVariant<T>, UnaryVariant<E>);
+type GenericBoolRepr = crate::Coprod!(HNil, HNil);
+
+impl<T> Generic for Option<T> {
+    type Repr = GenericOptionRepr<T>;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            None => Coproduct::Inl(crate::hlist![]),
+            Some(value) => Coproduct::Inr(Coproduct::Inl(crate::hlist![value])),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(crate::hlist_pat![]) => None,
+            Coproduct::Inr(Coproduct::Inl(crate::hlist_pat![value])) => Some(value),
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
+    }
+}
+
+impl<T, E> Generic for Result<T, E> {
+    type Repr = GenericResultRepr<T, E>;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            Ok(value) => Coproduct::Inl(crate::hlist![value]),
+            Err(value) => Coproduct::Inr(Coproduct::Inl(crate::hlist![value])),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(crate::hlist_pat![value]) => Ok(value),
+            Coproduct::Inr(Coproduct::Inl(crate::hlist_pat![value])) => Err(value),
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
+    }
+}
+
+impl Generic for bool {
+    type Repr = GenericBoolRepr;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            false => Coproduct::Inl(crate::hlist![]),
+            true => Coproduct::Inr(Coproduct::Inl(crate::hlist![])),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(crate::hlist_pat![]) => false,
+            Coproduct::Inr(Coproduct::Inl(crate::hlist_pat![])) => true,
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
     }
 }
 

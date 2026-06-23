@@ -241,6 +241,64 @@ fn test_enum_into_labelled_generic() {
 }
 
 #[test]
+fn test_option_labelled_generic() {
+    let none_repr = into_labelled_generic(None::<i32>);
+    let some_repr = into_labelled_generic(Some(42i32));
+
+    assert_eq!(none_repr, Coproduct::Inl(field!((N, o, n, e), hlist![])));
+    assert_eq!(
+        some_repr,
+        Coproduct::Inr(Coproduct::Inl(field!(
+            (S, o, m, e),
+            hlist![field!((__, _0), 42i32, "_0")]
+        )))
+    );
+    assert_eq!(from_labelled_generic::<Option<i32>, _>(none_repr), None);
+    assert_eq!(from_labelled_generic::<Option<i32>, _>(some_repr), Some(42));
+}
+
+#[test]
+fn test_result_labelled_generic() {
+    let ok_repr = into_labelled_generic(Ok::<i32, &str>(42));
+    let err_repr = into_labelled_generic(Err::<i32, &str>("error"));
+
+    assert_eq!(
+        ok_repr,
+        Coproduct::Inl(field!((O, k), hlist![field!((__, _0), 42i32, "_0")]))
+    );
+    assert_eq!(
+        err_repr,
+        Coproduct::Inr(Coproduct::Inl(field!(
+            (E, r, r),
+            hlist![field!((__, _0), "error", "_0")]
+        )))
+    );
+    assert_eq!(
+        from_labelled_generic::<Result<i32, &str>, _>(ok_repr),
+        Ok(42)
+    );
+    assert_eq!(
+        from_labelled_generic::<Result<i32, &str>, _>(err_repr),
+        Err("error")
+    );
+}
+
+#[test]
+fn test_bool_labelled_generic() {
+    type BoolRepr = <bool as LabelledGeneric>::Repr;
+
+    let false_repr: BoolRepr = into_labelled_generic(false);
+    let true_repr: BoolRepr = into_labelled_generic(true);
+    let expected_false: BoolRepr = Coproduct::Inl(field!((f, a, l, s, e), hlist![]));
+    let expected_true: BoolRepr = Coproduct::Inr(Coproduct::Inl(field!((t, r, u, e), hlist![])));
+
+    assert_eq!(false_repr, expected_false);
+    assert_eq!(true_repr, expected_true);
+    assert!(!from_labelled_generic::<bool, _>(expected_false));
+    assert!(from_labelled_generic::<bool, _>(expected_true));
+}
+
+#[test]
 fn test_sculpt_enum() {
     let value = LabelledEnum1::VariantC {
         x: "test".into(),

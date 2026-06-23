@@ -1,4 +1,4 @@
-use frunk::{convert_from, from_generic, into_generic, Coproduct};
+use frunk::{convert_from, from_generic, into_generic, Coproduct, Generic};
 use frunk_core::hlist;
 
 mod common;
@@ -74,6 +74,43 @@ fn test_enum_into_generic() {
         variant_c,
         Coproduct::inject(hlist!["test".to_string(), true])
     );
+}
+
+#[test]
+fn test_option_generic() {
+    let none_repr = into_generic(None::<i32>);
+    let some_repr = into_generic(Some(42i32));
+
+    assert_eq!(none_repr, Coproduct::Inl(hlist![]));
+    assert_eq!(some_repr, Coproduct::Inr(Coproduct::Inl(hlist![42i32])));
+    assert_eq!(from_generic::<Option<i32>, _>(none_repr), None);
+    assert_eq!(from_generic::<Option<i32>, _>(some_repr), Some(42));
+}
+
+#[test]
+fn test_result_generic() {
+    let ok_repr = into_generic(Ok::<i32, &str>(42));
+    let err_repr = into_generic(Err::<i32, &str>("error"));
+
+    assert_eq!(ok_repr, Coproduct::Inl(hlist![42i32]));
+    assert_eq!(err_repr, Coproduct::Inr(Coproduct::Inl(hlist!["error"])));
+    assert_eq!(from_generic::<Result<i32, &str>, _>(ok_repr), Ok(42));
+    assert_eq!(from_generic::<Result<i32, &str>, _>(err_repr), Err("error"));
+}
+
+#[test]
+fn test_bool_generic() {
+    type BoolRepr = <bool as Generic>::Repr;
+
+    let false_repr: BoolRepr = into_generic(false);
+    let true_repr: BoolRepr = into_generic(true);
+    let expected_false: BoolRepr = Coproduct::Inl(hlist![]);
+    let expected_true: BoolRepr = Coproduct::Inr(Coproduct::Inl(hlist![]));
+
+    assert_eq!(false_repr, expected_false);
+    assert_eq!(true_repr, expected_true);
+    assert!(!from_generic::<bool, _>(expected_false));
+    assert!(from_generic::<bool, _>(expected_true));
 }
 
 #[test]
