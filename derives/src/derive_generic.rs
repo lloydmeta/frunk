@@ -4,7 +4,8 @@ use quote::ToTokens;
 use std::iter::repeat;
 use syn::Data;
 
-/// Given an AST, returns an implementation of Generic using HList
+/// Given an AST, returns an implementation of Generic using an HList
+/// representation for structs and a Coproduct of payload HLists for enums.
 ///
 /// Works with structs, tuple structs, and enums.
 pub fn impl_generic(input: TokenStream) -> impl ToTokens {

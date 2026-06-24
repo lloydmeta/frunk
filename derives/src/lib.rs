@@ -25,8 +25,8 @@ use crate::derive_labelled_generic::impl_labelled_generic;
 
 use quote::ToTokens;
 
-/// Derives a Generic instance based on HList for
-/// a given struct, tuple struct, or enum.
+/// Derives a Generic instance based on HList for structs and
+/// Coproducts of payload HLists for enums.
 #[proc_macro_derive(Generic)]
 pub fn generic(input: TokenStream) -> TokenStream {
     // Build the impl
