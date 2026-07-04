@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783138410939,
+  "lastUpdate": 1783138489372,
   "repoUrl": "https://github.com/lloydmeta/frunk",
   "entries": {
     "Frunk Benchmarks": [
@@ -12851,6 +12851,258 @@ window.BENCHMARK_DATA = {
             "name": "validated_to_result",
             "value": 0.62,
             "range": "± 0.03",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "lloydmeta@users.noreply.github.com",
+            "name": "Lloyd",
+            "username": "lloydmeta"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bd2e176e1028bef4b273f6f44d5893cf7eca9235",
+          "message": "Add agentic helper hints (#255)\n\nBased on some of my blog posts.\n\nSigned-off-by: lloydmeta <lloydmeta@gmail.com>",
+          "timestamp": "2026-07-04T13:14:01+09:00",
+          "tree_id": "1c740e8a9233d84ee7929aee9756ed0f54119323",
+          "url": "https://github.com/lloydmeta/frunk/commit/bd2e176e1028bef4b273f6f44d5893cf7eca9235"
+        },
+        "date": 1783138486413,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "empty",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "generic_conversion",
+            "value": 0.88,
+            "range": "± 0.08",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_hlist",
+            "value": 1.05,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "creating_tuple2",
+            "value": 1.05,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_append",
+            "value": 2.15,
+            "range": "± 1.8",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_hlist_pat_match",
+            "value": 0.88,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2",
+            "value": 1.06,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_into_tuple2_match",
+            "value": 0.88,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_consuming",
+            "value": 1.05,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hlist_mapping_non_consuming",
+            "value": 1.05,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_24fields",
+            "value": 79.85,
+            "range": "± 6.25",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_from_25fields",
+            "value": 95.4,
+            "range": "± 2.57",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_24fields",
+            "value": 2896.56,
+            "range": "± 49.1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "big_transform_from_25fields",
+            "value": 2992.2,
+            "range": "± 52.32",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "labelled_conversion",
+            "value": 0.89,
+            "range": "± 0.06",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "name",
+            "value": 0.7,
+            "range": "± 0.02",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sculpted_conversion",
+            "value": 0.9,
+            "range": "± 0.12",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_all_i32",
+            "value": 5.8,
+            "range": "± 0.05",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_all_i32",
+            "value": 2.62,
+            "range": "± 0.08",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_mut",
+            "value": 0.35,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_ref",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "lens_path_read_value",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_mut",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_ref",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "normal_path_read_value",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_i32",
+            "value": 0.35,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "combine_option_string",
+            "value": 37.76,
+            "range": "± 4.24",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_i32",
+            "value": 0.35,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "std_add_option_string",
+            "value": 56.79,
+            "range": "± 0.97",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "manual_deep_from",
+            "value": 605.42,
+            "range": "± 8.48",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transmogrify_deep",
+            "value": 475.56,
+            "range": "± 28.6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_bad",
+            "value": 241.91,
+            "range": "± 3.42",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_all_good",
+            "value": 25.66,
+            "range": "± 5.16",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_result_to_validated_mixed",
+            "value": 114.26,
+            "range": "± 21.66",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "adding_validateds",
+            "value": 17.61,
+            "range": "± 0.45",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "error_result_into_validated",
+            "value": 31.62,
+            "range": "± 0.28",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "ok_result_into_validated",
+            "value": 1.12,
+            "range": "± 0.01",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "validated_to_result",
+            "value": 0.7,
+            "range": "± 0.01",
             "unit": "ns/iter"
           }
         ]
