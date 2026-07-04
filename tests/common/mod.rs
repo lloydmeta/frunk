@@ -80,6 +80,14 @@ pub struct HasKeyword2Embedder {
 #[derive(Generic, Debug, PartialEq, Eq)]
 pub struct TupleStruct<'a>(pub &'a str, pub i32);
 
+#[allow(dead_code)] // Not actually dead -- used in tests but clippy can't find it
+#[derive(Generic, PartialEq, Eq, Debug)]
+pub enum GenericEnum {
+    VariantA,
+    VariantB(i32),
+    VariantC { x: String, y: bool },
+}
+
 #[derive(LabelledGeneric)]
 pub struct NormalUser<'a> {
     pub first_name: &'a str,

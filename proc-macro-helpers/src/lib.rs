@@ -397,6 +397,12 @@ impl VariantBinding {
                 .build_hlist_constr(FieldBinding::build_field_pat),
         )
     }
+    pub fn build_hlist_type(&self) -> TokenStream2 {
+        self.fields.build_hlist_type(FieldBinding::build_type)
+    }
+    pub fn build_hlist_constr(&self) -> TokenStream2 {
+        self.fields.build_hlist_constr(FieldBinding::build)
+    }
 }
 
 pub struct VariantBindings {

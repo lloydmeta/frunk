@@ -1,11 +1,13 @@
 use frunk_proc_macro_helpers::*;
 use proc_macro::TokenStream;
 use quote::ToTokens;
+use std::iter::repeat;
 use syn::Data;
 
-/// Given an AST, returns an implementation of Generic using HList
+/// Given an AST, returns an implementation of Generic using an HList
+/// representation for structs and a Coproduct of payload HLists for enums.
 ///
-/// Only works with Structs and Tuple Structs
+/// Works with structs, tuple structs, and enums.
 pub fn impl_generic(input: TokenStream) -> impl ToTokens {
     let ast = to_ast(input);
     let name = &ast.ident;
@@ -39,7 +41,44 @@ pub fn impl_generic(input: TokenStream) -> impl ToTokens {
                 }
             }
         }
-        _ => panic!("Only Structs are supported. Enums/Unions cannot be turned into Generics."),
+        Data::Enum(ref data) => {
+            let variant_bindings = VariantBindings::new(&data.variants);
+            let repr_type = &variant_bindings.build_coprod_type(VariantBinding::build_hlist_type);
+            let coprod_constrs =
+                &variant_bindings.build_coprod_constrs(VariantBinding::build_hlist_constr);
+            let coprod_unreachable = &variant_bindings.build_coprod_unreachable_arm(false);
+            let type_constrs1 =
+                &variant_bindings.build_variant_constrs(VariantBinding::build_type_constr);
+            let type_constrs2 = type_constrs1;
+            let name_it1 = repeat(name);
+            let name_it2 = repeat(name);
+
+            quote! {
+                #[allow(non_snake_case, non_camel_case_types)]
+                impl #impl_generics ::frunk_core::generic::Generic for #name #ty_generics #where_clause {
+
+                    type Repr = #repr_type;
+
+                    fn into(self) -> Self::Repr {
+                        match self {
+                            #(
+                                #name_it1 :: #type_constrs1 => #coprod_constrs,
+                            )*
+                        }
+                    }
+
+                    fn from(r: Self::Repr) -> Self {
+                        match r {
+                            #(
+                                #coprod_constrs => #name_it2 :: #type_constrs2,
+                            )*
+                            #coprod_unreachable
+                        }
+                    }
+                }
+            }
+        }
+        _ => panic!("Only Structs and Enums can be turned into Generics."),
     };
 
     //     print!("{}", tree);

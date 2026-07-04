@@ -147,9 +147,11 @@
 //! # }
 //! ```
 
+use crate::coproduct::Coproduct;
 use crate::hlist::*;
 use crate::indices::*;
 use crate::traits::ToRef;
+use chars::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -279,6 +281,125 @@ where
     #[inline(always)]
     fn into(self) -> <Self as IntoLabelledGeneric>::Repr {
         self.into()
+    }
+}
+
+type NoneLabel = (N, o, n, e);
+type SomeLabel = (S, o, m, e);
+type OkLabel = (O, k);
+type ErrLabel = (E, r, r);
+type FalseLabel = (f, a, l, s, e);
+type TrueLabel = (t, r, u, e);
+type TupleField0 = (__, _0);
+type UnitVariant<Name> = Field<Name, HNil>;
+type UnaryTupleVariant<Name, T> = Field<Name, crate::HList!(Field<TupleField0, T>)>;
+type LabelledOptionRepr<T> =
+    crate::Coprod!(UnitVariant<NoneLabel>, UnaryTupleVariant<SomeLabel, T>);
+type LabelledResultRepr<T, E> =
+    crate::Coprod!(UnaryTupleVariant<OkLabel, T>, UnaryTupleVariant<ErrLabel, E>);
+type LabelledBoolRepr = crate::Coprod!(UnitVariant<FalseLabel>, UnitVariant<TrueLabel>);
+
+#[inline(always)]
+fn labelled_tuple_field_0<T>(value: T) -> Field<TupleField0, T> {
+    crate::field!(TupleField0, value, "_0")
+}
+
+#[inline(always)]
+fn labelled_unit_variant<Name>(name: &'static str) -> UnitVariant<Name> {
+    crate::field!(Name, crate::hlist![], name)
+}
+
+#[inline(always)]
+fn labelled_unary_tuple_variant<Name, T>(
+    name: &'static str,
+    value: T,
+) -> UnaryTupleVariant<Name, T> {
+    crate::field!(Name, crate::hlist![labelled_tuple_field_0(value)], name)
+}
+
+impl<T> LabelledGeneric for Option<T> {
+    type Repr = LabelledOptionRepr<T>;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            None => Coproduct::Inl(labelled_unit_variant::<NoneLabel>("None")),
+            Some(value) => Coproduct::Inr(Coproduct::Inl(labelled_unary_tuple_variant::<
+                SomeLabel,
+                _,
+            >("Some", value))),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(Field {
+                value: crate::hlist_pat![],
+                ..
+            }) => None,
+            Coproduct::Inr(Coproduct::Inl(Field {
+                value: crate::hlist_pat![Field { value, .. }],
+                ..
+            })) => Some(value),
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
+    }
+}
+
+impl<T, E> LabelledGeneric for Result<T, E> {
+    type Repr = LabelledResultRepr<T, E>;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            Ok(value) => Coproduct::Inl(labelled_unary_tuple_variant::<OkLabel, _>("Ok", value)),
+            Err(value) => Coproduct::Inr(Coproduct::Inl(
+                labelled_unary_tuple_variant::<ErrLabel, _>("Err", value),
+            )),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(Field {
+                value: crate::hlist_pat![Field { value, .. }],
+                ..
+            }) => Ok(value),
+            Coproduct::Inr(Coproduct::Inl(Field {
+                value: crate::hlist_pat![Field { value, .. }],
+                ..
+            })) => Err(value),
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
+    }
+}
+
+impl LabelledGeneric for bool {
+    type Repr = LabelledBoolRepr;
+
+    #[inline(always)]
+    fn into(self) -> Self::Repr {
+        match self {
+            false => Coproduct::Inl(labelled_unit_variant::<FalseLabel>("false")),
+            true => Coproduct::Inr(Coproduct::Inl(labelled_unit_variant::<TrueLabel>("true"))),
+        }
+    }
+
+    #[inline(always)]
+    fn from(repr: Self::Repr) -> Self {
+        match repr {
+            Coproduct::Inl(Field {
+                value: crate::hlist_pat![],
+                ..
+            }) => false,
+            Coproduct::Inr(Coproduct::Inl(Field {
+                value: crate::hlist_pat![],
+                ..
+            })) => true,
+            Coproduct::Inr(Coproduct::Inr(cnil)) => match cnil {},
+        }
     }
 }
 
@@ -968,7 +1089,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::chars::*;
     use super::*;
     use alloc::collections::{LinkedList, VecDeque};
     use alloc::{boxed::Box, format, string::ToString, vec, vec::Vec};
