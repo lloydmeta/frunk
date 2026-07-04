@@ -397,46 +397,52 @@
 <a href=#397 id=397 data-nosnippet>397</a>                .build_hlist_constr(FieldBinding::build_field_pat),
 <a href=#398 id=398 data-nosnippet>398</a>        )
 <a href=#399 id=399 data-nosnippet>399</a>    }
-<a href=#400 id=400 data-nosnippet>400</a>}
-<a href=#401 id=401 data-nosnippet>401</a>
-<a href=#402 id=402 data-nosnippet>402</a><span class="kw">pub struct </span>VariantBindings {
-<a href=#403 id=403 data-nosnippet>403</a>    <span class="kw">pub </span>variants: Vec&lt;VariantBinding&gt;,
-<a href=#404 id=404 data-nosnippet>404</a>}
-<a href=#405 id=405 data-nosnippet>405</a>
-<a href=#406 id=406 data-nosnippet>406</a><span class="kw">impl </span>VariantBindings {
-<a href=#407 id=407 data-nosnippet>407</a>    <span class="kw">pub fn </span>new&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Variant&gt;) -&gt; <span class="self">Self </span>{
-<a href=#408 id=408 data-nosnippet>408</a>        VariantBindings {
-<a href=#409 id=409 data-nosnippet>409</a>            variants: data
-<a href=#410 id=410 data-nosnippet>410</a>                .into_iter()
-<a href=#411 id=411 data-nosnippet>411</a>                .map(|variant| VariantBinding {
-<a href=#412 id=412 data-nosnippet>412</a>                    name: variant.ident.clone(),
-<a href=#413 id=413 data-nosnippet>413</a>                    fields: FieldBindings::new(<span class="kw-2">&amp;</span>variant.fields),
-<a href=#414 id=414 data-nosnippet>414</a>                })
-<a href=#415 id=415 data-nosnippet>415</a>                .collect(),
-<a href=#416 id=416 data-nosnippet>416</a>        }
-<a href=#417 id=417 data-nosnippet>417</a>    }
-<a href=#418 id=418 data-nosnippet>418</a>
-<a href=#419 id=419 data-nosnippet>419</a>    <span class="kw">pub fn </span>build_coprod_type&lt;R: ToTokens&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R) -&gt; TokenStream2 {
-<a href=#420 id=420 data-nosnippet>420</a>        build_coprod_type(<span class="self">self</span>.variants.iter().map(f))
-<a href=#421 id=421 data-nosnippet>421</a>    }
-<a href=#422 id=422 data-nosnippet>422</a>
-<a href=#423 id=423 data-nosnippet>423</a>    <span class="kw">pub fn </span>build_coprod_constrs&lt;R: ToTokens&gt;(
-<a href=#424 id=424 data-nosnippet>424</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
-<a href=#425 id=425 data-nosnippet>425</a>        f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R,
-<a href=#426 id=426 data-nosnippet>426</a>    ) -&gt; Vec&lt;TokenStream2&gt; {
-<a href=#427 id=427 data-nosnippet>427</a>        <span class="self">self</span>.variants
-<a href=#428 id=428 data-nosnippet>428</a>            .iter()
-<a href=#429 id=429 data-nosnippet>429</a>            .enumerate()
-<a href=#430 id=430 data-nosnippet>430</a>            .map(|(index, variant)| build_coprod_constr(index, f(variant)))
-<a href=#431 id=431 data-nosnippet>431</a>            .collect()
-<a href=#432 id=432 data-nosnippet>432</a>    }
-<a href=#433 id=433 data-nosnippet>433</a>
-<a href=#434 id=434 data-nosnippet>434</a>    <span class="kw">pub fn </span>build_variant_constrs&lt;R: ToTokens&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R) -&gt; Vec&lt;R&gt; {
-<a href=#435 id=435 data-nosnippet>435</a>        <span class="self">self</span>.variants.iter().map(f).collect()
-<a href=#436 id=436 data-nosnippet>436</a>    }
-<a href=#437 id=437 data-nosnippet>437</a>
-<a href=#438 id=438 data-nosnippet>438</a>    <span class="kw">pub fn </span>build_coprod_unreachable_arm(<span class="kw-2">&amp;</span><span class="self">self</span>, deref: bool) -&gt; TokenStream2 {
-<a href=#439 id=439 data-nosnippet>439</a>        build_coprod_unreachable_arm(<span class="self">self</span>.variants.len(), deref)
-<a href=#440 id=440 data-nosnippet>440</a>    }
-<a href=#441 id=441 data-nosnippet>441</a>}
+<a href=#400 id=400 data-nosnippet>400</a>    <span class="kw">pub fn </span>build_hlist_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
+<a href=#401 id=401 data-nosnippet>401</a>        <span class="self">self</span>.fields.build_hlist_type(FieldBinding::build_type)
+<a href=#402 id=402 data-nosnippet>402</a>    }
+<a href=#403 id=403 data-nosnippet>403</a>    <span class="kw">pub fn </span>build_hlist_constr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TokenStream2 {
+<a href=#404 id=404 data-nosnippet>404</a>        <span class="self">self</span>.fields.build_hlist_constr(FieldBinding::build)
+<a href=#405 id=405 data-nosnippet>405</a>    }
+<a href=#406 id=406 data-nosnippet>406</a>}
+<a href=#407 id=407 data-nosnippet>407</a>
+<a href=#408 id=408 data-nosnippet>408</a><span class="kw">pub struct </span>VariantBindings {
+<a href=#409 id=409 data-nosnippet>409</a>    <span class="kw">pub </span>variants: Vec&lt;VariantBinding&gt;,
+<a href=#410 id=410 data-nosnippet>410</a>}
+<a href=#411 id=411 data-nosnippet>411</a>
+<a href=#412 id=412 data-nosnippet>412</a><span class="kw">impl </span>VariantBindings {
+<a href=#413 id=413 data-nosnippet>413</a>    <span class="kw">pub fn </span>new&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Variant&gt;) -&gt; <span class="self">Self </span>{
+<a href=#414 id=414 data-nosnippet>414</a>        VariantBindings {
+<a href=#415 id=415 data-nosnippet>415</a>            variants: data
+<a href=#416 id=416 data-nosnippet>416</a>                .into_iter()
+<a href=#417 id=417 data-nosnippet>417</a>                .map(|variant| VariantBinding {
+<a href=#418 id=418 data-nosnippet>418</a>                    name: variant.ident.clone(),
+<a href=#419 id=419 data-nosnippet>419</a>                    fields: FieldBindings::new(<span class="kw-2">&amp;</span>variant.fields),
+<a href=#420 id=420 data-nosnippet>420</a>                })
+<a href=#421 id=421 data-nosnippet>421</a>                .collect(),
+<a href=#422 id=422 data-nosnippet>422</a>        }
+<a href=#423 id=423 data-nosnippet>423</a>    }
+<a href=#424 id=424 data-nosnippet>424</a>
+<a href=#425 id=425 data-nosnippet>425</a>    <span class="kw">pub fn </span>build_coprod_type&lt;R: ToTokens&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R) -&gt; TokenStream2 {
+<a href=#426 id=426 data-nosnippet>426</a>        build_coprod_type(<span class="self">self</span>.variants.iter().map(f))
+<a href=#427 id=427 data-nosnippet>427</a>    }
+<a href=#428 id=428 data-nosnippet>428</a>
+<a href=#429 id=429 data-nosnippet>429</a>    <span class="kw">pub fn </span>build_coprod_constrs&lt;R: ToTokens&gt;(
+<a href=#430 id=430 data-nosnippet>430</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#431 id=431 data-nosnippet>431</a>        f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R,
+<a href=#432 id=432 data-nosnippet>432</a>    ) -&gt; Vec&lt;TokenStream2&gt; {
+<a href=#433 id=433 data-nosnippet>433</a>        <span class="self">self</span>.variants
+<a href=#434 id=434 data-nosnippet>434</a>            .iter()
+<a href=#435 id=435 data-nosnippet>435</a>            .enumerate()
+<a href=#436 id=436 data-nosnippet>436</a>            .map(|(index, variant)| build_coprod_constr(index, f(variant)))
+<a href=#437 id=437 data-nosnippet>437</a>            .collect()
+<a href=#438 id=438 data-nosnippet>438</a>    }
+<a href=#439 id=439 data-nosnippet>439</a>
+<a href=#440 id=440 data-nosnippet>440</a>    <span class="kw">pub fn </span>build_variant_constrs&lt;R: ToTokens&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>VariantBinding) -&gt; R) -&gt; Vec&lt;R&gt; {
+<a href=#441 id=441 data-nosnippet>441</a>        <span class="self">self</span>.variants.iter().map(f).collect()
+<a href=#442 id=442 data-nosnippet>442</a>    }
+<a href=#443 id=443 data-nosnippet>443</a>
+<a href=#444 id=444 data-nosnippet>444</a>    <span class="kw">pub fn </span>build_coprod_unreachable_arm(<span class="kw-2">&amp;</span><span class="self">self</span>, deref: bool) -&gt; TokenStream2 {
+<a href=#445 id=445 data-nosnippet>445</a>        build_coprod_unreachable_arm(<span class="self">self</span>.variants.len(), deref)
+<a href=#446 id=446 data-nosnippet>446</a>    }
+<a href=#447 id=447 data-nosnippet>447</a>}
 </code></pre></div></section></main></body></html>
