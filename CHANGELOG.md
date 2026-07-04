@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]:
 
+## [0.5.0]:
+- Add `Generic` support for enum representations (https://github.com/lloydmeta/frunk/pull/252)
+
 ## [0.4.4]:
 - Implement Plucker/ByNameFieldPlucker for &HList (https://github.com/lloydmeta/frunk/pull/240)
 
