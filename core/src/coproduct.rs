@@ -43,7 +43,7 @@
 //! # type I32Bool = Coprod!(i32, bool);
 //! # let co1 = I32Bool::inject(3);
 //! # let co2 = I32Bool::inject(true);
-//! // In the below, we use unreachable!() to make it obvious hat we know what type of
+//! // In the below, we use unreachable!() to make it obvious that we know what type of
 //! // item is inside our coproducts co1 and co2 but in real life, you should be writing
 //! // complete functions for all the cases when folding coproducts
 //! //
